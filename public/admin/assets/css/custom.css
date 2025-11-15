@@ -1,0 +1,105 @@
+.main-content {
+    min-height: 150vh;
+}
+a:hover{
+    text-decoration:none;
+}
+.btn-custom {
+    height: 30px;
+    background-color: #f3f3f3;
+    -webkit-transition: 0.5s;
+    color: #434343;
+    transition: 0.5s;
+    position: relative;
+    border: none;
+    padding: 5px 8px;
+    font-size: 16px;
+    border-radius: 3px;
+    display: inline-block;
+    cursor:pointer;
+}
+
+.btn-custom:hover {
+    background-color: #434343;
+    color: #ffffff;
+}
+
+.btn-custom.success {
+    background-color: #c6e8cd;
+    color: #13bb37;
+}
+
+.btn-custom.success:hover {
+    background-color: #13bb37;
+    color: #ffffff;
+}
+
+.btn-custom.primary {
+    background-color: #2196f3;
+    color: #ffffff;
+}
+
+.btn-custom.primary:hover {
+    background-color: #13bb37;
+    color: #ffffff;
+}
+
+.btn-custom.danger {
+    background-color: #f9d0d9;
+    color: #e1000a;
+}
+
+.btn-custom.danger:hover {
+    background-color: #e1000a;
+    color: #ffffff;
+}
+
+.btn-custom.yellow {
+    background-color: #FFC107;
+    color: #ffffff;
+}
+
+.btn-custom.yellow:hover {
+    background-color: #FF9800;
+}
+
+table.table thead {
+    background: #0000000d;
+}
+
+ul.statuslist {
+    list-style: none;
+    float: right;
+}
+
+ul.statuslist li {
+    display: inline-block;
+    padding: 5px;
+    position: relative;
+}
+
+ul.statuslist li:before {
+    content: '';
+    width: 1px;
+    height: 20px;
+    position: absolute;
+    background: #cecbcb;
+    right: -1px;
+    display: inline-flex;
+}
+
+ul.statuslist li:last-child:before {
+    width: 0;
+}
+
+ul.statuslist li a {
+    color: black;
+    text-decoration: none;
+}
+
+ul.statuslist li a.active {
+    font-weight:bold;
+}
+.table thead th{
+    border-bottom:0;
+}
