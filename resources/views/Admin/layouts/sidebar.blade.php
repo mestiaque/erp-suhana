@@ -20,20 +20,35 @@
             <li class="nav-item-title">
                 Main
             </li>
-            <li class="nav-item {{Request::is('admin/dashboard')? 'mm-active' : ''}}">
-                <a href="#" class="nav-link">
-                    <span class="icon"><i class='bx bxs-dashboard'></i></span>
-                    <span class="menu-title">Dashboard </span>
-                </a>
-            </li>
-            <li class="nav-item {{Request::is('admin/my-profile')? 'mm-active' : ''}}">
-                <a href="#" class="nav-link">
-                    <span class="icon"><i class="bx bx-user"></i></span>
-                    <span class="menu-title">My Profile </span>
-                </a>
-            </li>
+
+            @foreach(config('sidebar') as $menu)
+                <li class="nav-item">
+                    <a href="javascript:void(0);" class="nav-link has-arrow" aria-expanded="trueA">
+                        <span class="icon"><i class="{{ $menu['icon'] }} {{ $menu['icon_color'] }}"></i></span>
+                        <span class="menu-title">{{ $menu['title'] }}</span>
+                    </a>
+                    @if(isset($menu['children']) && count($menu['children']))
+                        <ul class="sidemenu-nav-second-level mm-collapse mm-showA">
+                            @foreach($menu['children'] as $child)
+                                <li class="nav-item">
+                                    <a href="{{ $child['route'] ?? '#' }}" class="nav-link">
+                                        <span class="icon"><i class="{{ $child['icon'] }} {{ $child['icon_color'] }}"></i></span>
+                                        <span class="menu-title">{{ $child['title'] }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </li>
+            @endforeach
 
         </ul>
     </div>
 </div>
-   <!-- END: Main Menu-->
+<!-- END: Main Menu-->
+@push('css')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+@endpush
+@push('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+@endpush

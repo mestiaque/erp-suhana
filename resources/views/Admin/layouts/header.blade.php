@@ -13,7 +13,7 @@
                     <i class="bx bx-group"></i>
                 </a>
             </li>
-           
+
         </ul>
 
         <form class="nav-search-form d-none ml-auto d-md-block">
@@ -30,7 +30,7 @@
             <li class="nav-item dropdown profile-nav-item">
                 <a href="#" class="nav-link dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <div class="menu-profile">
-                        <span class="name">Hi! Admin </span>
+                        <span class="name">{{ Auth::user()->name }}</span>
                         <img src="" class="rounded-circle" alt="Admin" />
                     </div>
                 </a>
@@ -65,7 +65,7 @@
                         <ul class="profile-nav">
                             <li class="nav-item">
                                 <a href="" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link"> <i class="bx bx-log-out"></i> <span>Logout </span> </a>
-                                <form id="logout-form" action="" method="POST" style="display: none;">
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                     @csrf
                                 </form>
                             </li>
