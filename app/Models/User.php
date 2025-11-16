@@ -2,114 +2,290 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Role;
-use App\Models\RolePermission;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
+    //Models Information Data
+    /********
+     *
+     *
+     *  ------------------------
+     *  Status==0=Inactive, 1=Active, 2=draft
+     * ------------------------
+     *
+     * Column:
+     *
+     * id               =bigint(20):None,
+     * permission_id    =int(11):null,
+     * name             =varchar(100):null,
+     * email            =varchar(100):null,
+     * mobile           =varchar(20):null,
+     * profile          =text:null,
+     * full_address     =text:null,
+     * address_line1    =text:null,
+     * address_line2    =text:null,
+     * postal_address   =varchar(250):null,
+     * postal_code      =varchar(20):null,
+     * city             =int(4):null,
+     * district         =int(4):null,
+     * division         =int(4):null,
+     * country          =int(4):null,
+     * dob              =timestamp:null,
+     * gender           =varchar(10):null,
+     * status           =tinyint(1):1,
+     * fetured          =tinyint(1):0,
+     * email_verified_at=tinyint(1):0,
+     * password         =varchar(255):none,
+     * password_show    =varchar(191):null,
+     * remember_token   =varchar(100):null,
+     * api_token        =varchar(100):null,
+     * device_key       =varchar(255):null,
+     * verify_code      =varchar(100):null,
+     * verify_code_status=tinyint(1):0,
+     * balance          =float(10,2):0.00,
+     * subscriber       =tinyint(1):0,
+     * customer         =tinyint(1):1,
+     * business         =tinyint(1):0,
+     * admin            =tinyint(1):0,
+     * addedby_id       =bigint(20):0,
+     * addedby_at       =timestamp:null,
+     * created_at       =timestamp:null
+     * updated_at       =timestamp:null
+     *
+     *
+     *
+     ****/
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'name',
-        'profile_image',
         'email',
-        'email_verified_at',
         'password',
-        'phone',
-        'role_id',
-        'role_title',
-        'approved_by',
-        'approved_at',
-        'is_active',
-        'status',
-        'remember_token',
     ];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
         'password',
         'remember_token',
+        'password_show',
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class);
+
+
+    public function identities() {
+       return $this->hasMany(SocialIdentity::class);
     }
 
-    public function hasRole($roleSlug)
-    {
-        return $this->roles()->where('slug', $roleSlug)->exists();
+    public function permission(){
+        return $this->belongsTo(Permission::class);
     }
 
-    public function hasPermission($permission)
-    {
-        if ($this->hasRole('admin')) {
-            return true;
-        }
-        foreach ($this->roles as $role) {
-            $rolePermission = RolePermission::where('role_id', $role->id)->first();
-            if ($rolePermission && is_array($rolePermission->permissions)) {
-                if (in_array($permission, $rolePermission->permissions)) {
-                    return true;
-                }
+    public function addedBy(){
+        return $this->belongsTo(User::class,'addedby_id');
+    }
+
+    public function designation(){
+        return $this->belongsTo(Attribute::class,'designation_id')->where('type',2);
+    }
+
+    public function department(){
+        return $this->belongsTo(Attribute::class,'department_id')->where('type',3);
+    }
+
+    public function loans(){
+        return $this->hasMany(Transaction::class,'user_id')->where('type',2);
+    }
+
+    public function salaries(){
+        return $this->hasMany(Salary::class,'user_id');
+    }
+
+    public function leads(){
+        return $this->hasMany(Lead::class,'assinee_id')->where('status','<>','temp');
+    }
+
+    public function meetings(){
+        return $this->hasMany(Meeting::class,'host_id')->where('status','<>','temp');
+    }
+
+    public function tasks(){
+        return $this->hasMany(Task::class,'assignby_id')->where('status','<>','temp');
+    }
+
+    public function notes(){
+        return $this->hasMany(Note::class,'assignby_id');
+    }
+
+    public function visits(){
+        return $this->hasMany(Visit::class,'assignby_id')->where('status','<>','temp');
+    }
+
+    public function companies(){
+        return $this->hasMany(Company::class,'addedby_id')->where('status','<>','temp');
+    }
+
+    public function engineers(){
+        return $this->hasMany(Attribute::class,'addedby_id')->where('type',0)->where('status','<>','temp');
+    }
+
+    public function sales(){
+        return $this->hasMany(Order::class,'addedby_id')->where('order_type','sale_invoices')->where('order_status','confirmed');
+    }
+
+    public function comments(){
+        return $this->hasMany(Review::class,'addedby_id')->where('type',1);
+    }
+
+    public function reviews(){
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function imageFile(){
+    	return $this->hasOne(Media::class,'src_id')->where('src_type',6)->where('use_Of_file',1);
+    }
+
+    public function image($type=null){
+
+        if($this->imageFile){
+            if($type=='sm'){
+               return $this->imageFile->file_url_sm;
+            }elseif($type=='md'){
+               return $this->imageFile->file_url_md;
+            }elseif($type=='lg'){
+               return $this->imageFile->file_url_lg;
+            }else{
+               return $this->imageFile->file_url;
             }
+        }else{
+            return 'public/medies/profile.png';
         }
-        return false;
     }
 
-    //is admin
+    public function imageName(){
+
+        if($this->imageFile){
+            return $this->imageFile->file_rename;
+        }else{
+            return 'noimage.jpg';
+        }
+    }
+
+
+    public function bannerFile(){
+        return $this->hasOne(Media::class,'src_id')->where('src_type',6)->where('use_Of_file',2);
+    }
+
+    public function banner(){
+
+        if($this->bannerFile){
+            return $this->bannerFile->file_url;
+        }else{
+            return 'public/app-assets/images/carousel/22.jpg';
+        }
+    }
+
+    public function bannerName(){
+
+        if($this->bannerFile){
+            return $this->bannerFile->file_rename;
+        }else{
+            return 'no-banner.png';
+        }
+    }
+
+    public function galleryFiles(){
+        return $this->hasMany(Media::class,'src_id')->where('src_type',6)->where('use_Of_file',3);
+    }
+
+    public function countryN(){
+        return $this->belongsTo(Country::class,'country');
+    }
+
+    public function divitionN(){
+        return $this->belongsTo(Country::class,'division');
+    }
+
+    public function districtN(){
+        return $this->belongsTo(Country::class,'district');
+    }
+
+
+    public function cityN(){
+        return $this->belongsTo(Country::class,'city');
+    }
+
+
+    public function user(){
+        return $this->belongsTo(User::class,'id');
+    }
+
+    public function fullAddress(){
+
+        $addr =$this->address_line1;
+
+        if($this->cityN){
+           $addr .=', '.$this->cityN->name;
+        }
+
+        if($this->districtN){
+           $addr .=', '.$this->districtN->name;
+        }
+
+        if($this->postal_code){
+           $addr .=' - '.$this->postal_code;
+        }
+
+        if($this->divitionN){
+           $addr .=', '.$this->divitionN->name;
+        }
+
+        return $addr;
+
+    }
+
+    public function posts(){
+        return $this->hasMany(Post::class,'addedby_id')->where('type',1);;
+    }
+
+
+    public function lastLocation(){
+    	return $this->hasOne(UserLocation::class,'user_id');
+    }
+
+        // User model
+    public function is_staff()
+    {
+        return $this->staff == 1;
+    }
+
     public function is_admin()
     {
-        return $this->hasRole('admin');
+        return $this->admin ==  1;
     }
 
-    // public function hasPermission($action)
-    // {
-    //     return Permission::query()
-    //                 ->join('roles', 'roles.id', 'role_permission.role_id')
-    //                 ->whereIn('roles.id', Auth::user()->userRoles->pluck('id')->toArray())
-    //                 ->where('role_permission.action', $action)
-    //                 ->exists();
-    // }
 
-    public function assignRole($role)
-    {
-        if (is_string($role)) {
-            $role = Role::where('slug', $role)->firstOrFail();
-        }
-        $this->roles()->syncWithoutDetaching([$role->id]);
-    }
-
-    public function removeRole($role)
-    {
-        if (is_string($role)) {
-            $role = Role::where('slug', $role)->firstOrFail();
-        }
-        $this->roles()->detach($role);
-    }
-
-    public function getAllPermissions()
-    {
-        $permissions = [];
-        foreach ($this->roles as $role) {
-            $rolePermission = RolePermission::where('role_id', $role->id)->first();
-            if ($rolePermission && is_array($rolePermission->permissions)) {
-                $permissions = array_merge($permissions, $rolePermission->permissions);
-            }
-        }
-        return array_unique($permissions);
-    }
-
-    public function isActive()
-    {
-        // return $this->is_active == 1;
-        return true;
-    }
 }
