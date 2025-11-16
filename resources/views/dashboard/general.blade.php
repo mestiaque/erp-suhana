@@ -23,7 +23,7 @@
         font-size: 30px;
         margin-right: 10px;
         color: #2196F3;
-        margin-left: 20rem;
+        margin-left: 15rem;
     }
 
     .stats-card-box .sub-title {
