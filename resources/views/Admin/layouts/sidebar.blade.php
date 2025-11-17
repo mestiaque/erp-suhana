@@ -24,13 +24,12 @@
             @php
                 $groupHasVisibleMenu = false;
 
-                // Check each menu in group
                 foreach ($group as $key => $menu) {
-                    if ($key === 'group_title') continue; // skip group title
 
+                    if ($key === 'group_title') continue;
                     if (!isset($menu['title'])) continue;
 
-                    // Single item (no children)
+                    // Single item
                     if (!isset($menu['children'])) {
                         if ($menu['permission'] === '' || hasParentPermission($menu['permission'])) {
                             $groupHasVisibleMenu = true;
@@ -39,7 +38,7 @@
                         continue;
                     }
 
-                    // Menu with children
+                    // Item with children
                     foreach ($menu['children'] as $child) {
                         $childPermission = $child['permission'] ?? '';
                         if ($childPermission === '' || hasChildPermission($menu['permission'] ?? '', $childPermission)) {
@@ -61,44 +60,71 @@
                 @if($key === 'group_title') @continue @endif
                 @if(!isset($menu['title'])) @continue @endif
 
-                {{-- Single item --}}
+                {{-- ================== SINGLE ITEM ================== --}}
                 @if(!isset($menu['children']))
                     @php
                         $show = $menu['permission'] === '' || hasParentPermission($menu['permission']);
+                        $route = $menu['route'] ?? '';
+                        $pattern = trim($route, '/');
+                        $prefix  = $pattern . '/*';
+                        $active = !empty($route) && (request()->is($pattern) || request()->is($prefix));
                     @endphp
+
                     @if($show)
-                        <li class="nav-item">
-                            <a href="{{ !empty($menu['route']) ? route($menu['route']) : '#' }}" class="nav-link">
+                        <li class="nav-item {{ $active ? 'mm-active' : '' }}">
+                            <a href="{{ !empty($menu['route']) ? url($menu['route']) : '#' }}" class="nav-link">
                                 <span class="icon"><i class="{{ $menu['icon'] }}"></i></span>
                                 <span class="menu-title">{{ $menu['title'] }}</span>
                             </a>
                         </li>
                     @endif
+
                     @continue
                 @endif
 
-                {{-- Menu with children --}}
+                {{-- ================== PARENT WITH CHILDREN ================== --}}
                 @php
                     $showParent = $menu['permission'] === '' || hasParentPermission($menu['permission']);
                     $visibleChildren = [];
+                    $parentActive = false;
+
                     foreach ($menu['children'] as $child) {
                         $childPermission = $child['permission'] ?? '';
+                        $route = $child['route'] ?? '';
+
                         if ($childPermission === '' || hasChildPermission($menu['permission'] ?? '', $childPermission)) {
                             $visibleChildren[] = $child;
+
+                            if (!empty($route)) {
+                                $pattern = trim($route, '/');
+                                $prefix  = $pattern . '/*';
+
+                                if (request()->is($pattern) || request()->is($prefix)) {
+                                    $parentActive = true;
+                                }
+                            }
                         }
                     }
                 @endphp
 
                 @if($showParent && count($visibleChildren) > 0)
-                    <li class="nav-item">
-                        <a href="#" class="collapsed-nav-link nav-link" aria-expanded="false">
+                    <li class="nav-item {{ $parentActive ? 'mm-active' : '' }}">
+                        <a href="#" class="collapsed-nav-link nav-link" aria-expanded="{{ $parentActive ? 'true' : 'false' }}">
                             <span class="icon"><i class="{{ $menu['icon'] }}"></i></span>
                             <span class="menu-title">{{ $menu['title'] }}</span>
                         </a>
-                        <ul class="sidemenu-nav-second-level mm-collapse">
+
+                        <ul class="sidemenu-nav-second-level mm-collapse {{ $parentActive ? 'mm-show' : '' }}">
                             @foreach($visibleChildren as $child)
-                                <li class="nav-item">
-                                    <a href="{{ !empty($child['route']) ? route($child['route']) : '#' }}" class="nav-link">
+                                @php
+                                    $route = $child['route'] ?? '';
+                                    $pattern = trim($route, '/');
+                                    $prefix  = $pattern . '/*';
+                                    $childActive = !empty($route) && (request()->is($pattern) || request()->is($prefix));
+                                @endphp
+
+                                <li class="nav-item {{ $childActive ? 'mm-active' : '' }}">
+                                    <a href="{{ !empty($child['route']) ? url($child['route']) : '#' }}" class="nav-link">
                                         <span class="icon"><i class="{{ $child['icon'] }}"></i></span>
                                         <span class="menu-title">{{ $child['title'] }}</span>
                                     </a>
@@ -107,8 +133,8 @@
                         </ul>
                     </li>
                 @endif
-            @endforeach
 
+            @endforeach
         @endforeach
 
         </ul>
