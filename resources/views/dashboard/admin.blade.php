@@ -465,7 +465,7 @@
             </div>
         </div>
 
-        <h4 class="mb-4"><i class="fa fa-money"></i> Accounts</h4>
+        <h4 class="mb-4"><i class="fa fa-money"></i>Accounts</h4>
         <div class="row">
             <div class="col-lg-3 col-md-6">
                 <div class="stats-card-box">
