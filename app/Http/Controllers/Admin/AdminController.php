@@ -78,31 +78,6 @@ class AdminController extends Controller
     }
 
 
-    public function myLocationUpdate(Request $r){
-
-        if($r->ajax()){
-            $user =Auth::user();
-
-            $data =UserLocation::where('user_id',$user->id)->first();
-            if(!$data){
-                $data =new UserLocation();
-                $data->user_id =$user->id;
-            }
-            $data->latitude =$r->lat;
-            $data->longitude =$r->lng;
-            $data->visit_url =$r->visit_url;
-            $data->save();
-            $user->latitude =$data->latitude;
-            $user->longitude =$data->longitude;
-            $user->save();
-            return Response()->json([
-                  'success' => false
-              ]);
-        }
-
-        return redirect()->route('admin.dashboard');
-    }
-
     public function myProfile(Request $r){
       $user =Auth::user();
       return view(adminTheme().'users.myProfile',compact('user'));
@@ -4488,168 +4463,6 @@ class AdminController extends Controller
 
     }
 
-    public function loansManagement(Request $r){
-
-        $transections =Transaction::latest()->where('status','<>','temp')->where('type',2)
-                    ->where(function($q) use ($r) {
-
-                            if($r->search){
-                                $q->whereHas('user',function($qq)use($r){
-                                    $qq->where('name','LIKE','%'.$r->search.'%');
-                                });
-                            }
-
-                            if($r->startDate || $r->endDate)
-                            {
-                                if($r->startDate){
-                                    $from =$r->startDate;
-                                }else{
-                                    $from=Carbon::now()->format('Y-m-d');
-                                }
-
-                                if($r->endDate){
-                                    $to =$r->endDate;
-                                }else{
-                                    $to=Carbon::now()->format('Y-m-d');
-                                }
-
-                                $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-
-                            }
-
-                        })
-                    ->paginate(10);
-
-        $employees =User::latest()->where('status',true)->select(['id','name','mobile'])->get();
-        return view(adminTheme().'accounts.loansManagement',compact('transections','employees'));
-    }
-
-    public function loansManagementAction(Request $r,$action,$id=null){
-
-        if($action=='search-employee'){
-
-            $employees =User::latest()->where('status',true)->where(function($q)use($r){
-                if($r->search){
-                    $q->where('name','like','%'.$r->search.'%');
-                    $q->orWhere('mobile','like','%'.$r->search.'%');
-                }
-            })->limit(10)->get();
-
-            $search =view(adminTheme().'accounts.includes.searchEmployee',compact('employees'))->render();
-
-            return Response()->json([
-                'success' => true,
-                'view' => $search,
-            ]);
-        }
-
-
-        if($action=='add-loan'){
-            $employee =User::find($id);
-            if(!$employee){
-                Session()->flash('error','This Employee Are Not Found');
-                return redirect()->route('admin.loansManagement');
-            }
-            $loan =Transaction::where('user_id',$employee->id)->where('type',2)->where('status','temp')->first();
-            if(!$loan){
-                $loan =new Transaction();
-                $loan->user_id=$employee->id;
-                $loan->type=2;
-                $loan->status='temp';
-            }
-            $loan->created_at=Carbon::now();
-            $loan->save();
-
-            return redirect()->route('admin.loansManagementAction',['edit',$loan->id]);
-        }
-
-        $loan =Transaction::where('type',2)->find($id);
-        if(!$loan){
-            Session()->flash('error','This Loan Are Not Found');
-            return redirect()->route('admin.loansManagement');
-        }
-
-        if($action=='update'){
-
-            if($loan->status=='success'){
-                $check = $r->validate([
-                    'created_at' => 'required|date',
-                ]);
-
-                $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
-
-                $loan->billing_note=$r->description;
-                $loan->editedby_id =Auth::id();
-                if (!$createDate->isSameDay($loan->created_at)) {
-                    $loan->created_at = $createDate;
-                }
-                $loan->save();
-            }else{
-
-
-            $check = $r->validate([
-                'account' => 'required|numeric',
-                'amount' => 'required|numeric',
-                'created_at' => 'required|date',
-            ]);
-
-            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
-
-            $method =Attribute::where('type',10)->where('status','active')->find($r->account);
-            if(!$method){
-                Session()->flash('error','Account method Are Not found');
-                return redirect()->back();
-            }
-
-            if($r->amount > $method->amount){
-                Session()->flash('error','Account Balance Are Not Available');
-                return redirect()->back();
-            }
-
-            $method->amount -=$r->amount;
-            $method->save();
-
-            $loan->payment_method_id=$method->id;
-            $loan->amount=$r->amount;
-            $loan->billing_note=$r->description;
-            $loan->balance=$method->amount;
-            $loan->status ='success';
-            $loan->addedby_id =Auth::id();
-            if (!$createDate->isSameDay($loan->created_at)) {
-                $loan->created_at = $createDate;
-            }
-            $loan->save();
-
-            }
-
-            Session()->flash('success','Your Are Successfully Added');
-            return redirect()->back();
-
-        }
-
-
-        if($action=='delete'){
-
-            if($method =$loan->method){
-                $refundAmount =$loan->amount - $loan->paid_balance;
-                if($refundAmount > 0){
-                    $method->amount +=$refundAmount;
-                    $method->save();
-                }
-            }
-            $loan->delete();
-
-            Session()->flash('success','Your Are Successfully Added');
-            return redirect()->back();
-        }
-
-
-        $accountMethods = Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
-
-
-        return view(adminTheme().'accounts.loansManagementEdit',compact('loan','accountMethods'));
-
-    }
 
     public function salarySheet(Request $r){
 
@@ -5042,9 +4855,9 @@ class AdminController extends Controller
 
     }
 
-    public function accountsMethods(Request $r){
+    public function accounts(Request $r){
 
-        $accountsMethods =Attribute::latest()->where('type',10)->where('status','<>','temp')
+        $accounts =Attribute::latest()->where('type',10)->where('status','<>','temp')
             ->where(function($q) use ($r) {
                   if($r->search){
                       $q->where('name','LIKE','%'.$r->search.'%');
@@ -5061,10 +4874,10 @@ class AdminController extends Controller
 
         $adminUsers =User::where('admin',true)->select(['id','name','mobile'])->get();
 
-        return view(adminTheme().'accounts.accountsMethods',compact('accountsMethods','adminUsers'));
+        return view(adminTheme().'accounts.accountsMethods',compact('accounts','adminUsers'));
     }
 
-    public function accountsMethodsAction(Request $r,$action,$id=null){
+    public function accountsAction(Request $r,$action,$id=null){
         //Add Type  Start
         if($action=='create'){
 
@@ -5105,7 +4918,7 @@ class AdminController extends Controller
         $method =Attribute::where('type',10)->find($id);
         if(!$method){
             Session()->flash('error','This Account Method Type Are Not Found');
-            return redirect()->route('admin.accountsMethods');
+            return redirect()->route('admin.accounts');
         }
 
         // Update Department Action Start
@@ -5157,7 +4970,7 @@ class AdminController extends Controller
         $method->delete();
 
         Session()->flash('success','Your Are Successfully Deleted');
-        return redirect()->route('admin.accountsMethods');
+        return redirect()->route('admin.accounts');
 
       }
       // Delete Department Action End
@@ -6110,6 +5923,225 @@ class AdminController extends Controller
             $data->save();
         }
         return $data;
+    }
+
+    //Department Function
+
+    public function branchs(Request $r){
+
+
+      // Filter Action Start
+      if($r->action){
+        if($r->checkid){
+
+        $datas=Attribute::latest()->where('type',3)->whereIn('id',$r->checkid)->get();
+
+        foreach($datas as $data){
+
+            if($r->action==1){
+              $data->status='active';
+              $data->save();
+            }elseif($r->action==2){
+              $data->status='inactive';
+              $data->save();
+            }elseif($r->action==5){
+
+              $medias =Media::latest()->where('src_type',3)->where('src_id',$data->id)->get();
+              foreach($medias as $media){
+                if(File::exists($media->file_url)){
+                  File::delete($media->file_url);
+                }
+                $media->delete();
+              }
+
+              $data->delete();
+            }
+
+        }
+
+        Session()->flash('success','Action Successfully Completed!');
+
+        }else{
+          Session()->flash('info','Please Need To Select Minimum One Post');
+        }
+
+        return redirect()->back();
+      }
+
+      //Filter Action End
+
+      $departments=Attribute::latest()->where('type',3)->where('status','<>','temp')
+        ->where(function($q) use ($r) {
+
+          if($r->search){
+              $q->where('name','LIKE','%'.$r->search.'%');
+          }
+
+          if($r->status){
+             $q->where('status',$r->status);
+          }
+
+      })
+      ->select(['id','name','slug','type','description','created_at','addedby_id','status'])
+      ->paginate(25)->appends([
+        'search'=>$r->search,
+        'status'=>$r->status,
+      ]);
+
+      //Total Count Results
+      $totals = DB::table('attributes')
+      ->where('type',3)
+      ->selectRaw('count(*) as total')
+      ->selectRaw("count(case when status = 'active' then 1 end) as active")
+      ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+      ->first();
+
+      return view(adminTheme().'departments.departmentsAll',compact('departments','totals'));
+
+    }
+
+    public function branchsAction(Request $r,$action,$id=null){
+      // Add Department Action Start
+      if($action=='create'){
+
+        $check = $r->validate([
+            'name' => 'required|max:100',
+            'description' => 'nullable|max:1000',
+        ]);
+
+        $department =Attribute::where('type',3)->where('status','temp')->where('addedby_id',Auth::id())->first();
+        if(!$department){
+          $department =new Attribute();
+        }
+        $department->name=$r->name;
+        $department->description=$r->description;
+        $department->type =3;
+        $department->status ='active';
+        $department->addedby_id =Auth::id();
+        $department->save();
+
+        $slug =Str::slug($r->name);
+         if($slug==null){
+          $department->slug=$department->id;
+         }else{
+          if(Attribute::where('type',3)->where('slug',$slug)->whereNotIn('id',[$department->id])->count() >0){
+          $department->slug=$slug.'-'.$department->id;
+          }else{
+          $department->slug=$slug;
+          }
+        }
+        $department->save();
+
+        Session()->flash('success','Your Are Successfully Added');
+        return redirect()->back();
+
+      }
+
+      // Add Department Action End
+
+
+      $department =Attribute::where('type',3)->find($id);
+      if(!$department){
+        Session()->flash('error','This Department Are Not Found');
+        return redirect()->route('admin.branchs');
+      }
+
+      //Check Authorized User
+      $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
+      if($allPer && $department->addedby_id!=Auth::id()){
+        Session()->flash('error','You are unauthorized Try!!');
+        return redirect()->route('admin.branchs');
+      }
+
+      // Update Department Action Start
+      if($action=='update'){
+
+        $check = $r->validate([
+            'name' => 'required|max:191',
+            'seo_title' => 'nullable|max:200',
+            'seo_desc' => 'nullable|max:250',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $department->name=$r->name;
+        $department->short_description=$r->short_description;
+        $department->description=$r->description;
+        $department->seo_title=$r->seo_title;
+        $department->short_description=$r->short_description;
+        $department->seo_keyword=$r->seo_keyword;
+
+        ///////Image UploadStart////////////
+
+        if($r->hasFile('image')){
+          $file =$r->image;
+          $src  =$department->id;
+          $srcType  =3;
+          $fileUse  =1;
+          $author=Auth::id();
+          uploadFile($file,$src,$srcType,$fileUse,$author);
+        }
+
+        ///////Image Upload End////////////
+
+        ///////Banner Upload End////////////
+
+        if($r->hasFile('banner')){
+
+          $file =$r->banner;
+          $src  =$department->id;
+          $srcType  =3;
+          $fileUse  =2;
+          $author=Auth::id();
+          uploadFile($file,$src,$srcType,$fileUse,$author);
+
+        }
+
+        ///////Banner Upload End////////////
+
+        $slug =Str::slug($r->name);
+         if($slug==null){
+          $department->slug=$department->id;
+         }else{
+          if(Attribute::where('type',3)->where('slug',$slug)->whereNotIn('id',[$department->id])->count() >0){
+          $department->slug=$slug.'-'.$department->id;
+          }else{
+          $department->slug=$slug;
+          }
+        }
+
+        $department->status =$r->status?'active':'inactive';
+        $department->fetured =$r->fetured?1:0;
+        $department->editedby_id =Auth::id();
+        $department->save();
+
+        Session()->flash('success','Your Are Successfully Updated');
+        return redirect()->back();
+
+      }
+
+      // Update Department Action End
+
+
+      // Delete Department Action Start
+      if($action=='delete'){
+        $medias =Media::latest()->where('src_type',3)->where('src_id',$department->id)->get();
+        foreach($medias as $media){
+          if(File::exists($media->file_url)){
+            File::delete($media->file_url);
+          }
+          $media->delete();
+        }
+
+        $department->delete();
+
+        Session()->flash('success','Your Are Successfully Deleted');
+        return redirect()->route('admin.branchs');
+
+      }
+      // Delete Department Action End
+      return redirect()->back();
+
     }
 
     //Department Function
@@ -9705,6 +9737,239 @@ class AdminController extends Controller
     }
 
 
+
+    // Staff Management Function Start
+
+    public function staffAdmin(Request $r){
+
+      //Filter Actions Start
+      if($r->action){
+        if($r->checkid){
+
+        $datas=User::latest()->whereIn('status',[0,1])->where('admin',true)->whereIn('id',$r->checkid)->get();
+
+        foreach($datas as $data){
+
+            if($r->action==1){
+              $data->status=1;
+              $data->save();
+            }elseif($r->action==2){
+              $data->status=0;
+              $data->save();
+            }elseif($r->action==3){
+              $data->fetured=true;
+              $data->save();
+            }elseif($r->action==4){
+              $data->fetured=false;
+              $data->save();
+            }elseif($r->action==5){
+
+              //User Media File Delete
+              $data->admin=false;
+              $data->addedby_at=null;
+              $data->permission_id=null;
+              $data->addedby_id=null;
+              $data->save();
+
+            }
+
+        }
+
+        Session()->flash('success','Action Successfully Completed!');
+
+        }else{
+          Session()->flash('info','Please Need To Select Minimum One Post');
+        }
+
+        return redirect()->back();
+      }
+
+      //Filter Action End
+
+
+      $users =User::latest()->whereIn('status',[0,1])->where('admin',true)
+        ->where('permission_id',1)
+        ->where(function($q) use($r) {
+
+          if($r->search){
+              $q->where('name','LIKE','%'.$r->search.'%');
+              $q->orWhere('email','LIKE','%'.$r->search.'%');
+              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
+          }
+
+          if($r->role){
+             $q->where('permission_id',$r->role);
+          }
+
+          if($r->startDate || $r->endDate)
+          {
+              if($r->startDate){
+                  $from =$r->startDate;
+              }else{
+                  $from=Carbon::now()->format('Y-m-d');
+              }
+
+              if($r->endDate){
+                  $to =$r->endDate;
+              }else{
+                  $to=Carbon::now()->format('Y-m-d');
+              }
+
+              $q->whereDate('addedby_at','>=',$from)->whereDate('addedby_at','<=',$to);
+          }
+
+      })
+      ->select(['id','permission_id','name','email','mobile','addedby_at','addedby_id','status'])
+      ->paginate(12)->appends([
+        'search'=>$r->search,
+        'startDate'=>$r->startDate,
+        'endDate'=>$r->endDate,
+      ]);
+
+      //Total Count Results
+      $totals = DB::table('users')->whereIn('status',[0,1])->where('admin',true)
+      ->selectRaw('count(*) as total')
+      ->selectRaw("count(case when status = 1 then 1 end) as active")
+      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+      ->first();
+
+      $roles =Permission::latest()->where('status','active')->get();
+
+      return view(adminTheme().'users.staff.users',compact('users','totals','roles'));
+    }
+
+    public function staffAdminAction (Request $r,$action,$id=null){
+
+      //Add Admin User Start
+      if($action=='create' && $r->isMethod('post')){
+
+        if(filter_var($r->username, FILTER_VALIDATE_EMAIL)){
+          $hasUser =User::latest()->whereIn('status',[0,1])->where('email',$r->username)->first();
+        }else{
+          $hasUser =User::latest()->whereIn('status',[0,1])->where('mobile',$r->username)->first();
+        }
+
+        if(!$hasUser){
+            Session()->flash('error','This User Are Not Register');
+            return redirect()->route('admin.staffAdmin');
+        }
+
+        if($hasUser->staff){
+            Session()->flash('error','This User Are already Staff Authorize');
+            return redirect()->route('admin.staffAdmin');
+        }
+
+        $hasUser->staff=true;
+        $hasUser->permission_id=1;
+        $hasUser->addedby_at=Carbon::now();
+        $hasUser->addedby_id=Auth::id();
+        $hasUser->save();
+
+        Session()->flash('success','User Are Successfully Staff Authorize Done!');
+        return redirect()->route('admin.usersAdminAction',['edit',$hasUser->id]);
+
+      }
+      //Add Admin User End
+
+
+      $user=User::whereIn('status',[0,1])->where('admin',true)->find($id);
+
+      if(!$user){
+        Session()->flash('error','This Staff User Are Not Found');
+        return redirect()->route('admin.staffAdmin');
+      }
+
+        //Update User Profile Start
+        if($action=='update' && $r->isMethod('post')){
+
+            $check = $r->validate([
+                 'name' => 'required|max:100|unique:users,name,'.$user->id,
+                 'email' => 'required|max:100|unique:users,email,'.$user->id,
+                 'mobile' => 'nullable|max:20|unique:users,mobile,'.$user->id,
+                 'gender' => 'nullable|max:10',
+                 'address' => 'nullable|max:191',
+                 'division' => 'nullable|numeric',
+                 'district' => 'nullable|max:191',
+                 'city' => 'nullable|max:191',
+                 'postal_code' => 'nullable|max:20',
+                 'role' => 'nullable|numeric',
+                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+             ]);
+
+           $user->name =$r->name;
+           $user->mobile =$r->mobile;
+           $user->email =$r->email;
+           $user->gender =$r->gender;
+           $user->address_line1 =$r->address;
+           $user->division =$r->division;
+           $user->district =$r->district;
+           $user->city =$r->city;
+           $user->postal_code =$r->postal_code;
+           $user->permission_id =$r->role;
+
+           ///////Image UploadStart////////////
+           if($r->hasFile('image')){
+             $file =$r->image;
+             $src  =$user->id;
+             $srcType  =6;
+             $fileUse  =1;
+             $author=Auth::id();
+             uploadFile($file,$src,$srcType,$fileUse,$author);
+           }
+           ///////Image Upload End////////////
+
+           $user->status=$r->status?true:false;
+           $user->save();
+
+           Session()->flash('success','Your Updated Are Successfully Done!');
+           return redirect()->route('admin.usersAdstaffAdminActionminAction',['edit',$user->id]);
+        }
+        //Update User Profile End
+
+        //Update User Password Start
+        if($action=='change-password' && $r->isMethod('post')){
+
+          $validator = Validator::make($r->all(), [
+              'old_password' => 'required|string|min:8',
+              'password' => 'required|string|min:8|confirmed|different:old_password',
+          ]);
+
+          if($validator->fails()){
+              return redirect()->route('admin.staffAdminAction',['edit',$user->id])->withErrors($validator)->withInput();
+          }
+
+          if(Hash::check($r->old_password, $user->password)){
+            $user->password_show=$r->password;
+            $user->password=Hash::make($r->password);
+            $user->update();
+
+            Session()->flash('success','Your Are Successfully Done');
+            return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
+          }else{
+            Session()->flash('error','Current Password Are Not Match');
+            return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
+          }
+        }
+        //Update User Password End
+
+        //Delete User End
+        if($action=='delete'){
+          $user->staff=false;
+          $user->addedby_at=null;
+          $user->permission_id=null;
+          $user->addedby_id=null;
+          $user->save();
+
+          Session()->flash('success','Staff User Are Removed Successfully Done');
+          return redirect()->route('admin.staffAdmin');
+        }
+        //Delete User End
+        $roles =Permission::latest()->where('status','active')->get();
+
+        return view(adminTheme().'users.staff.editUser',compact('user','roles'));
+
+    }
 
     // User Management Function Start
 

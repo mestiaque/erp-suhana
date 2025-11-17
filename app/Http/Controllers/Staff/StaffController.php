@@ -74,10 +74,8 @@ class StaffController extends Controller
     }
 
     public function dashboard(){
-
         return view('staff.dashboard');
     }
-
 
     public function myProfile(Request $r){
       $user =Auth::user();
@@ -226,7 +224,6 @@ class StaffController extends Controller
         return view(adminTheme().'users.reminders',compact('user','meetings','tasks','visits','dueCollects','services'));
     }
 
-
     //Medias Library Route
     public function medies(Request $r){
 
@@ -322,68 +319,67 @@ class StaffController extends Controller
 
     }
 
-  public function mediesEdit(Request $r, $id){
-    $media =Media::find($id);
-    if(!$media){
-      Session()->flash('error','This File Are Not Found');
-      return redirect()->back();
-    }
-
-    if($media->src_type==0){
-      //Check Authorized User
-      $allPer = empty(json_decode(Auth::user()->permission->permission, true)['medies']['all']);
-      if($allPer && $media->addedby_id!=Auth::id()){
-        Session()->flash('error','You are unauthorized Try!!');
-        return redirect()->route('admin.medies');
+    public function mediesEdit(Request $r, $id){
+      $media =Media::find($id);
+      if(!$media){
+        Session()->flash('error','This File Are Not Found');
+        return redirect()->back();
       }
+
+      if($media->src_type==0){
+        //Check Authorized User
+        $allPer = empty(json_decode(Auth::user()->permission->permission, true)['medies']['all']);
+        if($allPer && $media->addedby_id!=Auth::id()){
+          Session()->flash('error','You are unauthorized Try!!');
+          return redirect()->route('admin.medies');
+        }
+      }
+
+      if($r->isMethod('post')){
+          $media->alt_text=$r->alt_text;
+          $media->caption=$r->caption;
+          $media->description=$r->description;
+          $media->editedby_id=auth::id();
+          $media->save();
+          Session()->flash('success','Your Are Successfully Done');
+          return redirect()->back();
+      }
+
+      return view(adminTheme().'medies.mediaImageEdit',compact('media'));
     }
 
-    if($r->isMethod('post')){
-         $media->alt_text=$r->alt_text;
-         $media->caption=$r->caption;
-         $media->description=$r->description;
-         $media->editedby_id=auth::id();
-         $media->save();
-         Session()->flash('success','Your Are Successfully Done');
-         return redirect()->back();
-    }
+    public function mediesDelete(Request $request,$id){
 
-    return view(adminTheme().'medies.mediaImageEdit',compact('media'));
-  }
+      if($request->ajax())
+      {
 
-
-  public function mediesDelete(Request $request,$id){
-
-     if($request->ajax())
-    {
-
-    $media =Media::find($id);
-    if(!$media){
-      Session()->flash('error','This File Are Not Found');
-     return Response()->json([
-              'success' => false
-          ]);
-     }
-
-    if(File::exists($media->file_url)){
-          File::delete($media->file_url);
-    }
-    if(File::exists($media->file_url_sm)){
-        File::delete($media->file_url_sm);
-    }
-    if(File::exists($media->file_url_md)){
-        File::delete($media->file_url_md);
-    }
-    if(File::exists($media->file_url_lg)){
-        File::delete($media->file_url_lg);
-    }
-    $media->delete();
+      $media =Media::find($id);
+      if(!$media){
+        Session()->flash('error','This File Are Not Found');
       return Response()->json([
-              'success' => true
-          ]);
-    }
+                'success' => false
+            ]);
+      }
 
-  }
+      if(File::exists($media->file_url)){
+            File::delete($media->file_url);
+      }
+      if(File::exists($media->file_url_sm)){
+          File::delete($media->file_url_sm);
+      }
+      if(File::exists($media->file_url_md)){
+          File::delete($media->file_url_md);
+      }
+      if(File::exists($media->file_url_lg)){
+          File::delete($media->file_url_lg);
+      }
+      $media->delete();
+        return Response()->json([
+                'success' => true
+            ]);
+      }
+
+    }
 
   //Medias Library Route End
 

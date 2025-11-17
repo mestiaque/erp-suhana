@@ -35,9 +35,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     //User Management
     Route::get('/users/admin/',[AdminController::class,'usersAdmin'])->name('usersAdmin');
     Route::any('/users/admin/{action}/{id?}',[AdminController::class,'usersAdminAction'])->name('usersAdminAction');
+    
+    Route::get('/users/staff/',[AdminController::class,'staffAdmin'])->name('staffAdmin');
+    Route::any('/users/staff/{action}/{id?}',[AdminController::class,'staffAdminAction'])->name('staffAdminAction');
 
-    Route::get('/users/customer/',[AdminController::class,'usersCustomer'])->name('usersCustomer');
-    Route::any('/users/customer/{action}/{id?}',[AdminController::class,'usersCustomerAction'])->name('usersCustomerAction');
+    Route::get('/users/employee/',[AdminController::class,'usersCustomer'])->name('usersCustomer');
+    Route::any('/users/employee/{action}/{id?}',[AdminController::class,'usersCustomerAction'])->name('usersCustomerAction');
 
     Route::get('/users/roles',[AdminController::class,'userRoles'])->name('userRoles');
     Route::any('/users/roles/{action}/{id?}',[AdminController::class,'userRoleAction'])->name('userRoleAction');
@@ -80,15 +83,25 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     Route::get('/accounts/payment-methods',[AdminController::class,'paymentsMethods'])->name('paymentsMethods');
     Route::any('/accounts/payment-methods/{action}/{id?}',[AdminController::class,'paymentsMethodsAction'])->name('paymentsMethodsAction');
 
-    Route::get('/accounts/accounts-methods',[AdminController::class,'accountsMethods'])->name('accountsMethods');
-    Route::any('/accounts/accounts-methods/{action}/{id?}',[AdminController::class,'accountsMethodsAction'])->name('accountsMethodsAction');
+    Route::get('/accounts/list',[AdminController::class,'accounts'])->name('accounts');
+    Route::any('/accounts/list/{action}/{id?}',[AdminController::class,'accountsAction'])->name('accountsAction');
+    
+    // Branch Route
+    Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
+    Route::any('/hr/branchs/{action}/{id?}',[AdminController::class,'branchsAction'])->name('branchsAction');
+    // Branch Route End
+    
+    // Department Route
+    Route::get('/hr/departments',[AdminController::class,'departments'])->name('departments');
+    Route::any('/hr/departments/{action}/{id?}',[AdminController::class,'departmentsAction'])->name('departmentsAction');
+    // Department Route End
 
+    // Designation Route
+    Route::get('/hr/designations',[AdminController::class,'designations'])->name('designations');
+    Route::any('/hr/designations/{action}/{id?}',[AdminController::class,'designationsAction'])->name('designationsAction');
 
-    Route::get('/accounts/loans',[AdminController::class,'loansManagement'])->name('loansManagement');
-    Route::any('/accounts/loans/{action}/{id?}',[AdminController::class,'loansManagementAction'])->name('loansManagementAction');
     //Accounts Management End
 
-    Route::get('/my-location-update',[AdminController::class,'myLocationUpdate'])->name('myLocationUpdate');
     Route::get('/my-profile',[AdminController::class,'myProfile'])->name('myProfile');
     Route::any('/edit-profile',[AdminController::class,'editProfile'])->name('editProfile');
 
