@@ -1,12 +1,13 @@
 <?php
 
-use App\Models\General;
+use Carbon\Carbon;
+use App\Models\Post;
 use App\Models\Media;
 use App\Models\Country;
-use App\Models\Post;
-use App\Models\PostExtra;
+use App\Models\General;
 use App\Models\Attribute;
-use Carbon\Carbon;
+use App\Models\PostExtra;
+use Illuminate\Support\Facades\Auth;
 
 
 function general(){
@@ -257,3 +258,40 @@ function uploadFile($file,$src,$srcType,$fileUse,$author=null,$fileStatus=true){
     return $media;
 
 }
+
+
+
+if (!function_exists('hasParentPermission')) {
+    function hasParentPermission(string $parent): bool
+    {
+        if (!Auth::check()) return false;
+
+        $roles = Auth::user()->permission;
+        if (!$roles) return false;
+
+        $permissions = json_decode($roles->permission, true);
+
+        // Check if parent exists and is 'on', '1' or true
+        return isset($permissions[$parent]) && in_array($permissions[$parent], ['on', '1', true]);
+    }
+}
+
+if (!function_exists('hasChildPermission')) {
+    function hasChildPermission(string $parent, string $child): bool
+    {
+        if (!Auth::check()) return false;
+
+        $roles = Auth::user()->permission;
+        if (!$roles) return false;
+
+        $permissions = json_decode($roles->permission, true);
+
+        // Parent must exist first
+        if (!isset($permissions[$parent])) return false;
+
+        // Check if child exists and is 'on', '1' or true
+        return isset($permissions[$parent][$child]) && in_array($permissions[$parent][$child], ['on', '1', true]);
+    }
+}
+
+
