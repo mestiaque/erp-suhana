@@ -297,7 +297,7 @@ h4{
                     <i class="fa fa-credit-card"></i>
                 </div>
                 <span class="sub-title">Total Expense Amount</span>
-                <h3>12300<span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
+                <h3>{{priceFullFormat($reports['total_expenses'])}}<span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">

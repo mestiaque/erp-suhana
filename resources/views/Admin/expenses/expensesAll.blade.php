@@ -99,7 +99,7 @@
                                  </label>
                                 </div>
                             </th>
-                            <th style="min-width: 150px;">Reff</th>
+                            <th style="min-width: 150px;">Description</th>
                             <th style="min-width: 100px;">Amount</th>
                             <th style="min-width: 120px;">Type</th>
                             <th style="min-width: 100px;">Account</th>
@@ -133,7 +133,7 @@
                                 @endif
                             </td>
                             <td>
-                                <span>{{$expense->name}}</span>
+                                <span>{{$expense->description}}</span>
                                 @if($expense->imageFile) <a href="{{asset($expense->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif
                             </td>
                             <td>{{priceFormat($expense->amount)}}</td>
@@ -241,7 +241,7 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-    	   		<div class="form-group">
+    	   		<!-- <div class="form-group">
     			    <label for="name">Title/Ref* </label>
     			    <div class="searchRef">
                         <div class="input-group">
@@ -259,7 +259,7 @@
     				@if ($errors->has('title'))
     				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('title') }}</p>
     				@endif
-             	</div>
+             	</div> -->
              	
     			<div class="form-group">
     				<label for="name">Description</label>
@@ -351,7 +351,7 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-    	   		<div class="form-group">
+    	   		<!-- <div class="form-group">
     			    <label for="title">Title/Ref* </label>
     			    <div class="searchRef">
                         <div class="input-group">
@@ -372,11 +372,11 @@
                            @include(adminTheme().'reffmembers.includes.reffSearchResult')
                         </div>
     			    </div>
-                    <!--<input type="text" class="form-control {{$errors->has('title')?'error':''}}" value="{{$dpm->name?:old('title')}}" name="title" placeholder="Enter Title/Ref" required="">-->
+                    <input type="text" class="form-control {{$errors->has('title')?'error':''}}" value="{{$dpm->name?:old('title')}}" name="title" placeholder="Enter Title/Ref" required="">
     				@if ($errors->has('title'))
     				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('title') }}</p>
     				@endif
-             	</div>
+             	</div> -->
     			 <div class="form-group">
     				<label for="name">Description</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>
@@ -471,11 +471,11 @@
     	                       
     	                   </td>
     	               </tr>
-    	               <tr>
+    	               <!-- <tr>
     	                   <th>Title/Ref</th>
     	                   <th>:</th>
     	                   <td>{{$dpm->name}}</td>
-    	               </tr>
+    	               </tr> -->
     	               <tr>
     	                   <th>Description</th>
     	                   <th>:</th>

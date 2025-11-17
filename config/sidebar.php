@@ -128,9 +128,9 @@ return [
                     'permission'  => ''
                 ],
                 [
-                    'title'       => 'Department',
+                    'title'       => 'Departments',
                     'icon'        => 'fa-solid fa-sitemap',
-                    'route'       => '/admin/hr/department',
+                    'route'       => '/admin/hr/departments',
                     'icon_color'  => 'text-info',
                     'permission'  => ''
                 ],
