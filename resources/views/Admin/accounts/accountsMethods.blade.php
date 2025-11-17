@@ -15,14 +15,14 @@
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddTypes" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Account
              </a>
-             <a href="{{route('admin.accountsMethods')}}" class="btn-custom yellow">
+             <a href="{{route('admin.accounts')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
          </div>
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-            <form action="{{route('admin.accountsMethods')}}">
+            <form action="{{route('admin.accounts')}}">
                 <div class="row">
                     <div class="col-md-6 mb-0">
                         <div class="input-group">
@@ -43,7 +43,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($accountsMethods as $i=>$method)
+                        @foreach($accounts as $i=>$method)
                         <tr>
                             <td>
                                 <b>Title:</b><span> {{$method->name}}</span><br>
@@ -69,16 +69,16 @@
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$method->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
-                                <a href="{{route('admin.accountsMethodsAction',['view',$method->id])}}"  class="btn-custom yellow">
+                                <a href="{{route('admin.accountsAction',['view',$method->id])}}"  class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
                                 </a>
-                                <a href="{{route('admin.accountsMethodsAction',['delete',$method->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                <a href="{{route('admin.accountsAction',['delete',$method->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-                {{$accountsMethods->links('pagination::bootstrap-4')}}
+                {{$accounts->links('pagination::bootstrap-4')}}
             </div>
         </form>
         
@@ -92,7 +92,7 @@
  <div class="modal fade text-left" id="AddTypes" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
 	 <div class="modal-content">
-	    <form action="{{route('admin.accountsMethodsAction','create')}}" method="post">
+	    <form action="{{route('admin.accountsAction','create')}}" method="post">
 	   	  @csrf
     	   <div class="modal-header">
     		 <h4 class="modal-title">Add Account</h4>
@@ -138,11 +138,11 @@
  </div>
 
 <!--Edit Modal -->
-@foreach($accountsMethods as $i=>$dpm)
+@foreach($accounts as $i=>$dpm)
  <div class="modal fade text-left" id="EditType_{{$dpm->id}}" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
 	 <div class="modal-content">
-	 <form action="{{route('admin.accountsMethodsAction',['update',$dpm->id])}}" method="post">
+	 <form action="{{route('admin.accountsAction',['update',$dpm->id])}}" method="post">
 	   	  @csrf
     	   <div class="modal-header">
     		 <h4 class="modal-title">Edit Account</h4>
