@@ -29,7 +29,7 @@
 <!-- END: Main Menu -->
 
 @push('css')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
     .children-right {
         padding-left: 0 !important;
@@ -45,5 +45,5 @@
 </style>
 @endpush
 @push('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+
 @endpush
