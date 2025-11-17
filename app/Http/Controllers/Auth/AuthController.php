@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\Auth;
 
 
-use Auth;
 use Str;
+use url;
+use File;
 use Hash;
 use Mail;
-use File;
-use url;
-use Session;
 use Cookie;
+use Session;
 use Socialite;
-use Redirect,Response;
 use App\Models\User;
 use App\Models\Seller;
+use Redirect,Response;
 use App\Models\General;
-use App\Models\SocialIdentity;
-use App\Http\Controllers\Controller;
-use App\Mail\RegistrationMail;
-use App\Mail\passwordResetVerify;
 use App\Mail\VerifyCodeMail;
 use Illuminate\Http\Request;
+use App\Mail\RegistrationMail;
+use App\Models\SocialIdentity;
+use App\Mail\passwordResetVerify;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -96,8 +96,24 @@ class AuthController extends Controller
 
     }
 
+    public function logout(Request $request)
+    {
 
+        // Laravel logout
+        Auth::logout();
 
+        // Clear all session data
+        session()->flush();
+
+        // Invalidate the session
+        $request->session()->invalidate();
+
+        // Regenerate CSRF token
+        $request->session()->regenerateToken();
+
+        // Redirect to login page with message
+        return redirect()->route('login')->with('success', 'You have been logged out successfully.');
+    }
 
 
 }

@@ -2,21 +2,28 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+
+// ----------------------
+// Admin Controller
+// ----------------------
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\PostsController;
-use App\Http\Controllers\Welcome\WelcomeController;
-use App\Http\Controllers\Customer\CustomerController;
+
+
+// ----------------------
+// Staff Controller
+// ----------------------
+use App\Http\Controllers\Staff\StaffController;
 
 
 // ----------------------
 // AUTH ROUTES
 // ----------------------
 Route::get('/', function(){
-
     return redirect()->route('login');
-});
+})->name('index');
+
 Route::any('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/log-out',[AuthController::class,'logout'])->name('logout');
 
 
 // ----------------------
@@ -100,6 +107,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
 // BUSINESS ROUTES
 // ----------------------
 Route::group(['prefix' => 'staff', 'as' => 'staff.', 'middleware' => ['auth','redirectUser']], function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard2'])->name('dashboard');
+    Route::get('/dashboard', [StaffController::class, 'dashboard'])->name('dashboard');
 });
 

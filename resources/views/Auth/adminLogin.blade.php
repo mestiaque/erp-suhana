@@ -1,15 +1,15 @@
-@extends('auth.adminApp') 
+@extends('Auth.AdminApp')
 @section('title')
 <title>Login</title>
-@endsection 
+@endsection
 @section('SEO')
 
-@endsection 
+@endsection
 @push('css')
 <style>
 
 </style>
-@endpush 
+@endpush
 @section('contents')
          <!-- Start Login Area -->
          <div class="login-area">
@@ -17,7 +17,7 @@
                  <div class="d-table-cell">
                      <div class="login-form">
                          <div class="logo">
-                             <a href="javascript:void(0)"><img src="" alt="logo" /></a>
+                             <a href="javascript:void(0)"><img src="{{ asset(general()->logo()) }}" alt="logo" /></a>
                          </div>
                          <h2>Welcome </h2>
                          @include('alerts')
@@ -30,7 +30,7 @@
                                     <span style="color:red;display: block;">{{ $errors->first('email') }}</span>
                                 @endif
                             </div>
-                            
+
                             <div class="form-group">
                                 <input type="password" class="form-control" name="password" placeholder="Password" value="{{old('password')}}" required="" />
                                 <span class="label-title"><i class='bx bx-lock'></i></span>
@@ -51,5 +51,5 @@
              </div>
          </div>
          <!-- End Login Area -->
-@endsection 
+@endsection
 @push('js') @endpush

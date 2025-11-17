@@ -23,6 +23,7 @@ class AuthMiddleware
                     Auth::logout();
                     session()->flush();
                 }
+                
                 return redirect()->route('admin.dashboard');
 
                //return redirect()->back();

@@ -74,11 +74,7 @@ class AdminController extends Controller
     }
 
     public function dashboard(){
-        return view('dashboard.admin');
-    }
-
-    public function dashboard2(){
-        return view('dashboard.general');
+        return view('admin.dashboard');
     }
 
 
