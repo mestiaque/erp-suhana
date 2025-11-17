@@ -13,7 +13,7 @@
                     <i class="bx bx-group"></i>
                 </a>
             </li>
-           
+
         </ul>
 
         <form class="nav-search-form d-none ml-auto d-md-block">
@@ -30,19 +30,19 @@
             <li class="nav-item dropdown profile-nav-item">
                 <a href="#" class="nav-link dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <div class="menu-profile">
-                        <span class="name">Hi! Admin </span>
-                        <img src="" class="rounded-circle" alt="Admin" />
+                        <span class="name">{{ Auth::user()->name }}</span>
+                        <img src="{{asset(Auth::user()->image())}}" class="rounded-circle" alt="Admin" />
                     </div>
                 </a>
 
                 <div class="dropdown-menu">
                     <div class="dropdown-header d-flex flex-column align-items-center">
                         <div class="figure mb-3">
-                            <img src="" class="rounded-circle" alt="image" />
+                            <img src="{{asset(Auth::user()->image())}}" class="rounded-circle" alt="image" />
                         </div>
 
                         <div class="info text-center">
-                            <span class="name">Admin</span>
+                            <span class="name">{{ Auth::user()->name }}</span>
                             <p class="mb-3 email">super Admin</p>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                                 <a href="" class="nav-link"> <i class="bx bx-user"></i> <span>User Dashboard </span></a>
                             </li>
                             <li class="nav-item">
-                                <a href="" class="nav-link"> <i class="bx bx-user"></i> <span>Profile </span></a>
+                                <a href="{{ route('admin.myProfile') }}" class="nav-link"> <i class="bx bx-user"></i> <span>Profile </span></a>
                             </li>
                             <li class="nav-item">
                                 <a href="" class="nav-link"> <i class="bx bx-bell"></i> <span>Reminder List <span style="background: #f80e5d;color: white;padding: 2px 10px;border-radius: 5px;margin-left: 5px;">0</span></span></a>
@@ -65,7 +65,7 @@
                         <ul class="profile-nav">
                             <li class="nav-item">
                                 <a href="" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link"> <i class="bx bx-log-out"></i> <span>Logout </span> </a>
-                                <form id="logout-form" action="" method="POST" style="display: none;">
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                     @csrf
                                 </form>
                             </li>
