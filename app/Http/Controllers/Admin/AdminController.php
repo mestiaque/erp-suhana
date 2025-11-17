@@ -79,7 +79,7 @@ class AdminController extends Controller
             'total_expenses' => Expense::sum('amount'),
         ];
 
-        return view('admin.dashboard',compact('reports'));
+        return view('Admin.dashboard',compact('reports'));
     }
 
 
