@@ -1,218 +1,429 @@
 @extends('Admin.layouts.app')
 @section('title')
-<title>Dashboard</title>
+<title>Admin Dashboard</title>
 @endsection
 
 @push('css')
-
-<style type="text/css">
-    #eventModal {
-      display: none;
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 20px;
-      z-index: 1000;
-      max-width: 600px;
-      width: 100%;
-    }
-    
-    #eventModal .body{
-        background: white;
-        padding: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+<style>
+    /* .stats-card-box {
+        padding: 15px;
         border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
     }
 
-    #modalOverlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+    .stats-card-box .icon-text {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
     }
 
-    #eventModal h3 {
-      margin-top: 0;
-      font-size: 24px;
+    .stats-card-box .icon-box {
+        font-size: 30px;
+        margin-right: 10px;
+        color: #4CAF50;
+        margin-left: 12rem;
     }
 
-    #eventLink {
-      color: black;
-      display: inline-block;
-      margin-top: 10px;
-    }
+    .stats-card-box .sub-title {
+        font-size: 16px;
+        font-weight: 600;
+    } */
 
-    .close-btn {
-      background-color: #f44336;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      border-radius: 5px;
-      float: right;
-    }
-    .bx-coin:before {
-        content: "\f2db"
-    }
+
+
+    /* dashboard ui css start */
+
+    /* .dashboardInfoContainer svg {
+            margin-right: 5px;
+        }
+
+        .dashboardInfoContainer h2 {
+            font-size: 24px;
+        }
+
+    .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .order-card.electronics {
+            border-left-color: #667eea;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+        }
+        
+        .order-card.furniture {
+            border-left-color: #f093fb;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+        }
+        .order-card.furniture h3 {
+            margin: 0;
+        }
+        .order-card.clothing {
+            border-left-color: #4facfe;
+        }
+        
+        .order-card.books {
+            border-left-color: #43e97b;
+        }
+        
+        .order-card.office {
+            border-left-color: #fa709a;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .badge-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-total {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .order-card.electronics h3 {
+    margin: 0;
+}
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .order-detail {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+        
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+        } */
+
+    /* dashboard ui css end */
+
+
+
+
+
+
+.stats-card-box .icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.stats-card-box .sub-title {
+    color: #000;
+}
+
+
 </style>
 @endpush
+
 @section('contents')
-
 <div class="flex-grow-1">
-    
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-area">
+        <h1>Admin Dashboard</h1>
+        <ol class="breadcrumb">
+            <li class="item"><a href="#"><i class="bx bx-home-alt"></i></a></li>
+            <li class="item">Dashboard</li>
+        </ol>
+    </div>
 
+    <h4 class="mb-4"><i class="fa fa-clipboard"></i> Order Summary</h4>
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-money"></i>
+                </div>
+                <span class="sub-title">Order total</span>
+                <h3>120 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
 
-<!-- Breadcrumb Area -->
-<div class="breadcrumb-area">
-    <h1>Dashboard</h1>
-    <ol class="breadcrumb">
-        <li class="item">
-            <a href="#"><i class="bx bx-home-alt"></i></a>
-        </li>
-        <li class="item">Dashboard</li>
-    </ol>
-</div>
-<!-- End Breadcrumb Area -->
-
-<!-- Start -->
-<div class="row">
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card-box">
-            <div class="icon-box">
-                <i class="bx bx-bar-chart"></i>
-            </div>
-            <span class="sub-title">Point Orders</span>
-            <h3>
-                0 <small style="font-size: 16px;font-weight: bold;">(02)</small>
-            </h3>
-
-            <div class="progress-list">
-                <!--<div class="bar-inner">-->
-                <!--    <div class="bar progress-line" data-width="56.9"></div>-->
-                <!--</div>-->
-                <p>Total Sales <a href="#">View</a> </p>
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="56.9" style="width: 56.9%;"></div>
+                    </div>
+                    
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card-box">
-            <div class="icon-box">
-                <i class="bx bx-cloud"></i>
-            </div>
-            <span class="sub-title">Point Buy</span>
-            <h3>
-                0
-                <br> <span class="badge"><i class="bx bx-phone"></i> 0 </span>
-            </h3>
-            <div class="progress-list">
-                <!--<div class="bar-inner">-->
-                <!--    <div class="bar progress-line" data-width="82"></div>-->
-                <!--</div>-->
 
-                <p>Total Buy <a href="">View</a> </p>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <span class="sub-title">Confirm order</span>
+                <h3>150 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="32.1" style="width: 32.1%;"></div>
+                    </div>
+
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card-box">
-            <div class="icon-box">
-                <i class="bx bx-bar-chart-alt"></i>
-            </div>
-            <span class="sub-title">Customers</span>
-            <h3>
-                0
-                <br><span class="badge"><i class="bx bx-up-arrow-alt"></i> Total</span>
-            </h3>
-            <div class="progress-list">
-                <!--<div class="bar-inner">-->
-                <!--    <div class="bar progress-line" data-width="80"></div>-->
-                <!--</div>-->
 
-                <p>Total Customers <a href="#">View</a> </p>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-clock-o"></i>
+                </div>
+                <span class="sub-title">Peding order</span>
+                <h3>333 <span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="45.5" style="width: 45.5%;"></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card-box">
-            <div class="icon-box">
-                <i class="bx bx-money"></i>
-            </div>
-            <span class="sub-title">Cash Out</span>
-            <h3>
-                0
-                <br><span class="badge"><i class="bx bx-up-arrow-alt"></i> Total</span>
-            </h3>
-            <div class="progress-list">
-                <p>Total  <a href="#">View</a> </p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- End -->
 
-<!-- Start -->
-<div class="row">
-    <div class="col-lg-7 col-md-12">
-        <div class="card mb-30">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3>Latest Point Orders</h3>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table mb-20">
-                        <thead>
-                            <tr class="table__title">
-                                <th>Customer</th>
-                                <th>Seller</th>
-                                <th>Amount</th>
-                                <th>Commission</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table__body">
-                           
-                        </tbody>
-                    </table>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-times-circle"></i>
+                </div>
+                <span class="sub-title">Cansel order</span>
+                <h3>100 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 26.0%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="26.0" style="width: 26%;"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-5 col-md-12">
-        <div class="card mb-30">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3>New Registration</h3>
+
+    <h4 class="mb-4"><i class="fa fa-users"></i> Office Staff</h4>
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box" style="background-color: #d81be9;">
+                    <i class="fa fa-user-friends"></i>
+                </div>
+                <span class="sub-title">Total Staff</span>
+                <h3>1000 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="56.9" style="width: 56.9%;"></div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table mb-20">
-                        <thead>
-                            <tr class="table__title">
-                                <th>Name</th>
-                                <th>Mobile</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table__body">
-                           
-                        </tbody>
-                    </table>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box" style="background-color: #185806;">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <span class="sub-title">Present Staff</span>
+                <h3>760 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="32.1" style="width: 32.1%;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box" style="background-color: #b20c0c;">
+                    <i class="fa fa-times-circle"></i>
+                </div>
+                <span class="sub-title">Absent Staff</span>
+                <h3>123<span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="45.5" style="width: 45.5%;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box" style="background-color: #ea043a;">
+                    <i class="fa fa-briefcase"></i>
+                </div>
+                <span class="sub-title">Working Staff</span>
+                <h3>856 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 88.0%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="26.0" style="width: 26%;"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- End -->
+
+    <h4 class="mb-4"><i class="fa fa-money"></i>Accounts</h4>
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-line-chart"></i>
+                </div>
+                <span class="sub-title">Total Sale Amount</span>
+                <h3>13456780 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="56.9" style="width: 56.9%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-file-text"></i>
+                </div>
+                <span class="sub-title">Order Amount</span>
+                <h3>13456780 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="32.1" style="width: 32.1%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-credit-card"></i>
+                </div>
+                <span class="sub-title">Total Expense Amount</span>
+                <h3>12300<span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="45.5" style="width: 45.5%;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card-box">
+                <div class="icon-box">
+                    <i class="fa fa-credit-card"></i>
+                </div>
+                <span class="sub-title">Net Profit / Balance</span>
+                <h3>13456780<span class="badge"><i class="bx bx-up-arrow-alt"></i> 88.0%</span></h3>
+
+                <div class="progress-list">
+                    <div class="bar-inner">
+                        <div class="bar progress-line" data-width="26.0" style="width: 26%;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
 @push('js')
-
-
-
+<!-- Custom JS for admin -->
 @endpush
