@@ -98,7 +98,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        dd(1);
+
         // Laravel logout
         Auth::logout();
 
@@ -114,10 +114,6 @@ class AuthController extends Controller
         // Redirect to login page with message
         return redirect()->route('login')->with('success', 'You have been logged out successfully.');
     }
-
-
-
-
 
 
 }

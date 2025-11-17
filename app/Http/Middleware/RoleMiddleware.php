@@ -26,7 +26,7 @@ class RoleMiddleware
             }
 
         }else{
-            return redirect()->route('index');
+            return abort(401); redirect()->route('index');
         }
     }
 }

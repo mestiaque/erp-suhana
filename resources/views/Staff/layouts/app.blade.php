@@ -99,13 +99,13 @@
    <body>
 
     
-    @include('Admin.layouts.sidebar')
+    @include('Staff.layouts.sidebar')
 
      <!-- BEGIN: Content-->
      <div class="main-content d-flex flex-column">
-        @include('Admin.layouts.header')
+        @include('Staff.layouts.header')
         @yield('contents')
-        @include('Admin.layouts.footer')
+        @include('Staff.layouts.footer')
      </div>
      <!-- END: Content-->
      
@@ -134,70 +134,7 @@
      <script>
       $(document).ready(function(){
 
-          
-        $(document).on('click', '.searchRef .input-group input:not([readonly])', function() {
-            $(this).siblings(".reffSearchResult").remove();
-            $(this).closest('.searchRef').find(".reffSearchResult").show();
-        });
         
-        
-        
-        $(document).on('keyup', '.searchRef .input-group input', function() {
-            
-            var that =$(this);
-            var search =$(this).val();
-            var url ="";
-            var total =10;
-            if(url){
-                $.ajax({
-                  url:url,
-                  dataType: 'json',
-                  cache: false,
-                  data: {'reff_search':search},
-                  success : function(data){
-                      
-                    total = data.total;
-
-                    if (total == 0) {
-                        that.closest('.searchRef').find(".refActionBtn").empty().append('<span class="add" style="background: #13bb37;color: white;"><i class="bx bx-plus"></i></span>');
-                    } else {
-                        that.closest('.searchRef').find(".refActionBtn").empty().append('<span><i class="bx bx-search"></i></span>');
-                    }
-
-                    $('.reffSearchResult').empty().append(data.view);
-                    
-                  },error: function () {
-                      alert('error');
-        
-                    }
-                });
-            }
-            
-        });    
-        
-        $(document).on('click', '.searchRef .reffSearchResult ul li .reffAdd', function() {
-            var title =$(this).data('name');
-            $(this).closest('.searchRef').find(".input-group input").prop('readonly', true).val(title);
-            $(this).closest('.searchRef').find(".refActionBtn").empty().append('<span class="remove" style="background: #ff6a6a;color: white;"><i class="bx bx-x"></i></span>');
-            $(this).closest('.searchRef').find(".reffSearchResult").hide();
-        });
-        
-        $(document).on('click', '.searchRef .refActionBtn .add', function() {
-            $(this).closest('.searchRef').find(".input-group input").prop('readonly', true);
-            $(this).closest('.searchRef').find(".refActionBtn").empty().append('<span class="remove" style="background: #ff6a6a;color: white;"><i class="bx bx-x"></i></span>');
-            $(this).closest('.searchRef').find(".reffSearchResult").hide();
-        });
-        
-        $(document).on('click', '.searchRef .refActionBtn .remove', function() {
-            $(this).closest('.searchRef').find(".input-group input").prop('readonly', false);
-            $(this).closest('.searchRef').find(".refActionBtn").empty().append('<span><i class="bx bx-search"></i></span>');
-        });
-        
-        $(document).on('click', function(event) {
-            if (!$(event.target).closest('.searchRef').length) {
-                $('.reffSearchResult').hide();
-            }
-        });
 
         $('#PrintAction').on("click", function () {
             $('.PrintAreaContact').printThis();
@@ -234,6 +171,7 @@
                     reader.readAsDataURL(input.files[0]);
                 }
             });
+            
           $(document).on('click','.showPassword',function(){
                 $(this).toggleClass('active-show');
                 if ($(this).hasClass('active-show')) {
