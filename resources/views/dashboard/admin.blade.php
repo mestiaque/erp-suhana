@@ -535,7 +535,97 @@
         </div>
 
 
-        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3><i class="fa fa-line-chart"></i> Website Analytics</h3>
+
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-horizontal-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu" style="">
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-show"></i> View
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-edit-alt"></i> Edit
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-trash"></i> Delete
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-printer"></i> Print
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card mb-30">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3><i class="fa-regular fa-user"></i> Login User</h3>
+
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-horizontal-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-show"></i> View
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-edit-alt"></i> Edit
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-trash"></i> Delete
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-printer"></i> Print
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <i class="bx bx-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body browser-used-box">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>MD. Nasim Billah</td>
+                                        <td>01864748523</td>
+                                    </tr>
+                                    <tr>
+                                        <td>MD. Rabiul Islam</td>
+                                        <td>01564748523</td>
+                                    </tr>
+                                    <tr>
+                                        <td>MD. Emon Hasan</td>
+                                        <td>01464748523</td>
+                                    </tr>
+                                    
+                            
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
