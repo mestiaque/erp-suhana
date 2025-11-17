@@ -97,7 +97,11 @@ class AuthController extends Controller
     }
 
 
-
+    public function logout(){
+    	Auth::logout();
+        session()->flush();
+    	return Redirect()->route('index');
+    }
 
 
 }

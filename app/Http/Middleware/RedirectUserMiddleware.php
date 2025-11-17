@@ -11,7 +11,6 @@ class RedirectUserMiddleware
     public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
-
         if (!$user) {
             return redirect()->route('login');
         }
