@@ -156,9 +156,8 @@
                   data: {'reff_search':search},
                   success : function(data){
                       
-                     total = data.total; // Update total here with the value from the server
+                    total = data.total;
 
-                    // Now handle the append based on the updated total value inside the success callback
                     if (total == 0) {
                         that.closest('.searchRef').find(".refActionBtn").empty().append('<span class="add" style="background: #13bb37;color: white;"><i class="bx bx-plus"></i></span>');
                     } else {
