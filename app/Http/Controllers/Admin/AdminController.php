@@ -3679,10 +3679,21 @@ class AdminController extends Controller
 
     public function expenseReports(Request $r){
 
+        if($r->startDate){
+            $from =Carbon::parse($r->startDate);
+        }else{
+            $from=Carbon::now();
+        }
+
+        if($r->endDate){
+            $to =Carbon::parse($r->endDate);
+        }else{
+            $to=Carbon::now();
+        }
+
         $expenses =null;
 
 
-        if($r->search || $r->expense_type || $r->method || $r->startDate || $r->endDate){
 
             $expenses = Expense::latest()->where('status','active')
                 ->where(function($q) use ($r) {
@@ -3699,36 +3710,14 @@ class AdminController extends Controller
                     if($r->method){
                         $q->where('method_id',$r->method);
                     }
-
-                    if($r->startDate || $r->endDate)
-                    {
-                        if($r->startDate){
-                            $from =$r->startDate;
-                        }else{
-                            $from=Carbon::now()->format('Y-m-d');
-                        }
-
-                        if($r->endDate){
-                            $to =$r->endDate;
-                        }else{
-                            $to=Carbon::now()->format('Y-m-d');
-                        }
-
-                        $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-
-                    }
-
                 })
+                ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
                 ->get();
 
 
-        }
-
-
         $expenseTypes =Attribute::latest()->where('type',5)->where('status','active')->select(['id','name'])->get();
-        $reffTitles =ReffMember::latest()->where('status','<>','temp')->select(['id','name'])->get();
 
-        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','reffTitles'));
+        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to'));
     }
 
 

@@ -101,7 +101,7 @@ return [
                 [
                     'title'       => 'Employee List',
                     'icon'        => 'fa-solid fa-id-badge',
-                    'route'       => '/admin/users/admin',
+                    'route'       => '/admin/users/employee',
                     'icon_color'  => 'text-success',
                     'permission'  => ''
                 ],
