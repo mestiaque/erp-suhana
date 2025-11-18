@@ -101,7 +101,7 @@ return [
                 [
                     'title'       => 'Employee List',
                     'icon'        => 'fa-solid fa-id-badge',
-                    'route'       => '/admin/users/admin',
+                    'route'       => '/admin/users/employee',
                     'icon_color'  => 'text-success',
                     'permission'  => ''
                 ],
@@ -128,9 +128,9 @@ return [
                     'permission'  => ''
                 ],
                 [
-                    'title'       => 'Department',
+                    'title'       => 'Departments',
                     'icon'        => 'fa-solid fa-sitemap',
-                    'route'       => '/admin/hr/department',
+                    'route'       => '/admin/hr/departments',
                     'icon_color'  => 'text-info',
                     'permission'  => ''
                 ],

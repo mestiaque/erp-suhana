@@ -74,7 +74,12 @@ class AdminController extends Controller
     }
 
     public function dashboard(){
-        return view('admin.dashboard');
+
+        $reports =[
+            'total_expenses' => Expense::sum('amount'),
+        ];
+
+        return view('Admin.dashboard',compact('reports'));
     }
 
 
@@ -3368,7 +3373,6 @@ class AdminController extends Controller
         if($action=='create'){
 
             $check = $r->validate([
-                'title' => 'required|max:100',
                 'expense_type' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'account' => 'required|numeric',
@@ -3390,16 +3394,7 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
-            $title =$r->title;
-            $hasTitle =ReffMember::where('name',$title)->first();
-            if(!$hasTitle){
-               $hasTitle = $this->ReffNewMember($title);
-            }
-
-
             $expense =new Expense();
-            $expense->name=$title;
-            $expense->member_id=$hasTitle?$hasTitle->id:null;
             $expense->category_id=$r->expense_type;
             $expense->method_id=$r->payment;
             $expense->account_id=$method->id;
@@ -3407,9 +3402,7 @@ class AdminController extends Controller
             $expense->description=$r->description;
             $expense->status ='active';
             $expense->addedby_id =Auth::id();
-            if (!$createDate->isSameDay($expense->created_at)) {
-                $expense->created_at = $createDate;
-            }
+            $expense->created_at = $createDate;
             $expense->save();
 
             $method->amount -=$expense->amount;
@@ -3452,7 +3445,6 @@ class AdminController extends Controller
         if($action=='update'){
 
             $check = $r->validate([
-                'title' => 'required|max:100',
                 'expense_type' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'created_at' => 'nullable|date',
@@ -3460,19 +3452,12 @@ class AdminController extends Controller
             ]);
             $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
-            $title =$r->title;
-            $hasTitle =ReffMember::where('name',$title)->first();
-            if(!$hasTitle){
-               $hasTitle = $this->ReffNewMember($title);
-            }
 
-            $expense->name=$title;
-            $expense->member_id=$hasTitle?$hasTitle->id:null;
             $expense->category_id=$r->expense_type;
             $expense->method_id=$r->payment;
             $expense->description=$r->description;
             $expense->status =$r->status?'active':'inactive';
-            $expense->addedby_id =Auth::id();
+            $expense->editedby_id =Auth::id();
             if (!$createDate->isSameDay($expense->created_at)) {
                 $expense->created_at = $createDate;
             }
@@ -3694,10 +3679,21 @@ class AdminController extends Controller
 
     public function expenseReports(Request $r){
 
+        if($r->startDate){
+            $from =Carbon::parse($r->startDate);
+        }else{
+            $from=Carbon::now();
+        }
+
+        if($r->endDate){
+            $to =Carbon::parse($r->endDate);
+        }else{
+            $to=Carbon::now();
+        }
+
         $expenses =null;
 
 
-        if($r->search || $r->expense_type || $r->method || $r->startDate || $r->endDate){
 
             $expenses = Expense::latest()->where('status','active')
                 ->where(function($q) use ($r) {
@@ -3714,36 +3710,14 @@ class AdminController extends Controller
                     if($r->method){
                         $q->where('method_id',$r->method);
                     }
-
-                    if($r->startDate || $r->endDate)
-                    {
-                        if($r->startDate){
-                            $from =$r->startDate;
-                        }else{
-                            $from=Carbon::now()->format('Y-m-d');
-                        }
-
-                        if($r->endDate){
-                            $to =$r->endDate;
-                        }else{
-                            $to=Carbon::now()->format('Y-m-d');
-                        }
-
-                        $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-
-                    }
-
                 })
+                ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
                 ->get();
 
 
-        }
-
-
         $expenseTypes =Attribute::latest()->where('type',5)->where('status','active')->select(['id','name'])->get();
-        $reffTitles =ReffMember::latest()->where('status','<>','temp')->select(['id','name'])->get();
 
-        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','reffTitles'));
+        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to'));
     }
 
 

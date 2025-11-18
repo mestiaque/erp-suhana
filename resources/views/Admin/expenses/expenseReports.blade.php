@@ -52,14 +52,14 @@
         @include(adminTheme().'alerts')
         <form action="{{route('admin.expenseReports')}}">
             <div class="row">
-                <div class="col-md-4 mb-1">
+                <div class="col-md-5 mb-1">
                     <label>Date To Date</label>
                     <div class="input-group">
-                        <input type="date" name="startDate" value="{{request()->startDate?Carbon\Carbon::parse(request()->startDate)->format('Y-m-d') :''}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                        <input type="date" value="{{request()->endDate?Carbon\Carbon::parse(request()->endDate)->format('Y-m-d') :''}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
+                        <input type="date" name="startDate" value="{{$from->format('Y-m-d')}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
+                        <input type="date" value="{{$to->format('Y-m-d')}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
                     </div>
                 </div>
-                <div class="col-md-3 mb-1">
+                <div class="col-md-4 mb-1">
                     <div class="form-group">
                         <label>Expense Type</label>
                         <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
@@ -71,18 +71,6 @@
                     </div>
                 </div>
                 <div class="col-md-3 mb-1">
-                    <label>Search </label>
-                    <div class="input-group">
-                        <select class="select2" name="search" data-placeholder="Select Reff/Title">
-                            <option value="">Select Reff/Title</option>
-                            @foreach($reffTitles as $reffTitle)
-                            <option value="{{$reffTitle->id}}" {{request()->search==$reffTitle->id?'selected':''}}>{{$reffTitle->name}}</option>
-                            @endforeach
-                        </select>
-                        <!--<input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Search Expense" class="form-control {{$errors->has('search')?'error':''}}" />-->
-                    </div>
-                </div>
-                <div class="col-md-2 mb-1">
                         <label>Action</label> <br>
                         <button type="submit" class="btn btn-success btn-sm btn-block">Search</button>
                 </div>
@@ -145,7 +133,7 @@
                 <th>Title</th>
                 <th>Method</th>
                 <th>Type</th>
-                <th>Amount</th>
+                <th>{{priceFormat($expenses->sum('amount'))}}</th>
                 <th>Description</th>
             </tr>
         </tfoot>

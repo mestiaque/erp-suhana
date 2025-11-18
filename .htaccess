@@ -1,0 +1,53 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+
+    # Pass Authorization headers (For API / Sanctum / Passport)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Force HTTPS (SSL)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Redirect everything to /public folder
+    RewriteCond %{REQUEST_URI} !^/public
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Laravel Routing Handler
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Block sensitive files (.env, composer, config, etc.)
+<FilesMatch "\.(env|json|config.js|md|gitignore|gitattributes|lock|composer.json|example|sql|bak|ini|sh)$">
+    Require all denied
+</FilesMatch>
+
+# Block artisan file
+<FilesMatch "(artisan)$">
+    Require all denied
+</FilesMatch>
+
+# Block Dangerous File Uploads (ZIP, EXE, Shell, etc.)
+<FilesMatch "\.(phtml|phar|exe|sh|bash|zip|gz|tar|cgi|pl|jsp|asp|aspx)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Prevent access to hidden files and folders like .git or .env
+RedirectMatch 404 /(\.git|\.env|composer\.json|artisan|server\.php|readme\.md|storage|node_modules)
+
+# Protect against script injections in query strings
+RewriteCond %{QUERY_STRING} base64_encode\(.*\) [OR]
+RewriteCond %{QUERY_STRING} (\<|%3C).script.(\>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} (\||\&|\;|\'|\") [NC]
+RewriteRule ^(.*)$ - [F,L]
+
