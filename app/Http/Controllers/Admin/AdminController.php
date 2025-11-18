@@ -9720,7 +9720,7 @@ class AdminController extends Controller
       if($r->action){
         if($r->checkid){
 
-        $datas=User::latest()->whereIn('status',[0,1])->where('admin',true)->whereIn('id',$r->checkid)->get();
+        $datas=User::latest()->whereIn('status',[0,1])->where('staff',true)->whereIn('id',$r->checkid)->get();
 
         foreach($datas as $data){
 
@@ -9739,7 +9739,7 @@ class AdminController extends Controller
             }elseif($r->action==5){
 
               //User Media File Delete
-              $data->admin=false;
+              $data->staff=false;
               $data->addedby_at=null;
               $data->permission_id=null;
               $data->addedby_id=null;
@@ -9761,8 +9761,7 @@ class AdminController extends Controller
       //Filter Action End
 
 
-      $users =User::latest()->whereIn('status',[0,1])->where('admin',true)
-        ->where('permission_id',1)
+      $users =User::latest()->whereIn('status',[0,1])->where('staff',true)
         ->where(function($q) use($r) {
 
           if($r->search){
@@ -9793,7 +9792,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name','email','mobile','addedby_at','addedby_id','status'])
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status'])
       ->paginate(12)->appends([
         'search'=>$r->search,
         'startDate'=>$r->startDate,
@@ -9801,7 +9800,7 @@ class AdminController extends Controller
       ]);
 
       //Total Count Results
-      $totals = DB::table('users')->whereIn('status',[0,1])->where('admin',true)
+      $totals = DB::table('users')->whereIn('status',[0,1])->where('staff',true)
       ->selectRaw('count(*) as total')
       ->selectRaw("count(case when status = 1 then 1 end) as active")
       ->selectRaw("count(case when status = 0 then 1 end) as inactive")
@@ -9840,13 +9839,13 @@ class AdminController extends Controller
         $hasUser->save();
 
         Session()->flash('success','User Are Successfully Staff Authorize Done!');
-        return redirect()->route('admin.usersAdminAction',['edit',$hasUser->id]);
+        return redirect()->route('admin.staffAdminAction',['edit',$hasUser->id]);
 
       }
       //Add Admin User End
 
 
-      $user=User::whereIn('status',[0,1])->where('admin',true)->find($id);
+      $user=User::whereIn('status',[0,1])->where('staff',true)->find($id);
 
       if(!$user){
         Session()->flash('error','This Staff User Are Not Found');
@@ -9897,7 +9896,7 @@ class AdminController extends Controller
            $user->save();
 
            Session()->flash('success','Your Updated Are Successfully Done!');
-           return redirect()->route('admin.usersAdstaffAdminActionminAction',['edit',$user->id]);
+           return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
         }
         //Update User Profile End
 
@@ -10026,7 +10025,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name','email','mobile','addedby_at','addedby_id','status'])
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status'])
       ->paginate(12)->appends([
         'search'=>$r->search,
         'startDate'=>$r->startDate,
@@ -10046,7 +10045,6 @@ class AdminController extends Controller
     }
 
     public function usersAdminAction (Request $r,$action,$id=null){
-
       //Add Admin User Start
       if($action=='create' && $r->isMethod('post')){
 
