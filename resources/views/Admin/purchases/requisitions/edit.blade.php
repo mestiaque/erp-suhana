@@ -63,7 +63,7 @@
                         <input type="date" class="form-control" name="requision_date" required>
                     </div>
 
-                    <div class="col-md-4 mt-2">
+                    <div class="col-md-4">
                         <label>Expected Receive Date</label>
                         <input type="date" class="form-control" name="expected_date" required>
                     </div>

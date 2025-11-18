@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Attribute;
+use App\Models\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class PurchaseRequisition extends Model
@@ -27,7 +27,7 @@ class PurchaseRequisition extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'requested_by');
+        return $this->belongsTo(User::class, 'addedby_id');
     }
 
     public function department()

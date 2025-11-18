@@ -244,12 +244,6 @@ class PurchasesController extends Controller
 
 
 
-
-
-
-
-
-
     public function purchasesRequisitions(Request $r)
     {
         // Permission Check
@@ -350,7 +344,7 @@ class PurchasesController extends Controller
 
         // View Requisition
         if($action=='view'){
-            return view(adminTheme().'purchases.viewRequisition', compact('requisition'));
+            return view(adminTheme().'purchases.requisitions.view', compact('requisition'));
         }
 
         // Add / Search Company

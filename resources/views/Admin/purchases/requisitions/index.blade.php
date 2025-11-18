@@ -93,11 +93,13 @@
                             <tr>
                                 <td>{{ $i+1 }}</td>
                                 <td><a href="{{route('admin.purchasesRequisitionsAction',['view',$req->id])}}" target="_blank">{{$req->requisition_no}}</a></td>
-                                <td>{{$req->department?->name}}</td>
+                                <td>{{$req->department?->name ?? '--'}}</td>
                                 <td>{{$req->user?->name}}</td>
                                 <td>{{$req->items()->count()}} Items</td>
                                 <td>
-                                    @if($req->status=='pending')
+                                    @if($req->status=='temp')
+                                        <span class="badge badge-secondary">Temp</span>
+                                    @elseif($req->status=='pending')
                                         <span class="badge badge-warning">Pending</span>
                                     @elseif($req->status=='approved')
                                         <span class="badge badge-success">Approved</span>
@@ -107,15 +109,8 @@
                                 </td>
                                 <td>{{$req->created_at->format('d.m.Y')}}</td>
                                 <td>
-                                    @isset(json_decode(Auth::user()->permission->permission, true)['requision']['view'])
-                                    <a href="{{route('admin.purchasesRequisitionsAction',['view',$req->id])}}" class="btn-custom success"><i class="bx bx-show"></i></a>
-                                    @endisset
-                                    @isset(json_decode(Auth::user()->permission->permission, true)['requision']['edit'])
                                     <a href="{{route('admin.purchasesRequisitionsAction',['edit',$req->id])}}" class="btn-custom"><i class="bx bx-edit"></i></a>
-                                    @endisset
-                                    @isset(json_decode(Auth::user()->permission->permission, true)['requision']['delete'])
-                                    <a href="{{route('admin.purchasesRequisitionsAction',['delete',$req->id])}}" onclick="return confirm('Are You Sure?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
-                                    @endisset
+                                    <a href="{{route('admin.purchasesRequisitionsAction',['delete',$req->id])}}" onclick="return confirm('Are You Want To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -132,3 +127,4 @@
 
 @push('js')
 @endpush
+
