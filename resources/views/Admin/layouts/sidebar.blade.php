@@ -72,7 +72,7 @@
 
                     @if($show)
                         <li class="nav-item {{ $active ? 'mm-active' : '' }}">
-                            <a href="{{ !empty($menu['route']) ? url($menu['route']) : '#' }}" class="nav-link">
+                            <a href="{{ !empty($menu['route']) ? url($menu['route']) : 'javascript:void(0)' }}" class="nav-link">
                                 <span class="icon"><i class="{{ $menu['icon'] }}"></i></span>
                                 <span class="menu-title">{{ $menu['title'] }}</span>
                             </a>
@@ -109,7 +109,7 @@
 
                 @if($showParent && count($visibleChildren) > 0)
                     <li class="nav-item {{ $parentActive ? 'mm-active' : '' }}">
-                        <a href="#" class="collapsed-nav-link nav-link" aria-expanded="{{ $parentActive ? 'true' : 'false' }}">
+                        <a href="javascript:void(0)" class="collapsed-nav-link nav-link" aria-expanded="{{ $parentActive ? 'true' : 'false' }}">
                             <span class="icon"><i class="{{ $menu['icon'] }}"></i></span>
                             <span class="menu-title">{{ $menu['title'] }}</span>
                         </a>
@@ -124,7 +124,7 @@
                                 @endphp
 
                                 <li class="nav-item {{ $childActive ? 'mm-active' : '' }}">
-                                    <a href="{{ !empty($child['route']) ? url($child['route']) : '#' }}" class="nav-link">
+                                    <a href="{{ !empty($child['route']) ? url($child['route']) : 'javascript:void(0)' }}" class="nav-link">
                                         <span class="icon"><i class="{{ $child['icon'] }}"></i></span>
                                         <span class="menu-title">{{ $child['title'] }}</span>
                                     </a>
