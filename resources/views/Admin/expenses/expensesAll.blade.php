@@ -10,6 +10,158 @@
     .expenseTableView tr td{
         padding:5px;
     }
+
+
+    /* slip css start */
+
+
+
+      .slip-container {
+                background: #fff;
+                border-radius: 4px;
+                padding: 20px;
+                position: relative;
+        }
+        
+        .header {
+            text-align: center;
+        }
+        
+        .company-name {
+            font-size: 30px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+            letter-spacing: 1px;
+            font-family: serif;
+        }
+        
+        .subtitle {
+            font-size: 13px;
+            font-weight: bold;
+            color: #000 !important;
+            margin: 5px 0;
+        }
+        
+        .contact-info {
+                font-size: 12px;
+                color: #000 !important;
+                margin: 0px 0;
+        }
+        
+        .transaction-badge {
+            background: #000;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px 0;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .date-field {
+            position: absolute;
+            top: 135px;
+            right: 40px;
+            font-size: 14px;
+        }
+        
+        .date-label {
+            font-weight: bold;
+        }
+        
+        .form-section {
+            margin: 20px 0;
+        }
+        
+        .form-label {
+            font-weight: bold;
+            color: #2d5016;
+            margin-bottom: 0 !important;
+        }
+        
+        .handwritten {
+            font-size: 18px;
+            color: #1a1a1a;
+            font-style: italic;
+        }
+        
+        .slip-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        
+        .slip-table td {
+            padding: 10px;
+            border-bottom: 1px solid #5d8a3a;
+        }
+        
+        .amount-column {
+            text-align: right;
+            font-weight: bold;
+            width: 150px;
+        }
+        
+        .total-row {
+            border-top: 2px solid #2d5016;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .amount-words {
+            margin: 15px 0;
+            font-style: italic;
+        }
+        
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+        }
+        
+        .signature-box {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 40px 20px 5px 20px;
+            position: relative;
+        }
+        
+        .signature-text {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 24px;
+            margin-top: -35px;
+            color: #1a3d0a;
+        }
+        
+        .input-underline {
+            border: none;
+            border-bottom: 1px solid #000;
+            background: transparent;
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        .input-underline:focus {
+            outline: none;
+            border-bottom-color: #2d5016;
+        }
+        .amountWriteText {
+            display: flex;
+            align-items: end;
+        }
+
+        .siral {
+            left: 40px;
+        }
+
+    /* slip css end */
     
     
     
@@ -421,9 +573,11 @@
 <!--View Modal -->
 @foreach($expenses as $i=>$dpm)
  <div class="modal fade text-left" id="ViewExpense_{{$dpm->id}}" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document">
+   <div class="modal-dialog modal-lg" role="document">
 	 <div class="modal-content">
-	 <form action="{{route('admin.expensesAction',['update',$dpm->id])}}" method="post" enctype="multipart/form-data" >
+
+
+	 {{--<form action="{{route('admin.expensesAction',['update',$dpm->id])}}" method="post" enctype="multipart/form-data" >
 	   	  @csrf
     	   <div class="modal-header">
     		 <h4 class="modal-title">View Expense</h4>
@@ -484,7 +638,127 @@
     	           </table>
     	       </div>
     	   </div>
-	   </form>
+	   </form>--}}
+
+
+
+
+         <div class="slip-container">
+
+          <div class="date-field siral">
+            <span class="date-label">SL:</span>
+            <input type="text" class="input-underline" style="width: 100px;" value="123748893457498">
+        </div>
+
+        <div class="header">
+            <h1 class="company-name">ANR Fashion Wear Limited.</h1>
+            <p class="subtitle">(100% Export Oriented Garments Manufacturing Factory)</p>
+            <p class="contact-info">Office: 3 Kazi Nazrul Islam Road, National University, Gazipur-1704, Bangladesh</p>
+            <p class="contact-info">Mobile: 01842 481023, info@anrfashion.com</p>
+            
+            <div class="transaction-badge">TRANSACTION SLIP</div>
+        </div>
+        
+        <div class="date-field">
+            <span class="date-label">Date:</span>
+            <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('Y-m-d')}}">
+        </div>
+        
+        <div class="form-section">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="amountWriteText">
+                        <label class="form-label">Account: </label>
+                        <input type="text" class="input-underline handwritten" value="S/o Bell Exp (Process) Sewing">
+                    </div>
+               
+                </div>
+            </div>
+            
+           
+        </div>
+        
+
+     <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td colspan="8"><b>Cash Paid To </b></td>
+                <td><b>Taka</b></td>
+            </tr>
+            <tr>
+                <td colspan="8">{!!$dpm->description!!}</td>
+                <td>{{priceFormat($dpm->amount)}}</td>
+            </tr>
+            <tr>
+                <td colspan="8"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8" style="text-align: right;"><b>Total </b></td>
+                <td>{{priceFormat($dpm->amount)}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+   <div class="form-section">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="amountWriteText">
+                    <label class="form-label" style="min-width: 100px;">Taka in word:</label>
+                    <input type="text" class="input-underline handwritten" value="Five Thousand Only">
+                </div>
+            
+            </div>
+        </div>
+    </div>
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line">
+                    <div class="signature-text">Athlas</div>
+                </div>
+                <small>Receiver</small>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">
+                    <div class="signature-text">Athlas</div>
+                </div>
+                <small>Accountant</small>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">
+                     <div class="signature-text">Athlas</div>
+                </div>
+                <small>Approved by</small>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
 	 </div>
    </div>
  </div>
