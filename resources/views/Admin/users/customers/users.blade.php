@@ -91,7 +91,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="min-width: 100px; width: 100px;padding-right:0;">
+                            <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
                                 <div class="checkbox mr-3">
                                      <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                      <label class="cbx" for="checkall">
@@ -115,7 +115,7 @@
                     <tbody>
                         @foreach($users as $i=>$user)
                         <tr>
-                            <td>
+                            <td style=" position: relative;">
                                 @if($user->id==Auth::id()) @else
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
