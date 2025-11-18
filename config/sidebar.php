@@ -19,6 +19,98 @@ return [
         ],
     ],
 
+    // Purchases Management
+    [
+        'group_title' => 'PURCHASES MANAGEMENT',
+        [
+            'title'      => 'Purchase Setup',
+            'icon'       => 'fa-solid fa-store',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Goods Items',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-items',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Purchases Suppliers',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/suppliers',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
+            ]
+        ],
+        [
+            'title'      => ' Purchase Orders',
+            'icon'       => 'fa-solid fa-truck-fast',
+            'icon_color' => 'text-warning',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Requisitions',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-requisitions',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Purchases',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-orders',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Goods Receive (GRN)',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-received',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Damages / Returns',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-damage-returns',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+            ]
+        ],
+        [
+            'title'      => 'Reports',
+            'icon'       => 'fa-solid fa-chart-line',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Supplier Ledgers',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/suppliers-ladgers',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Purchase Reports',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-reports',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Purchase Stock',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-stocks',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ]
+            ]
+        ]
+    ],
+    
     // Accounts Management
     [
         'group_title' => 'ACCOUNTS MANAGEMENT',
