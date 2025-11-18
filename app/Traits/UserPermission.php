@@ -7,40 +7,48 @@ trait UserPermission{
 	public function checkRequestPermission(){
 
 		if($activeRole =Permission::find(Auth::user()->permission_id)){
+            $p = json_decode($activeRole->permission, true);
 			if(
-			    
-				
-				
-				empty(json_decode($activeRole->permission, true)['salarySheet']['view']) && \Request::is('admin/salary-sheet/export*')||
-				
-				empty(json_decode($activeRole->permission, true)['expenses']['delete']) && \Request::is('admin/expenses/delete*')||
-				empty(json_decode($activeRole->permission, true)['expenses']['report']) && \Request::is('admin/expenses/reports*')||
-				empty(json_decode($activeRole->permission, true)['expenses']['type']) && \Request::is('admin//expenses/types*')||
-				
-				
-				empty(json_decode($activeRole->permission, true)['departments']['list']) && \Request::is('admin/hr/departments*')||
-				empty(json_decode($activeRole->permission, true)['designations']['list']) && \Request::is('admin/hr/designations*')||
-				empty(json_decode($activeRole->permission, true)['companies']['list']) && \Request::is('admin/hr/companies*')||
-				empty(json_decode($activeRole->permission, true)['merchandisers']['list']) && \Request::is('admin/hr/merchandisers*')||
-				
-				empty(json_decode($activeRole->permission, true)['paymentMethod']['list']) && \Request::is('admin/accounts/payment-methods*')||
-				empty(json_decode($activeRole->permission, true)['accounts']['list']) && \Request::is('admin/accounts/accounts-methods*')||
-				empty(json_decode($activeRole->permission, true)['deposit']['list']) && \Request::is('admin/accounts/deposits*')||
-				empty(json_decode($activeRole->permission, true)['loanManagement']['list']) && \Request::is('admin/accounts/loans*')||
-				
-				empty(json_decode($activeRole->permission, true)['employees']['list']) && \Request::is('admin/users/customer*')||
 
-				empty(json_decode($activeRole->permission, true)['adminUsers']['list']) && \Request::is('admin/users/admin*')||
+                empty($p['salarySheet']['view']) && \Request::is('admin/salary-sheet/export*') ||
 
-				// empty(json_decode($activeRole->permission, true)['adminRoles']['list']) && \Request::is('admin/users/roles*') ||
+                empty($p['expenses']['delete']) && \Request::is('admin/expenses/delete*') ||
+                empty($p['expenses']['report']) && \Request::is('admin/expenses/reports*') ||
+                empty($p['expenses']['type']) && \Request::is('admin/expenses/types*') ||
+                empty($p['expenses']['list']) && \Request::is('admin/expenses*') ||
 
-				empty(json_decode($activeRole->permission, true)['appsSetting']['general']) && \Request::is('admin/setting/general*') ||
-				empty(json_decode($activeRole->permission, true)['appsSetting']['general']) && \Request::is('admin/setting/logo*') ||
-				empty(json_decode($activeRole->permission, true)['appsSetting']['general']) && \Request::is('admin/setting/favicon*') ||
-				empty(json_decode($activeRole->permission, true)['appsSetting']['mail']) && \Request::is('admin/setting/mail*') ||
-				empty(json_decode($activeRole->permission, true)['appsSetting']['sms']) && \Request::is('admin/setting/sms*') ||
-				empty(json_decode($activeRole->permission, true)['appsSetting']['social']) && \Request::is('admin/setting/social*')
+                empty($p['departments']['list']) && \Request::is('admin/hr/departments*') ||
+                empty($p['designations']['list']) && \Request::is('admin/hr/designations*') ||
+                empty($p['companies']['list']) && \Request::is('admin/hr/companies*') ||
+                empty($p['merchandisers']['list']) && \Request::is('admin/hr/merchandisers*') ||
 
+                empty($p['paymentMethod']['list']) && \Request::is('admin/accounts/payment-methods*') ||
+                empty($p['accounts']['list']) && \Request::is('admin/accounts/list*') ||
+                empty($p['deposit']['list']) && \Request::is('admin/accounts/deposits*') ||
+                empty($p['loanManagement']['list']) && \Request::is('admin/accounts/loans*') ||
+                empty($p['accounts']['transfer']) && \Request::is('admin/accounts/transfers*') ||
+                empty($p['accounts']['withdraw']) && \Request::is('admin/accounts/withdrawal*') ||
+
+                empty($p['employees']['list']) && \Request::is('admin/users/employee*') ||
+
+                empty($p['adminUsers']['list']) && \Request::is('admin/users/admin*') ||
+
+                empty($p['staff']['list']) && \Request::is('admin/users/staff*') ||
+
+                empty($p['adminRoles']['list']) && \Request::is('admin/users/roles*') ||
+
+                empty($p['media']['list']) && \Request::is('admin/medies*') ||
+
+                empty($p['branch']['list']) && \Request::is('admin/hr/branchs*') ||
+
+                empty($p['appsSetting']['general']) && \Request::is('admin/setting/general*') ||
+                empty($p['appsSetting']['general']) && \Request::is('admin/setting/logo*') ||
+                empty($p['appsSetting']['general']) && \Request::is('admin/setting/favicon*') ||
+
+                empty($p['appsSetting']['mail']) && \Request::is('admin/setting/mail*') ||
+                empty($p['appsSetting']['sms']) && \Request::is('admin/setting/sms*') ||
+
+                empty($p['appsSetting']['social']) && \Request::is('admin/setting/social*')
 
 			){
 				return abort('401');

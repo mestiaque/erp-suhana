@@ -43,15 +43,34 @@
 
                         <div class="info text-center">
                             <span class="name">{{ Auth::user()->name }}</span>
-                            <p class="mb-3 email">super Admin</p>
+                            <p class="mb-3 email">{{ Auth::user()->permission?->name ?? '' }}</p>
                         </div>
                     </div>
 
                     <div class="dropdown-body">
                         <ul class="profile-nav p-0 pt-3">
+
                             <li class="nav-item">
-                                <a href="" class="nav-link"> <i class="bx bx-user"></i> <span>User Dashboard </span></a>
+                                @php
+                                    $user = Auth::user();
+                                    $currentRoute = \Request::route()->getName();
+                                @endphp
+
+                                {{-- যদি user দুই role এর মধ্যে থাকে এবং এখন admin dashboard এ থাকে --}}
+                                @if($user->staff && $user->admin && \Str::contains($currentRoute, 'admin.'))
+                                    <a href="{{ route('staff.dashboard') }}" class="nav-link">
+                                        <i class="bx bx-home"></i>
+                                        <span>Staff Dashboard</span>
+                                    </a>
+                                {{-- যদি user দুই role এর মধ্যে থাকে এবং এখন staff dashboard এ থাকে --}}
+                                @elseif($user->staff && $user->admin && \Str::contains($currentRoute, 'staff.'))
+                                    <a href="{{ route('admin.dashboard') }}" class="nav-link">
+                                        <i class="bx bx-user"></i>
+                                        <span>Admin Dashboard</span>
+                                    </a>
+                                @endif
                             </li>
+
                             <li class="nav-item">
                                 <a href="{{ route('admin.myProfile') }}" class="nav-link"> <i class="bx bx-user"></i> <span>Profile </span></a>
                             </li>

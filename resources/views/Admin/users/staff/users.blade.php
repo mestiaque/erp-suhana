@@ -1,101 +1,108 @@
-@extends(adminTheme().'layouts.app') 
+@extends(adminTheme().'layouts.app')
 @section('title')
 <title>{{websiteTitle('Staff Users')}}</title>
-@endsection 
+@endsection
 @push('css')
-<style>
-    .adminProfile img {
-        height: 150px;
-        max-width: 100%;
-        width: unset;
-        margin: auto;
-    }
-    .info ul {
-        padding: 0;
-        margin: 0;
-    }
-    .adminProfile {
-        margin-bottom: 15px;
-    }
-</style>
-@endpush 
-@section('contents')
 
+@endpush
+@section('contents')
 
 @include(adminTheme().'alerts')
 <div class="flex-grow-1">
-<!-- Start -->
+
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Staff List</h3>
          <div class="dropdown">
 
-             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
-                 <i class="bx bx-plus"></i> User
+             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddStaff">
+                 <i class="bx bx-plus"></i> Add Staff
              </a>
+
              <a href="{{route('admin.staffAdmin')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
+
          </div>
     </div>
+
     <div class="card-body">
+
+        {{-- Search Filter --}}
         <div class="accordion-box">
             <div class="accordion">
                 <div class="accordion-item">
+
                  <a class="accordion-title" href="javascript:void(0)">
                      <i class="bx bx-filter-alt"></i>
-                    Search click Here..
+                     Search Click Here..
                  </a>
+
                  <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
                      <form action="{{route('admin.staffAdmin')}}">
                         <div class="row">
-                            <div class="col-md-4 mb-1">
-                            <select name="role" class="form-control {{$errors->has('role')?'error':''}}">
-                                <option value="">Select Role</option>
-                                @foreach($roles as $role)
-                                <option value="{{$role->id}}" {{request()->role==$role->id?'selected':''}}>{{$role->name}}</option>
-                                @endforeach
-                            </select>
-                            </div>
-                            <div class="col-md-8 mb-1">
+
+                            <div class="col-md-5 mb-1">
                                 <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
+                                    <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control">
+                                    <input type="date" name="endDate" value="{{request()->endDate?:''}}" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 mb-1">
+                                <select class="form-control" name="role_id">
+                                    <option value="">Select Role</option>
+                                    @foreach($roles as $role)
+                                    <option value="{{$role->id}}" {{request()->role_id==$role->id?'selected':''}}>{{$role->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-5 mb-1">
+                                <div class="input-group">
+                                    <input type="text" name="search" value="{{request()->search?:''}}" placeholder="Name, Email, Mobile" class="form-control">
                                     <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                                 </div>
                             </div>
+
                         </div>
                     </form>
                  </div>
+
                 </div>
             </div>
         </div>
+
         <br>
-        {{--
+
+        {{-- Bulk Action --}}
         <form action="{{route('admin.staffAdmin')}}">
+
             <div class="row">
                 <div class="col-md-4">
                     <div class="input-group mb-1">
-                        <select class="form-control form-control-sm rounded-0" name="action" required="">
+                        <select class="form-control form-control-sm rounded-0" name="action" required>
                             <option value="">Select Action</option>
                             <option value="1">Active</option>
                             <option value="2">Inactive</option>
-                            <option value="5">Remove</option>
+                            <option value="5">Delete</option>
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    
-                </div>
+
+                <div class="col-md-4"></div>
+
                 <div class="col-md-4">
                     <ul class="statuslist">
-                        <li><a href="{{route('admin.staffAdmin')}}">All ({{$totals->total}})</a></li>
-                        <li><a href="{{route('admin.staffAdmin',['status'=>'active'])}}">Active ({{$totals->active}})</a></li>
-                        <li><a href="{{route('admin.staffAdmin',['status'=>'inactive'])}}">Inactive ({{$totals->inactive}})</a></li>
+                        <li><a href="{{route('admin.staffAdmin')}}" class="{{request()->status?'':'active'}}">All ({{$totals->total}})</a></li>
+                        <li><a href="{{route('admin.staffAdmin',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}">Active ({{$totals->active}})</a></li>
+                        <li><a href="{{route('admin.staffAdmin',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}">Inactive ({{$totals->inactive}})</a></li>
                     </ul>
                 </div>
             </div>
 
+            {{-- Staff Table --}}
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -109,22 +116,26 @@
                                                  <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                              </svg>
                                          </span>
-                                         All <span class="checkCounter"></span> 
+                                         All <span class="checkCounter"></span>
                                      </label>
                                  </div>
                             </th>
-                            <th style="min-width: 80px;">Image</th>
-                            <th style="min-width: 250px; width: 250px;">Name</th>
+
+                            <th style="min-width: 70px;">Image</th>
+                            <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 150px;">Email</th>
                             <th style="min-width: 100px;">Role</th>
-                            <th style="min-width: 80px; width: 80px;">Action</th>
+                            <th style="min-width: 90px;">Join Date</th>
+                            <th style="min-width: 80px;">Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach($users as $i=>$user)
                         <tr>
+
                             <td>
-                                @if($user->id==Auth::id()) @else
+                                @if($user->id!=Auth::id())
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$user->id}}">
@@ -136,142 +147,104 @@
                                      </label>
                                  </div>
                                 @endif
-                                <span style="margin:0 5px;">{{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}</span>
+
+                                <span style="margin:0 5px;">
+                                    {{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}
+                                </span>
+
                                 @if($user->status)
-                                <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
+                                <span style="color: #43d39e;font-size: 20px;">
                                     <i class="bx bx-check-circle"></i>
                                 </span>
                                 @else
-                                <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
+                                <span style="color: #FF9800;font-size: 20px;">
                                     <i class="bx bx-analyse"></i>
                                 </span>
                                 @endif
+
                             </td>
-                            <td style="padding: 0 3px; text-align: center;">
-                                <span>
-                                    <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
-                                </span>
+
+                            <td style="padding: 0 3px;">
+                                <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
                             </td>
+
                             <td>
-                                <a href="{{route('admin.staffAdminAction',['edit',$user->id])}}" class="invoice-action-view mr-1">{{$user->name}} </a>
-                            </td>
-                            <td>{{$user->email}}</td>
-                            <td> 
+                                <a href="{{route('admin.staffAdminAction',['view',$user->id])}}" target="_blank">
+                                    {{$user->name}}
+                                </a>
+                                <br>
                                 @if($user->permission)
-                                <span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}} ">{{$user->permission->name}}</span>
-                                @else
-                                <span class="badge badge-danger">Un-athorize</span>
+                                <span class="badge badge-info">{{$user->permission->name}}</span>
                                 @endif
                             </td>
-                            <td style="padding: 5px 0; text-align: center;">
+
+                            <td>{{$user->email}}</td>
+
+                            <td>
+                                @if($user->designation)
+                                <span style="color: #009688;font-weight: bold;">{{$user->designation->name}}</span>
+                                @else
+                                <span style="color: #FF9800;">No Role</span>
+                                @endif
+                            </td>
+
+                            <td>{{$user->created_at}}</td>
+
+                            <td style="text-align: center;">
                                 <a href="{{route('admin.staffAdminAction',['edit',$user->id])}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
-    
 
-                                @if($user->id==Auth::id()) @else
+                                @if($user->id!=Auth::id())
                                 <a href="{{route('admin.staffAdminAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
                                     <i class="bx bx-trash"></i>
                                 </a>
-                                @endif 
-
+                                @endif
                             </td>
+
                         </tr>
                         @endforeach
                     </tbody>
+
                 </table>
             </div>
         </form>
-        --}}
+
+        {{ $users->links('pagination::bootstrap-4') }}
     </div>
 </div>
-
-<div class="row mb-30" style="margin:0 -10px;">
-    
-    @foreach($users as $i=>$user)
-    <div class="col-md-3" style="padding:0 10px;">
-        
-        
-        <div class="card adminProfile p-0">
-            <div class="card-header bg-info d-flex justify-content-between align-items-center" style="margin: 0;padding: 10px;">
-                 <h3 style="color:white;">{{$user->permission?ucfirst($user->permission->name):'Unauthorized'}}</h3>
-                 <div class="dropdown">
-                     <button class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color:white;">
-                         <i class="bx bx-dots-horizontal-rounded"></i>
-                     </button>
-                     <div class="dropdown-menu">
-                         <!--<a class="dropdown-item d-flex align-items-center" href="{{route('admin.staffAdminAction',['view',$user->id])}}">-->
-                         <!--    <i class="bx bx-show"></i> View-->
-                         <!--</a>-->
-                         <a class="dropdown-item d-flex align-items-center" href="{{route('admin.staffAdminAction',['edit',$user->id])}}">
-                             <i class="bx bx-edit-alt"></i> Edit
-                         </a>
-                        @if($user->id==Auth::id()) @else
-                         <a class="dropdown-item d-flex align-items-center" href="{{route('admin.staffAdminAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')">
-                             <i class="bx bx-trash"></i> Delete
-                         </a>
-                        @endif 
-                     </div>
-                 </div>
-            </div>
-             <img src="{{asset($user->image())}}" class="card-img-top" alt="{{$user->name}}" />
-             <div class="card-body p-4">
-                 <h5 class="card-title font-weight-bold">{{$user->name}}</h5>
-                 <div class="info">
-                    <ul>
-                        <li class="d-flex"><i class="bx bx-user mr-2 pt-2"></i> <span><b>Status</b><br>
-                            @if($user->status)
-                            <span style="color: #43d39e;font-size: 20px;line-height: 20px;">
-                                <i class="bx bx-check-circle"></i>
-                            </span>
-                            @else
-                            <span style="color: #FF9800;font-size: 20px;line-height: 20px;">
-                                <i class="bx bx-analyse"></i>
-                            </span>
-                            @endif
-                            </span>
-                        </li>
-                        <li class="d-flex"><i class="bx bx-mobile mr-2 pt-2"></i> <span><b>Mobile</b><br>{{$user->mobile}}</span></li>
-                        <li class="d-flex"><i class="bx bx-envelope mr-2 pt-2"></i><span><b>Email</b><br>{{$user->email}}</span></li>
-                    </ul>
-                </div>
-             </div>
-         </div>
-     </div>
-     @endforeach
-</div>
-<br>
-{{$users->links('pagination')}}
-
 </div>
 
-<!-- Modal -->
-<div class="modal fade text-left" id="AddUser" tabindex="-1" >
+<!-- ADD USER MODAL -->
+<div class="modal fade text-left" id="AddStaff" tabindex="-1">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form action="{{route('admin.staffAdminAction','create')}}" method="post">
                 @csrf
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel1">Add Admin User</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h4 class="modal-title">Add Staff</h4>
+                    <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times; </span>
                     </button>
                 </div>
+
                 <div class="modal-body">
                     <div class="form-group">
-                        <div class="controls">
-                            <input type="text" class="form-control {{$errors->has('username')?'error':''}}" name="username" placeholder="Enter Email/Mobile" value="" required="" />
-                        </div>
+                        <input type="text" class="form-control" name="username"
+                               placeholder="Enter Email/Mobile" required>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add User</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Staff</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
- 
 
- @endsection @push('js') @endpush
+@endsection
+
+@push('js')
+@endpush
