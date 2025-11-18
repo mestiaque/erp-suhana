@@ -7,13 +7,14 @@ use App\Http\Controllers\Auth\AuthController;
 // Admin Controller
 // ----------------------
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\PurchasesController;
+use App\Http\Controllers\Staff\StaffController;
 
 
 // ----------------------
 // Staff Controller
 // ----------------------
-use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\Admin\PurchasesController;
+use App\Http\Controllers\Admin\RequisitionController;
 
 
 // ----------------------
@@ -36,7 +37,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     //User Management
     Route::get('/users/admin/',[AdminController::class,'usersAdmin'])->name('usersAdmin');
     Route::any('/users/admin/{action}/{id?}',[AdminController::class,'usersAdminAction'])->name('usersAdminAction');
-    
+
     Route::get('/users/staff/',[AdminController::class,'staffAdmin'])->name('staffAdmin');
     Route::any('/users/staff/{action}/{id?}',[AdminController::class,'staffAdminAction'])->name('staffAdminAction');
 
@@ -68,13 +69,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     //Expenses Management End
 
     // Purchases Module Route
-    
+
     Route::get('/purchases-items-unit',[PurchasesController::class,'purchasesItemsUnits'])->name('purchasesItemsUnits');
     Route::get('/purchases-items-unit/{action}/{id?}',[PurchasesController::class,'purchasesItemsUnitsAction'])->name('purchasesItemsUnitsAction');
 
     Route::get('/purchases-items-category',[PurchasesController::class,'purchasesItemsCatgory'])->name('purchasesItemsCatgory');
     Route::any('/purchases-items-category/{action}/{id?}',[PurchasesController::class,'purchasesItemsCatgoryAction'])->name('purchasesItemsCatgoryAction');
-    
+
     Route::get('/purchases-stocks',[PurchasesController::class,'purchasesStocks'])->name('purchasesStocks');
     Route::get('/purchases-items',[PurchasesController::class,'purchasesItems'])->name('purchasesItems');
     Route::any('/purchases-items/{action}/{id?}',[PurchasesController::class,'purchasesItemsAction'])->name('purchasesItemsAction');
@@ -82,17 +83,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     Route::get('/suppliers-ladgers',[PurchasesController::class,'suppliersLegers'])->name('suppliersLegers');
     Route::get('/suppliers',[PurchasesController::class,'suppliers'])->name('suppliers');
     Route::any('/suppliers/{action}/{id?}',[PurchasesController::class,'suppliersAction'])->name('suppliersAction');
-    
+
     Route::get('/purchases-requisitions',[PurchasesController::class,'purchasesRequisitions'])->name('purchasesRequisitions');
     Route::any('/purchases-requisitions/{action}/{id?}',[PurchasesController::class,'purchasesRequisitionsAction'])->name('purchasesRequisitionsAction');
-    
+
     Route::get('/purchases-reports',[PurchasesController::class,'purchasesReports'])->name('purchasesReports');
     Route::get('/purchases-orders',[PurchasesController::class,'purchasesOrders'])->name('purchasesOrders');
     Route::any('/purchases-orders/{action}/{id?}',[PurchasesController::class,'purchasesOrdersAction'])->name('purchasesOrdersAction');
-    
+
     Route::get('/purchases-received',[PurchasesController::class,'purchasesReceived'])->name('purchasesReceived');
     Route::any('/purchases-received/{action}/{id?}',[PurchasesController::class,'purchasesReceivedAction'])->name('purchasesReceivedAction');
-    
+
     Route::get('/purchases-damage-returns',[PurchasesController::class,'purchasesDamageReturn'])->name('purchasesDamageReturn');
     Route::any('/purchases-damage-returns/{action}/{id?}',[PurchasesController::class,'purchasesDamageReturnAction'])->name('purchasesDamageReturnAction');
     // Purchases Module Route
@@ -112,12 +113,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
 
     Route::get('/accounts/list',[AdminController::class,'accounts'])->name('accounts');
     Route::any('/accounts/list/{action}/{id?}',[AdminController::class,'accountsAction'])->name('accountsAction');
-    
+
     // Branch Route
     Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
     Route::any('/hr/branchs/{action}/{id?}',[AdminController::class,'branchsAction'])->name('branchsAction');
     // Branch Route End
-    
+
     // Department Route
     Route::get('/hr/departments',[AdminController::class,'departments'])->name('departments');
     Route::any('/hr/departments/{action}/{id?}',[AdminController::class,'departmentsAction'])->name('departmentsAction');
@@ -139,7 +140,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     Route::get('/medies/delete/{id}',[AdminController::class,'mediesDelete'])->name('mediesDelete');
     // Medies Library Route End
 
-    
+    // Route::get('/sales',[RequisitionController::class,'sales'])->name('sales');
+    // Route::any('/sales/{action}/{id?}',[RequisitionController::class,'salesAction'])->name('salesAction');
+
+
 });
 
 
