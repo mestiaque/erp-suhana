@@ -152,7 +152,7 @@ class Post extends Model
     }
     
     public function unit(){
-    	return $this->belongsTo(PostExtra::class,'unit_id');
+    	return $this->belongsTo(Attribute::class,'unit_id');
     }
     
     public function category(){

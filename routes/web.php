@@ -77,7 +77,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     
     Route::get('/purchases-stocks',[PurchasesController::class,'purchasesStocks'])->name('purchasesStocks');
     Route::get('/purchases-items',[PurchasesController::class,'purchasesItems'])->name('purchasesItems');
-    Route::get('/purchases-items/{action}/{id?}',[PurchasesController::class,'purchasesItemsAction'])->name('purchasesItemsAction');
+    Route::any('/purchases-items/{action}/{id?}',[PurchasesController::class,'purchasesItemsAction'])->name('purchasesItemsAction');
 
     Route::get('/suppliers-ladgers',[PurchasesController::class,'suppliersLegers'])->name('suppliersLegers');
     Route::get('/suppliers',[PurchasesController::class,'suppliers'])->name('suppliers');
