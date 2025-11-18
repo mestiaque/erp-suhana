@@ -18,8 +18,6 @@ use App\Models\Order;
 use Redirect,Response;
 use App\Models\Attribute;
 use App\Models\OrderItem;
-
-use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\PurchaseRequisition;
 use App\Http\Controllers\Controller;
