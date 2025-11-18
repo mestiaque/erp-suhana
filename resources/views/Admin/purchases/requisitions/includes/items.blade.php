@@ -23,8 +23,6 @@
             <th class="px-2 pb-1" style="min-width: 200px;">Product</th>
             <th class="px-2 pb-1" style="width: 80px;">Qty</th>
             <th class="px-2 pb-1" style="width: 120px;">Unit</th>
-            <th class="px-2 pb-1" style="width: 150px;">Expected Date</th>
-            <th class="px-2 pb-1" style="width: 200px;">Note</th>
             <th class="p-1" style="width: 60px;text-align:center;vertical-align: middle;">
                 <span class="btn-custom success addItem"
                       data-url="{{route('admin.purchasesRequisitionsAction',['add-item',$requisition->id])}}">
@@ -68,22 +66,6 @@
                         </option>
                     @endforeach --}}
                 </select>
-            </td>
-
-            <td class="p-1">
-                <input type="date"
-                       class="form-control form-control-sm updateItem"
-                       data-name="expected_date"
-                       data-url="{{route('admin.purchasesRequisitionsAction',['update-item',$requisition->id,'item_id'=>$item->id])}}"
-                       value="{{$item->expected_date}}">
-            </td>
-
-            <td class="p-1">
-                <input type="text"
-                       class="form-control form-control-sm updateItem"
-                       data-name="note"
-                       data-url="{{route('admin.purchasesRequisitionsAction',['update-item',$requisition->id,'item_id'=>$item->id])}}"
-                       value="{{$item->note}}">
             </td>
 
             <td style="text-align:center;" class="p-1">

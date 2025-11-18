@@ -412,11 +412,11 @@ class PurchasesController extends Controller
             $r->validate([
                 'status'=>'nullable|max:20',
                 'created_at'=>'required|date',
-                'remark'=>'nullable',
+                'note'=>'nullable',
             ]);
 
             $requisition->status = $r->status ?: $requisition->status;
-            $requisition->remark = $r->remark;
+            $requisition->note = $r->note;
             $requisition->created_at = $r->created_at ?: Carbon::now();
             $requisition->save();
 
