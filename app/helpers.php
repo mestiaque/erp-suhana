@@ -108,30 +108,46 @@ function en2bnMonth($month){
   return $en_number;
 }
 
-function priceFormat($amount=0)
-{
+function priceFormat($amount=0){
   $formatAmount ='';
-
   $formatAmount = number_format($amount,general()->currency_decimal);
-
   return $formatAmount;
-
 }
 
-function priceFullFormat($amount=0)
-{
+function numberFormat($amount=0,$type=0,$currency=null){
+  $formatAmount =$amount;
+  $currency = $currency??general()->currency;
+  if($type==1){
+    $formatAmount =rtrim(rtrim(number_format($amount, general()->currency_decimal, '.', ''), '0'), '.');
+  }elseif($type==2){
+    $amountFormet = number_format($amount,general()->currency_decimal);
+    if(general()->currency_position==0){
+      $formatAmount = $currency.' '.$amountFormet;
+    }else{
+      $formatAmount = $amountFormet.' '.$currency;
+    }
+  }elseif($type==3){
+    $amountFormet = rtrim(rtrim(number_format($amount, general()->currency_decimal, '.', ''), '0'), '.');
+    if(general()->currency_position==0){
+      $formatAmount = $currency.' '.$amountFormet;
+    }else{
+      $formatAmount = $amountFormet.' '.$currency;
+    }
+  }else{
+    $formatAmount = number_format($amount,general()->currency_decimal);
+  }
+  return $formatAmount;
+}
+
+function priceFullFormat($amount=0){
   $formatAmount ='';
-
   $amountFormet = number_format($amount,general()->currency_decimal);
-
   if(general()->currency_position==0){
     $formatAmount = general()->currency.' '.$amountFormet;
   }else{
      $formatAmount = $amountFormet.' '.general()->currency;
   }
-
   return $formatAmount;
-
 }
 
 function sendMail($toEmail,$toName,$subject,$datas,$template){

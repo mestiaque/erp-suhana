@@ -781,6 +781,24 @@ class PurchasesController extends Controller
 
     }
 
+    public function purchasesReports(Request $r){
+
+      $orders =PurchaseOrder::latest()
+              ->where(function($q) use ($r){
+                  if($r->startDate || $r->endDate){
+                      $from = $r->startDate ?: Carbon::now()->format('Y-m-d');
+                      $to = $r->endDate ?: Carbon::now()->format('Y-m-d');
+                      $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+                  }
+                  if($r->supplier_id){
+                      $q->where('supplier_id',$r->supplier_id);
+                  } 
+              })
+              ->paginate(25)->appends($r->all());
+
+      return view(adminTheme().'purchases.reports.purchasesReports',compact('orders'));
+    }
+
     // ================================
     //  LIST PAGE
     // ================================
@@ -1008,7 +1026,7 @@ class PurchasesController extends Controller
     public function purchasesReceived(Request $r)
     {
         $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
-        $branches = Attribute::where('type', 0)->get(['id','name']);
+        $branches = Attribute::where('type', 0)->where('status','active')->get(['id','name']);
         if ($r->action && $r->checkid) {
             $receives = PurchaseReceive::whereIn('id', $r->checkid)->get();
             foreach ($receives as $data) {
@@ -1028,7 +1046,7 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $receives = PurchaseReceive::latest()
+        $receives = PurchaseReceive::latest()->where('status','<>','trash')
             ->where(function($q) use ($r){
                 if ($r->search){
                     $q->where('purchase_receive_no','LIKE','%'.$r->search.'%');

@@ -42,15 +42,19 @@
                 @csrf
 
                 <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label>Purchase Order</label>
-                        <input type="text" class="form-control" value="{{ $receive->purchase_no ?? '' }}" readonly>
+                    <div class="col-md-3">
+                        <label>Branch/Factory</label>
+                        <input type="text" class="form-control" value="{{ $receive->branch?$receive->branch->name:'' }}" readonly>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label>Purchase Receive No</label>
                         <input type="text" class="form-control" value="{{ $receive->purchase_receive_no }}" readonly>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label>Purchase Receive No</label>
+                        <input type="text" class="form-control" value="{{ $receive->purchase_receive_no }}" readonly>
+                    </div>
+                    <div class="col-md-3">
                         <label>Challan No</label>
                         <input type="text" class="form-control" name="challan_no" value="{{ $receive->challan_no }}">
                     </div>
