@@ -7,6 +7,7 @@ use Str;
 use Auth;
 use File;
 use Image;
+use Hash;
 use Session;
 use Validator;
 use Carbon\Carbon;
@@ -364,8 +365,6 @@ class PurchasesController extends Controller
 
 
     public function purchasesStocks(Request $r){
-
-
         
         return view(adminTheme().'purchases-items.purchasesStocks');
     }
@@ -400,7 +399,7 @@ class PurchasesController extends Controller
         }
 
         // Fetch Requisitions
-        $requisitions = PurchaseRequisition::latest()
+        $requisitions = PurchaseRequisition::latest()->where('status','<>','temp')
             ->where(function($q) use($r){
                 if($r->search){
                     $q->where('requisition_no','LIKE','%'.$r->search.'%');
@@ -428,7 +427,7 @@ class PurchasesController extends Controller
             ]);
 
         // Total Counts
-        $totals = DB::table('purchase_requisitions')
+        $totals = DB::table('purchase_requisitions')->where('status','<>','temp')
             ->selectRaw("count(case when status != 'trash' then 1 end) as total")
             ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
             ->selectRaw("count(case when status = 'approved' then 1 end) as approved")
@@ -448,10 +447,11 @@ class PurchasesController extends Controller
                 $requisition = new PurchaseRequisition();
                 $requisition->status='temp';
                 $requisition->addedby_id = Auth::id();
-                $requisition->created_date = now()->format('Ymd');
                 $requisition->save();
             }
-            $requisition->requisition_no = Carbon::now()->format('Ymd').$requisition->id;
+            $requisition->created_at = now()->format('Ymd');
+            $requisition->department_id = Auth::user()->department_id;
+            $requisition->requisition_no = $requisition->created_at->format('Ymd').$requisition->id;
             $requisition->save();
 
             return redirect()->route('admin.purchasesRequisitionsAction',['edit',$requisition->id]);
@@ -475,16 +475,6 @@ class PurchasesController extends Controller
             return view(adminTheme().'purchases.requisitions.view', compact('requisition'));
         }
 
-        // Add / Search Company
-        if($action=='add-company'){
-            $company = Company::find($r->company_id);
-            if($company){
-                $requisition->company_id = $company->id;
-                $requisition->save();
-            }
-            $view = view(adminTheme().'purchases.includes.requisitionItems', compact('requisition'))->render();
-            return response()->json(['success'=>true, 'view'=>$view]);
-        }
 
         // Search Item
         if($action=='search-item'){
@@ -509,10 +499,15 @@ class PurchasesController extends Controller
             if($action=='update-item'){
                 $item = PurchaseRequisitionItem::find($r->item_id);
                 if($item){
-                    $item->material_id = $r->material_id ?: null;
-                    $item->material_name = $r->material_name ?: null;
-                    $item->qty = $r->qty ?: 0;
-                    $item->unit = $r->unit ?: null;
+                    if($r->name=='product_name'){
+                      $item->material_name = $r->data ?: null;
+                    }
+                    if($r->name=='qty'){
+                      $item->qty = $r->data?:0;
+                    }
+                    if($r->name=='unit'){
+                      $item->unit = $r->data ?: null;
+                    }
                     $item->save();
                 }
             }
@@ -532,18 +527,22 @@ class PurchasesController extends Controller
         // Update Requisition
         if($action=='update'){
             $r->validate([
-                'status'=>'nullable|max:20',
+                // 'status'=>'nullable|max:20',
+                'department_id'=>'required|numeric',
                 'created_at'=>'required|date',
+                'expected_date'=>'required|date',
                 'note'=>'nullable',
             ]);
 
-            $requisition->status = $r->status ?: $requisition->status;
+            $requisition->department_id = $r->department_id;
+            $requisition->status = 'pending';
             $requisition->note = $r->note;
+            $requisition->expected_date = $r->expected_date ?: Carbon::now();
             $requisition->created_at = $r->created_at ?: Carbon::now();
             $requisition->save();
 
             Session()->flash('success','Requisition Updated Successfully');
-            return redirect()->route('purchasesRequisitionsAction',['view',$requisition->id]);
+            return redirect()->route('admin.purchasesRequisitionsAction',['view',$requisition->id]);
         }
 
         // Delete Requisition
@@ -557,8 +556,214 @@ class PurchasesController extends Controller
         $departments = Attribute::where('type', 3)->get(['id', 'name']);
         $requisition = PurchaseRequisition::with('items')->findOrFail($id);
 
-        return view(adminTheme().'purchases.requisitions.edit', compact('requisition', 'departments', 'requisition'));
+        return view(adminTheme().'purchases.requisitions.edit', compact('requisition', 'departments',));
     }
+
+
+
+
+    public function suppliers(Request $r){
+         //Filter Actions Start
+        if($r->action){
+        if($r->checkid){
+        $datas=User::where('supplier',true)->whereIn('status',[0,1])
+                ->whereIn('id',$r->checkid)->get();
+  
+        foreach($datas as $data){
+  
+            if($r->action==1){
+              $data->status=1;
+              $data->save();
+            }elseif($r->action==2){
+              $data->status=0;
+              $data->save();
+            }elseif($r->action==5){
+              
+              $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
+              foreach ($userFiles as $media) {
+                  if(File::exists($media->file_url)){
+                        File::delete($media->file_url);
+                    }
+                  $media->delete();
+              }
+              $data->delete();
+  
+            }
+  
+        }
+  
+        Session()->flash('success','Action Successfully Completed!');
+  
+        }else{
+          Session()->flash('info','Please Need To Select Minimum One Post');
+        }
+  
+        return redirect()->back();
+      }
+  
+      //Filter Action End
+  
+      $users =User::latest()->where('supplier',true)->whereIn('status',[0,1])
+      ->where(function($q) use($r) {
+          if($r->search){
+              $q->where('name','LIKE','%'.$r->search.'%');
+              $q->orWhere('email','LIKE','%'.$r->search.'%');
+              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
+          }
+          if($r->status){
+            $q->where('status',$r->status=='inactive'?0:1);
+          }
+          if($r->startDate || $r->endDate)
+          {
+              if($r->startDate){
+                  $from =$r->startDate;
+              }else{
+                  $from=Carbon::now()->format('Y-m-d');
+              }
+  
+              if($r->endDate){
+                  $to =$r->endDate;
+              }else{
+                  $to=Carbon::now()->format('Y-m-d');
+              }
+  
+              $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+          }
+  
+      })
+      ->select(['id','name','email','mobile','created_at','company_name','address_line1','addedby_id','status'])
+        ->paginate(25)->appends([
+          'search'=>$r->search,
+          'status'=>$r->status,
+          'startDate'=>$r->startDate,
+          'endDate'=>$r->endDate,
+        ]);
+
+      //Total Count Results
+      $total = DB::table('users')->whereIn('status',[0,1])->where('supplier',true)
+      ->selectRaw('count(*) as total')
+      ->selectRaw("count(case when status = 1 then 1 end) as active")
+      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+      ->first();
+
+      return view(adminTheme().'suppliers.users',compact('users','total'));
+    }
+
+    public function suppliersAction(Request $r,$action,$id=null){
+     
+   //Add New User Start
+      if($action=='create' && $r->isMethod('post')){
+        $check = $r->validate([
+          'name' => 'required|max:100',
+          'company_name' => 'nullable|max:100',
+          'email_mobile' => 'required|max:100',
+          'address' => 'nullable|max:500',
+        ]);
+
+        $user =User::where('email',$r->email_mobile)->orWhere('mobile',$r->email_mobile)->first();
+        if($user){
+          $user->supplier=true;
+          $user->save();
+          Session()->flash('success','User Already Register! Now you are Supplier.');
+        }else{
+          $password=Str::random(8);
+          $user =new User();
+          $user->name =$r->name;
+          if(filter_var($r->email_mobile, FILTER_VALIDATE_EMAIL)){
+            $user->email =$r->email_mobile;
+          }else{
+            $user->mobile =$r->email_mobile;
+          }
+          $user->company_name=$r->company_name;
+          $user->address_line1=$r->address;
+          $user->password_show=$password;
+          $user->password=Hash::make($password);
+          $user->supplier=true;
+          $user->save();
+
+          Session()->flash('success','Supplier Are Successfully Register Done!');
+        }
+        
+        
+        return redirect()->route('admin.suppliersAction',['view',$user->id]);
+      }
+      //Add New User End
+      
+      
+      $user=User::where('supplier',true)->whereIn('status',[0,1])->find($id);
+      if(!$user){
+        Session()->flash('error','This Supplier Are Not Found');
+        return redirect()->route('admin.suppliers');
+      }
+      
+      if($action=='view'){
+        $orders =$user->orders()->whereIn('order_type',['purchase_order'])
+                ->paginate(10);
+        return view(adminTheme().'suppliers.viewUser',compact('user','orders'));   
+      }
+  
+      //Update User Profile Start
+      if($action=='update' && $r->isMethod('post')){
+
+          $check = $r->validate([
+                'name' => 'required|max:100',
+                'email' => 'nullable|max:100|unique:users,email,'.$user->id,
+                'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
+                'address' => 'nullable|max:200',
+                'company_name' => 'nullable|max:200',
+                'created_at' => 'nullable|date|max:50',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+          $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+          if (!$createDate->isSameDay($user->created_at)) {
+              $user->created_at = $createDate;
+          }
+       
+          $user->name =$r->name;
+          $user->mobile =$r->mobile;
+          $user->email =$r->email;
+          $user->company_name =$r->company_name;
+          $user->address_line1 =$r->address;
+          ///////Image UploadStart////////////
+          if($r->hasFile('image')){
+            $file =$r->image;
+            $src  =$user->id;
+            $srcType  =6;
+            $fileUse  =1;
+            $author =Auth::id();
+            uploadFile($file,$src,$srcType,$fileUse,$author);
+          }
+          ///////Image Upload End////////////
+          $user->status=$r->status?true:false;
+          $user->save();
+    
+          Session()->flash('success','Your Updated Are Successfully Done!');
+          return redirect()->back();
+  
+        }
+        //Update User Profile End
+  
+        //Delete User Start
+        if($action=='delete'){
+  
+          $userFiles =Media::latest()->where('src_type',6)->where('src_id',$user->id)->get();
+          foreach ($userFiles as $media) {
+              if(File::exists($media->file_url)){
+                    File::delete($media->file_url);
+                }
+              $media->delete();
+          }
+          $user->delete();
+          Session()->flash('success','User Are Deleted Successfully Deleted!');
+          return redirect()->back();
+        }
+        //Delete User End
+        
+      return view(adminTheme().'suppliers.editUser',compact('user'));
+
+  }
+
 
 
 }

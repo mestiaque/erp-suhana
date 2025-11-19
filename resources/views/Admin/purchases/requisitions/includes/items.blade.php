@@ -42,16 +42,17 @@
                           data-name="product_name"
                           data-url="{{route('admin.purchasesRequisitionsAction',['update-item',$requisition->id,'item_id'=>$item->id])}}"
                           style="height:31px;"
-                          placeholder="Product name">{{ $item->product_name }}</textarea>
+                          placeholder="Product name">{{ $item->material_name }}</textarea>
             </td>
 
             <td class="p-1">
                 <input type="number" step="any"
                        class="form-control form-control-sm updateItem qty qty_{{$item->id}}"
+                       placeholder="Qty"
                        data-id="{{$item->id}}"
                        data-name="qty"
                        data-url="{{route('admin.purchasesRequisitionsAction',['update-item',$requisition->id,'item_id'=>$item->id])}}"
-                       value="{{$item->qty}}">
+                       value="{{$item->qty > 0?$item->qty:'' }}">
             </td>
 
             <td class="p-1">
@@ -59,12 +60,12 @@
                         data-name="unit"
                         data-url="{{route('admin.purchasesRequisitionsAction',['update-item',$requisition->id,'item_id'=>$item->id])}}">
                     <option value="">Select</option>
-                    {{-- @foreach(App\Models\PostExtra::where('type',1)->get(['name']) as $unit)
+                    @foreach(App\Models\Attribute::where('type',6)->get(['name']) as $unit)
                         <option value="{{$unit->name}}"
                                 {{$unit->name==$item->unit?'selected':''}}>
                             {{$unit->name}}
                         </option>
-                    @endforeach --}}
+                    @endforeach
                 </select>
             </td>
 

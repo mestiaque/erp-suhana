@@ -181,7 +181,7 @@ class User extends Authenticatable
                return $this->imageFile->file_url;
             }
         }else{
-            return 'public/medies/profile.png';
+            return 'medies/profile.png';
         }
     }
 
@@ -204,7 +204,7 @@ class User extends Authenticatable
         if($this->bannerFile){
             return $this->bannerFile->file_url;
         }else{
-            return 'public/app-assets/images/carousel/22.jpg';
+            return 'app-assets/images/carousel/22.jpg';
         }
     }
 
@@ -242,7 +242,7 @@ class User extends Authenticatable
     public function user(){
         return $this->belongsTo(User::class,'id');
     }
-
+   
     public function fullAddress(){
 
         $addr =$this->address_line1;
@@ -274,6 +274,15 @@ class User extends Authenticatable
 
     public function lastLocation(){
     	return $this->hasOne(UserLocation::class,'user_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class)->orderBy('id','desc');
+    }
+    public function duePurchaseAmount()
+    {
+        return $this->hasMany(Order::class)->where('order_type','purchase_order')->where('order_status','delivered')->where('due_amount','>',0)->sum('due_amount');
     }
 
         // User model

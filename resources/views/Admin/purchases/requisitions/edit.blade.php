@@ -44,33 +44,45 @@
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-            <form action="{{ route('admin.purchasesRequisitionsAction', ['create']) }}" method="POST">
+            <form action="{{ route('admin.purchasesRequisitionsAction', ['update',$requisition->id]) }}" method="POST">
                 @csrf
 
                 <div class="row">
                     <div class="col-md-4">
-                        <label>Department</label>
+                        <label>Department*</label>
                         <select class="form-control select2" name="department_id" required>
                             <option value="">Select Department</option>
                             @foreach($departments as $dep)
-                                <option value="{{ $dep->id }}">{{ $dep->name }}</option>
+                                <option value="{{ $dep->id }}" {{ old('department_id', $requisition->department_id) == $dep->id ? 'selected' : '' }}>{{ $dep->name }}</option>
                             @endforeach
                         </select>
+                        @if ($errors->has('department_id'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('department_id') }}</p>
+                        @endif
                     </div>
 
                     <div class="col-md-4">
-                        <label>Requision Date</label>
-                        <input type="date" class="form-control" name="requision_date" required>
+                        <label>Requision Date*</label>
+                        <input type="date" class="form-control" name="created_at" value="{{$requisition->created_at->format('Y-m-d')}}" required>
+                        @if ($errors->has('created_at'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('created_at') }}</p>
+                        @endif
                     </div>
 
                     <div class="col-md-4">
-                        <label>Expected Receive Date</label>
-                        <input type="date" class="form-control" name="expected_date" required>
+                        <label>Expected Receive Date*</label>
+                        <input type="date" class="form-control" name="expected_date" value="{{$requisition->expected_date?Carbon\Carbon::parse($requisition->expected_date)->format('Y-m-d'):old('expected_date')}}" required>
+                        @if ($errors->has('expected_date'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('expected_date') }}</p>
+                        @endif
                     </div>
 
                     <div class="col-md-12 mt-3">
                         <label>Notes</label>
                         <textarea class="form-control" name="note" rows="3"></textarea>
+                        @if ($errors->has('note'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('note') }}</p>
+                        @endif
                     </div>
                 </div>
 
@@ -131,11 +143,11 @@ $(document).ready(function(){
         $.ajax({
             url: url,
             type: 'POST',
-            data: {'name': name, 'data': value, '_token': $('meta[name="csrf-token"]').attr('content')},
+            data: {'name': name, 'data': value},
             dataType: 'json',
             success: function(res){
                 if(res.view){
-                    $('.cardItems').html(res.view);
+                    // $('.cardItems').html(res.view);
                     updateTotalSummary();
                 }
             },
