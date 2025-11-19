@@ -15,7 +15,9 @@ class PurchaseReceive extends Model
         'purchase_id',
         'purchase_no',
         'challan_no',
+        'branch_id',
         'purchase_receive_no',
+        'supplier_id',
         'note',
         'status',
         'addedby_id',
@@ -39,5 +41,11 @@ class PurchaseReceive extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'addedby_id');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Attribute::class, 'branch_id')
+                    ->where('type', 0);
     }
 }

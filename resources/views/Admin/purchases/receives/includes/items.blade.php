@@ -13,13 +13,13 @@
                 <tr>
                     <td>{{ $i+1 }}</td>
                     <td>{{ $item->material_name ?? 'N/A' }}</td>
-                    <td>{{ $item->qty ?? 0 }}</td>
+                    <td>{{ $item->orderItem?->qty ?? 0 }}</td>
                     <td>
-                        <input type="number" step="any" class="form-control form-control-sm updateItemQty"
+                        <input type="number" step="any" min="0" max="{{ $item->orderItem?->qty ?? 0 }}" class="form-control form-control-sm updateItemQty"
                                data-item="{{ $item->id }}"
                                value="{{ $item->received_qty ?? '' }}">
                     </td>
-                    <td>{{ $item->unit ?? '' }}</td>
+                    <td>{{ $item->orderItem?->unit ?? '--' }}</td>
                 </tr>
             @endforeach
         @else

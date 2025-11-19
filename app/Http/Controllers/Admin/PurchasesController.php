@@ -1008,6 +1008,7 @@ class PurchasesController extends Controller
     public function purchasesReceived(Request $r)
     {
         $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
+        $branches = Attribute::where('type', 0)->get(['id','name']);
         if ($r->action && $r->checkid) {
             $receives = PurchaseReceive::whereIn('id', $r->checkid)->get();
             foreach ($receives as $data) {
@@ -1057,7 +1058,7 @@ class PurchasesController extends Controller
             ->selectRaw("count(case when status='trash' then 1 end) as trash")
             ->first();
 
-        return view(adminTheme().'purchases.receives.index', compact('receives','totals', 'purchases'));
+        return view(adminTheme().'purchases.receives.index', compact('receives','totals', 'purchases', 'branches'));
     }
 
     // ================================
@@ -1081,7 +1082,6 @@ class PurchasesController extends Controller
                                     ->where('addedby_id', Auth::id())
                                     ->where('status', 'temp')
                                     ->first();
-            // dd()
             if ($exist) {
                 return response()->json([
                     'success' => true,
@@ -1091,6 +1091,7 @@ class PurchasesController extends Controller
             // Create Receive
             $receive = PurchaseReceive::create([
                 'purchase_id'         => $purchase->id,
+                'branch_id'           => $r->branch_id,
                 'purchase_no'         => $purchase->order_no,
                 'challan_no'          => null,
                 'purchase_receive_no' => 'PR'.now()->format('Ymd').$purchase->id,
@@ -1104,6 +1105,8 @@ class PurchasesController extends Controller
                     'purchase_receive_id' => $receive->id,
                     'purchase_id'         => $purchase->id,
                     'purchase_item_id'    => $item->id,
+                    'material_id'    => $item->material_id,
+                    'material_name'  => $item->material_name,
                     'received_qty'        => 0
                 ]);
             }
@@ -1133,7 +1136,7 @@ class PurchasesController extends Controller
         // EDIT RECEIVE
         // -----------------------
         if ($action == 'edit') {
-            $receive = PurchaseReceive::with('items.purchaseItem.product')->findOrFail($id);
+            $receive = PurchaseReceive::with('items.orderItem.product')->findOrFail($id);
             return view(adminTheme().'purchases.receives.edit', compact('receive'));
         }
 
@@ -1153,11 +1156,22 @@ class PurchasesController extends Controller
             if ($action == 'update-item') {
                 $item = PurchaseReceiveItem::find($r->item_id);
                 if ($item) {
-                    $item->purchase_item_id = $r->purchase_item_id ?? null;
-                    $item->received_qty = $r->received_qty ?? 0;
+                    // Fetch corresponding purchase order item
+                    $orderItem = PurchaseOrderItem::find($item->purchase_item_id);
+
+                    $receivedQty = floatval($r->received_qty ?? 0);
+                    $maxQty = $orderItem ? floatval($orderItem->qty) : 0;
+
+                    // Prevent received qty > order qty
+                    if ($receivedQty > $maxQty) {
+                        $receivedQty = $maxQty;
+                    }
+
+                    $item->received_qty = $receivedQty;
                     $item->save();
                 }
             }
+
 
             if ($action == 'remove-item') {
                 PurchaseReceiveItem::where('id',$r->item_id)->delete();
@@ -1173,13 +1187,12 @@ class PurchasesController extends Controller
         if ($action == 'update') {
             $receive = PurchaseReceive::findOrFail($id);
             $r->validate([
-                'status'=>'nullable|max:20',
-                'created_at'=>'required|date',
-                'note'=>'nullable',
+                'challan_no' => 'required',
             ]);
 
-            $receive->status = $r->status ?: $receive->status;
+            $receive->status = "pending";
             $receive->note = $r->note;
+            $receive->challan_no = $r->challan_no;
             $receive->created_at = $r->created_at ?: now();
             $receive->save();
 
@@ -1196,6 +1209,11 @@ class PurchasesController extends Controller
             $receive->delete();
             session()->flash('success','Purchase Receive Deleted');
             return redirect()->back();
+        }
+
+        if ($action == 'view') {
+            $receive = PurchaseReceive::with('items.orderItem.product')->findOrFail($id);
+            return view(adminTheme().'purchases.receives.view', compact('receive'));
         }
     }
 

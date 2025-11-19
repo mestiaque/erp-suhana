@@ -94,6 +94,25 @@ $(document).ready(function(){
         });
     });
 
+    $(document).on('keyup change', '.update-challan', function(){
+        let item_id = $(this).data('item');
+        let value = $(this).val();
+
+        $.ajax({
+            url: "{{ route('admin.purchasesReceivedAction',['update',$receive->id]) }}",
+            type: "POST",
+            data: {_token:"{{ csrf_token() }}", item_id:item_id, received_qty:value},
+            success: function(res){
+                if(res.view){
+                    $('.cardItems').html(res.view);
+                }
+            },
+            error: function(){
+                alert('Error updating received quantity.');
+            }
+        });
+    });
+
 });
 </script>
 @endpush

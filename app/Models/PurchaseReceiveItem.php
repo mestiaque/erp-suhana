@@ -16,6 +16,8 @@ class PurchaseReceiveItem extends Model
         'purchase_id',
         'purchase_item_id',
         'received_qty',
+        'material_id',
+        'material_name',
         'note',
         'created_at',
         'updated_at',
