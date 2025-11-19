@@ -90,6 +90,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
 
     Route::get('/purchases-damage-returns',[PurchasesController::class,'purchasesDamageReturn'])->name('purchasesDamageReturn');
     Route::any('/purchases-damage-returns/{action}/{id?}',[PurchasesController::class,'purchasesDamageReturnAction'])->name('purchasesDamageReturnAction');
+
+    Route::get('/bill-payments',[PurchasesController::class,'billPayment'])->name('billPayment');
+    Route::any('/bill-payments/{action}/{id?}',[PurchasesController::class,'billPaymentAction'])->name('billPaymentAction');
+    
+    Route::get('/bill-collections',[PurchasesController::class,'billCollection'])->name('billCollection');
+    Route::any('/bill-collections/{action}/{id?}',[PurchasesController::class,'billCollectionAction'])->name('billCollectionAction');
     // Purchases Module Route
 
     //Accounts Management
