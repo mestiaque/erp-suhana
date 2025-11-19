@@ -366,11 +366,24 @@ class PurchasesController extends Controller
     }
 
 
-
-
     public function purchasesStocks(Request $r){
 
-        return view(adminTheme().'purchases-items.purchasesStocks');
+
+        $goodsItems =Post::latest()->where('type',3)->where('status','active')
+                        ->where(function($q) use ($r) {
+
+                          if($r->category_id){
+                              $q->where('category_id',$r->category_id);
+                          }
+                      })
+                      ->select(['id','name','slug','type','description','category_id','unit_id','created_at','addedby_id','status','fetured'])
+                      ->paginate(25)->appends([
+                        'category_id'=>$r->category_id,
+                      ]);
+
+        $categories =Attribute::where('type',7)->where('status','active')->select(['id','name'])->get();
+        $branches =Attribute::where('type',0)->where('status','active')->select(['id','name'])->get();
+        return view(adminTheme().'purchases-items.purchasesStocks',compact('categories','goodsItems','branches'));
     }
 
 
@@ -655,7 +668,7 @@ class PurchasesController extends Controller
 
     public function suppliersAction(Request $r,$action,$id=null){
 
-        //Add New User Start
+      //Add New User Start
       if($action=='create' && $r->isMethod('post')){
         $check = $r->validate([
           'name' => 'required|max:100',
@@ -883,17 +896,32 @@ class PurchasesController extends Controller
         }
 
         // SEARCH MATERIAL
-        if ($action == 'search-material') {
-            $materials = Post::where('type', 3)->where('status', 'active')
+        if ($action == 'search-item') {
+            $goods = Post::where('type', 3)->where('status', 'active')
                 ->when($r->search, fn($q) => $q->where('name', 'like', '%' . $r->search . '%'))
-                ->limit(10)->get();
+                ->limit(20)->get();
 
-            $search = view(adminTheme().'purchases.orders.includes.searchMaterials', compact('materials', 'order'))->render();
+            $search = view(adminTheme().'purchases.orders.includes.searchGoods', compact('goods', 'order'))->render();
             return response()->json(['success' => true, 'view' => $search]);
         }
 
         // ITEM CRUD
-        if (in_array($action, ['add-item', 'update-item', 'remove-item'])) {
+        if (in_array($action, ['add-material','add-item', 'update-item', 'remove-item'])) {
+
+            if ($action == 'add-material') {
+                $item =$order->items()->where('material_id',$r->item_id)->first();
+                if(!$item){
+                  $item = new PurchaseOrderItem();
+                  $item->order_id = $order->id;
+                  $item->material_id = $r->item_id?: null;
+                }
+                $item->material_name = $item->material?$item->material->name: null;
+                if($item->material){
+                  $item->unit = $item->material->unit?$item->material->unit->name: null;
+                }
+                $item->addedby_id = Auth::id();
+                $item->save();
+            }
 
             if ($action == 'add-item') {
                 $item = new PurchaseOrderItem();
@@ -905,12 +933,28 @@ class PurchasesController extends Controller
             if ($action == 'update-item') {
                 $item = PurchaseOrderItem::find($r->item_id);
                 if ($item) {
-                    $item->material_id = $r->material_id ?: null;
-                    $item->material_name = $r->material_name ?: null;
-                    $item->qty = $r->qty ?: 0;
-                    $item->unit = $r->unit ?: null;
-                    $item->price = $r->price ?: 0;
+                    if($r->name == 'material_name')
+                    {
+                      $item->material_name = $r->data ?: null;
+                    }
+                    if($r->name == 'qty')
+                    {
+                      $item->qty = $r->data ?: 0;
+                    }
+                    if($r->name == 'unit')
+                    {
+                      $item->unit = $r->data ?: null;
+                    }
+                    if($r->name == 'price')
+                    {
+                      $item->price = $r->data ?: 0;
+                    }
+                    $item->total_price = $item->qty * $item->price;
                     $item->save();
+
+                    $order->grand_total = $order->items()->sum('total_price');
+                    $order->total_qty = $order->items()->sum('qty');
+                    $order->save();
                 }
             }
 
@@ -918,21 +962,22 @@ class PurchasesController extends Controller
                 PurchaseOrderItem::where('id', $r->item_id)->delete();
             }
 
-            $order->save();
-
-            $view = view(adminTheme().'purchases.orders.includes.items', compact('order'))->render();
+            $goods = Post::where('type', 3)->where('status', 'active')->limit(20)->get(['id', 'name','unit_id']);
+            $view = view(adminTheme().'purchases.orders.includes.items', compact('goods','order'))->render();
             return response()->json(['success' => true, 'view' => $view]);
         }
 
         // UPDATE ORDER
         if ($action == 'update') {
             $r->validate([
+                'supplier_id' => 'nullable|numeric',
                 'status' => 'nullable|max:20',
                 'created_at' => 'required|date',
                 'note' => 'nullable',
             ]);
 
-            $order->status = $r->status ?: $order->status;
+            $order->supplier_id = $r->supplier_id;
+            $order->status = 'pending';
             $order->note = $r->note;
             $order->created_at = $r->created_at ?: now();
             $order->save();
@@ -950,11 +995,10 @@ class PurchasesController extends Controller
         }
 
         // LOAD EDIT PAGE
-        $departments = Attribute::where('type', 3)->get(['id', 'name']);
-        $order = PurchaseOrder::with('items')->findOrFail($id);
-        $suppliers = User::where('supplier', 1)->get(['id', 'name']);
 
-        return view(adminTheme().'purchases.orders.edit', compact('order', 'departments', 'suppliers'));
+        $suppliers = User::where('supplier', 1)->get(['id', 'name','company_name']);
+        $goods = Post::where('type', 3)->where('status', 'active')->limit(20)->get(['id', 'name','unit_id']);
+        return view(adminTheme().'purchases.orders.edit', compact('order','suppliers','goods'));
     }
 
 

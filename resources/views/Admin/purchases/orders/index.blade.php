@@ -79,7 +79,7 @@
                             <tr>
                                 <th style="min-width: 50px;">SL</th>
                                 <th style="min-width: 150px;">Order No</th>
-                                <th style="min-width: 150px;">Company</th>
+                                <th style="min-width: 150px;">Supplier</th>
                                 <th style="min-width: 200px;">Created By</th>
                                 <th style="min-width: 150px;">Items</th>
                                 <th style="min-width: 100px;">Status</th>
@@ -94,7 +94,7 @@
                                 <td>
                                     <a href="{{ route('admin.purchasesOrdersAction',['view',$order->id]) }}" target="_blank">{{ $order->order_no }}</a>
                                 </td>
-                                <td>{{ $order->company?->factory_name ?? '--' }}</td>
+                                <td>{{ $order->supplier?$order->supplier->company_name : '--' }}</td>
                                 <td>{{ $order->user?->name }}</td>
                                 <td>{{ $order->items()->count() }} Items</td>
                                 <td>

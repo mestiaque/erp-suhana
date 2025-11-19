@@ -70,12 +70,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
 
     // Purchases Module Route
 
-    Route::get('/purchases-items-unit',[PurchasesController::class,'purchasesItemsUnits'])->name('purchasesItemsUnits');
-    Route::get('/purchases-items-unit/{action}/{id?}',[PurchasesController::class,'purchasesItemsUnitsAction'])->name('purchasesItemsUnitsAction');
-
-    Route::get('/purchases-items-category',[PurchasesController::class,'purchasesItemsCatgory'])->name('purchasesItemsCatgory');
-    Route::any('/purchases-items-category/{action}/{id?}',[PurchasesController::class,'purchasesItemsCatgoryAction'])->name('purchasesItemsCatgoryAction');
-
     Route::get('/purchases-stocks',[PurchasesController::class,'purchasesStocks'])->name('purchasesStocks');
     Route::get('/purchases-items',[PurchasesController::class,'purchasesItems'])->name('purchasesItems');
     Route::any('/purchases-items/{action}/{id?}',[PurchasesController::class,'purchasesItemsAction'])->name('purchasesItemsAction');

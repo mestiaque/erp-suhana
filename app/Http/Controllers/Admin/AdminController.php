@@ -3720,246 +3720,6 @@ class AdminController extends Controller
         return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to'));
     }
 
-
-    public function supplierTrading(Request $r){
-
-        // Filter Action Start
-        if($r->action){
-            if($r->checkid){
-                $datas=SupplierTrading::latest()->whereIn('id',$r->checkid)->get();
-                foreach($datas as $data){
-
-                    if($r->action==5){
-
-                        if($data->type==2){
-                            if($method = $data->method){
-                                $method->amount +=$data->amount;
-                                $method->save();
-                            }
-                            if($trans = $data->payBill){
-                                $trans->delete();
-                            }
-
-                            if($supplier = $data->supplier){
-                                $supplier->amount-=$data->amount;
-                                $supplier->save();
-                            }
-                        }else{
-                            if($supplier = $data->supplier){
-                                $supplier->amount+=$data->amount;
-                                $supplier->save();
-                            }
-                        }
-
-                        $medias =Media::latest()->where('src_type',10)->where('src_id',$data->id)->get();
-                        foreach($medias as $media){
-                            if(File::exists($media->file_url)){
-                              File::delete($media->file_url);
-                            }
-                            $media->delete();
-                        }
-
-                        $data->delete();
-                    }
-                }
-            Session()->flash('success','Action Successfully Completed!');
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-        return redirect()->back();
-      }
-
-
-        $traddings =SupplierTrading::latest()->where('status','<>','temp')
-                    ->where(function($q) use ($r) {
-                        if($r->search){
-                            $q->where('title','LIKE','%'.$r->search.'%');
-                        }
-                        if($r->supplier){
-                            $q->where('src_id',$r->supplier);
-                        }
-                        if($r->startDate || $r->endDate)
-                        {
-                            if($r->startDate){
-                                $from =$r->startDate;
-                            }else{
-                                $from=Carbon::now()->format('Y-m-d');
-                            }
-                            if($r->endDate){
-                                $to =$r->endDate;
-                            }else{
-                                $to=Carbon::now()->format('Y-m-d');
-                            }
-                            $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-                        }
-                    })
-                    ->paginate(10);
-        $suppliers =Attribute::latest()->where('type',0)->select(['id','name','amount'])->get();
-        return view(adminTheme().'suppliers.tradingAll',compact('traddings','suppliers'));
-    }
-
-
-    public function supplierTradingAction(Request $r,$action,$id=null){
-        if($action=='search-supplier'){
-
-            $suppliers =Attribute::latest()->where('type',0)->where('name','like','%'.$r->search.'%')->limit(10)->select(['id','name','amount'])->get();
-
-            $search =view(adminTheme().'suppliers.includes.searchSupplier',compact('suppliers'))->render();
-
-            return Response()->json([
-                'success' => true,
-                'view' => $search,
-            ]);
-        }
-
-        if($action=='add-goods'){
-
-            $trading =SupplierTrading::where('type',1)->where('status','temp')->where('addedby_id',Auth::id())->first();
-            if(!$trading){
-                $trading =new SupplierTrading();
-                $trading->status='temp';
-                $trading->type=1;
-                $trading->addedby_id=Auth::id();
-            }
-            $trading->src_id=$id;
-            $trading->created_at=Carbon::now();
-            $trading->save();
-
-            return redirect()->route('admin.supplierTradingAction',['edit',$trading->id]);
-        }
-
-        if($action=='add-paybill'){
-            $trading =SupplierTrading::where('type',2)->where('status','temp')->where('addedby_id',Auth::id())->first();
-            if(!$trading){
-                $trading =new SupplierTrading();
-                $trading->src_id=$id;
-                $trading->status='temp';
-                $trading->type=2;
-                $trading->addedby_id=Auth::id();
-            }
-            $trading->created_at=Carbon::now();
-            $trading->save();
-
-            return redirect()->route('admin.supplierTradingAction',['edit',$trading->id]);
-        }
-
-        $trading =SupplierTrading::find($id);
-        if(!$trading){
-            Session()->flash('error','Supplier Trading Are Not found');
-          return redirect()->back();
-        }
-
-        if($action=='update'){
-
-            $check = $r->validate([
-                'title' => 'required|max:100',
-                'amount' => 'nullable|numeric',
-                'created_at' => 'required|date',
-                'attachment' => 'nullable||file|max:25600',
-            ]);
-
-            if($trading->status=='temp'){
-                $check = $r->validate([
-                    'amount' => 'required|numeric',
-                ]);
-
-                if($trading->type==2){
-                    $check = $r->validate([
-                        'account' => 'required|numeric',
-                    ]);
-
-                    $method =Attribute::where('type',10)->where('status','active')->find($r->account);
-                    if(!$method){
-                        Session()->flash('error','Account method Are Not found');
-                        return redirect()->back();
-                    }
-                    if($r->amount > $method->amount){
-                        Session()->flash('error','Account Balance Are Not Available');
-                        return redirect()->back();
-                    }
-
-
-                }
-
-
-
-            }
-
-            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
-
-            $title =$r->title;
-            $hasTitle =ReffMember::where('name',$title)->first();
-            if(!$hasTitle){
-               $hasTitle = $this->ReffNewMember($title);
-            }
-
-            $trading->title=$title;
-            $trading->member_id=$hasTitle?$hasTitle->id:null;
-            $trading->description=$r->description;
-            if($trading->status=='temp'){
-                $trading->amount=$r->amount;
-                if($trading->type==2){
-                    $trading->method_id=$method->id;
-                    if($supplier = $trading->supplier){
-                        $supplier->amount+=$trading->amount;
-                        $supplier->save();
-                    }
-                    $method->amount -=$trading->amount;
-                    $method->save();
-
-                    $transection =new Transaction();
-                    $transection->type=3;
-                    $transection->src_id=$trading->id;
-                    $transection->payment_method_id=$trading->method_id;
-                    $transection->amount=$trading->amount;
-                    $transection->status ='success';
-                    $transection->addedby_id =Auth::id();
-                    $transection->created_at =Carbon::now();
-                    $transection->balance =$method->amount;
-                    $transection->created_at =$trading->created_at;
-                    $transection->save();
-
-                }else{
-
-                    if($supplier = $trading->supplier){
-                        $supplier->amount-=$trading->amount;
-                        $supplier->save();
-                    }
-                }
-                $trading->balance=$supplier->amount;
-            }
-
-            $trading->status ='active';
-            if (!$createDate->isSameDay($trading->created_at)) {
-                $trading->created_at = $createDate;
-                if($trans =$trading->payBill){
-                   $trans->created_at =$trading->created_at;
-                   $trans->save();
-                }
-            }
-            $trading->save();
-
-            ///////Image Upload End////////////
-            if($r->hasFile('attachment')){
-              $file =$r->attachment;
-              $src  =$trading->id;
-              $srcType  =10;
-              $fileUse  =1;
-              uploadFile($file,$src,$srcType,$fileUse);
-            }
-            ///////Image Upload End////////////
-
-            Session()->flash('success','Your Are Successfully Done');
-            return redirect()->route('admin.supplierTrading');
-
-
-        }
-
-        $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
-        return view(adminTheme().'suppliers.tradingEdit',compact('trading','accountMethods'));
-
-    }
-
     // Services Management Function
     public function balanceTransfers(Request $r){
         // Filter Action Start
@@ -5944,7 +5704,7 @@ class AdminController extends Controller
 
       //Filter Action End
 
-      $departments=Attribute::latest()->where('type',3)->where('status','<>','temp')
+      $branchs=Attribute::latest()->where('type',0)->where('status','<>','temp')
         ->where(function($q) use ($r) {
 
           if($r->search){
@@ -5963,14 +5723,14 @@ class AdminController extends Controller
       ]);
 
       //Total Count Results
-      $totals = DB::table('attributes')
-      ->where('type',3)
+      $total = DB::table('attributes')->where('status','<>','temp')
+      ->where('type',0)
       ->selectRaw('count(*) as total')
       ->selectRaw("count(case when status = 'active' then 1 end) as active")
       ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
       ->first();
 
-      return view(adminTheme().'departments.departmentsAll',compact('departments','totals'));
+      return view(adminTheme().'branchs.branchAll',compact('branchs','total'));
 
     }
 
@@ -5980,31 +5740,31 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'name' => 'required|max:100',
-            'description' => 'nullable|max:1000',
+            'address' => 'nullable|max:500',
         ]);
 
-        $department =Attribute::where('type',3)->where('status','temp')->where('addedby_id',Auth::id())->first();
-        if(!$department){
-          $department =new Attribute();
+        $store =Attribute::where('type',0)->where('status','temp')->where('addedby_id',Auth::id())->first();
+        if(!$store){
+          $store =new Attribute();
         }
-        $department->name=$r->name;
-        $department->description=$r->description;
-        $department->type =3;
-        $department->status ='active';
-        $department->addedby_id =Auth::id();
-        $department->save();
+        $store->name=$r->name;
+        $store->description=$r->address;
+        $store->type =0;
+        $store->status ='active';
+        $store->addedby_id =Auth::id();
+        $store->save();
 
         $slug =Str::slug($r->name);
          if($slug==null){
-          $department->slug=$department->id;
+          $store->slug=$store->id;
          }else{
-          if(Attribute::where('type',3)->where('slug',$slug)->whereNotIn('id',[$department->id])->count() >0){
-          $department->slug=$slug.'-'.$department->id;
+          if(Attribute::where('type',0)->where('slug',$slug)->whereNotIn('id',[$store->id])->count() >0){
+          $store->slug=$slug.'-'.$store->id;
           }else{
-          $department->slug=$slug;
+          $store->slug=$slug;
           }
         }
-        $department->save();
+        $store->save();
 
         Session()->flash('success','Your Are Successfully Added');
         return redirect()->back();
@@ -6014,42 +5774,36 @@ class AdminController extends Controller
       // Add Department Action End
 
 
-      $department =Attribute::where('type',3)->find($id);
-      if(!$department){
-        Session()->flash('error','This Department Are Not Found');
+      $store =Attribute::where('type',0)->find($id);
+      if(!$store){
+        Session()->flash('error','This Branch Are Not Found');
         return redirect()->route('admin.branchs');
       }
 
       //Check Authorized User
-      $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
-      if($allPer && $department->addedby_id!=Auth::id()){
-        Session()->flash('error','You are unauthorized Try!!');
-        return redirect()->route('admin.branchs');
-      }
+    //   $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
+    //   if($allPer && $store->addedby_id!=Auth::id()){
+    //     Session()->flash('error','You are unauthorized Try!!');
+    //     return redirect()->route('admin.branchs');
+    //   }
 
       // Update Department Action Start
       if($action=='update'){
 
         $check = $r->validate([
-            'name' => 'required|max:191',
-            'seo_title' => 'nullable|max:200',
-            'seo_desc' => 'nullable|max:250',
+            'name' => 'required|max:100',
+            'address' => 'nullable|max:500',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $department->name=$r->name;
-        $department->short_description=$r->short_description;
-        $department->description=$r->description;
-        $department->seo_title=$r->seo_title;
-        $department->short_description=$r->short_description;
-        $department->seo_keyword=$r->seo_keyword;
+        $store->name=$r->name;
+        $store->description=$r->description;
 
         ///////Image UploadStart////////////
 
         if($r->hasFile('image')){
           $file =$r->image;
-          $src  =$department->id;
+          $src  =$store->id;
           $srcType  =3;
           $fileUse  =1;
           $author=Auth::id();
@@ -6058,36 +5812,21 @@ class AdminController extends Controller
 
         ///////Image Upload End////////////
 
-        ///////Banner Upload End////////////
-
-        if($r->hasFile('banner')){
-
-          $file =$r->banner;
-          $src  =$department->id;
-          $srcType  =3;
-          $fileUse  =2;
-          $author=Auth::id();
-          uploadFile($file,$src,$srcType,$fileUse,$author);
-
-        }
-
-        ///////Banner Upload End////////////
-
         $slug =Str::slug($r->name);
          if($slug==null){
-          $department->slug=$department->id;
+          $store->slug=$store->id;
          }else{
-          if(Attribute::where('type',3)->where('slug',$slug)->whereNotIn('id',[$department->id])->count() >0){
-          $department->slug=$slug.'-'.$department->id;
+          if(Attribute::where('type',0)->where('slug',$slug)->whereNotIn('id',[$store->id])->count() >0){
+          $store->slug=$slug.'-'.$store->id;
           }else{
-          $department->slug=$slug;
+          $store->slug=$slug;
           }
         }
 
-        $department->status =$r->status?'active':'inactive';
-        $department->fetured =$r->fetured?1:0;
-        $department->editedby_id =Auth::id();
-        $department->save();
+        $store->status =$r->status?'active':'inactive';
+        $store->fetured =$r->fetured?1:0;
+        $store->editedby_id =Auth::id();
+        $store->save();
 
         Session()->flash('success','Your Are Successfully Updated');
         return redirect()->back();
@@ -6099,7 +5838,7 @@ class AdminController extends Controller
 
       // Delete Department Action Start
       if($action=='delete'){
-        $medias =Media::latest()->where('src_type',3)->where('src_id',$department->id)->get();
+        $medias =Media::latest()->where('src_type',3)->where('src_id',$store->id)->get();
         foreach($medias as $media){
           if(File::exists($media->file_url)){
             File::delete($media->file_url);
@@ -6107,7 +5846,7 @@ class AdminController extends Controller
           $media->delete();
         }
 
-        $department->delete();
+        $store->delete();
 
         Session()->flash('success','Your Are Successfully Deleted');
         return redirect()->route('admin.branchs');

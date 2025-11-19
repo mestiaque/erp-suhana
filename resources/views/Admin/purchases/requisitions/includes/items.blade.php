@@ -34,7 +34,7 @@
         @if($requisition->items->count() > 0)
         @foreach($requisition->items as $i => $item)
         <tr>
-            <td class="p-1" style="    vertical-align: bottom; text-align: center;">{{ $i+1 }}</td>
+            <td class="p-1" style="vertical-align: bottom; text-align: center;">{{ $i+1 }}</td>
 
             <td class="p-1">
                 <textarea type="text"
