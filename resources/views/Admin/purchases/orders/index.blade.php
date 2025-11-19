@@ -82,6 +82,8 @@
                                 <th style="min-width: 150px;">Supplier</th>
                                 <th style="min-width: 200px;">Created By</th>
                                 <th style="min-width: 150px;">Items</th>
+                                <th style="min-width: 150px;">Bill Amount</th>
+                                <th style="min-width: 150px;">Due Amount</th>
                                 <th style="min-width: 100px;">Status</th>
                                 <th style="min-width: 100px;">Date</th>
                                 <th style="min-width: 100px;">Action</th>
@@ -97,6 +99,8 @@
                                 <td>{{ $order->supplier?$order->supplier->company_name : '--' }}</td>
                                 <td>{{ $order->user?->name }}</td>
                                 <td>{{ $order->items()->count() }} Items</td>
+                                <td>{{ numberFormat($order->grand_total,3) }}</td>
+                                <td>{{ numberFormat($order->due_amount,3) }}</td>
                                 <td>
                                     @if($order->status=='temp')
                                         <span class="badge badge-secondary">Temp</span>

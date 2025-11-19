@@ -393,25 +393,7 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-    	   		<!-- <div class="form-group">
-    			    <label for="name">Title/Ref* </label>
-    			    <div class="searchRef">
-                        <div class="input-group">
-                            <input type="text" class="form-control {{$errors->has('title')?'error':''}}" data-url="{{route('admin.expensesAction','search-reff')}}" name="title" placeholder="Enter title" required="">
-                            <div class="refActionBtn">
-                                <span><i class="bx bx-search"></i></span>
-                            </div>
-                        </div>
-                        <div class="reffSearchResult">
-                            
-                           {{-- @include(adminTheme().'reffmembers.includes.reffSearchResult') --}}
-                            
-                        </div>
-    			    </div>
-    				@if ($errors->has('title'))
-    				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('title') }}</p>
-    				@endif
-             	</div> -->
+
              	
     			<div class="form-group">
     				<label for="name">Description</label>
@@ -503,32 +485,7 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-    	   		<!-- <div class="form-group">
-    			    <label for="title">Title/Ref* </label>
-    			    <div class="searchRef">
-                        <div class="input-group">
-                            <input type="text" class="form-control {{$errors->has('title')?'error':''}}" value="{{$dpm->name?:old('title')}}"
-                            
-                            name="title" placeholder="Enter title" required=""
-                            {{$dpm->name?'readonly':''}}
-                            >
-                            <div class="refActionBtn">
-                                @if($dpm->name)
-                                <span class="remove" style="background: #ff6a6a;color: white;"><i class="bx bx-x"></i></span>
-                                @else
-                                <span><i class="bx bx-search"></i></span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="reffSearchResult">
-                           @include(adminTheme().'reffmembers.includes.reffSearchResult')
-                        </div>
-    			    </div>
-                    <input type="text" class="form-control {{$errors->has('title')?'error':''}}" value="{{$dpm->name?:old('title')}}" name="title" placeholder="Enter Title/Ref" required="">
-    				@if ($errors->has('title'))
-    				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('title') }}</p>
-    				@endif
-             	</div> -->
+    	   		
     			 <div class="form-group">
     				<label for="name">Description</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>

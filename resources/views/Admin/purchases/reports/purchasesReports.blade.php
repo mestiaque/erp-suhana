@@ -37,7 +37,12 @@
                     </div>
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Search Requisition, Department" class="form-control" />
+                            <select name="supplier_id" class="form-control select2">
+                                <option value="">-- Select Supplier --</option>
+                                @foreach($suppliers as $supplier)
+                                <option value="{{$supplier->id}}" {{request()->supplier_id==$supplier->id?'selected':''}}>{{$supplier->name}} {{$supplier->company_name?'- '.$supplier->company_name:''}}</option>
+                                @endforeach
+                            </select>
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -77,9 +82,12 @@
                     <span>
                         <b>Invoice:</b><a href="{{ route('admin.purchasesOrdersAction',['view',$order->id]) }}" target="_blank">{{$order->order_no}}</a>
                         <b>Date:</b> {{$order->created_at?->format('d-m-Y')}}
-                        <b>Supplier:</b> {{$order->supplier->name}} {{$order->supplier->company_name?'- '.$order->supplier->company_name:''}}   
-
+                        <b>Supplier:</b>
+                        @if($order->supplier)
+                        {{$order->supplier->name}} {{$order->supplier->company_name?'- '.$order->supplier->company_name:''}}   
+                        @endif
                         <span style="float:right;">
+                            <b>Due Bill:</b> {{numberFormat($order->due_amount,3)}}
                             <b>Creaqted By:</b> {{$order->user?$order->user->name:'-'}}
                         </span>
                     </span>
