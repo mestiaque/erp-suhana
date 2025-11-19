@@ -294,7 +294,7 @@
 	 <form action="{{route('admin.purchasesItemsAction',['update',$dpm->id])}}" method="post">
 	   	  @csrf
     	   <div class="modal-header">
-    		 <h4 class="modal-title">Edit Designations</h4>
+    		 <h4 class="modal-title">Edit Item</h4>
     		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
     		   <span aria-hidden="true">&times; </span>
     		 </button>
@@ -366,7 +366,7 @@
     	   </div>
     	   <div class="modal-footer">
     		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Update Designations</button>
+    		 <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Update</button>
     	   </div>
 	   </form>
 	 </div>
