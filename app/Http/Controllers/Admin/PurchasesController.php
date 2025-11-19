@@ -1026,7 +1026,7 @@ class PurchasesController extends Controller
     public function purchasesReceived(Request $r)
     {
         $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
-        $branches = Attribute::where('type', 0)->get(['id','name']);
+        $branches = Attribute::where('type', 0)->where('status','active')->get(['id','name']);
         if ($r->action && $r->checkid) {
             $receives = PurchaseReceive::whereIn('id', $r->checkid)->get();
             foreach ($receives as $data) {

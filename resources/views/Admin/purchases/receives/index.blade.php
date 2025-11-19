@@ -10,15 +10,14 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3>Purchase Receive List</h3>
 
-                <div class="dropdown">
-
-                    <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#createReceiveModal" style="padding:5px 15px;">
-                        <i class="bx bx-plus"></i>Add Purchase Receive
+                <div class="dropdown d-flex">
+                    <a href="javascript:void(0)" class="btn-custom primary mr-1" style="padding:5px 15px;" data-toggle="modal" data-target="#createReceiveModal"  >
+                        <i class="fa fa-print"></i> Add Purchase Receive
                     </a>
-
                     <a href="{{route('admin.purchasesReceived')}}" class="btn-custom yellow">
                         <i class="bx bx-rotate-left"></i>
                     </a>
+
                 </div>
             </div>
 
@@ -125,7 +124,7 @@
 
                             @if($receives->count()==0)
                                 <tr>
-                                    <td colspan="8" style="text-align:center;color:#aaa;">No Record Found</td>
+                                    <td colspan="9" style="text-align:center;color:#aaa;">No Record Found</td>
                                 </tr>
                             @endif
 
