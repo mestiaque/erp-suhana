@@ -9940,6 +9940,10 @@ class AdminController extends Controller
         //Delete User End
         $roles =Permission::latest()->where('status','active')->get();
 
+        if($action == 'view'){
+            return view(adminTheme().'users.staff.viewUser',compact('user','roles', 'action'));
+        }
+
         return view(adminTheme().'users.staff.editUser',compact('user','roles'));
 
     }
@@ -10171,6 +10175,11 @@ class AdminController extends Controller
         }
         //Delete User End
         $roles =Permission::latest()->where('status','active')->get();
+
+
+        if($action == 'view'){
+            return view(adminTheme().'users.admins.viewUser',compact('user','roles', 'action'));
+        }
 
         return view(adminTheme().'users.admins.editUser',compact('user','roles'));
 

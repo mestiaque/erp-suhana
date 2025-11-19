@@ -367,7 +367,7 @@ class PurchasesController extends Controller
 
 
     public function purchasesStocks(Request $r){
-        
+
         return view(adminTheme().'purchases-items.purchasesStocks');
     }
 
@@ -570,9 +570,9 @@ class PurchasesController extends Controller
         if($r->checkid){
         $datas=User::where('supplier',true)->whereIn('status',[0,1])
                 ->whereIn('id',$r->checkid)->get();
-  
+
         foreach($datas as $data){
-  
+
             if($r->action==1){
               $data->status=1;
               $data->save();
@@ -580,7 +580,7 @@ class PurchasesController extends Controller
               $data->status=0;
               $data->save();
             }elseif($r->action==5){
-              
+
               $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
               foreach ($userFiles as $media) {
                   if(File::exists($media->file_url)){
@@ -589,22 +589,22 @@ class PurchasesController extends Controller
                   $media->delete();
               }
               $data->delete();
-  
+
             }
-  
+
         }
-  
+
         Session()->flash('success','Action Successfully Completed!');
-  
+
         }else{
           Session()->flash('info','Please Need To Select Minimum One Post');
         }
-  
+
         return redirect()->back();
       }
-  
+
       //Filter Action End
-  
+
       $users =User::latest()->where('supplier',true)->whereIn('status',[0,1])
       ->where(function($q) use($r) {
           if($r->search){
@@ -622,16 +622,16 @@ class PurchasesController extends Controller
               }else{
                   $from=Carbon::now()->format('Y-m-d');
               }
-  
+
               if($r->endDate){
                   $to =$r->endDate;
               }else{
                   $to=Carbon::now()->format('Y-m-d');
               }
-  
+
               $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
           }
-  
+
       })
       ->select(['id','name','email','mobile','created_at','company_name','address_line1','addedby_id','status'])
         ->paginate(25)->appends([
@@ -652,8 +652,8 @@ class PurchasesController extends Controller
     }
 
     public function suppliersAction(Request $r,$action,$id=null){
-     
-   //Add New User Start
+
+        //Add New User Start
       if($action=='create' && $r->isMethod('post')){
         $check = $r->validate([
           'name' => 'required|max:100',
@@ -685,25 +685,25 @@ class PurchasesController extends Controller
 
           Session()->flash('success','Supplier Are Successfully Register Done!');
         }
-        
-        
+
+
         return redirect()->route('admin.suppliersAction',['view',$user->id]);
       }
-      //Add New User End
-      
-      
+        //Add New User End
+
+
       $user=User::where('supplier',true)->whereIn('status',[0,1])->find($id);
       if(!$user){
         Session()->flash('error','This Supplier Are Not Found');
         return redirect()->route('admin.suppliers');
       }
-      
+
       if($action=='view'){
         $orders =$user->orders()->whereIn('order_type',['purchase_order'])
                 ->paginate(10);
-        return view(adminTheme().'suppliers.viewUser',compact('user','orders'));   
+        return view(adminTheme().'suppliers.viewUser',compact('user','orders'));
       }
-  
+
       //Update User Profile Start
       if($action=='update' && $r->isMethod('post')){
 
@@ -721,7 +721,7 @@ class PurchasesController extends Controller
           if (!$createDate->isSameDay($user->created_at)) {
               $user->created_at = $createDate;
           }
-       
+
           $user->name =$r->name;
           $user->mobile =$r->mobile;
           $user->email =$r->email;
@@ -739,16 +739,16 @@ class PurchasesController extends Controller
           ///////Image Upload End////////////
           $user->status=$r->status?true:false;
           $user->save();
-    
+
           Session()->flash('success','Your Updated Are Successfully Done!');
           return redirect()->back();
-  
+
         }
         //Update User Profile End
-  
+
         //Delete User Start
         if($action=='delete'){
-  
+
           $userFiles =Media::latest()->where('src_type',6)->where('src_id',$user->id)->get();
           foreach ($userFiles as $media) {
               if(File::exists($media->file_url)){
@@ -761,10 +761,10 @@ class PurchasesController extends Controller
           return redirect()->back();
         }
         //Delete User End
-        
+
       return view(adminTheme().'suppliers.editUser',compact('user'));
 
-  }
+    }
 
     // ================================
     //  LIST PAGE
