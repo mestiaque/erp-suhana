@@ -1046,7 +1046,7 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $receives = PurchaseReceive::latest()
+        $receives = PurchaseReceive::latest()->where('status','<>','trash')
             ->where(function($q) use ($r){
                 if ($r->search){
                     $q->where('purchase_receive_no','LIKE','%'.$r->search.'%');
