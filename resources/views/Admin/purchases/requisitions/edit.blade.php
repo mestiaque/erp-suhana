@@ -25,12 +25,15 @@
 @section('contents')
 
 <div class="breadcrumb-area">
-    <h1>Create Requision</h1>
+    <h1>Edit Purchase Requisition</h1>
     <ol class="breadcrumb">
         <li class="item">
             <a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a>
         </li>
-        <li class="item">Requision</li>
+        <li class="item">
+            <a href="{{ route('admin.purchasesRequisitions') }}">Purchase Requisition</a>
+        </li>
+        <li class="item">Edit Purchase Requisition</li>
     </ol>
 </div>
 
@@ -38,7 +41,7 @@
 
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3>Requision Form</h3>
+            <h3>Requision Form #<span class="text-primary">{{ $requisition->requisition_no }}</span></h3>
         </div>
 
         <div class="card-body">
