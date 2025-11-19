@@ -10582,61 +10582,12 @@ class AdminController extends Controller
         //Delete User End
 
 
-        $leads =$user->leads()->latest()
-                ->where(function($q)use($r){
-                    if($r->search){
-                        $q->where('factory_name','like','%'.$r->search.'%')->orWhere('name','like','%'.$r->search.'%')->orWhere('key_parson_name','like','%'.$r->search.'%');
-                    }
-
-                    if($r->customer_status){
-                        $q->where('customer_status',$r->customer_status);
-                    }
-
-
-
-                    if($r->status){
-                        $q->where('status',$r->status);
-                    }
-
-                    if($r->startDate || $r->endDate)
-                    {
-                        if($r->startDate){
-                            $from =$r->startDate;
-                        }else{
-                            $from=Carbon::now()->format('Y-m-d');
-                        }
-
-                        if($r->endDate){
-                            $to =$r->endDate;
-                        }else{
-                            $to=Carbon::now()->format('Y-m-d');
-                        }
-
-                        $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-                    }
-
-                })
-                ->paginate(20)->appends(['search'=>$r->search,'customer_status'=>$r->customer_status,'startDate'=>$r->startDate,'endDate'=>$r->endDate,'status'=>$r->status]);
-
-        $meetings =$user->meetings()->latest()->paginate(10);
-        $visits =$user->visits()->latest()->paginate(10);
-        $notes =$user->notes()->latest()->paginate(10);
-        $tasks =$user->tasks()->latest()->paginate(10);
-        $companies =$user->companies()->latest()->paginate(10);
-
 
         $startDate=$r->startDate?Carbon::parse($r->startDate):Carbon::now()->startOfMonth();
         $endDate=$r->endDate?Carbon::parse($r->endDate):Carbon::now();
-        $summeryReport =[
-            'Leads'=>$user->leads()->whereDate('created_at','>=',$startDate)->whereDate('created_at','<=',$endDate)->count(),
-            'Companies'=>$user->companies()->whereDate('created_at','>=',$startDate)->whereDate('created_at','<=',$endDate)->count(),
-            'Meeting'=>$user->meetings()->whereDate('created_at','>=',$startDate)->whereDate('created_at','<=',$endDate)->count(),
-            'Visits'=>$user->visits()->whereDate('created_at','>=',$startDate)->whereDate('created_at','<=',$endDate)->count(),
-            'Sales'=>$user->sales()->whereDate('created_at','>=',$startDate)->whereDate('created_at','<=',$endDate)->sum('grand_total'),
-            'SalesDue'=>$user->sales()->whereDate('created_at','>=',$startDate)->whereDate('created_at','<=',$endDate)->sum('due_amount'),
-            ];
 
-        return view(adminTheme().'users.customers.viewUser',compact('user','leads','meetings','visits','notes','tasks','companies','action','startDate','endDate','summeryReport'));
+
+        return view(adminTheme().'users.customers.viewUser',compact('user','action','startDate','endDate'));
     }
 
     public function subscribes(Request $r){

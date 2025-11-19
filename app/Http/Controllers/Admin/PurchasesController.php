@@ -792,7 +792,7 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $orders = PurchaseOrder::latest()
+        $orders = PurchaseOrder::latest()->where('status', '<>', 'temp')
             ->where(function ($q) use ($r) {
                 if ($r->search) {
                     $q->where('order_no', 'LIKE', '%' . $r->search . '%');
@@ -816,7 +816,7 @@ class PurchasesController extends Controller
             ->paginate(25)
             ->appends($r->all());
 
-        $totals = DB::table('purchase_orders')
+        $totals = DB::table('purchase_orders')->where('status', '<>', 'temp')
             ->selectRaw("count(case when status != 'trash' then 1 end) as total")
             ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
             ->selectRaw("count(case when status = 'approved' then 1 end) as approved")

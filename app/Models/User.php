@@ -124,33 +124,6 @@ class User extends Authenticatable
         return $this->hasMany(Salary::class,'user_id');
     }
 
-    public function leads(){
-        return $this->hasMany(Lead::class,'assinee_id')->where('status','<>','temp');
-    }
-
-    public function meetings(){
-        return $this->hasMany(Meeting::class,'host_id')->where('status','<>','temp');
-    }
-
-    public function tasks(){
-        return $this->hasMany(Task::class,'assignby_id')->where('status','<>','temp');
-    }
-
-    public function notes(){
-        return $this->hasMany(Note::class,'assignby_id');
-    }
-
-    public function visits(){
-        return $this->hasMany(Visit::class,'assignby_id')->where('status','<>','temp');
-    }
-
-    public function companies(){
-        return $this->hasMany(Company::class,'addedby_id')->where('status','<>','temp');
-    }
-
-    public function engineers(){
-        return $this->hasMany(Attribute::class,'addedby_id')->where('type',0)->where('status','<>','temp');
-    }
 
     public function sales(){
         return $this->hasMany(Order::class,'addedby_id')->where('order_type','sale_invoices')->where('order_status','confirmed');
