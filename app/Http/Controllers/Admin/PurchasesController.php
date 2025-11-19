@@ -12,14 +12,16 @@ use Session;
 use Validator;
 use Carbon\Carbon;
 use App\Models\Post;
-use App\Models\Media;
-use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Media;
 use App\Models\Order;
 use Redirect,Response;
 use App\Models\Attribute;
 use App\Models\OrderItem;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseRequisition;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseRequisitionItem;
@@ -103,7 +105,7 @@ class PurchasesController extends Controller
     public function purchasesItemsAction(Request $r,$action,$id=null){
       // Add Item Unit Action
       if($action=='addUnit' || $action=='deleteUnit' || $action=='updateUnit'){
-        
+
         if($action=='addUnit'){
 
           $hasUnit =Attribute::where('type',6)->where('name',$r->name)->first();
@@ -171,7 +173,7 @@ class PurchasesController extends Controller
 
       // Add Item Category Action
       if($action=='addCtg' || $action=='deleteCtg' || $action=='updateCtg'){
-        
+
         if($action=='addCtg'){
 
           $hasCtg =Attribute::where('type',7)->where('name',$r->name)->first();
@@ -403,7 +405,7 @@ class PurchasesController extends Controller
             ->where(function($q) use($r){
                 if($r->search){
                     $q->where('requisition_no','LIKE','%'.$r->search.'%');
-                    $q->orWhereHas('company', function($qq) use($r){
+                    $q->orWhereHas('supplier', function($qq) use($r){
                         $qq->where('factory_name','LIKE','%'.$r->search.'%');
                     });
                 }
@@ -764,6 +766,194 @@ class PurchasesController extends Controller
 
   }
 
+    // ================================
+    //  LIST PAGE
+    // ================================
+    public function purchasesOrders(Request $r)
+    {
+        if ($r->action && $r->checkid) {
+            $orders = PurchaseOrder::whereIn('id', $r->checkid)->get();
+
+            foreach ($orders as $data) {
+                switch ($r->action) {
+                    case 1: $data->status = 'pending'; break;
+                    case 2: $data->status = 'approved'; break;
+                    case 3: $data->status = 'rejected'; break;
+                    case 4: $data->status = 'trash'; break;
+                    case 5:
+                        $data->items()->delete();
+                        $data->delete();
+                        continue 2;
+                }
+                $data->save();
+            }
+
+            session()->flash('success', 'Action Completed Successfully!');
+            return redirect()->back();
+        }
+
+        $orders = PurchaseOrder::latest()
+            ->where(function ($q) use ($r) {
+                if ($r->search) {
+                    $q->where('order_no', 'LIKE', '%' . $r->search . '%');
+                    $q->orWhereHas('supplier', function ($qq) use ($r) {
+                        $qq->where('supplier_name', 'LIKE', '%' . $r->search . '%');
+                    });
+                }
+
+                if ($r->startDate || $r->endDate) {
+                    $from = $r->startDate ?: now()->format('Y-m-d');
+                    $to = $r->endDate ?: now()->format('Y-m-d');
+                    $q->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+                }
+
+                if ($r->status) {
+                    $q->where('status', $r->status);
+                } else {
+                    $q->where('status', '<>', 'trash');
+                }
+            })
+            ->paginate(25)
+            ->appends($r->all());
+
+        $totals = DB::table('purchase_orders')
+            ->selectRaw("count(case when status != 'trash' then 1 end) as total")
+            ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
+            ->selectRaw("count(case when status = 'approved' then 1 end) as approved")
+            ->selectRaw("count(case when status = 'rejected' then 1 end) as rejected")
+            ->selectRaw("count(case when status = 'trash' then 1 end) as trash")
+            ->first();
+
+        return view(adminTheme().'purchases.orders.index', compact('orders', 'totals'));
+    }
+
+    // ================================
+    //  CREATE / EDIT ACTION
+    // ================================
+    public function purchasesOrdersAction(Request $r, $action, $id = null)
+    {
+        // CREATE
+        if ($action == 'create') {
+            $order = PurchaseOrder::where('status', 'temp')->where('addedby_id', Auth::id())->first();
+
+            if (!$order) {
+                $order = new PurchaseOrder();
+                $order->status = 'temp';
+                $order->addedby_id = Auth::id();
+                $order->created_date = now()->format('Ymd');
+                $order->save();
+            }
+
+            $order->order_no = now()->format('Ymd') . $order->id;
+            $order->save();
+
+            return redirect()->route('admin.purchasesOrdersAction', ['edit', $order->id]);
+        }
+
+        // FIND ORDER
+        $order = PurchaseOrder::find($id);
+        if (!$order) {
+            session()->flash('error', 'Order Not Found');
+            return redirect()->route('purchaseOrders');
+        }
+
+        // PDF
+        if ($action == 'pdf') {
+            $pdf = PDF::loadView(adminTheme().'purchases.pdfOrder', compact('order'));
+            return $pdf->stream('purchase_order.pdf');
+        }
+
+        // VIEW
+        if ($action == 'view') {
+            return view(adminTheme().'purchases.orders.view', compact('order'));
+        }
+
+        // ADD COMPANY
+        if ($action == 'add-supplier') {
+            $supplier = Supplier::find($r->supplier_id);
+            if ($supplier) {
+                $order->supplier_id = $supplier->id;
+                $order->save();
+            }
+
+            $view = view(adminTheme().'purchases.orders.includes.items', compact('order'))->render();
+            return response()->json(['success' => true, 'view' => $view]);
+        }
+
+        // SEARCH MATERIAL
+        if ($action == 'search-material') {
+            $materials = Post::where('type', 3)->where('status', 'active')
+                ->when($r->search, fn($q) => $q->where('name', 'like', '%' . $r->search . '%'))
+                ->limit(10)->get();
+
+            $search = view(adminTheme().'purchases.orders.includes.searchMaterials', compact('materials', 'order'))->render();
+            return response()->json(['success' => true, 'view' => $search]);
+        }
+
+        // ITEM CRUD
+        if (in_array($action, ['add-item', 'update-item', 'remove-item'])) {
+
+            if ($action == 'add-item') {
+                $item = new PurchaseOrderItem();
+                $item->order_id = $order->id;
+                $item->addedby_id = Auth::id();
+                $item->save();
+            }
+
+            if ($action == 'update-item') {
+                $item = PurchaseOrderItem::find($r->item_id);
+                if ($item) {
+                    $item->material_id = $r->material_id ?: null;
+                    $item->material_name = $r->material_name ?: null;
+                    $item->qty = $r->qty ?: 0;
+                    $item->unit = $r->unit ?: null;
+                    $item->price = $r->price ?: 0;
+                    $item->save();
+                }
+            }
+
+            if ($action == 'remove-item') {
+                PurchaseOrderItem::where('id', $r->item_id)->delete();
+            }
+
+            $order->save();
+
+            $view = view(adminTheme().'purchases.orders.includes.items', compact('order'))->render();
+            return response()->json(['success' => true, 'view' => $view]);
+        }
+
+        // UPDATE ORDER
+        if ($action == 'update') {
+            $r->validate([
+                'status' => 'nullable|max:20',
+                'created_at' => 'required|date',
+                'note' => 'nullable',
+            ]);
+
+            $order->status = $r->status ?: $order->status;
+            $order->note = $r->note;
+            $order->created_at = $r->created_at ?: now();
+            $order->save();
+
+            session()->flash('success', 'Purchase Order Updated');
+            return redirect()->route('admin.purchasesOrdersAction', ['view', $order->id]);
+        }
+
+        // DELETE
+        if ($action == 'delete') {
+            $order->items()->delete();
+            $order->delete();
+            session()->flash('success', 'Purchase Order Deleted');
+            return redirect()->back();
+        }
+
+        // LOAD EDIT PAGE
+        $departments = Attribute::where('type', 3)->get(['id', 'name']);
+        $order = PurchaseOrder::with('items')->findOrFail($id);
+        $suppliers = User::where('supplier', 1)->get(['id', 'name']);
+
+        return view(adminTheme().'purchases.orders.edit', compact('order', 'departments', 'suppliers'));
+    }
 
 
 }
