@@ -138,53 +138,53 @@
             </div>
         </div>
     </div>
+    
+    {{-- ============================
+          CREATE RECEIVE MODAL
+    ============================= --}}
+    <!-- Create Purchase Receive Modal -->
+    <div class="modal fade text-left" id="createReceiveModal" tabindex="-1">
+       <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Purchase Receive</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times; </span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Branch Selection -->
+                <div class="form-group">
+                    <label for="branchSelect">Select Branch</label>
+                    <select id="branchSelect" class="form-control">
+                        <option value="">-- Choose Branch --</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Purchase Number Input (Initially Hidden) -->
+                <div id="purchaseSection" style="display:none;">
+                    <input type="text" id="searchPurchaseNo" class="form-control mt-2" placeholder="Type Purchase Number">
+                    @include(adminTheme().'purchases.receives.includes.searchResults', [
+                        'purchases' => $purchases,
+                    ])
+                </div>
+                <p id="searchMsg" class="mt-2 text-danger" style="display:none;"></p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="createReceiveBtn">
+                    <i class="bx bx-plus"></i> Create
+                </button>
+            </div>
+         </div>
+       </div>
+    </div>
 @endsection
 
-
-{{-- ============================
-      CREATE RECEIVE MODAL
-============================= --}}
-<!-- Create Purchase Receive Modal -->
-<div class="modal fade text-left" id="createReceiveModal" tabindex="-1">
-   <div class="modal-dialog">
-     <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">Add Purchase Receive</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-    		   <span aria-hidden="true">&times; </span>
-    		</button>
-        </div>
-        <div class="modal-body">
-            <!-- Branch Selection -->
-            <div class="form-group">
-                <label for="branchSelect">Select Branch</label>
-                <select id="branchSelect" class="form-control">
-                    <option value="">-- Choose Branch --</option>
-                    @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Purchase Number Input (Initially Hidden) -->
-            <div id="purchaseSection" style="display:none;">
-                <input type="text" id="searchPurchaseNo" class="form-control mt-2" placeholder="Type Purchase Number">
-                @include(adminTheme().'purchases.receives.includes.searchResults', [
-                    'purchases' => $purchases,
-                ])
-            </div>
-            <p id="searchMsg" class="mt-2 text-danger" style="display:none;"></p>
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="createReceiveBtn">
-                <i class="bx bx-plus"></i> Create
-            </button>
-        </div>
-     </div>
-   </div>
-</div>
 
 
 @push('js')
