@@ -6,8 +6,8 @@ use DB;
 use Str;
 use Auth;
 use File;
-use Image;
 use Hash;
+use Image;
 use Session;
 use Validator;
 use Carbon\Carbon;
@@ -21,7 +21,9 @@ use App\Models\OrderItem;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseReceive;
 use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseReceiveItem;
 use App\Models\PurchaseRequisition;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseRequisitionItem;
@@ -365,7 +367,7 @@ class PurchasesController extends Controller
 
 
     public function purchasesStocks(Request $r){
-        
+
 
         $goodsItems =Post::latest()->where('type',3)->where('status','active')
                         ->where(function($q) use ($r) {
@@ -583,9 +585,9 @@ class PurchasesController extends Controller
         if($r->checkid){
         $datas=User::where('supplier',true)->whereIn('status',[0,1])
                 ->whereIn('id',$r->checkid)->get();
-  
+
         foreach($datas as $data){
-  
+
             if($r->action==1){
               $data->status=1;
               $data->save();
@@ -593,7 +595,7 @@ class PurchasesController extends Controller
               $data->status=0;
               $data->save();
             }elseif($r->action==5){
-              
+
               $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
               foreach ($userFiles as $media) {
                   if(File::exists($media->file_url)){
@@ -602,22 +604,22 @@ class PurchasesController extends Controller
                   $media->delete();
               }
               $data->delete();
-  
+
             }
-  
+
         }
-  
+
         Session()->flash('success','Action Successfully Completed!');
-  
+
         }else{
           Session()->flash('info','Please Need To Select Minimum One Post');
         }
-  
+
         return redirect()->back();
       }
-  
+
       //Filter Action End
-  
+
       $users =User::latest()->where('supplier',true)->whereIn('status',[0,1])
       ->where(function($q) use($r) {
           if($r->search){
@@ -635,16 +637,16 @@ class PurchasesController extends Controller
               }else{
                   $from=Carbon::now()->format('Y-m-d');
               }
-  
+
               if($r->endDate){
                   $to =$r->endDate;
               }else{
                   $to=Carbon::now()->format('Y-m-d');
               }
-  
+
               $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
           }
-  
+
       })
       ->select(['id','name','email','mobile','created_at','company_name','address_line1','addedby_id','status'])
         ->paginate(25)->appends([
@@ -665,7 +667,7 @@ class PurchasesController extends Controller
     }
 
     public function suppliersAction(Request $r,$action,$id=null){
-     
+
       //Add New User Start
       if($action=='create' && $r->isMethod('post')){
         $check = $r->validate([
@@ -698,25 +700,25 @@ class PurchasesController extends Controller
 
           Session()->flash('success','Supplier Are Successfully Register Done!');
         }
-        
-        
+
+
         return redirect()->route('admin.suppliersAction',['view',$user->id]);
       }
-      //Add New User End
-      
-      
+        //Add New User End
+
+
       $user=User::where('supplier',true)->whereIn('status',[0,1])->find($id);
       if(!$user){
         Session()->flash('error','This Supplier Are Not Found');
         return redirect()->route('admin.suppliers');
       }
-      
+
       if($action=='view'){
         $orders =$user->orders()->whereIn('order_type',['purchase_order'])
                 ->paginate(10);
-        return view(adminTheme().'suppliers.viewUser',compact('user','orders'));   
+        return view(adminTheme().'suppliers.viewUser',compact('user','orders'));
       }
-  
+
       //Update User Profile Start
       if($action=='update' && $r->isMethod('post')){
 
@@ -734,7 +736,7 @@ class PurchasesController extends Controller
           if (!$createDate->isSameDay($user->created_at)) {
               $user->created_at = $createDate;
           }
-       
+
           $user->name =$r->name;
           $user->mobile =$r->mobile;
           $user->email =$r->email;
@@ -752,16 +754,16 @@ class PurchasesController extends Controller
           ///////Image Upload End////////////
           $user->status=$r->status?true:false;
           $user->save();
-    
+
           Session()->flash('success','Your Updated Are Successfully Done!');
           return redirect()->back();
-  
+
         }
         //Update User Profile End
-  
+
         //Delete User Start
         if($action=='delete'){
-  
+
           $userFiles =Media::latest()->where('src_type',6)->where('src_id',$user->id)->get();
           foreach ($userFiles as $media) {
               if(File::exists($media->file_url)){
@@ -774,10 +776,9 @@ class PurchasesController extends Controller
           return redirect()->back();
         }
         //Delete User End
-        
+
       return view(adminTheme().'suppliers.editUser',compact('user'));
 
-    
     }
 
     public function purchasesReports(Request $r){
@@ -939,7 +940,7 @@ class PurchasesController extends Controller
                 $item->addedby_id = Auth::id();
                 $item->save();
             }
-            
+
             if ($action == 'add-item') {
                 $item = new PurchaseOrderItem();
                 $item->order_id = $order->id;
@@ -1017,6 +1018,223 @@ class PurchasesController extends Controller
         $goods = Post::where('type', 3)->where('status', 'active')->limit(20)->get(['id', 'name','unit_id']);
         return view(adminTheme().'purchases.orders.edit', compact('order','suppliers','goods'));
     }
+
+
+    // ================================
+    // LIST PAGE
+    // ================================
+    public function purchasesReceived(Request $r)
+    {
+        $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
+        $branches = Attribute::where('type', 0)->get(['id','name']);
+        if ($r->action && $r->checkid) {
+            $receives = PurchaseReceive::whereIn('id', $r->checkid)->get();
+            foreach ($receives as $data) {
+                switch ($r->action) {
+                    case 1: $data->status = 'pending'; break;
+                    case 2: $data->status = 'approved'; break;
+                    case 3: $data->status = 'rejected'; break;
+                    case 4: $data->status = 'trash'; break;
+                    case 5:
+                        $data->items()->delete();
+                        $data->delete();
+                        continue 2;
+                }
+                $data->save();
+            }
+            session()->flash('success', 'Action Completed Successfully!');
+            return redirect()->back();
+        }
+
+        $receives = PurchaseReceive::latest()
+            ->where(function($q) use ($r){
+                if ($r->search){
+                    $q->where('purchase_receive_no','LIKE','%'.$r->search.'%');
+                    $q->orWhere('purchase_no','LIKE','%'.$r->search.'%');
+                    $q->orWhereHas('purchase', fn($qq)=>$qq->where('order_no','LIKE','%'.$r->search.'%'));
+                }
+                if ($r->startDate || $r->endDate){
+                    $from = $r->startDate ?: now()->format('Y-m-d');
+                    $to = $r->endDate ?: now()->format('Y-m-d');
+                    $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+                }
+                if ($r->status){
+                    $q->where('status',$r->status);
+                }else{
+                    $q->where('status','<>','trash');
+                }
+            })
+            ->paginate(25)
+            ->appends($r->all());
+
+        $totals = DB::table('purchase_receives')
+            ->where('status','<>','trash')
+            ->selectRaw("count(*) as total")
+            ->selectRaw("count(case when status='pending' then 1 end) as pending")
+            ->selectRaw("count(case when status='approved' then 1 end) as approved")
+            ->selectRaw("count(case when status='rejected' then 1 end) as rejected")
+            ->selectRaw("count(case when status='trash' then 1 end) as trash")
+            ->first();
+
+        return view(adminTheme().'purchases.receives.index', compact('receives','totals', 'purchases', 'branches'));
+    }
+
+    // ================================
+    // CREATE / EDIT / ITEM / UPDATE
+    // ================================
+    public function purchasesReceivedAction(Request $r, $action, $id = null)
+    {
+        // -----------------------
+        // AJAX CREATE VIA MODAL
+        // -----------------------
+        if ($action == 'create' && $r->ajax()) {
+
+            $purchase = PurchaseOrder::where('order_no', $r->purchase_no)->first();
+
+            if (!$purchase) {
+                return response()->json(['success' => false, 'message' => 'Purchase Number Not Found']);
+            }
+
+            // Check if receive already exists
+            $exist = PurchaseReceive::where('purchase_id', $purchase->id)
+                                    ->where('addedby_id', Auth::id())
+                                    ->where('status', 'temp')
+                                    ->first();
+            if ($exist) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('admin.purchasesReceivedAction', ['edit', $exist->id])
+                ]);
+            }
+            // Create Receive
+            $receive = PurchaseReceive::create([
+                'purchase_id'         => $purchase->id,
+                'branch_id'           => $r->branch_id,
+                'purchase_no'         => $purchase->order_no,
+                'challan_no'          => null,
+                'purchase_receive_no' => 'PR'.now()->format('Ymd').$purchase->id,
+                'status'              => 'temp',
+                'addedby_id'          => Auth::id()
+            ]);
+
+            // Add items
+            foreach ($purchase->items as $item) {
+                PurchaseReceiveItem::create([
+                    'purchase_receive_id' => $receive->id,
+                    'purchase_id'         => $purchase->id,
+                    'purchase_item_id'    => $item->id,
+                    'material_id'    => $item->material_id,
+                    'material_name'  => $item->material_name,
+                    'received_qty'        => 0
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.purchasesReceivedAction', ['edit', $receive->id])
+            ]);
+        }
+
+        // -----------------------
+        // LIVE SEARCH PURCHASE ORDER
+        // -----------------------
+        if ($action == 'search-purchase' && $r->ajax()) {
+            $purchases = PurchaseOrder::where('order_no', 'like', '%'.$r->search.'%')
+                ->latest()
+                ->limit(10)
+                ->get(['id','order_no']);
+
+            if(count($purchases) < 1)  return response()->json(['error' => true, 'message' => 'Purchase Number Not Found']);
+            $html = view(adminTheme().'purchases.receives.includes.searchResults', compact('purchases'))->render();
+
+            return response()->json(['success'=>true,'view'=>$html]);
+        }
+
+        // -----------------------
+        // EDIT RECEIVE
+        // -----------------------
+        if ($action == 'edit') {
+            $receive = PurchaseReceive::with('items.orderItem.product')->findOrFail($id);
+            return view(adminTheme().'purchases.receives.edit', compact('receive'));
+        }
+
+        // -----------------------
+        // ITEM CRUD (AJAX)
+        // -----------------------
+        if (in_array($action, ['add-item','update-item','remove-item'])) {
+            $receive = PurchaseReceive::with('items')->findOrFail($id);
+
+            if ($action == 'add-item') {
+                $item = new PurchaseReceiveItem();
+                $item->purchase_receive_id = $receive->id;
+                $item->addedby_id = Auth::id();
+                $item->save();
+            }
+
+            if ($action == 'update-item') {
+                $item = PurchaseReceiveItem::find($r->item_id);
+                if ($item) {
+                    // Fetch corresponding purchase order item
+                    $orderItem = PurchaseOrderItem::find($item->purchase_item_id);
+
+                    $receivedQty = floatval($r->received_qty ?? 0);
+                    $maxQty = $orderItem ? floatval($orderItem->qty) : 0;
+
+                    // Prevent received qty > order qty
+                    if ($receivedQty > $maxQty) {
+                        $receivedQty = $maxQty;
+                    }
+
+                    $item->received_qty = $receivedQty;
+                    $item->save();
+                }
+            }
+
+
+            if ($action == 'remove-item') {
+                PurchaseReceiveItem::where('id',$r->item_id)->delete();
+            }
+
+            $view = view(adminTheme().'purchases.receives.includes.items', compact('receive'))->render();
+            return response()->json(['success'=>true,'view'=>$view]);
+        }
+
+        // -----------------------
+        // UPDATE RECEIVE
+        // -----------------------
+        if ($action == 'update') {
+            $receive = PurchaseReceive::findOrFail($id);
+            $r->validate([
+                'challan_no' => 'required',
+            ]);
+
+            $receive->status = "pending";
+            $receive->note = $r->note;
+            $receive->challan_no = $r->challan_no;
+            $receive->created_at = $r->created_at ?: now();
+            $receive->save();
+
+            session()->flash('success','Purchase Receive Updated');
+            return redirect()->route('admin.purchasesReceivedAction',['edit',$receive->id]);
+        }
+
+        // -----------------------
+        // DELETE RECEIVE
+        // -----------------------
+        if ($action == 'delete') {
+            $receive = PurchaseReceive::findOrFail($id);
+            $receive->items()->delete();
+            $receive->delete();
+            session()->flash('success','Purchase Receive Deleted');
+            return redirect()->back();
+        }
+
+        if ($action == 'view') {
+            $receive = PurchaseReceive::with('items.orderItem.product')->findOrFail($id);
+            return view(adminTheme().'purchases.receives.view', compact('receive'));
+        }
+    }
+
 
 
 }

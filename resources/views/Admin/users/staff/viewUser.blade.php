@@ -104,7 +104,7 @@
         <li class="item">
             <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
         </li>
-        <li class="item"><a href="{{route('admin.usersCustomer')}}">Employee List</a></li>
+        <li class="item"><a href="{{route('admin.staffAdmin')}}">Employee List</a></li>
         <li class="item">Profile View</li>
     </ol>
 </div>
@@ -117,13 +117,13 @@
             <div class="card mb-30">
                 <div class="card-header d-flex justify-content-between align-items-center">
                      <h3>{{$user->name}} - Profile View</h3>
-                     <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}"  class="btn-custom yellow"><i class="bx bx-edit"></i> Edit</a>
+                     <a href="{{route('admin.staffAdminAction',['edit',$user->id])}}"  class="btn-custom yellow"><i class="bx bx-edit"></i> Edit</a>
                 </div>
                 <div class="card-body">
 
                     <ul class="nav nav-tabs">
                       <li class="nav-item">
-                        <a class="nav-link {{$action=='view'?'active':''}}" href="{{route('admin.usersCustomerAction',['view',$user->id])}}">Information</a>
+                        <a class="nav-link {{$action=='view'?'active':''}}" href="{{route('admin.staffAdminAction',['view',$user->id])}}">Information</a>
                       </li>
 
                     </ul>

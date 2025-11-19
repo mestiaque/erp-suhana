@@ -28,6 +28,11 @@ class PurchaseOrderItem extends Model
     {
         return $this->belongsTo(Post::class, 'material_id'); // assuming Post model stores materials
     }
+    
+    public function product()
+    {
+        return $this->belongsTo(Post::class, 'material_id'); // assuming Post model stores materials
+    }
 
     public function user()
     {
