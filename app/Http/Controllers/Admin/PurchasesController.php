@@ -1261,8 +1261,8 @@ class PurchasesController extends Controller
 
         // Main Query
         $purchases = PurchaseOrder::with('supplier')
-            ->where('status', '<>', 'trash')
-
+            ->where('status', 'approved')
+            ->where('due_amount', '>', 0)
             ->when($r->status, function($q) use ($r){
                 $q->where('payment_status', $r->status);
             })
