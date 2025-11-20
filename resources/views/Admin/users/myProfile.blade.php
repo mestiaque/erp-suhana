@@ -11,6 +11,8 @@
 </style>
 @endpush @section('contents')
 
+<div class="flex-grow-1">
+
 <!-- Breadcrumb Area -->
 <div class="breadcrumb-area">
     <h1>My Profile</h1>
@@ -35,7 +37,7 @@
                  <a href="{{route('admin.editProfile')}}" class="btn-custom yellow"><i class="bx bx-edit"></i> Edit</a>
             </div>
             <div class="card-body">
-                <div class="row">
+                                    <div class="row">
                     <div class="col-md-4">
                         <div class="text-center">
 
@@ -137,74 +139,13 @@
             </div>
         </div>
     </div>
-    <div class="col-md-5">
-        <!-- Start -->
-        <!--<div class="card mb-30">-->
-        <!--    <div class="card-header d-flex justify-content-between align-items-center">-->
-        <!--         <h3>Activity Map</h3>-->
-        <!--    </div>-->
-        <!--    <div class="card-body">-->
-        <!--        <div style="text-align: center;min-height: 350px;background: #f2f2f2;padding: 25px;">-->
-        <!--            <div class="showMapArea" style="height: 400px; width: 100%;"></div>-->
-        <!--        </div>-->
-        <!--    </div>-->
-        <!--</div>-->
-    </div>
 </div>
 
-
+</div>
 
 @endsection
 
 @push('js')
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-$(document).ready(function () {
-    let map, marker;
-    const mapContainer = $('.showMapArea');
 
-    // $('.startLocation').on('click', function () {
-        if (!navigator.geolocation) {
-            alert("Your browser does not support Geolocation.");
-            return;
-        }
-        mapContainer.html('');
-        map = L.map(mapContainer[0]).setView([23.8103, 90.4125], 13);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        marker = L.marker([23.8103, 90.4125]).addTo(map)
-            .bindPopup("Detecting location...")
-            .openPopup();
-
-        navigator.geolocation.watchPosition(function (pos) {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-
-            marker.setLatLng([lat, lng]).bindPopup("{{$user->name}} are here!").openPopup();
-            map.panTo([lat, lng]);
-
-            // Optional: send to server (uncomment)
-            /*
-            $.ajax({
-                url: '{{route('admin.usersCustomer')}}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    lat: lat,
-                    lng: lng
-                }
-            });
-            */
-        }, function (err) {
-            // alert("Unable to get your location: " + err.message);
-            window.realod();
-        }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 });
-    // });
-});
-</script>
 
 @endpush

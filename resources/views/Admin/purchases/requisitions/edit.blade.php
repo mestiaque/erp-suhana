@@ -51,7 +51,7 @@
                 @csrf
 
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label>Department*</label>
                         <select class="form-control select2" name="department_id" required>
                             <option value="">Select Department</option>
@@ -64,7 +64,7 @@
                         @endif
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label>Requision Date*</label>
                         <input type="date" class="form-control" name="created_at" value="{{$requisition->created_at->format('Y-m-d')}}" required>
                         @if ($errors->has('created_at'))
@@ -72,11 +72,22 @@
                         @endif
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label>Expected Receive Date*</label>
                         <input type="date" class="form-control" name="expected_date" value="{{$requisition->expected_date?Carbon\Carbon::parse($requisition->expected_date)->format('Y-m-d'):old('expected_date')}}" required>
                         @if ($errors->has('expected_date'))
                         <p style="color: red; margin: 0;">{{ $errors->first('expected_date') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-3">
+                        <label>Status*</label>
+                        <select class="form-control" name="status" required="" >
+                            <option value="pending" {{$requisition->status=='pending'?'selected':''}} >Pending</option>
+                            <option value="approved" {{$requisition->status=='approved'?'selected':''}} > Approved</option>
+                            <option value="cancelled" {{$requisition->status=='cancelled'?'selected':''}} > Cancelled</option>
+                        </select>
+                        @if ($errors->has('status'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('status') }}</p>
                         @endif
                     </div>
 

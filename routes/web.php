@@ -34,6 +34,9 @@ Route::post('/log-out',[AuthController::class,'logout'])->name('logout');
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','redirectUser']], function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+    Route::get('/my-profile',[AdminController::class,'myProfile'])->name('myProfile');
+    Route::any('/edit-profile',[AdminController::class,'editProfile'])->name('editProfile');
+
     //User Management
     Route::get('/users/admin/',[AdminController::class,'usersAdmin'])->name('usersAdmin');
     Route::any('/users/admin/{action}/{id?}',[AdminController::class,'usersAdminAction'])->name('usersAdminAction');
@@ -123,9 +126,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     Route::any('/hr/designations/{action}/{id?}',[AdminController::class,'designationsAction'])->name('designationsAction');
 
     //Accounts Management End
-
-    Route::get('/my-profile',[AdminController::class,'myProfile'])->name('myProfile');
-    Route::any('/edit-profile',[AdminController::class,'editProfile'])->name('editProfile');
 
     // Medies Library Route
     Route::get('/medies',[AdminController::class,'medies'])->name('medies');

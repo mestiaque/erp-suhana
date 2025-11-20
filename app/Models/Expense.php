@@ -39,6 +39,10 @@ class Expense extends Model
     	return $this->belongsTo(Attribute::class,'category_id')->where('type',5);
     }
     
+    public function branch(){
+    	return $this->belongsTo(Attribute::class,'branch_id')->where('type',0);
+    }
+    
     public function method(){
     	return $this->belongsTo(Attribute::class,'method_id')->where('type',9);
     }

@@ -18,7 +18,7 @@
     </div>
 
     <div class="sidemenu-body">
-        <ul class="sidemenu-nav metisMenu h-100" id="sidemenu-nav" data-simplebar="">
+        <ul class="sidemenu-nav metismenu h-100" id="sidemenu-nav" data-simplebar="">
 
         @foreach(config('sidebar') as $group)
             @php

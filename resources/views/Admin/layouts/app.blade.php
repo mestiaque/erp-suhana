@@ -59,7 +59,9 @@
             text-align: center;
         }
         
-        
+        .metisMenu .mm-collapse:not(.mm-show) {
+            display: none;
+        }
         
         .refActionBtn span {
             padding: 8px 10px;
@@ -127,6 +129,7 @@
      <script src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js" integrity="sha512-d5Jr3NflEZmFDdFHZtxeJtBzk0eB+kkRXWFQqEc1EKmolXjHm2IKCA7kTvXBNjIYzjXfD5XzIjaaErpkZHCkBg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+     <script src="{{asset('admin/assets/js/inword.js')}}"></script>
      <script src="{{asset('admin/assets/js/custom.js')}}"></script>
      <!-- END: Page JS-->
 
@@ -206,11 +209,43 @@
         $('#PrintAction2').on("click", function () {
             $('.PrintAreaContact2').printThis();
           });
-        
+
          $.ajaxSetup({
               headers: {
                   'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
               }
+            });
+          
+            $(document).on('click','.mediaDelete',function(e){
+              e.preventDefault();
+              var url =$(this).attr('href');
+              if(confirm("Are you sure you want to delete this?")){
+                $.ajax({
+                  url : url,
+                  type:'GET',
+                  cache: false,
+                  contentType: false,
+                  dataType: 'json',
+                  beforeSend: function()
+                  {
+                    
+                  },
+                  complete: function()
+                  {
+                      
+                  },
+                  }).done(function (data) {
+                     
+                     location.reload(true);
+                    
+                  }).fail(function () {
+                      alert('fail');
+                  });
+                  
+              }else{
+                  return false;
+              }
+
             });
 
             $(document).on('click','.reloadPage',function(){
@@ -268,42 +303,6 @@
                   $.get(url,function(data){
                     $('#city').empty().append(data.geoData);  
                   });   
-            });
-
-
-            $('.mediaDelete').click(function(e){
-                e.preventDefault();
-
-              var url =$(this).attr('href');
-
-              if(confirm("Are you sure you want to delete this?")){
-                
-                $.ajax({
-                  url : url,
-                  type:'GET',
-                  cache: false,
-                  contentType: false,
-                  dataType: 'json',
-                  beforeSend: function()
-                  {
-                    
-                  },
-                  complete: function()
-                  {
-                      
-                  },
-                  }).done(function (data) {
-                     
-                     location.reload(true);
-                    
-                  }).fail(function () {
-                      alert('fail');
-                  });
-                  
-              }else{
-                  return false;
-              }
-
             });
           
       });

@@ -22,47 +22,36 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                    <form action="{{route('admin.expensesTypes')}}">
-                        <div class="row">
-                            <div class="col-md-12 mb-0">
-                                <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Expense Type" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                </div>
+    
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group mb-1">
+                    <select class="form-control form-control-sm rounded-0 actionSelect" name="action" required="">
+                        <option value="">Select Action</option>
+                        <option value="1">Active</option>
+                        <option value="2">Inactive</option>
+                        <option value="5">Delete</option>
+                    </select>
+                    <button class="btn btn-sm btn-primary rounded-0 SubmitAction">Action</button>
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <form action="{{route('admin.expensesTypes')}}">
+                    <div class="row">
+                        <div class="col-md-12 mb-2">
+                            <div class="input-group">
+                                <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Search head" class="form-control form-control-sm {{$errors->has('search')?'error':''}}" />
+                                <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                             </div>
                         </div>
-                    </form>
-                </div>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
-        <br>
-        <form action="{{route('admin.expensesTypes')}}">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="input-group mb-1">
-                        <select class="form-control form-control-sm rounded-0" name="action" required="">
-                            <option value="">Select Action</option>
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            <option value="5">Delete</option>
-                        </select>
-                        <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
-                    </div>
-                </div>
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    
-                </div>
-            </div>
+        
+        <form class="actionForm" action="{{route('admin.expensesTypes')}}">
+            <input type="hidden" name="action" value="" class="actionInput">
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -82,7 +71,7 @@
                             </th>
                             <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 300px;">Description</th>
-                            <th style="min-width: 120px;">Date</th>
+                            <th style="min-width: 120px;">Created Date</th>
                             <th style="min-width: 100px;width:100px;">Action</th>
                         </tr>
                     </thead>
@@ -241,4 +230,32 @@
 
 
 
-@endsection @push('js') @endpush
+@endsection 
+@push('js')
+<script>
+    $(document).ready(function(){
+        $('.actionSelect').on('click',function(){
+            var action = $(this).val();
+            $('.actionInput').val(action);
+        });
+
+        $('.SubmitAction').on('click',function(){
+            var action = $('.actionInput').val();
+            if(action==''){
+                alert('Please select any action');
+                return false;
+            }
+            var checked = $('input[name="checkid[]"]:checked').length;
+            if(checked<=0){
+                alert('Please select at least one checkbox');
+                return false;
+            }
+ 
+             var url = "{{ route('admin.expensesTypes') }}?action=" + action;
+            $('.actionForm').attr('action', url);
+            $('.actionForm').submit();
+        });
+
+    });
+</script>
+@endpush

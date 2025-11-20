@@ -361,30 +361,30 @@ class AdminController extends Controller
      if($request->ajax())
     {
 
-    $media =Media::find($id);
-    if(!$media){
-      Session()->flash('error','This File Are Not Found');
-     return Response()->json([
-              'success' => false
-          ]);
-     }
+        $media =Media::find($id);
+        if(!$media){
+        Session()->flash('error','This File Are Not Found');
+        return Response()->json([
+                'success' => false
+            ]);
+        }
 
-    if(File::exists($media->file_url)){
-          File::delete($media->file_url);
-    }
-    if(File::exists($media->file_url_sm)){
-        File::delete($media->file_url_sm);
-    }
-    if(File::exists($media->file_url_md)){
-        File::delete($media->file_url_md);
-    }
-    if(File::exists($media->file_url_lg)){
-        File::delete($media->file_url_lg);
-    }
-    $media->delete();
-      return Response()->json([
-              'success' => true
-          ]);
+        if(File::exists($media->file_url)){
+            File::delete($media->file_url);
+        }
+        if(File::exists($media->file_url_sm)){
+            File::delete($media->file_url_sm);
+        }
+        if(File::exists($media->file_url_md)){
+            File::delete($media->file_url_md);
+        }
+        if(File::exists($media->file_url_lg)){
+            File::delete($media->file_url_lg);
+        }
+        $media->delete();
+        return Response()->json([
+                'success' => true
+            ]);
     }
 
   }
@@ -3352,22 +3352,34 @@ class AdminController extends Controller
                           'search'=>$r->search,
                           'status'=>$r->status,
                         ]);
+        
+        $report = [
+                'today_expenses' => numberFormat(
+                    Expense::where('status', '<>', 'temp')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount'),
+                    2
+                ),
 
-        $expenseTypes =Attribute::latest()->where('type',5)->where('status','active')->select(['id','name'])->get();
-        $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
-        $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
+                'monthly_expenses' => numberFormat(
+                    Expense::where('status', '<>', 'temp')
+                        ->whereMonth('created_at', Carbon::now()->month)
+                        ->whereYear('created_at', Carbon::now()->year)
+                        ->sum('amount'),
+                    2
+                ),
+            ];
 
-        return view(adminTheme().'expenses.expensesAll',compact('expenses','expenseTypes','paymentMethods','accountMethods'));
+        $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+        $paymentMethods =Attribute::where('type',9)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
+        $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
+        $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+
+        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches'));
     }
 
 
     public function expensesAction(Request $r,$action,$id=null){
-
-
-
-
-
-
 
         //Add Service  Start
         if($action=='create'){
@@ -3376,7 +3388,9 @@ class AdminController extends Controller
                 'expense_type' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'account' => 'required|numeric',
+                'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
+                // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -3398,6 +3412,8 @@ class AdminController extends Controller
             $expense->category_id=$r->expense_type;
             $expense->method_id=$r->payment;
             $expense->account_id=$method->id;
+            $expense->branch_id=$r->branch_id;
+            $expense->title=$r->title;
             $expense->amount=$r->amount;
             $expense->description=$r->description;
             $expense->status ='active';
@@ -3418,7 +3434,6 @@ class AdminController extends Controller
             $transection->created_at =$expense->created_at;
             $transection->balance =$method->amount;
             $transection->save();
-
 
             ///////Image Upload End////////////
             if($r->hasFile('attachment')){
@@ -3447,6 +3462,8 @@ class AdminController extends Controller
             $check = $r->validate([
                 'expense_type' => 'required|numeric',
                 'payment' => 'required|numeric',
+                'branch_id' => 'required|numeric',
+                // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -3455,6 +3472,8 @@ class AdminController extends Controller
 
             $expense->category_id=$r->expense_type;
             $expense->method_id=$r->payment;
+            $expense->branch_id=$r->branch_id;
+            $expense->title=$r->title;
             $expense->description=$r->description;
             $expense->status =$r->status?'active':'inactive';
             $expense->editedby_id =Auth::id();
@@ -3480,7 +3499,6 @@ class AdminController extends Controller
 
             Session()->flash('success','Your Are Successfully Added');
             return redirect()->back();
-
 
         }
 
@@ -3556,7 +3574,7 @@ class AdminController extends Controller
 
 
 
-        $categories =Attribute::latest()->where('type',5)->where('status','<>','temp')
+        $categories =Attribute::where('type',5)->where('status','<>','temp')
             ->where(function($q) use ($r) {
 
                   if($r->search){
@@ -3568,6 +3586,7 @@ class AdminController extends Controller
                   }
 
             })
+            ->orderBy('name')
             ->select(['id','name','slug','description','created_at','addedby_id','status','fetured'])
                 ->paginate(25)->appends([
                   'search'=>$r->search,
@@ -3691,33 +3710,34 @@ class AdminController extends Controller
             $to=Carbon::now();
         }
 
-        $expenses =null;
+        $expenses = Expense::latest()->where('status','active')
+            ->where(function($q) use ($r) {
+
+                if($r->search){
+                    $q->where('member_id',$r->search);
+                    // $q->where('name','LIKE','%'.$r->search.'%');
+                }
+
+                if($r->expense_type){
+                    $q->where('category_id',$r->expense_type);
+                }
+                
+                if($r->branch_id){
+                    $q->where('branch_id',$r->branch_id);
+                }
+
+                if($r->method){
+                    $q->where('method_id',$r->method);
+                }
+            })
+            ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
+            ->get();
 
 
+        $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+        $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
-            $expenses = Expense::latest()->where('status','active')
-                ->where(function($q) use ($r) {
-
-                    if($r->search){
-                        $q->where('member_id',$r->search);
-                        // $q->where('name','LIKE','%'.$r->search.'%');
-                    }
-
-                    if($r->expense_type){
-                        $q->where('category_id',$r->expense_type);
-                    }
-
-                    if($r->method){
-                        $q->where('method_id',$r->method);
-                    }
-                })
-                ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
-                ->get();
-
-
-        $expenseTypes =Attribute::latest()->where('type',5)->where('status','active')->select(['id','name'])->get();
-
-        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to'));
+        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches'));
     }
 
     // Services Management Function

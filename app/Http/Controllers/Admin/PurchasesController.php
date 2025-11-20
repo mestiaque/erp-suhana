@@ -544,7 +544,7 @@ class PurchasesController extends Controller
         // Update Requisition
         if($action=='update'){
             $r->validate([
-                // 'status'=>'nullable|max:20',
+                'status'=>'nullable|max:20',
                 'department_id'=>'required|numeric',
                 'created_at'=>'required|date',
                 'expected_date'=>'required|date',
@@ -552,7 +552,7 @@ class PurchasesController extends Controller
             ]);
 
             $requisition->department_id = $r->department_id;
-            $requisition->status = 'pending';
+            $requisition->status = $r->status?:'pending';
             $requisition->note = $r->note;
             $requisition->expected_date = $r->expected_date ?: Carbon::now();
             $requisition->created_at = $r->created_at ?: Carbon::now();
@@ -575,9 +575,6 @@ class PurchasesController extends Controller
 
         return view(adminTheme().'purchases.requisitions.edit', compact('requisition', 'departments',));
     }
-
-
-
 
     public function suppliers(Request $r){
          //Filter Actions Start
@@ -781,6 +778,13 @@ class PurchasesController extends Controller
 
     }
 
+    
+    public function suppliersLegers(){
+
+      return view(adminTheme().'suppliers.supplierLadgers');
+    }
+
+
     public function purchasesReports(Request $r){
 
       $orders =PurchaseOrder::latest()
@@ -974,6 +978,7 @@ class PurchasesController extends Controller
                     $item->save();
 
                     $order->grand_total = $order->items()->sum('total_price');
+                    $order->due_amount = $order->grand_total - $order->paid_amount;
                     $order->total_qty = $order->items()->sum('qty');
                     $order->save();
                 }
@@ -992,13 +997,22 @@ class PurchasesController extends Controller
         if ($action == 'update') {
             $r->validate([
                 'supplier_id' => 'nullable|numeric',
-                'status' => 'nullable|max:20',
+                'status' => 'required|max:20',
                 'created_at' => 'required|date',
                 'note' => 'nullable',
             ]);
 
-            $order->supplier_id = $r->supplier_id;
-            $order->status = 'pending';
+            $supplier =User::where('supplier',true)->find($r->supplier_id);
+            if(!$supplier){
+              session()->flash('error', 'Supplier are not found');
+              return back();
+            }
+            $order->supplier_id = $supplier->id;
+            $order->supplier_name = $supplier->name;
+            $order->supplier_email = $supplier->email;
+            $order->supplier_mobile = $supplier->mobile;
+            $order->supplier_address = $supplier->address_line1;
+            $order->status = $r->status?:'pending';
             $order->note = $r->note;
             $order->created_at = $r->created_at ?: now();
             $order->save();

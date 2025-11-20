@@ -76,8 +76,8 @@
 
             <form action="{{ route('admin.purchasesOrdersAction', ['update', $order->id]) }}" method="POST">
                 @csrf
-                <div class="row mb-3">
-                    <div class="col-md-4">
+                <div class="row ">
+                    <div class="col-md-4 mb-3">
                         <label>Company *</label>
                         <select id="supplier_id" name="supplier_id" class="form-control" required>
                             <option value="">Select Company</option>
@@ -92,7 +92,7 @@
                         @endif
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3 mb-3">
                         <label>Order Date*</label>
                         <input type="date" name="created_at" value="{{ $order->created_at?->format('Y-m-d') }}" class="form-control" required>
                         @if ($errors->has('created_at'))
@@ -100,9 +100,21 @@
                         @endif
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3 mb-3">
                         <label>Order Number</label>
                         <input type="text"  value="{{ $order->order_no }}" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label>Status</label>
+                        <select class="form-control" name="status" required="">
+                            <option value="pending" {{$order->status=='pending'?'selected':''}} >Pending</option>
+                            <option value="approved" {{$order->status=='approved'?'selected':''}} > Approved</option>
+                            <option value="cancelled" {{$order->status=='cancelled'?'selected':''}} > Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label>Write Note</label>
+                        <textarea class="form-control" name="note" placeholder="Write note" >{{ $order->note}}</textarea>
                     </div>
                 </div>
 

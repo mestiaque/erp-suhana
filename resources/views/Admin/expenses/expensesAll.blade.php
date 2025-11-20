@@ -1,6 +1,7 @@
 @extends(adminTheme().'layouts.app') @section('title')
 <title>{{websiteTitle('Expenses List')}}</title>
 @endsection @push('css')
+
 <style type="text/css">
     
     .expenseTableView tr th{
@@ -10,163 +11,41 @@
     .expenseTableView tr td{
         padding:5px;
     }
+    .select2-container{
+        width: calc(100% - 70px) !important;
+    }
+    .select2-container--default .select2-selection--single {
+        border-radius: 0px;
+    }
 
-
-    /* slip css start */
-
-
-
-      .slip-container {
-                background: #fff;
-                border-radius: 4px;
-                padding: 20px;
-                position: relative;
+    
+        .stats-card-box{
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px 10px 80px;
+            margin-bottom: 15px;
         }
-        
-        .header {
-            text-align: center;
+        .stats-card-box .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
         }
-        
-        .company-name {
-            font-size: 30px;
-            font-weight: bold;
+
+        .stats-card-box .sub-title {
             color: #000;
-            margin: 0;
-            letter-spacing: 1px;
-            font-family: serif;
+        }
+        .stats-card-box h3 {
+            font-size: 20px;
         }
         
-        .subtitle {
-            font-size: 13px;
-            font-weight: bold;
-            color: #000 !important;
-            margin: 5px 0;
-        }
-        
-        .contact-info {
-                font-size: 12px;
-                color: #000 !important;
-                margin: 0px 0;
-        }
-        
-        .transaction-badge {
-            background: #000;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 5px;
-            display: inline-block;
-            margin: 10px 0;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .date-field {
-            position: absolute;
-            top: 135px;
-            right: 40px;
-            font-size: 14px;
-        }
-        
-        .date-label {
-            font-weight: bold;
-        }
-        
-        .form-section {
-            margin: 20px 0;
-        }
-        
-        .form-label {
-            font-weight: bold;
-            color: #2d5016;
-            margin-bottom: 0 !important;
-        }
-        
-        .handwritten {
-            font-size: 18px;
-            color: #1a1a1a;
-            font-style: italic;
-        }
-        
-        .slip-table {
-            width: 100%;
-            margin: 20px 0;
-            border-collapse: collapse;
-        }
-        
-        .slip-table td {
-            padding: 10px;
-            border-bottom: 1px solid #5d8a3a;
-        }
-        
-        .amount-column {
-            text-align: right;
-            font-weight: bold;
-            width: 150px;
-        }
-        
-        .total-row {
-            border-top: 2px solid #2d5016;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        
-        .amount-words {
-            margin: 15px 0;
-            font-style: italic;
-        }
-        
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            padding-top: 20px;
-        }
-        
-        .signature-box {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .signature-line {
-            border-top: 1px solid #000;
-            margin: 40px 20px 5px 20px;
-            position: relative;
-        }
-        
-        .signature-text {
-            font-family: 'Brush Script MT', cursive;
-            font-size: 24px;
-            margin-top: -35px;
-            color: #1a3d0a;
-        }
-        
-        .input-underline {
-            border: none;
-            border-bottom: 1px solid #000;
-            background: transparent;
-            width: 100%;
-            font-size: 14px;
-        }
-        
-        .input-underline:focus {
-            outline: none;
-            border-bottom-color: #2d5016;
-        }
-        .amountWriteText {
-            display: flex;
-            align-items: end;
-        }
-
-        .siral {
-            left: 40px;
-        }
-
-    /* slip css end */
-    
-    
-    
 </style>
-@endpush @section('contents')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+@endpush 
+@section('contents')
 
 <div class="flex-grow-1">
     
@@ -189,39 +68,61 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                     <a class="accordion-title" href="javascript:void(0)">
-                         <i class="bx bx-filter-alt"></i>
-                        Search click Here..
-                     </a>
-                     <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                        <form action="{{route('admin.expenses')}}">
-                            <div class="row">
-                                <div class="col-md-12 mb-0">
-                                    <div class="input-group">
-                                        <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Expence Title" class="form-control {{$errors->has('search')?'error':''}}" />
-                                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                    </div>
-                                </div>
+    
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <h5><b>Search Expense</b></h5>
+                <form action="{{route('admin.expenses')}}">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <div class="input-group">
+                                <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
+                                <input type="date" name="endDate" value="{{request()->endDate}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
                             </div>
-                        </form>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="input-group">
+                                <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
+                                    <option value="">Select Expense Type</option>
+                                    @foreach($expenseTypes as $expenseType)
+                                    <option value="{{$expenseType->id}}" {{request()->expense_type==$expenseType->id?'selected':''}}>{{$expenseType->name}}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                            </div>
+                        </div>
                     </div>
+                </form>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card-box">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <span class="sub-title">Today Expense</span>
+                    <h3>{{$report['today_expenses']}}</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card-box">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <span class="sub-title">This Month</span>
+                    <h3>{{$report['monthly_expenses']}}</h3>
                 </div>
             </div>
         </div>
-        <br>
         <form action="{{route('admin.expenses')}}">
             <div class="row">
                 <div class="col-md-4">
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
+                            <!-- @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
                             <option value="1">Active</option>
                             <option value="2">Inactive</option>
-                            @endisset
+                            @endisset -->
                             @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
                             <option value="5">Delete</option>
                             @endisset
@@ -256,6 +157,7 @@
                             <th style="min-width: 120px;">Type</th>
                             <th style="min-width: 100px;">Account</th>
                             <th style="min-width: 100px;">Date</th>
+                            <th style="min-width: 120px;">Branch/Factory</th>
                             <th style="min-width: 130px;width:130px;">Action</th>
                         </tr>
                     </thead>
@@ -285,13 +187,19 @@
                                 @endif
                             </td>
                             <td>
-                                <span>{{$expense->description}}</span>
-                                @if($expense->imageFile) <a href="{{asset($expense->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif
+                                <span>{!! nl2br(e($expense->description)) !!}</span>
+                                @if($expense->imageFile) 
+                                <span style="border: 1px solid #dadada;display: inline-block;padding: 0px 10px;border-radius: 5px;">
+                                    <a href="{{asset($expense->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> 
+                                    <a href="{{route('admin.mediesDelete',$expense->imageFile->id)}}" class="mediaDelete" style="padding-left: 5px;color: #dc3545;display: inline-block;border-left: 1px solid #d2d2d2;"><i class="bx bx-trash"></i></a>
+                                </span>
+                                @endif
                             </td>
                             <td>{{priceFormat($expense->amount)}}</td>
                             <td>{{$expense->category?$expense->category->name:''}}</td>
                             <td>{{$expense->account?$expense->account->name:''}}</td>
                             <td>{{$expense->created_at->format('d-m-Y')}}</td>
+                            <td>{{$expense->branch?$expense->branch->name:''}}</td>
                             <td class="center">
                                 @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
@@ -373,7 +281,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif
                  	</div>
-                 	<div class="col-md-12 form-group">
+                 	<div class="col-md-6 form-group">
         			    <label for="name">Account Method *</label>
                         <select class="form-control" name="account" required="">
                             <option value="">Select Account</option>
@@ -385,6 +293,18 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('payment') }}</p>
         				@endif
                  	</div>
+                    <div class="col-md-6 form-group">
+                        <label>Branch/Factory *</label>
+                        <select class="form-control" name="branch_id" required="">
+                            <option value="">Select Branch/Factory</option>
+                            @foreach($branches as $branch)
+                            <option value="{{$branch->id}}">{{$branch->name}}</option>
+                            @endforeach
+                        </select>
+                        @if ($errors->has('branch_id'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('branch_id') }}</p>
+                        @endif
+                    </div>
     	       </div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>
@@ -468,7 +388,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif
                  	</div>
-                 	<div class="col-md-12 form-group">
+                 	<div class="col-md-6 form-group">
         			    <label for="name">Account Method *</label>
                         <select class="form-control" disabled="">
                             <option value="{{$dpm->account_id}}">{{$dpm->account?$dpm->account->name:''}}</option>
@@ -477,6 +397,18 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('payment') }}</p>
         				@endif
                  	</div>
+                    <div class="col-md-6 form-group">
+                        <label>Branch/Factory *</label>
+                        <select class="form-control" name="branch_id" required="">
+                            <option value="">Select Branch/Factory</option>
+                            @foreach($branches as $branch)
+                            <option value="{{$branch->id}}" {{$dpm->branch_id==$branch->id?'selected':''}} >{{$branch->name}}</option>
+                            @endforeach
+                        </select>
+                        @if ($errors->has('branch_id'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('branch_id') }}</p>
+                        @endif
+                    </div>
     	       </div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>
@@ -528,194 +460,262 @@
 @endforeach
 @endisset
 <!--View Modal -->
-@foreach($expenses as $i=>$dpm)
- <div class="modal fade text-left" id="ViewExpense_{{$dpm->id}}" tabindex="-1" role="dialog">
+@foreach($expenses as $i=>$exp)
+ <div class="modal fade text-left" id="ViewExpense_{{$exp->id}}" tabindex="-1" role="dialog">
    <div class="modal-dialog modal-lg" role="document">
 	 <div class="modal-content">
-
-
-	 {{--<form action="{{route('admin.expensesAction',['update',$dpm->id])}}" method="post" enctype="multipart/form-data" >
-	   	  @csrf
-    	   <div class="modal-header">
-    		 <h4 class="modal-title">View Expense</h4>
-    		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-    		   <span aria-hidden="true">&times; </span>
-    		 </button>
-    	   </div>
-    	   <div class="modal-body">
-    	       <div class="table-responsive">
-    	           <table class="table table-borderless expenseTableView">
-    	               <tr>
-    	                   <th style="width:150px;min-width:150px;">Date</th>
-    	                   <th style="width:25px;min-width:25px;">:</th>
-    	                   <td>{{$dpm->created_at->format('Y-m-d')}}</td>
-    	               </tr>
-    	               <tr>
-    	                   <th>Expense Type</th>
-    	                   <th>:</th>
-    	                   <td>{{$dpm->category?$dpm->category->name:''}}</td>
-    	               </tr>
-    	               <tr>
-    	                   <th>Payment Method</th>
-    	                   <th>:</th>
-    	                   <td>{{$dpm->method?$dpm->method->name:''}}</td>
-    	               </tr>
-    	               <tr>
-    	                   <th>Account Method</th>
-    	                   <th>:</th>
-    	                   <td>{{$dpm->account?$dpm->account->name:''}}</td>
-    	               </tr>
-    	               <tr>
-    	                   <th>Amount</th>
-    	                   <th>:</th>
-    	                   <td>{{priceFormat($dpm->amount)}}</td>
-    	               </tr>
-    	                <tr>
-    	                   <th>Attachment</th>
-    	                   <th>:</th>
-    	                   <td>
-    	                       @if($dpm->imageFile)
-    	                       <a href="{{asset($dpm->imageFile->file_url)}}" class="btn-custom primary" target="_blank">View Attachment</a>
-    	                       @else
-    	                       <span>No Attachment</span>
-    	                       @endif
-    	                       
-    	                   </td>
-    	               </tr>
-    	               <!-- <tr>
-    	                   <th>Title/Ref</th>
-    	                   <th>:</th>
-    	                   <td>{{$dpm->name}}</td>
-    	               </tr> -->
-    	               <tr>
-    	                   <th>Description</th>
-    	                   <th>:</th>
-    	                   <td>{!!$dpm->description!!}</td>
-    	               </tr>
-    	           </table>
-    	       </div>
-    	   </div>
-	   </form>--}}
-
-
-
-
+        <span class="btn btn-danger printBtn" style="width: 100px;">Print</span>
          <div class="slip-container">
+            <style>
+                /* slip css start */
+                .slip-container {
+                            background: #fff;
+                            border-radius: 4px;
+                            padding: 20px;
+                            position: relative;
+                    }
+                    
+                    .header {
+                        text-align: center;
+                    }
+                    
+                    .company-name {
+                        font-size: 30px;
+                        font-weight: bold;
+                        color: #000;
+                        margin: 0;
+                        letter-spacing: 1px;
+                        font-family: serif;
+                    }
+                    
+                    .subtitle {
+                        font-size: 13px;
+                        font-weight: bold;
+                        color: #000 !important;
+                        margin: 0px 0;
+                    }
+                    
+                    .contact-info {
+                            font-size: 12px;
+                            color: #000 !important;
+                            margin: 0px 0;
+                    }
+                    
+                    .transaction-badge {
+                        background: #000;
+                        color: white;
+                        padding: 5px 15px;
+                        border-radius: 5px;
+                        display: inline-block;
+                        margin: 10px 0;
+                        font-size: 12px;
+                        font-weight: bold;
+                    }
+                    
+                    .date-field {
+                        position: absolute;
+                        top: 135px;
+                        right: 40px;
+                        font-size: 14px;
+                    }
+                    
+                    .date-label {
+                        font-weight: bold;
+                    }
+                    
+                    .form-section {
+                        margin: 20px 0;
+                    }
+                    
+                    .form-label {
+                        font-weight: bold;
+                        color: #2d5016;
+                        margin-bottom: 0 !important;
+                    }
+                    
+                    .handwritten {
+                        font-size: 18px;
+                        color: #1a1a1a;
+                        font-style: italic;
+                    }
+                    
+                    .slip-table {
+                        width: 100%;
+                        margin: 20px 0;
+                        border-collapse: collapse;
+                    }
+                    
+                    .slip-table td {
+                        padding: 10px;
+                        border-bottom: 1px solid #5d8a3a;
+                    }
+                    
+                    .amount-column {
+                        text-align: right;
+                        font-weight: bold;
+                        width: 150px;
+                    }
+                    
+                    .total-row {
+                        border-top: 2px solid #2d5016;
+                        font-weight: bold;
+                        font-size: 16px;
+                    }
+                    
+                    .amount-words {
+                        margin: 15px 0;
+                        font-style: italic;
+                    }
+                    
+                    .signature-section {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 0;
+                        padding-top: 20px;
+                    }
+                    
+                    .signature-box {
+                        text-align: center;
+                        flex: 1;
+                    }
+                    
+                    .signature-line {
+                        border-top: 1px solid #000;
+                        margin: 40px 20px 5px 20px;
+                        position: relative;
+                    }
+                    
+                    .signature-text {
+                        font-family: 'Brush Script MT', cursive;
+                        font-size: 24px;
+                        margin-top: -35px;
+                        color: #1a3d0a;
+                    }
+                    
+                    .input-underline {
+                        border: none;
+                        border-bottom: 1px solid #000;
+                        background: transparent;
+                        width: 100%;
+                        font-size: 14px;
+                    }
+                    
+                    .input-underline:focus {
+                        outline: none;
+                        border-bottom-color: #2d5016;
+                    }
+                    .amountWriteText {
+                        display: flex;
+                        align-items: end;
+                    }
 
-          <div class="date-field siral">
-            <span class="date-label">SL:</span>
-            <input type="text" class="input-underline" style="width: 100px;" value="123748893457498">
-        </div>
+                    .siral {
+                        left: 40px;
+                    }
+                    .TableSlip tr th{
+                        padding:5px 10px;
+                    }
+                    .TableSlip tr td{
+                        padding:5px 10px;
 
-        <div class="header">
-            <h1 class="company-name">ANR Fashion Wear Limited.</h1>
-            <p class="subtitle">(100% Export Oriented Garments Manufacturing Factory)</p>
-            <p class="contact-info">Office: 3 Kazi Nazrul Islam Road, National University, Gazipur-1704, Bangladesh</p>
-            <p class="contact-info">Mobile: 01842 481023, info@anrfashion.com</p>
+                    }
+
+                /* slip css end */
+            </style>
             
-            <div class="transaction-badge">TRANSACTION SLIP</div>
-        </div>
-        
-        <div class="date-field">
-            <span class="date-label">Date:</span>
-            <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('Y-m-d')}}">
-        </div>
-        
-        <div class="form-section">
-            <div class="row mb-3">
-                <div class="col-12">
-                    <div class="amountWriteText">
-                        <label class="form-label">Account: </label>
-                        <input type="text" class="input-underline handwritten" value="S/o Bell Exp (Process) Sewing">
+            <div class="date-field siral">
+                <span class="date-label">SL:</span>
+                <input type="text" class="input-underline" style="width: 100px;" value="{{ str_pad($exp->id, 10, '0', STR_PAD_LEFT) }}">
+            </div>
+            <div class="header">
+                <span style="position: absolute;left: 10px;" class="barCodeShow barCodeShow_{{$exp->id}}">
+                    <svg class="showBarcode"
+                        data-no="{{ str_pad($exp->id, 10, '0', STR_PAD_LEFT) }}">
+                    </svg>
+                </span>
+                 
+
+
+                <h1 class="company-name">{{general()->title}}</h1>
+                <p class="subtitle">(100% Export Oriented Garments Manufacturing Factory)</p>
+                <p class="contact-info">{!!general()->address_one!!}</p>
+                <p class="contact-info">Mobile: {{general()->mobile}}, {{general()->email}}</p>
+                
+                <div class="transaction-badge">TRANSACTION SLIP</div>
+            </div>
+            
+            <div class="date-field">
+                <span class="date-label">Date:</span>
+                <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('Y-m-d')}}">
+            </div>
+            
+            <div class="form-section">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="amountWriteText">
+                            <label class="form-label">Account: </label>
+                            <input type="text" class="input-underline handwritten" value="S/o {{$exp->account?$exp->account->name:''}} Exp {{$exp->category?$dpm->category->name:''}}">
+                        </div>
+                
                     </div>
-               
                 </div>
             </div>
-            
-           
-        </div>
-        
-
-     <table class="table table-bordered">
-        <tbody>
-            <tr>
-                <td colspan="8"><b>Cash Paid To </b></td>
-                <td><b>Taka</b></td>
-            </tr>
-            <tr>
-                <td colspan="8">{!!$dpm->description!!}</td>
-                <td>{{priceFormat($dpm->amount)}}</td>
-            </tr>
-            <tr>
-                <td colspan="8"></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="8"></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="8"></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="8"></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="8"></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="8"></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="8" style="text-align: right;"><b>Total </b></td>
-                <td>{{priceFormat($dpm->amount)}}</td>
-            </tr>
-        </tbody>
-    </table>
-
-   <div class="form-section">
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="amountWriteText">
-                    <label class="form-label" style="min-width: 100px;">Taka in word:</label>
-                    <input type="text" class="input-underline handwritten" value="Five Thousand Only">
+            <table class="table table-bordered TableSlip">
+                <tbody>
+                    <tr>
+                        <td><b>Cash Paid To </b></td>
+                        <td style="min-width: 150px;width: 150px;"><b>Taka</b></td>
+                    </tr>
+                    <tr>
+                        <td>{!! nl2br(e($exp->description)) !!}</td>
+                        <td>{{numberFormat($exp->amount,2)}}</td>
+                    </tr>
+                    <tr>
+                        <td style="height:30px;"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="height:30px;"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;"><b>Total </b></td>
+                        <td>{{numberFormat($exp->amount,2)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="form-section">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="amountWriteText">
+                            <label class="form-label" style="min-width: 120px;width: 120px;">Taka in word:</label>
+                            <span class="input-underline handwritten TotalAmoutnInWord" data-amount="{{$exp->amount}}" ></span>
+                        </div>
+                    
+                    </div>
                 </div>
-            
             </div>
-        </div>
-    </div>
-        <div class="signature-section">
-            <div class="signature-box">
-                <div class="signature-line">
-                    <div class="signature-text">Athlas</div>
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <div class="signature-text" style="height: 1px;"></div>
+                    </div>
+                    <small>Receiver</small>
                 </div>
-                <small>Receiver</small>
-            </div>
-            <div class="signature-box">
-                <div class="signature-line">
-                    <div class="signature-text">Athlas</div>
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <div class="signature-text" style="height: 1px;"></div>
+                    </div>
+                    <small>Accountant</small>
                 </div>
-                <small>Accountant</small>
-            </div>
-            <div class="signature-box">
-                <div class="signature-line">
-                     <div class="signature-text">Athlas</div>
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <div class="signature-text" style="height: 1px;" ></div>
+                    </div>
+                    <small>Approved by</small>
                 </div>
-                <small>Approved by</small>
             </div>
         </div>
-    </div>
-
-
-
-
-
-
-
 	 </div>
    </div>
  </div>
@@ -726,6 +726,70 @@
 @endsection 
 @push('js')
 
+<script>
+    $(document).ready(function(){
+
+        $(document).on('click', '.printBtn', function () {
+
+            // Get only the slip HTML
+            let slip = $(this).closest('.modal-content').find('.slip-container').html();
+
+            // Save the original page content
+            let originalContent = document.body.innerHTML;
+
+            // Replace body with slip content
+            document.body.innerHTML = `
+                <html>
+                <head>
+                    <title>Print Slip</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        table, th, td { border: 1px solid #000; padding: 6px; }
+                    </style>
+                </head>
+                <body>
+                    ${slip}
+                </body>
+                </html>
+            `;
+
+            // Trigger print preview
+            window.print();
+
+            // After print, restore original page
+            document.body.innerHTML = originalContent;
+        });
 
 
+        $(".select2").each(function () {
+            var placeHolder = $(this).data('placeholder');
+            
+            $(this).select2({
+                placeholder: placeHolder,
+                allowClear: true
+            });
+        });      
+        
+        $('.showBarcode').each(function () {
+            let code = $(this).data('no');
+            console.log("BARCODE =>", code);
+
+            JsBarcode(this, code, {
+                format: "CODE128",
+                displayValue: true,
+                fontSize: 16,
+                height: 35
+            });
+        });
+
+
+        $('.TotalAmoutnInWord').each(function () {
+            var amount = Number($(this).data('amount'));
+            var words = toWords(amount);
+            $(this).html(words + ' Taka Only');
+        });
+
+    });
+</script>
 @endpush

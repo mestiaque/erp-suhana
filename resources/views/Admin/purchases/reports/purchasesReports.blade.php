@@ -52,7 +52,7 @@
 
 
 
-            <div class="printableArea PrintAreaContact">
+            <div class="PrintAreaContact">
                 <style>
                     .tableReport tr th{
                         padding: 5px 10px;
@@ -72,7 +72,7 @@
                         <b>Phone:</b> {{general()->mobile}}
                         <b>Email:</b> {{general()->email}}
                         <br>
-                        <b>Report Date:</b>
+                        <b>Purchases Report Date:</b>
                         {{ date('d M, Y') }}
                     </p>
                 </div>
