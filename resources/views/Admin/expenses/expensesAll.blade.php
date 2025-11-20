@@ -659,7 +659,7 @@
                     <div class="col-12">
                         <div class="amountWriteText">
                             <label class="form-label">Account: </label>
-                            <input type="text" class="input-underline handwritten" value="S/o {{$exp->account?$exp->account->name:''}} Exp {{$exp->category?$dpm->category->name:''}}">
+                            <input type="text" class="input-underline handwritten" value="S/o {{$exp->account?$exp->account->name:''}} Exp {{$exp->category?$exp->category->name:''}}">
                         </div>
                 
                     </div>
@@ -797,7 +797,7 @@
 
             JsBarcode(this, code, {
                 format: "CODE128",
-                displayValue: true,
+                displayValue: false,
                 fontSize: 16,
                 height: 35
             });
