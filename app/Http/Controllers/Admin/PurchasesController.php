@@ -796,7 +796,7 @@ class PurchasesController extends Controller
                   }
                   if($r->supplier_id){
                       $q->where('supplier_id',$r->supplier_id);
-                  } 
+                  }
               })
               ->paginate(25)->appends($r->all());
 
@@ -806,9 +806,6 @@ class PurchasesController extends Controller
       return view(adminTheme().'purchases.reports.purchasesReports',compact('orders','suppliers'));
     }
 
-    // ================================
-    //  LIST PAGE
-    // ================================
     public function purchasesOrders(Request $r)
     {
         if ($r->action && $r->checkid) {
@@ -832,30 +829,52 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $orders = PurchaseOrder::latest()->where('status', '<>', 'temp')
-            ->where(function ($q) use ($r) {
+        $orders = PurchaseOrder::latest()
+            ->where('status', '<>', 'temp')
+
+            ->where(function($q) use ($r){
+
+                // SEARCH
                 if ($r->search) {
-                    $q->where('order_no', 'LIKE', '%' . $r->search . '%');
-                    $q->orWhereHas('supplier', function ($qq) use ($r) {
-                        $qq->where('supplier_name', 'LIKE', '%' . $r->search . '%');
+
+                    $search = $r->search;
+
+                    $q->where(function($qq) use ($search){
+
+                        // order_no
+                        $qq->where('order_no', 'LIKE', "%{$search}%")
+
+                        // supplier name (fixed)
+                        ->orWhereHas('supplier', function($sup) use ($search){
+                            $sup->where('users.supplier', 1)       // FIX 1
+                                ->where('users.name','LIKE',"%{$search}%"); // FIX 2
+                        });
+
                     });
                 }
 
+                // DATE RANGE
                 if ($r->startDate || $r->endDate) {
                     $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to = $r->endDate ?: now()->format('Y-m-d');
-                    $q->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+                    $to   = $r->endDate   ?: now()->format('Y-m-d');
+
+                    $q->whereDate('created_at','>=',$from)
+                    ->whereDate('created_at','<=',$to);
                 }
 
+                // STATUS
                 if ($r->status) {
                     $q->where('status', $r->status);
                 } else {
                     $q->where('status', '<>', 'trash');
                 }
+
             })
+
             ->paginate(25)
             ->appends($r->all());
 
+        // TOTAL COUNTS (unchanged)
         $totals = DB::table('purchase_orders')->where('status', '<>', 'temp')
             ->selectRaw("count(case when status != 'trash' then 1 end) as total")
             ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
@@ -867,9 +886,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'purchases.orders.index', compact('orders', 'totals'));
     }
 
-    // ================================
-    //  CREATE / EDIT ACTION
-    // ================================
+
     public function purchasesOrdersAction(Request $r, $action, $id = null)
     {
         // CREATE
@@ -1037,9 +1054,6 @@ class PurchasesController extends Controller
     }
 
 
-    // ================================
-    // LIST PAGE
-    // ================================
     public function purchasesReceived(Request $r)
     {
         $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
@@ -1096,9 +1110,6 @@ class PurchasesController extends Controller
         return view(adminTheme().'purchases.receives.index', compact('receives','totals', 'purchases', 'branches'));
     }
 
-    // ================================
-    // CREATE / EDIT / ITEM / UPDATE
-    // ================================
     public function purchasesReceivedAction(Request $r, $action, $id = null)
     {
         // -----------------------
@@ -1251,6 +1262,193 @@ class PurchasesController extends Controller
             return view(adminTheme().'purchases.receives.view', compact('receive'));
         }
     }
+
+
+    public function billPayment(Request $r)
+    {
+        // Totals Count
+        $totals = PurchaseOrder::selectRaw("count(*) as total")
+            ->selectRaw("count(case when payment_status='due' then 1 end) as due")
+            ->selectRaw("count(case when payment_status='partial' then 1 end) as partial")
+            ->selectRaw("count(case when payment_status='paid' then 1 end) as paid")
+            ->first();
+
+        // Main Query
+        $purchases = PurchaseOrder::with('supplier')
+            ->where('status', '<>', 'trash')
+
+            ->when($r->status, function($q) use ($r){
+                $q->where('payment_status', $r->status);
+            })
+
+            ->when($r->search, function($query) use ($r){
+
+                $search = $r->search;
+
+                $query->where(function($q) use ($search){
+
+                    $q->where('order_no', 'LIKE', '%'.$search.'%')
+                    ->orWhere('supplier_name', 'LIKE', '%'.$search.'%');
+                });
+
+            })
+
+            ->when(($r->startDate || $r->endDate), function($q) use ($r){
+                $from = $r->startDate ?: now()->format('Y-m-d');
+                $to   = $r->endDate ?: now()->format('Y-m-d');
+                $q->whereDate('created_at', '>=', $from)
+                ->whereDate('created_at', '<=', $to);
+            })
+
+            ->orderBy('id', 'desc')
+            ->paginate(20)
+            ->appends($r->all());
+            // return $purchases;
+
+        return view(adminTheme().'purchases.bill-payments.index', compact('purchases','totals'));
+    }
+
+
+
+    public function billPaymentAction($action, $id = null)
+    {
+        $request = request();
+        if ($action == 'can-pay-info') {
+
+            $purchase = PurchaseOrder::findOrFail($id);
+            $canInfo = collect([
+                'can_pay_by' => $purchase->canPayBy?->name,
+                'can_pay_at' => $purchase->can_pay_at,
+                'can_pay_note' => $purchase->can_pay_note,
+            ]);
+             return view(adminTheme().'purchases.bill-payments.can-pay-info', compact('canInfo'));
+        }
+        if ($action == 'pay') {
+
+            $purchase = PurchaseOrder::findOrFail($id);
+            $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
+            $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
+            $transactions = Transaction::where('src_id', $purchase->id)->where('type', 3)->latest()->get();
+
+            return view(adminTheme().'purchases.bill-payments.view', compact('purchase', 'paymentMethods', 'accountMethods', 'transactions'));
+        }
+
+        if ($action == 'save') {
+            $purchase = PurchaseOrder::findOrFail($id);
+
+            $pay_amount = floatval(request()->pay_amount);
+
+            // Update due & paid
+            $purchase->due_amount = max(0, $purchase->due_amount - $pay_amount);
+            $purchase->paid_amount += $pay_amount;
+
+            // Update payment_status
+            if ($purchase->due_amount <= 0) {
+                $purchase->payment_status = 'paid';
+                $purchase->due_amount = 0;
+            } elseif ($purchase->due_amount < $purchase->grand_total) {
+                $purchase->payment_status = 'partial';
+            } else {
+                $purchase->payment_status = 'due';
+            }
+
+            $paymentMethods =Attribute::find(request()->payment_method_id);
+            $transactionData = [
+                            "src_id"            => $purchase->id,
+                            "user_id"           => $purchase->supplier_id,
+
+                            "billing_name"      =>  $purchase->supplier_name ?? null,
+                            "billing_mobile"    =>  $purchase->supplier_mobile ?? null,
+                            "billing_email"     =>  $purchase->supplier_email ?? null,
+                            "billing_address"   =>  $purchase->supplier_address ?? null,
+                            "billing_note"      =>  request()->note ?? null,
+                            "type"              => 3,
+                            "account_id"        => request()->account_id ?? null,
+                            "transection_id"    => date('Ymd') . random_int(1000, 9999),
+                            "payment_method"    => $paymentMethods->name,
+                            "payment_method_id" => $paymentMethods->id,
+                            "amount"      => request()->pay_amount,
+                            "currency"          => "BDT",
+                            "status"            => "Pending",
+                            "addedby_id"        => Auth::user()->id,
+                        ];
+
+
+            // Save payment history
+            Transaction::create( $transactionData );
+
+            $purchase->save();
+
+            return redirect()->back()->with('success', 'Payment Successful!');
+        }
+
+        if ($action == 'update'){
+
+            $transaction = Transaction::findOrFail($id);
+            $purchase = PurchaseOrder::findOrFail($transaction->src_id);
+
+            $old_amount = floatval($transaction->amount);
+            $new_amount = floatval($request->pay_amount);
+
+            // Adjust purchase paid & due
+            $purchase->paid_amount = ($purchase->paid_amount - $old_amount) + $new_amount;
+            $purchase->due_amount = max(0, $purchase->grand_total - $purchase->paid_amount);
+
+            // Update payment status
+            if ($purchase->due_amount <= 0) {
+                $purchase->payment_status = 'paid';
+                $purchase->due_amount = 0;
+            } elseif ($purchase->due_amount < $purchase->grand_total) {
+                $purchase->payment_status = 'partial';
+            } else {
+                $purchase->payment_status = 'due';
+            }
+
+            // Update account method & payment method
+            $paymentMethod = Attribute::find($request->payment_method_id);
+
+            // Update transaction
+            $transaction->update([
+                "amount"            => $new_amount,
+                "account_id"        => $request->account_id,
+                "payment_method_id" => $paymentMethod->id,
+                "payment_method"    => $paymentMethod->name,
+                "billing_note"      => $request->note,
+            ]);
+
+            $purchase->save();
+
+            return back()->with('success', 'Payment Updated Successfully!');
+        }
+
+        if ($action == 'delete'){
+            $transaction = Transaction::findOrFail($id);
+            $purchase = PurchaseOrder::findOrFail($transaction->src_id);
+
+            $amount = floatval($transaction->amount);
+
+            // Reverse the payment
+            $purchase->paid_amount -= $amount;
+            $purchase->due_amount = max(0, $purchase->grand_total - $purchase->paid_amount);
+
+            // Update payment status
+            if ($purchase->paid_amount <= 0) {
+                $purchase->payment_status = 'due';
+            } elseif ($purchase->paid_amount < $purchase->grand_total) {
+                $purchase->payment_status = 'partial';
+            } else {
+                $purchase->payment_status = 'paid';
+            }
+
+            $purchase->save();
+
+            $transaction->delete();
+
+            return back()->with('success', 'Payment Updated Successfully!');
+        }
+    }
+
+
 
 
 

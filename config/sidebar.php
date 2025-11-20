@@ -110,7 +110,7 @@ return [
             ]
         ]
     ],
-    
+
     // Accounts Management
     [
         'group_title' => 'ACCOUNTS MANAGEMENT',
@@ -160,6 +160,28 @@ return [
                     'title'       => 'Expense Reports',
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/reports',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+            ]
+         ],
+        [
+            'title'      => 'Finance',
+            'icon'       => 'fas fa-coins',
+            'icon_color' => 'text-warning',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Bill Payment',
+                    'icon'        => 'fas fa-credit-card',
+                    'route'       => '/admin/bill-payments',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Bill Collection',
+                    'icon'        => 'fas fa-wallet',
+                    'route'       => '/admin/bill-collection',
                     'icon_color'  => 'text-warning',
                     'permission'  => ''
                 ],
