@@ -464,7 +464,12 @@
  <div class="modal fade text-left" id="ViewExpense_{{$exp->id}}" tabindex="-1" role="dialog">
    <div class="modal-dialog modal-lg" role="document">
 	 <div class="modal-content">
-        <span class="btn btn-danger printBtn" style="width: 100px;">Print</span>
+        <div>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="width: 50px;float: right;padding: 10px;">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <span class="btn btn-danger printBtn" style="width: 100px;">Print</span>
+        </div>
          <div class="slip-container">
             <style>
                 /* slip css start */
@@ -731,14 +736,22 @@
 
         $(document).on('click', '.printBtn', function () {
 
-            // Get only the slip HTML
             let slip = $(this).closest('.modal-content').find('.slip-container').html();
 
-            // Save the original page content
-            let originalContent = document.body.innerHTML;
+            // Create hidden iframe
+            let iframe = document.createElement('iframe');
+            iframe.style.position = "fixed";
+            iframe.style.right = "0";
+            iframe.style.bottom = "0";
+            iframe.style.width = "0";
+            iframe.style.height = "0";
+            iframe.style.border = "0";
+            document.body.appendChild(iframe);
 
-            // Replace body with slip content
-            document.body.innerHTML = `
+            let doc = iframe.contentWindow.document;
+
+            doc.open();
+            doc.write(`
                 <html>
                 <head>
                     <title>Print Slip</title>
@@ -752,14 +765,21 @@
                     ${slip}
                 </body>
                 </html>
-            `;
+            `);
+            doc.close();
 
-            // Trigger print preview
-            window.print();
+            // Wait for iframe content to load then print
+            iframe.onload = function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
 
-            // After print, restore original page
-            document.body.innerHTML = originalContent;
+                // Remove iframe after printing
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 300);
+            };
         });
+
 
 
         $(".select2").each(function () {
