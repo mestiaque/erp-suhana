@@ -796,7 +796,10 @@ class PurchasesController extends Controller
               })
               ->paginate(25)->appends($r->all());
 
-      return view(adminTheme().'purchases.reports.purchasesReports',compact('orders'));
+      $suppliers =User::where('supplier',true)->where('status',1)
+                  ->select(['id','name','company_name'])->get();
+
+      return view(adminTheme().'purchases.reports.purchasesReports',compact('orders','suppliers'));
     }
 
     public function purchasesOrders(Request $r)
