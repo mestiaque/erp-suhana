@@ -83,7 +83,7 @@
                                     <th>#</th>
                                     <th>Transaction ID</th>
                                     <th>Amount</th>
-                                    <th>Paid At</th>
+                                    <th>Paid Date</th>
                                     <th>Note</th>
                                     {{-- <th>Account</th> --}}
                                     <th>Method</th>
