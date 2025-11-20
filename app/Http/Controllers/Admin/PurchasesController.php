@@ -792,16 +792,13 @@ class PurchasesController extends Controller
                   }
                   if($r->supplier_id){
                       $q->where('supplier_id',$r->supplier_id);
-                  } 
+                  }
               })
               ->paginate(25)->appends($r->all());
 
       return view(adminTheme().'purchases.reports.purchasesReports',compact('orders'));
     }
 
-    // ================================
-    //  LIST PAGE
-    // ================================
     public function purchasesOrders(Request $r)
     {
         if ($r->action && $r->checkid) {
@@ -825,30 +822,52 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $orders = PurchaseOrder::latest()->where('status', '<>', 'temp')
-            ->where(function ($q) use ($r) {
+        $orders = PurchaseOrder::latest()
+            ->where('status', '<>', 'temp')
+
+            ->where(function($q) use ($r){
+
+                // SEARCH
                 if ($r->search) {
-                    $q->where('order_no', 'LIKE', '%' . $r->search . '%');
-                    $q->orWhereHas('supplier', function ($qq) use ($r) {
-                        $qq->where('supplier_name', 'LIKE', '%' . $r->search . '%');
+
+                    $search = $r->search;
+
+                    $q->where(function($qq) use ($search){
+
+                        // order_no
+                        $qq->where('order_no', 'LIKE', "%{$search}%")
+
+                        // supplier name (fixed)
+                        ->orWhereHas('supplier', function($sup) use ($search){
+                            $sup->where('users.supplier', 1)       // FIX 1
+                                ->where('users.name','LIKE',"%{$search}%"); // FIX 2
+                        });
+
                     });
                 }
 
+                // DATE RANGE
                 if ($r->startDate || $r->endDate) {
                     $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to = $r->endDate ?: now()->format('Y-m-d');
-                    $q->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+                    $to   = $r->endDate   ?: now()->format('Y-m-d');
+
+                    $q->whereDate('created_at','>=',$from)
+                    ->whereDate('created_at','<=',$to);
                 }
 
+                // STATUS
                 if ($r->status) {
                     $q->where('status', $r->status);
                 } else {
                     $q->where('status', '<>', 'trash');
                 }
+
             })
+
             ->paginate(25)
             ->appends($r->all());
 
+        // TOTAL COUNTS (unchanged)
         $totals = DB::table('purchase_orders')->where('status', '<>', 'temp')
             ->selectRaw("count(case when status != 'trash' then 1 end) as total")
             ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
@@ -860,9 +879,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'purchases.orders.index', compact('orders', 'totals'));
     }
 
-    // ================================
-    //  CREATE / EDIT ACTION
-    // ================================
+
     public function purchasesOrdersAction(Request $r, $action, $id = null)
     {
         // CREATE
@@ -1020,9 +1037,6 @@ class PurchasesController extends Controller
     }
 
 
-    // ================================
-    // LIST PAGE
-    // ================================
     public function purchasesReceived(Request $r)
     {
         $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
@@ -1079,9 +1093,6 @@ class PurchasesController extends Controller
         return view(adminTheme().'purchases.receives.index', compact('receives','totals', 'purchases', 'branches'));
     }
 
-    // ================================
-    // CREATE / EDIT / ITEM / UPDATE
-    // ================================
     public function purchasesReceivedAction(Request $r, $action, $id = null)
     {
         // -----------------------
@@ -1234,6 +1245,108 @@ class PurchasesController extends Controller
             return view(adminTheme().'purchases.receives.view', compact('receive'));
         }
     }
+
+
+    public function billPayment(Request $r)
+    {
+        // Totals Count
+        $totals = PurchaseOrder::selectRaw("count(*) as total")
+            ->selectRaw("count(case when payment_status='due' then 1 end) as due")
+            ->selectRaw("count(case when payment_status='partial' then 1 end) as partial")
+            ->selectRaw("count(case when payment_status='paid' then 1 end) as paid")
+            ->first();
+
+        // Main Query
+        $purchases = PurchaseOrder::with('supplier')
+            ->where('status', '<>', 'trash')
+
+            ->when($r->status, function($q) use ($r){
+                $q->where('payment_status', $r->status);
+            })
+
+            ->when($r->search, function($query) use ($r){
+
+                $search = $r->search;
+
+                $query->where(function($q) use ($search){
+
+                    $q->where('order_no', 'LIKE', '%'.$search.'%')
+                    ->orWhere('supplier_name', 'LIKE', '%'.$search.'%');
+                });
+
+            })
+
+            ->when(($r->startDate || $r->endDate), function($q) use ($r){
+                $from = $r->startDate ?: now()->format('Y-m-d');
+                $to   = $r->endDate ?: now()->format('Y-m-d');
+                $q->whereDate('created_at', '>=', $from)
+                ->whereDate('created_at', '<=', $to);
+            })
+
+            ->orderBy('id', 'desc')
+            ->paginate(20)
+            ->appends($r->all());
+            // return $purchases;
+
+        return view(adminTheme().'purchases.bill-payments.index', compact('purchases','totals'));
+    }
+
+
+
+    public function billPaymentAction($action, $id = null)
+    {
+        if ($action == 'can-pay-info') {
+
+            $purchase = PurchaseOrder::findOrFail($id);
+            $canInfo = collect([
+                'can_pay_by' => $purchase->canPayBy?->name,
+                'can_pay_at' => $purchase->can_pay_at,
+                'can_pay_note' => $purchase->can_pay_note,
+            ]);
+             return view(adminTheme().'purchases.bill-payments.can-pay-info', compact('canInfo'));
+        }
+        if ($action == 'pay') {
+
+            $purchase = PurchaseOrder::findOrFail($id);
+
+            return view(adminTheme().'purchases.bill-payments.view', compact('purchase'));
+        }
+
+        if ($action == 'save') {
+
+            $purchase = PurchaseOrder::findOrFail($id);
+
+            $pay_amount = request()->pay_amount;
+
+            // Update due
+            $purchase->due_amount -= $pay_amount;
+
+            // Update payment_status
+            if ($purchase->due_amount <= 0) {
+                $purchase->payment_status = 'paid';
+                $purchase->due_amount = 0;
+            } elseif ($purchase->due_amount < $purchase->grand_total) {
+                $purchase->payment_status = 'partial';
+            } else {
+                $purchase->payment_status = 'due';
+            }
+
+            // Save payment history
+            Payment::create([
+                'purchase_id' => $purchase->id,
+                'amount'      => $pay_amount,
+                'payment_date'=> request()->payment_date,
+                'note'        => request()->note,
+                'addedby_id'  => auth()->id(),
+            ]);
+
+            $purchase->save();
+
+            return redirect()->route('admin.billPayment')->with('success', 'Payment Successful!');
+        }
+    }
+
+
 
 
 
