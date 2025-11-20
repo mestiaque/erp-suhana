@@ -1298,6 +1298,7 @@ class PurchasesController extends Controller
 
     public function billPaymentAction($action, $id = null)
     {
+        $request = request();
         if ($action == 'can-pay-info') {
 
             $purchase = PurchaseOrder::findOrFail($id);
@@ -1311,18 +1312,21 @@ class PurchasesController extends Controller
         if ($action == 'pay') {
 
             $purchase = PurchaseOrder::findOrFail($id);
+            $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
+            $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
+            $transactions = Transaction::where('src_id', $purchase->id)->where('type', 3)->latest()->get();
 
-            return view(adminTheme().'purchases.bill-payments.view', compact('purchase'));
+            return view(adminTheme().'purchases.bill-payments.view', compact('purchase', 'paymentMethods', 'accountMethods', 'transactions'));
         }
 
         if ($action == 'save') {
-
             $purchase = PurchaseOrder::findOrFail($id);
 
-            $pay_amount = request()->pay_amount;
+            $pay_amount = floatval(request()->pay_amount);
 
-            // Update due
-            $purchase->due_amount -= $pay_amount;
+            // Update due & paid
+            $purchase->due_amount = max(0, $purchase->due_amount - $pay_amount);
+            $purchase->paid_amount += $pay_amount;
 
             // Update payment_status
             if ($purchase->due_amount <= 0) {
@@ -1334,18 +1338,99 @@ class PurchasesController extends Controller
                 $purchase->payment_status = 'due';
             }
 
+            $paymentMethods =Attribute::find(request()->payment_method_id);
+            $transactionData = [
+                            "src_id"            => $purchase->id,
+                            "user_id"           => $purchase->supplier_id,
+
+                            "billing_name"      =>  $purchase->supplier_name ?? null,
+                            "billing_mobile"    =>  $purchase->supplier_mobile ?? null,
+                            "billing_email"     =>  $purchase->supplier_email ?? null,
+                            "billing_address"   =>  $purchase->supplier_address ?? null,
+                            "billing_note"      =>  request()->note ?? null,
+                            "type"              => 3,
+                            "account_id"        => request()->account_id ?? null,
+                            "transection_id"    => date('Ymd') . random_int(1000, 9999),
+                            "payment_method"    => $paymentMethods->name,
+                            "payment_method_id" => $paymentMethods->id,
+                            "amount"      => request()->pay_amount,
+                            "currency"          => "BDT",
+                            "status"            => "Pending",
+                            "addedby_id"        => Auth::user()->id,
+                        ];
+
+
             // Save payment history
-            Payment::create([
-                'purchase_id' => $purchase->id,
-                'amount'      => $pay_amount,
-                'payment_date'=> request()->payment_date,
-                'note'        => request()->note,
-                'addedby_id'  => auth()->id(),
+            Transaction::create( $transactionData );
+
+            $purchase->save();
+
+            return redirect()->back()->with('success', 'Payment Successful!');
+        }
+
+        if ($action == 'update'){
+
+            $transaction = Transaction::findOrFail($id);
+            $purchase = PurchaseOrder::findOrFail($transaction->src_id);
+
+            $old_amount = floatval($transaction->amount);
+            $new_amount = floatval($request->pay_amount);
+
+            // Adjust purchase paid & due
+            $purchase->paid_amount = ($purchase->paid_amount - $old_amount) + $new_amount;
+            $purchase->due_amount = max(0, $purchase->grand_total - $purchase->paid_amount);
+
+            // Update payment status
+            if ($purchase->due_amount <= 0) {
+                $purchase->payment_status = 'paid';
+                $purchase->due_amount = 0;
+            } elseif ($purchase->due_amount < $purchase->grand_total) {
+                $purchase->payment_status = 'partial';
+            } else {
+                $purchase->payment_status = 'due';
+            }
+
+            // Update account method & payment method
+            $paymentMethod = Attribute::find($request->payment_method_id);
+
+            // Update transaction
+            $transaction->update([
+                "amount"            => $new_amount,
+                "account_id"        => $request->account_id,
+                "payment_method_id" => $paymentMethod->id,
+                "payment_method"    => $paymentMethod->name,
+                "billing_note"      => $request->note,
             ]);
 
             $purchase->save();
 
-            return redirect()->route('admin.billPayment')->with('success', 'Payment Successful!');
+            return back()->with('success', 'Payment Updated Successfully!');
+        }
+
+        if ($action == 'delete'){
+            $transaction = Transaction::findOrFail($id);
+            $purchase = PurchaseOrder::findOrFail($transaction->src_id);
+
+            $amount = floatval($transaction->amount);
+
+            // Reverse the payment
+            $purchase->paid_amount -= $amount;
+            $purchase->due_amount = max(0, $purchase->grand_total - $purchase->paid_amount);
+
+            // Update payment status
+            if ($purchase->paid_amount <= 0) {
+                $purchase->payment_status = 'due';
+            } elseif ($purchase->paid_amount < $purchase->grand_total) {
+                $purchase->payment_status = 'partial';
+            } else {
+                $purchase->payment_status = 'paid';
+            }
+
+            $purchase->save();
+
+            $transaction->delete();
+
+            return back()->with('success', 'Payment Updated Successfully!');
         }
     }
 
