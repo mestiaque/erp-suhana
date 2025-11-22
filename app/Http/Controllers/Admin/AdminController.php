@@ -3996,7 +3996,7 @@ class AdminController extends Controller
             $to=Carbon::now();
         }
 
-        $expenses = ExpenseIou::latest()->where('status','active')
+        $expenses = ExpenseIou::latest()
             ->where(function($q) use ($r) {
 
                 if($r->search){
