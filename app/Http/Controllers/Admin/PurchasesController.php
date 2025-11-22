@@ -25,6 +25,7 @@ use App\Models\PurchaseReceive;
 use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseReceiveItem;
 use App\Models\PurchaseRequisition;
+use App\Models\MeterialStock;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseRequisitionItem;
 
@@ -376,7 +377,7 @@ class PurchasesController extends Controller
                               $q->where('category_id',$r->category_id);
                           }
                       })
-                      ->select(['id','name','slug','type','description','category_id','unit_id','created_at','addedby_id','status','fetured'])
+                      ->select(['id','name','slug','type','description','category_id','unit_id','quantity','created_at','addedby_id','status','fetured'])
                       ->paginate(25)->appends([
                         'category_id'=>$r->category_id,
                       ]);
@@ -1110,8 +1111,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'purchases.receives.index', compact('receives','totals', 'purchases', 'branches'));
     }
 
-    public function purchasesReceivedAction(Request $r, $action, $id = null)
-    {
+    public function purchasesReceivedAction(Request $r, $action, $id = null){
         // -----------------------
         // AJAX CREATE VIA MODAL
         // -----------------------
@@ -1140,7 +1140,7 @@ class PurchasesController extends Controller
                 'branch_id'           => $r->branch_id,
                 'purchase_no'         => $purchase->order_no,
                 'challan_no'          => null,
-                'purchase_receive_no' => 'PR'.now()->format('Ymd').$purchase->id,
+                'purchase_receive_no' => now()->format('ymdhis').$purchase->id,
                 'status'              => 'temp',
                 'addedby_id'          => Auth::id()
             ]);
@@ -1189,15 +1189,8 @@ class PurchasesController extends Controller
         // -----------------------
         // ITEM CRUD (AJAX)
         // -----------------------
-        if (in_array($action, ['add-item','update-item','remove-item'])) {
+        if (in_array($action, ['update-item'])) {
             $receive = PurchaseReceive::with('items')->findOrFail($id);
-
-            if ($action == 'add-item') {
-                $item = new PurchaseReceiveItem();
-                $item->purchase_receive_id = $receive->id;
-                $item->addedby_id = Auth::id();
-                $item->save();
-            }
 
             if ($action == 'update-item') {
                 $item = PurchaseReceiveItem::find($r->item_id);
@@ -1213,18 +1206,14 @@ class PurchasesController extends Controller
                         $receivedQty = $maxQty;
                     }
 
+
                     $item->received_qty = $receivedQty;
                     $item->save();
                 }
             }
 
-
-            if ($action == 'remove-item') {
-                PurchaseReceiveItem::where('id',$r->item_id)->delete();
-            }
-
-            $view = view(adminTheme().'purchases.receives.includes.items', compact('receive'))->render();
-            return response()->json(['success'=>true,'view'=>$view]);
+            // $view = view(adminTheme().'purchases.receives.includes.items', compact('receive'))->render();
+            return response()->json(['success'=>true]);
         }
 
         // -----------------------
@@ -1236,14 +1225,82 @@ class PurchasesController extends Controller
                 'challan_no' => 'required',
             ]);
 
-            $receive->status = "pending";
+            foreach($receive->items as $item){
+              $purchase =$item->purchase;
+              $qty = $r['qty_'.$item->id] ?? 0;
+
+              if($qty > 0 && $purchase){
+                
+                $stock =MeterialStock::where('branch_id',$receive->branch_id)->where('meterial_id',$item->material_id)->first();
+                if(!$stock){
+                  $stock =new MeterialStock();
+                  $stock->branch_id =$receive->branch_id;
+                  $stock->meterial_id =$item->material_id;
+                  $stock->save();
+                }
+
+                $oldQty =$item->received_qty;
+                if($oldQty > $qty){
+                  $needQty =$oldQty - $qty;
+                  //Received Update
+                  $data =$purchase->items()->find($item->purchase_item_id);
+                  if($data){
+                    if($stock->quantity >= $needQty){
+                      //Reveived Data update
+                      $item->received_qty =$qty;
+                      $item->save();
+
+                      //Purchsee Data update
+                      $data->received_qty -=$needQty;
+                      $data->save();
+
+                      //Branch wise quantity update
+                      $stock->quantity -=$needQty;
+                      $stock->save();
+                    }
+                  }
+
+                }elseif($oldQty < $qty){
+                  $needQty =$qty - $oldQty;
+                  //Received Update
+                  $data =$purchase->items()->find($item->purchase_item_id);
+                  if($data){
+                    $data->received_qty +=$needQty;
+                    if($data->received_qty <=  $data->qty){
+
+                      //Reveived Data update
+                      $item->received_qty =$qty;
+                      $item->save();
+
+                      //Purchsee Data update
+                      $data->save();
+                      
+                      //Branch wise quantity update
+                      $stock->quantity +=$needQty;
+                      $stock->save();
+                    }
+                  }
+                
+                }
+
+                //Meterial quantity update
+                $meterial =$item->meterial;
+                if($meterial){
+                  $meterial->quantity=$meterial->materialStockQty();
+                  $meterial->save();
+                }
+
+              }
+            }
+
+            $receive->status = "approved";
             $receive->note = $r->note;
             $receive->challan_no = $r->challan_no;
             $receive->created_at = $r->created_at ?: now();
             $receive->save();
 
             session()->flash('success','Purchase Receive Updated');
-            return redirect()->route('admin.purchasesReceivedAction',['edit',$receive->id]);
+            return redirect()->route('admin.purchasesReceivedAction',['view',$receive->id]);
         }
 
         // -----------------------

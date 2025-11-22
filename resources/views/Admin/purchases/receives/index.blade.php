@@ -12,7 +12,7 @@
 
                 <div class="dropdown d-flex">
                     <a href="javascript:void(0)" class="btn-custom primary mr-1" style="padding:5px 15px;" data-toggle="modal" data-target="#createReceiveModal"  >
-                        <i class="fa fa-print"></i> Add Purchase Receive
+                        <i class="fa fa-plus"></i> Add Receive
                     </a>
                     <a href="{{route('admin.purchasesReceived')}}" class="btn-custom yellow">
                         <i class="bx bx-rotate-left"></i>
@@ -103,11 +103,11 @@
                                         @if($r->status=='pending')
                                             <span class="badge bg-warning">Pending</span>
                                         @elseif($r->status=='approved')
-                                            <span class="badge bg-success">Approved</span>
+                                            <span class="badge bg-success text-white">Approved</span>
                                         @elseif($r->status=='temp')
                                             <span class="badge bg-secondary text-white">Temp</span>
                                         @elseif($r->status=='rejected')
-                                            <span class="badge bg-danger">Rejected</span>
+                                            <span class="badge bg-danger text-white">Rejected</span>
                                         @elseif($r->status=='trash')
                                             <span class="badge bg-secondary">Trash</span>
                                         @endif
@@ -138,9 +138,7 @@
         </div>
     </div>
 
-    {{-- ============================
-          CREATE RECEIVE MODAL
-    ============================= --}}
+
     <!-- Create Purchase Receive Modal -->
     <div class="modal fade text-left" id="createReceiveModal" tabindex="-1">
        <div class="modal-dialog">
@@ -171,10 +169,9 @@
                     ])
                 </div>
                 <p id="searchMsg" class="mt-2 text-danger" style="display:none;"></p>
-
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="createReceiveBtn">
                     <i class="bx bx-plus"></i> Create
                 </button>

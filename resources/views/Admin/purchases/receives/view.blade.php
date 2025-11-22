@@ -5,65 +5,7 @@
 @endsection
 
 @push('css')
-<style>
-.invoice-container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 30px 40px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    position: relative;
-}
 
-.status-ribbon {
-    position: absolute;
-    top: 20px;
-    right: -60px;
-    background: #ffc107;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 10px 80px;
-    transform: rotate(45deg);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    text-align: center;
-    border-top: 3px solid #e0a800;
-    border-bottom: 3px solid #e0a800;
-}
-
-.invoice-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.company-info p, .receive-info p {
-    margin: 3px 0;
-    font-size: 14px;
-}
-
-.items-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-.items-table th, .items-table td {
-    border: 1px solid #dee2e6;
-    padding: 8px;
-    text-align: left;
-    font-size: 14px;
-}
-
-.items-table th {
-    background-color: #f5f5f5;
-}
-
-@media print {
-    .invoice-container { box-shadow: none; padding: 10px; }
-    .btn, .breadcrumb-area { display: none; }
-}
-</style>
 @endpush
 
 @section('contents')
@@ -98,20 +40,73 @@
             @include(adminTheme().'alerts')
 
             <div class="invoice-container PrintAreaReceive">
-                @if($receive->status=='approved')
-                    <div class="status-ribbon" style="background:#28a745">APPROVED</div>
-                @elseif($receive->status=='pending')
-                    <div class="status-ribbon" style="background:#ffc107">PENDING</div>
-                @elseif($receive->status=='rejected')
-                    <div class="status-ribbon" style="background:#dc3545">REJECTED</div>
-                @endif
+                <style>
+                    .invoice-container {
+                        max-width: 900px;
+                        margin: 0 auto;
+                        background: #fff;
+                        padding: 30px 40px;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        position: relative;
+                    }
+
+                    .status-ribbon {
+                        position: absolute;
+                        top: 20px;
+                        right: -60px;
+                        background: #ffc107;
+                        color: white;
+                        font-size: 20px;
+                        font-weight: bold;
+                        padding: 10px 80px;
+                        transform: rotate(45deg);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                        text-align: center;
+                        border-top: 3px solid #e0a800;
+                        border-bottom: 3px solid #e0a800;
+                    }
+
+                    .invoice-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 20px;
+                    }
+
+                    .company-info p, .receive-info p {
+                        margin: 3px 0;
+                        font-size: 14px;
+                    }
+
+                    .items-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                    }
+
+                    .items-table th, .items-table td {
+                        border: 1px solid #dee2e6;
+                        padding: 8px;
+                        text-align: left;
+                        font-size: 14px;
+                    }
+
+                    .items-table th {
+                        background-color: #f5f5f5;
+                    }
+
+                    @media print {
+                        .invoice-container { box-shadow: none; padding: 10px; }
+                        .btn, .breadcrumb-area { display: none; }
+                    }
+                    </style>
 
                 <div class="invoice-header">
                     <div class="company-info">
-                        <p><b>Company:</b> {{ general()->name ?? 'N/A' }}</p>
-                        <p><b>Address:</b> {{ general()->address_one ?? '' }}</p>
-                        <p><b>Phone:</b> {{ general()->mobile ?? '' }}</p>
-                        <p><b>Email:</b> {{ general()->email ?? '' }}</p>
+                        <p><b>Branch:</b> {{ $receive->branch?->name ?? 'N/A' }}</p>
+                        <p><b>Address:</b> {{ $receive->branch?->description ?? 'N/A' }}</p>
+                        <p><b>Supplier Name:</b> {{ $receive->purchase?->name ?? '' }}</p>
+                        <p><b>Supplier Company:</b> {{ $receive->purchase?->company_name ?? '' }}</p>
+                        <p><b>Address:</b> {{  $receive->purchase?->supplier_address ?? '' }}</p>
                     </div>
                     <div class="receive-info">
                         <p><b>Receive No:</b> {{ $receive->purchase_receive_no }}</p>
@@ -125,11 +120,11 @@
                 <table class="items-table">
                     <thead>
                         <tr>
-                            <th>SL</th>
-                            <th>Product</th>
-                            <th>Ordered Qty</th>
-                            <th>Received Qty</th>
-                            <th>Unit</th>
+                            <th style="width: 50px;min-width: 50px;">SL</th>
+                            <th style="min-width: 250px;">Product</th>
+                            <th style="width: 120px;min-width: 120px;text-align:center;">Ordered Qty</th>
+                            <th style="width: 120px;min-width: 120px;text-align:center;">Received Qty</th>
+                            <th style="width: 60px;min-width: 60px;" >Unit</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -137,8 +132,8 @@
                             <tr>
                                 <td>{{ $i+1 }}</td>
                                 <td>{{ $item->material_name ?? 'N/A' }}</td>
-                                <td>{{ $item->orderItem?->qty ?? 0 }}</td>
-                                <td>{{ $item->received_qty ?? 0 }}</td>
+                                <td style="text-align:center;">{{ numberFormat($item->orderItem?->qty ?? 0,1) }}</td>
+                                <td style="text-align:center;">{{ numberFormat($item->received_qty ?? 0,1) }}</td>
                                 <td>{{ $item->orderItem?->unit ?? '--' }}</td>
                             </tr>
                         @empty

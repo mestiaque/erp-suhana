@@ -165,6 +165,29 @@ class Post extends Model
     	return $this->belongsTo(User::class,'addedby_id');
     }
 
+    public function materialPurchases(){
+        return $this->hasMany(PurchaseOrderItem::class,'material_id');
+    }
+    
+    public function materialLastPurchase(){
+        return $this->hasOne(PurchaseOrderItem::class,'material_id')->latest()->whereHas('order',function($q){$q->where('status','approved');});
+    }
+    
+    public function materialStock(){
+        return $this->hasMany(MeterialStock::class,'meterial_id');
+    }
+
+    public function materialStockQty($id=null){
+
+        $qty=$this->materialStock()
+                    ->where(function($q)use($id){
+                        if($id){
+                            $q->where('branch_id',$id);
+                        }
+                    })
+                    ->sum('quantity');
+        return $qty;
+    }
     
 
     

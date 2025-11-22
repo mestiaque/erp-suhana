@@ -34,4 +34,14 @@ class PurchaseReceiveItem extends Model
     {
         return $this->belongsTo(PurchaseOrderItem::class, 'purchase_item_id');
     }
+    
+    public function purchase()
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_id');
+    }
+    
+    public function meterial()
+    {
+        return $this->belongsTo(Post::class, 'material_id');
+    }
 }

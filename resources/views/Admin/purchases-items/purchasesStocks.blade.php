@@ -4,7 +4,15 @@
 @endsection
 
 @push('css')
-<style type="text/css"></style>
+<style type="text/css">
+    .brandSpan{
+        display: inline-block;
+        border: 1px solid #dddada;
+        padding: 1px 15px;
+        border-radius: 3px;
+        margin: 1px 3px;
+    }
+</style>
 @endpush
 
 @section('contents')
@@ -41,7 +49,7 @@
                         <select class="form-control" name="branch_id">
                             <option value="">Select Branch</option>
                             @foreach($branches as $branch)
-                                <option value="{{$category->id}}" {{request()->branch_id==$branch->id?'selected':''}}>
+                                <option value="{{$branch->id}}" {{request()->branch_id==$branch->id?'selected':''}}>
                                     {{$branch->name}}
                                 </option>
                             @endforeach
@@ -75,13 +83,15 @@
                              @foreach($goodsItems as $key=>$item)
                                 <tr>
                                     <td>{{ $key+1 }}</td>
-                                    <td>{{ $item->name }}</td>
-                                    <td>{{ $item->qty }}</td>
+                                    <td>{{ $item->name }} </td>
+                                    <td>{{numberFormat($item->materialStockQty(request()->branch_id),1) }}</td>
                                     <td>
-                                        ..
+                                        @foreach($item->materialStock()->where('quantity','>',0)->get() as $brh)
+                                        <span class="brandSpan">{{$brh->branch?->name ?? N/A}} ({{numberFormat($brh->quantity,1)}})</span>
+                                        @endforeach
                                     </td>
                                     <td>
-                                        N/A
+                                        {{$item->materialLastPurchase?$item->materialLastPurchase->order->created_at->format('d.m.Y'):'N/A'}}
                                     </td>
                                     <td>
                                         {{ucfirst($item->status)}}

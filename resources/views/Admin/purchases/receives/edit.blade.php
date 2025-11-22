@@ -41,26 +41,31 @@
             <form action="{{ route('admin.purchasesReceivedAction', ['update', $receive->id]) }}" method="POST">
                 @csrf
 
-                <div class="row mb-3">
-                    <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
                         <label>Branch/Factory</label>
                         <input type="text" class="form-control" value="{{ $receive->branch?$receive->branch->name:'' }}" readonly>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
+                        <label>Purchase No</label>
+                        <input type="text" class="form-control" value="{{ $receive->purchase_no }}" readonly>
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label>Purchase Receive No</label>
                         <input type="text" class="form-control" value="{{ $receive->purchase_receive_no }}" readonly>
                     </div>
-                    <div class="col-md-3">
-                        <label>Purchase Receive No</label>
-                        <input type="text" class="form-control" value="{{ $receive->purchase_receive_no }}" readonly>
+                    <div class="col-md-3 mb-3">
+                        <label>Challan No*</label>
+                        <input type="text" class="form-control" name="challan_no" value="{{ $receive->challan_no }}" placeholder="Enter challan no" required="">
                     </div>
-                    <div class="col-md-3">
-                        <label>Challan No</label>
-                        <input type="text" class="form-control" name="challan_no" value="{{ $receive->challan_no }}">
+                    <div class="col-md-12 mb-3">
+                        <label>Note</label>
+                        <textarea name="note" class="form-control" placeholder="Write note" >{{ $receive->note }}</textarea>
                     </div>
                 </div>
 
-                <h5><b>Received Items</b></h5>
+                <h5><b>Received Items</b> @if($receive->status=='approved')
+                                            <span class="badge bg-success text-white">Approved</span> @endif </h5>
                 <div class="cardItems">
                     @include(adminTheme().'purchases.receives.includes.items', ['receive' => $receive])
                 </div>
@@ -89,7 +94,7 @@ $(document).ready(function(){
             data: {_token:"{{ csrf_token() }}", item_id:item_id, received_qty:value},
             success: function(res){
                 if(res.view){
-                    $('.cardItems').html(res.view);
+                    // $('.cardItems').html(res.view);
                 }
             },
             error: function(){
