@@ -49,7 +49,7 @@
                 <form action="{{route('admin.purchasesReceived')}}">
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="input-group mb-1">
+                            {{-- <div class="input-group mb-1">
                                 <select class="form-control form-control-sm rounded-0" name="action" required>
                                     <option value="">Select Action</option>
                                     <option value="1">Pending</option>
@@ -59,7 +59,7 @@
                                     <option value="5">Delete</option>
                                 </select>
                                 <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Sure?')">Apply</button>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="col-md-8">

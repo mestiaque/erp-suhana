@@ -3,13 +3,12 @@
         <div class="searchGrid">
             <input type="text" class="form-control form-control-sm SearchQuery"
                    data-type="goods"
-                   data-url="{{ route('admin.purchasesRequisitionsAction',['search-product',$requisition->id]) }}"
-                   placeholder="Search Product">
-
+                   data-url="{{ route('admin.purchasesRequisitionsAction',['search-item',$requisition->id]) }}"
+                   placeholder="Search Material">
             <div class="itemSearch searchlist" style="height:200px;overflow:auto;">
                 @include(adminTheme().'purchases.requisitions.includes.searchGoods', [
-                    'goods' => App\Models\Post::latest()->limit(10)->get(),
-                    'req' => $requisition,
+                    'requisition' => $requisition,
+                    'goods'=> $goods
                 ])
             </div>
         </div>

@@ -255,7 +255,7 @@ class User extends Authenticatable
     }
     public function duePurchaseAmount()
     {
-        return $this->hasMany(Order::class)->where('order_type','purchase_order')->where('order_status','delivered')->where('due_amount','>',0)->sum('due_amount');
+        return $this->hasMany(PurchaseOrder::class, 'supplier_id')->where('status','approved')->where('due_amount','>',0)->sum('due_amount');
     }
 
         // User model
