@@ -31,11 +31,11 @@
         padding: 2px;
         margin-right: 10px;
     }
-    
+
     .searchGrid {
         position: relative;
     }
-    
+
     .itemSearch {
         height: 200px;
         overflow: auto;
@@ -83,7 +83,7 @@
                             <option value="">Select Company</option>
                             @foreach($suppliers as $s)
                                 <option value="{{ $s->id }}" {{ $order->supplier_id == $s->id ? 'selected':'' }}>
-                                    {{ $s->name }} {{ $s->company_name?'- '.$s->company_name:'' }} 
+                                    {{ $s->name }} {{ $s->company_name?'- '.$s->company_name:'' }}
                                 </option>
                             @endforeach
                         </select>
@@ -217,7 +217,7 @@
     // Update QTY / UNIT
     // -------------------------
     $(document).on('keyup change','.update-field', function(){
-        let url = $(this).data('url');  
+        let url = $(this).data('url');
         let value = $(this).val();
         $.ajax({
             url: url,
@@ -287,7 +287,7 @@
     $(document).on('focus', '.searchGrid input', function() {
         $('.itemSearch').show();
     });
-    
+
     $(document).on('click', function(event) {
         if (!$(event.target).closest('.searchGrid').length) {
             $('.itemSearch').hide();

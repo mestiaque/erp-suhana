@@ -170,13 +170,13 @@
 
                                     @endforeach
                                     @if($orders->count()==0)
-                                    <tr><td colspan="8" style="text-align:center;">No Order Found</td></tr>
+                                    <tr><td colspan="9" style="text-align:center;">No Order Found</td></tr>
                                     @endif
                                 </tbody>
 
                             </table>
 
-                            {{$orders->links('pagination')}}
+                            {{ $orders->appends(request()->except('orders_page'))->links('pagination') }}
                         </div>
 
                     </div>
@@ -233,7 +233,7 @@
                                         @endforelse
                                     </tbody>
                                 </table>
-                                {{$transactions->links('pagination')}}
+                                {{ $transactions->appends(request()->except('trans_page'))->links('pagination') }}
                             </div>
                         </div>
                     </div>

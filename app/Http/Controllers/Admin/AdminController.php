@@ -3369,7 +3369,7 @@ class AdminController extends Controller
                           'search'=>$r->search,
                           'status'=>$r->status,
                         ]);
-        
+
         $report = [
                 'today_expenses' => numberFormat(
                     Expense::where('status', '<>', 'temp')
@@ -4046,7 +4046,7 @@ class AdminController extends Controller
                 if($r->expense_type){
                     $q->where('category_id',$r->expense_type);
                 }
-                
+
                 if($r->branch_id){
                     $q->where('branch_id',$r->branch_id);
                 }
@@ -5976,20 +5976,20 @@ class AdminController extends Controller
 
       // Update  Action End
 
-    $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
-    $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
+        $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
+        $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
 
-    $traddings =SupplierTrading::latest()->where('status','<>','temp')->where('type',2)->where('member_id',$title->id)
+        $traddings =SupplierTrading::latest()->where('status','<>','temp')->where('type',2)->where('member_id',$title->id)
+                        ->whereDate('created_at', '>=', $from)
+                        ->whereDate('created_at', '<=', $to)
+                        ->get();
+
+        $expenses = Expense::latest()->where('status','active')->where('member_id',$title->id)
                     ->whereDate('created_at', '>=', $from)
                     ->whereDate('created_at', '<=', $to)
                     ->get();
 
-    $expenses = Expense::latest()->where('status','active')->where('member_id',$title->id)
-                ->whereDate('created_at', '>=', $from)
-                ->whereDate('created_at', '<=', $to)
-                ->get();
-
-    return view(adminTheme().'reffmembers.reffmembersView',compact('title','expenses','traddings','from','to'));
+        return view(adminTheme().'reffmembers.reffmembersView',compact('title','expenses','traddings','from','to'));
 
     }
 

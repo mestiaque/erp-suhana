@@ -6,19 +6,46 @@
 
 @push('css')
 <style>
-    textarea::-webkit-scrollbar { width: 8px; }
-    textarea::-webkit-scrollbar-thumb { background-color: darkgrey; }
-    .select2-container { width: 100% !important; }
-    .select2-container--default .select2-selection--single .select2-selection__arrow { top: 5px; }
-    .select2-container .select2-selection--single { height: 35px; padding: 3px; }
-
-    .itemSearch{
-        height: 200px; overflow: auto;
-        position: absolute; width: 100%; background: #fff;
-        border: 1px solid #ccc; border-top: 0; display:none;
+    .search-result-box{position:absolute;z-index:9;width:100%;background:#fff;border:1px solid #ddd;display:none;}
+    .search-result-box li{padding:6px 10px;cursor:pointer;}
+    .search-result-box li:hover{background:#f5f5f5;}
+    .searchlist ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
     }
-    .reInvoiceTable tr th,
-    .reInvoiceTable tr td{ padding: 5px; }
+
+    .searchlist ul li {
+        border-top: 1px solid #dbd6d6;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    .searchlist ul li:hover {
+        background: #f2f2f2;
+    }
+    .searchlist ul li img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+        border: 1px solid #dbd6d6;
+        padding: 2px;
+        margin-right: 10px;
+    }
+
+    .searchGrid {
+        position: relative;
+    }
+
+    .itemSearch {
+        height: 200px;
+        overflow: auto;
+        position: absolute;
+        width: 100%;
+        background: white;
+        border: 1px solid #dfdfdf;
+        border-top: 0;
+        display:none;
+    }
 </style>
 @endpush
 
@@ -63,7 +90,6 @@
                         <p style="color: red; margin: 0;">{{ $errors->first('department_id') }}</p>
                         @endif
                     </div>
-
                     <div class="col-md-3">
                         <label>Requision Date*</label>
                         <input type="date" class="form-control" name="created_at" value="{{$requisition->created_at->format('Y-m-d')}}" required>

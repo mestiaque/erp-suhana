@@ -467,7 +467,7 @@ class PurchasesController extends Controller
                 $requisition->addedby_id = Auth::id();
                 $requisition->save();
             }
-            $requisition->created_at = now()->format('Ymd');
+            $requisition->created_at = now();
             $requisition->department_id = Auth::user()->department_id;
             $requisition->requisition_no = $requisition->created_at->format('Ymd').$requisition->id;
             $requisition->save();
@@ -495,14 +495,13 @@ class PurchasesController extends Controller
 
 
         // Search Item
-        if($action=='search-item'){
-            $items = Post::where('type',3)->where('status','active')
-                ->when($r->search, function($q) use($r){
-                    $q->where('name','like','%'.$r->search.'%');
-                })->limit(10)->get();
-
-            $search = view(adminTheme().'purchases.includes.searchItems', compact('items','requisition'))->render();
-            return response()->json(['success'=>true, 'view'=>$search]);
+        // SEARCH MATERIAL
+        if ($action == 'search-item') {
+            $goods = Post::where('type', 3)->where('status', 'active')
+                ->when($r->search, fn($q) => $q->where('name', 'like', '%' . $r->search . '%'))
+                ->limit(20)->get();
+            $search = view(adminTheme().'purchases.requisitions.includes.searchGoods', compact('goods', 'requisition'))->render();
+            return response()->json(['success' => true, 'view' => $search]);
         }
 
         // Add / Update / Remove Items
@@ -538,7 +537,9 @@ class PurchasesController extends Controller
             // Update totals
             $requisition->save();
 
-            $view = view(adminTheme().'purchases..requisitions.includes.items', compact('requisition'))->render();
+            $goods = Post::where('type',3)->where('status','active')->limit(10)->get();
+
+            $view = view(adminTheme().'purchases.requisitions.includes.items', compact('requisition', 'goods'))->render();
             return response()->json(['success'=>true,'view'=>$view]);
         }
 
@@ -574,47 +575,52 @@ class PurchasesController extends Controller
         $departments = Attribute::where('type', 3)->get(['id', 'name']);
         $requisition = PurchaseRequisition::with('items')->findOrFail($id);
 
-        return view(adminTheme().'purchases.requisitions.edit', compact('requisition', 'departments',));
+        $goods = Post::where('type',3)->where('status','active')
+                ->when($r->search, function($q) use($r){
+                    $q->where('name','like','%'.$r->search.'%');
+                })->limit(10)->get();
+
+        return view(adminTheme().'purchases.requisitions.edit', compact('requisition', 'departments', 'goods'));
     }
 
     public function suppliers(Request $r){
          //Filter Actions Start
         if($r->action){
-        if($r->checkid){
-        $datas=User::where('supplier',true)->whereIn('status',[0,1])
-                ->whereIn('id',$r->checkid)->get();
+            if($r->checkid){
+                $datas=User::where('supplier',true)->whereIn('status',[0,1])
+                    ->whereIn('id',$r->checkid)->get();
 
-        foreach($datas as $data){
+                foreach($datas as $data){
 
-            if($r->action==1){
-              $data->status=1;
-              $data->save();
-            }elseif($r->action==2){
-              $data->status=0;
-              $data->save();
-            }elseif($r->action==5){
+                    if($r->action==1){
+                    $data->status=1;
+                    $data->save();
+                    }elseif($r->action==2){
+                    $data->status=0;
+                    $data->save();
+                    }elseif($r->action==5){
 
-              $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
-              foreach ($userFiles as $media) {
-                  if(File::exists($media->file_url)){
-                        File::delete($media->file_url);
+                    $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
+                    foreach ($userFiles as $media) {
+                        if(File::exists($media->file_url)){
+                                File::delete($media->file_url);
+                            }
+                        $media->delete();
                     }
-                  $media->delete();
-              }
-              $data->delete();
+                    $data->delete();
 
+                    }
+
+                }
+
+                Session()->flash('success','Action Successfully Completed!');
+
+            }else{
+            Session()->flash('info','Please Need To Select Minimum One Post');
             }
 
+            return redirect()->back();
         }
-
-        Session()->flash('success','Action Successfully Completed!');
-
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-
-        return redirect()->back();
-      }
 
       //Filter Action End
 
@@ -711,11 +717,10 @@ class PurchasesController extends Controller
       }
 
       if($action=='view'){
-        $orders =$user->orders()->whereIn('status',['approved'])
-                ->paginate(10);
+        $orders =$user->orders()->whereIn('status',['approved'])->paginate(10, ['*'], 'orders_page');
         $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
         $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
-        $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id', 'desc')->paginate(10);
+        $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id', 'desc')->paginate(10, ['*'], 'trans_page');
         return view(adminTheme().'suppliers.viewUser',compact('user','orders', 'transactions', 'paymentMethods', 'transactions'));
       }
 
@@ -1045,7 +1050,7 @@ class PurchasesController extends Controller
         $order = PurchaseOrder::find($id);
         if (!$order) {
             session()->flash('error', 'Order Not Found');
-            return redirect()->route('purchaseOrders');
+            return redirect()->route('admin.purchasesOrders');
         }
 
         // PDF
@@ -1159,6 +1164,7 @@ class PurchasesController extends Controller
               return back();
             }
             $order->supplier_id = $supplier->id;
+            $order->company_name = $supplier->company_name;
             $order->supplier_name = $supplier->name;
             $order->supplier_email = $supplier->email;
             $order->supplier_mobile = $supplier->mobile;
@@ -1190,7 +1196,7 @@ class PurchasesController extends Controller
 
     public function purchasesReceived(Request $r)
     {
-        $purchases = PurchaseOrder::latest()->limit(10)->get(['id','order_no']);
+        $purchases = PurchaseOrder::where('status', 'approved')->latest()->limit(10)->get(['id','order_no']);
         $branches = Attribute::where('type', 0)->where('status','active')->get(['id','name']);
         if ($r->action && $r->checkid) {
             $receives = PurchaseReceive::whereIn('id', $r->checkid)->get();
@@ -1216,6 +1222,7 @@ class PurchasesController extends Controller
                 if ($r->search){
                     $q->where('purchase_receive_no','LIKE','%'.$r->search.'%');
                     $q->orWhere('purchase_no','LIKE','%'.$r->search.'%');
+                    $q->orWhere('challan_no','LIKE','%'.$r->search.'%');
                     $q->orWhereHas('purchase', fn($qq)=>$qq->where('order_no','LIKE','%'.$r->search.'%'));
                 }
                 if ($r->startDate || $r->endDate){
@@ -1300,7 +1307,7 @@ class PurchasesController extends Controller
         // LIVE SEARCH PURCHASE ORDER
         // -----------------------
         if ($action == 'search-purchase' && $r->ajax()) {
-            $purchases = PurchaseOrder::where('order_no', 'like', '%'.$r->search.'%')
+            $purchases = PurchaseOrder::where('status', 'approved')->where('order_no', 'like', '%'.$r->search.'%')
                 ->latest()
                 ->limit(10)
                 ->get(['id','order_no']);
@@ -1363,7 +1370,7 @@ class PurchasesController extends Controller
               $qty = $r['qty_'.$item->id] ?? 0;
 
               if($qty > 0 && $purchase){
-                
+
                 $stock =MeterialStock::where('branch_id',$receive->branch_id)->where('meterial_id',$item->material_id)->first();
                 if(!$stock){
                   $stock =new MeterialStock();
@@ -1407,13 +1414,13 @@ class PurchasesController extends Controller
 
                       //Purchsee Data update
                       $data->save();
-                      
+
                       //Branch wise quantity update
                       $stock->quantity +=$needQty;
                       $stock->save();
                     }
                   }
-                
+
                 }
 
                 //Meterial quantity update
@@ -1635,6 +1642,13 @@ class PurchasesController extends Controller
             return back()->with('success', 'Payment Updated Successfully!');
         }
     }
+
+
+    public function purchasesDamageReturn(Request $request)
+    {
+        return view(adminTheme().'purchases.returns.index');
+    }
+
 
 
 
