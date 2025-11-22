@@ -21,10 +21,8 @@
         <link rel="stylesheet" href="{{asset('admin/assets/css/style.css')}}">
         <!-- Responsive CSS -->
         <link rel="stylesheet" href="{{asset('admin/assets/css/responsive.css')}}">
-
          @stack('css')
     </head>
-
     <body>
 
         @yield('contents')
