@@ -61,6 +61,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     // Expenses Management Route
     Route::get('/expenses/types',[AdminController::class,'expensesTypes'])->name('expensesTypes');
     Route::any('/expenses/types/{action}/{id?}',[AdminController::class,'expensesTypesAction'])->name('expensesTypesAction');
+    
+    Route::get('/expenses/iou-reports',[AdminController::class,'expenseIOUReports'])->name('expenseIOUReports');
+    Route::get('/expenses/iou',[AdminController::class,'expensesIOU'])->name('expensesIOU');
+    Route::any('/expenses/iou/{action}/{id?}',[AdminController::class,'expensesIOUAction'])->name('expensesIOUAction');
 
     Route::get('/expenses/reports',[AdminController::class,'expenseReports'])->name('expenseReports');
 

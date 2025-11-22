@@ -11,8 +11,8 @@
      <meta name="keywords" content="" />
      <meta name="author" content="NIT" />
      @yield('title')
-     <link rel="apple-touch-icon" href="" />
-     <link rel="shortcut icon" type="image/x-icon" href="" />
+     <link rel="apple-touch-icon" href="{{asset(general()->favicon())}}" />
+     <link rel="shortcut icon" type="image/x-icon" href="{{asset(general()->favicon())}}" />
 
      <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,500i%7COpen+Sans:300,300i,400,400i,600,600i,700,700i" rel="stylesheet" />
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg==" crossorigin="anonymous" referrerpolicy="no-referrer" />

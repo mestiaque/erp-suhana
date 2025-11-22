@@ -1,5 +1,5 @@
 @extends(adminTheme().'layouts.app') @section('title')
-<title>{{websiteTitle('Expenses List')}}</title>
+<title>{{websiteTitle('I.O.U List')}}</title>
 @endsection @push('css')
 
 <style type="text/css">
@@ -53,15 +53,15 @@
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
-         <h3>Expenses List</h3>
+         <h3>I.O.U List</h3>
          <div class="dropdown">
              @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddExpense" style="padding:5px 15px;">
-                 <i class="bx bx-plus"></i> Expense
+                 <i class="bx bx-plus"></i> I.O.U
              </a>
              @endisset
              
-             <a href="{{route('admin.expenses')}}" class="btn-custom yellow">
+             <a href="{{route('admin.expensesIOU')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
          </div>
@@ -71,12 +71,10 @@
     
         <div class="row">
             <div class="col-lg-6 col-md-6">
-
-                <form action="{{route('admin.expenses')}}">
+                <h5><b>Search I.O.U</b></h5>
+                <form action="{{route('admin.expensesIOU')}}">
                     <div class="row">
-                        <div class="col-md-12 mb-2">
-                            <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Serial No">
-                        </div>
+                        
                         <div class="col-md-6 mb-2">
                             <div class="input-group">
                                 <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
@@ -85,12 +83,7 @@
                         </div>
                         <div class="col-md-6 mb-2">
                             <div class="input-group">
-                                <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
-                                    <option value="">Select Expense Type</option>
-                                    @foreach($expenseTypes as $expenseType)
-                                    <option value="{{$expenseType->id}}" {{request()->expense_type==$expenseType->id?'selected':''}}>{{$expenseType->name}}</option>
-                                    @endforeach
-                                </select>
+                                <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Name">
                                 <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                             </div>
                         </div>
@@ -102,7 +95,7 @@
                     <div class="icon-box">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                     </div>
-                    <span class="sub-title">Today Expense</span>
+                    <span class="sub-title">Today I.O.U</span>
                     <h3>{{$report['today_expenses']}}</h3>
                 </div>
             </div>
@@ -116,16 +109,12 @@
                 </div>
             </div>
         </div>
-        <form action="{{route('admin.expenses')}}">
+        <form action="{{route('admin.expensesIOU')}}">
             <div class="row">
                 <div class="col-md-4">
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            <!-- @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            @endisset -->
                             @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
                             <option value="5">Delete</option>
                             @endisset
@@ -155,10 +144,9 @@
                                  </label>
                                 </div>
                             </th>
-                            <th style="min-width: 100px;">Serial No</th>
-                            <th style="min-width: 150px;">Description</th>
+                            <th style="min-width: 120px;">Employee</th>
+                            <th style="min-width: 150px;">Purpose/Referance</th>
                             <th style="min-width: 100px;">Amount</th>
-                            <th style="min-width: 120px;">Type</th>
                             <th style="min-width: 100px;">Account</th>
                             <th style="min-width: 100px;">Date</th>
                             <th style="min-width: 120px;">Branch/Factory</th>
@@ -166,12 +154,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($expenses as $i=>$expense)
+                        
+                        @foreach($expenseIou as $i=>$Iou)
                         <tr>
                             <td>
                                 <div class="checkbox">
-                                     <input class="inp-cbx" id="cbx_{{$expense->id}}" type="checkbox" name="checkid[]" value="{{$expense->id}}" style="display: none;" />
-                                     <label class="cbx" for="cbx_{{$expense->id}}">
+                                     <input class="inp-cbx" id="cbx_{{$Iou->id}}" type="checkbox" name="checkid[]" value="{{$Iou->id}}" style="display: none;" />
+                                     <label class="cbx" for="cbx_{{$Iou->id}}">
                                          <span>
                                              <svg width="12px" height="10px" viewbox="0 0 12 10">
                                                  <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
@@ -179,8 +168,8 @@
                                          </span>
                                      </label>
                                  </div>
-                                <span style="margin:0 5px;">{{$expenses->currentpage()==1?$i+1:$i+($expenses->perpage()*($expenses->currentpage() - 1))+1}}</span>
-                                @if($expense->status=='active')
+                                <span style="margin:0 5px;">{{$expenseIou->currentpage()==1?$i+1:$i+($expenseIou->perpage()*($expenseIou->currentpage() - 1))+1}}</span>
+                                @if($Iou->status=='completed')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
                                     <i class="bx bx-check-circle"></i>
                                 </span>
@@ -190,29 +179,28 @@
                                 </span>
                                 @endif
                             </td>
-                            <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{$Iou->employee?$Iou->employee->name:''}}</td>
                             <td>
-                                <span>{!! nl2br(e($expense->description)) !!}</span>
-                                @if($expense->imageFile) 
+                                <span>{!! nl2br(e($Iou->description)) !!}</span>
+                                @if($Iou->imageFile) 
                                 <span style="border: 1px solid #dadada;display: inline-block;padding: 0px 10px;border-radius: 5px;">
-                                    <a href="{{asset($expense->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> 
-                                    <a href="{{route('admin.mediesDelete',$expense->imageFile->id)}}" class="mediaDelete" style="padding-left: 5px;color: #dc3545;display: inline-block;border-left: 1px solid #d2d2d2;"><i class="bx bx-trash"></i></a>
+                                    <a href="{{asset($Iou->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> 
+                                    <a href="{{route('admin.mediesDelete',$Iou->imageFile->id)}}" class="mediaDelete" style="padding-left: 5px;color: #dc3545;display: inline-block;border-left: 1px solid #d2d2d2;"><i class="bx bx-trash"></i></a>
                                 </span>
                                 @endif
                             </td>
-                            <td>{{priceFormat($expense->amount)}}</td>
-                            <td>{{$expense->category?$expense->category->name:''}}</td>
-                            <td>{{$expense->account?$expense->account->name:''}}</td>
-                            <td>{{$expense->created_at->format('d-m-Y')}}</td>
-                            <td>{{$expense->branch?$expense->branch->name:''}}</td>
+                            <td>{{priceFormat($Iou->amount)}}</td>
+                            <td>{{$Iou->account?$Iou->account->name:''}}</td>
+                            <td>{{$Iou->created_at->format('d-m-Y')}}</td>
+                            <td>{{$Iou->branch?$Iou->branch->name:''}}</td>
                             <td class="center">
                                 @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$Iou->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
                                 @endisset
                                 
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$expense->id}}" class="btn-custom yellow">
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$Iou->id}}" class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
                                 </a>
                             </td>
@@ -220,7 +208,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{$expenses->links('pagination::bootstrap-4')}}
+
             </div>
         </form>
         
@@ -234,10 +222,10 @@
  <div class="modal fade text-left" id="AddExpense" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
 	 <div class="modal-content">
-	 <form action="{{route('admin.expensesAction','create')}}" method="post" enctype="multipart/form-data">
+	 <form action="{{route('admin.expensesIOUAction','create')}}" method="post" enctype="multipart/form-data">
 	   	  @csrf
     	   <div class="modal-header">
-    		 <h4 class="modal-title">Add Expense</h4>
+    		 <h4 class="modal-title">Add I.O.U</h4>
     		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
     		   <span aria-hidden="true">&times; </span>
     		 </button>
@@ -252,15 +240,15 @@
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-        			    <label for="name">Expense Type*</label>
-                        <select class="form-control" name="expense_type">
-                            <option value="">Select Type</option>
-                            @foreach($expenseTypes as $type)
-                            <option value="{{$type->id}}">{{$type->name}}</option>
+        			    <label for="name">Employee*</label>
+                        <select class="form-control" name="employee_id">
+                            <option value="">Select Employee</option>
+                            @foreach($users as $user)
+                            <option value="{{$user->id}}">{{$user->name}}</option>
                             @endforeach
                         </select>
-        				@if ($errors->has('expense_type'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('expense_type') }}</p>
+        				@if ($errors->has('employee_id'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
         				@endif
                  	</div>
     	            
@@ -278,7 +266,6 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('payment') }}</p>
         				@endif
                  	</div>
-    	           
     	            <div class="col-md-6 form-group">
         			    <label for="name">Amount* </label>
                         <input type="number" step="any" class="form-control {{$errors->has('amount')?'error':''}}" name="amount" placeholder="Amount"  required="">
@@ -318,10 +305,9 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-
              	
     			<div class="form-group">
-    				<label for="name">Description</label>
+    				<label for="name">Purpose/Referance</label>
 					<textarea name="description" rows="5" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description"></textarea>
 					@if ($errors->has('description'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
@@ -330,22 +316,22 @@
     	   </div>
     	   <div class="modal-footer">
     		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add Expense</button>
+    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add I.O.U</button>
     	   </div>
 	   </form>
 	 </div>
    </div>
  </div>
 
-<!--Edit Modal -->
-@foreach($expenses as $i=>$dpm)
+  <!--Edit Modal -->
+@foreach($expenseIou as $i=>$dpm)
  <div class="modal fade text-left" id="EditExpense_{{$dpm->id}}" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
 	 <div class="modal-content">
-	 <form action="{{route('admin.expensesAction',['update',$dpm->id])}}" method="post" enctype="multipart/form-data" >
+	 <form action="{{route('admin.expensesIOUAction',['update',$dpm->id])}}" method="post" enctype="multipart/form-data" >
 	   	  @csrf
     	   <div class="modal-header">
-    		 <h4 class="modal-title">Edit Expense</h4>
+    		 <h4 class="modal-title">Edit I.O.U</h4>
     		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
     		   <span aria-hidden="true">&times; </span>
     		 </button>
@@ -360,15 +346,15 @@
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-        			    <label for="name">Expense Type*</label>
-                        <select class="form-control" name="expense_type">
-                            <option value="">Select Type</option>
-                            @foreach($expenseTypes as $type)
-                            <option value="{{$type->id}}" {{$dpm->category_id==$type->id?'selected':''}} >{{$type->name}}</option>
+                        <label for="name">Employee*</label>
+                        <select class="form-control" name="employee_id">
+                            <option value="">Select Employee</option>
+                            @foreach($users as $user)
+                            <option value="{{$user->id}}" {{$dpm->user_id==$user->id?'selected':''}}>{{$user->name}}</option>
                             @endforeach
                         </select>
-        				@if ($errors->has('expense_type'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('expense_type') }}</p>
+        				@if ($errors->has('employee_id'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
         				@endif
                  	</div>
     	            
@@ -388,7 +374,7 @@
                  	</div>
     	            <div class="col-md-6 form-group">
         			    <label for="name">Amount* </label>
-                        <input type="number" disabled="" class="form-control {{$errors->has('amount')?'error':''}}" step="any" value="{{$dpm->amount}}" placeholder="Amount" >
+                        <input type="number" name="amount" class="form-control {{$errors->has('amount')?'error':''}}" step="any" value="{{$dpm->amount}}" placeholder="Amount" >
         				@if ($errors->has('amount'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif
@@ -424,7 +410,7 @@
              	</div>
     	   		
     			 <div class="form-group">
-    				<label for="name">Description</label>
+    				<label for="name">Purpose/Referance</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>
 					@if ($errors->has('description'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
@@ -434,14 +420,14 @@
                  	<div class="col-md-6 form-group">
                  	    <label for="name">Status</label><br>
                  	    <div class="checkbox">
-                             <input class="inp-cbx" id="status_{{$dpm->id}}" type="checkbox" name="status" style="display: none;" {{$dpm->status=='active'?'checked':''}} />
+                             <input class="inp-cbx" id="status_{{$dpm->id}}" type="checkbox" name="status" style="display: none;" {{$dpm->status=='completed'?'checked':''}} />
                              <label class="cbx" for="status_{{$dpm->id}}">
                                  <span>
                                      <svg width="12px" height="10px" viewbox="0 0 12 10">
                                          <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                      </svg>
                                  </span>
-                                 Active
+                                 Completed
                              </label>
                          </div>
                  	</div>
@@ -456,17 +442,14 @@
     	   </div>
     	   <div class="modal-footer">
     		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Update Expense</button>
+    		 <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Update I.O.U</button>
     	   </div>
 	   </form>
 	 </div>
    </div>
  </div>
-@endforeach
-@endisset
-<!--View Modal -->
-@foreach($expenses as $i=>$exp)
- <div class="modal fade text-left" id="ViewExpense_{{$exp->id}}" tabindex="-1" role="dialog">
+
+ <div class="modal fade text-left" id="ViewExpense_{{$dpm->id}}" tabindex="-1" role="dialog">
    <div class="modal-dialog modal-lg" role="document">
 	 <div class="modal-content">
         <div>
@@ -633,40 +616,37 @@
                 /* slip css end */
             </style>
             
-            <div class="date-field siral">
+            <!-- <div class="date-field siral">
                 <span class="date-label">SL:</span>
-                <input type="text" class="input-underline" style="width: 100px;" value="{{ str_pad($exp->id, 10, '0', STR_PAD_LEFT) }}">
-            </div>
+                <input type="text" class="input-underline" style="width: 100px;" value="{{ str_pad($dpm->id, 10, '0', STR_PAD_LEFT) }}">
+            </div> -->
             <div class="header">
-                <span style="position: absolute;left: 10px;" class="barCodeShow barCodeShow_{{$exp->id}}">
+                <!-- <span style="position: absolute;left: 10px;" class="barCodeShow barCodeShow_{{$dpm->id}}">
                     <svg class="showBarcode"
-                        data-no="{{ str_pad($exp->id, 10, '0', STR_PAD_LEFT) }}">
+                        data-no="{{ str_pad($dpm->id, 10, '0', STR_PAD_LEFT) }}">
                     </svg>
-                </span>
+                </span> -->
                  
-
-
-                <h1 class="company-name">{{general()->title}}</h1>
+                <h1 class="company-name">{{$Iou->branch?$Iou->branch->name:general()->title}}</h1>
                 <p class="subtitle">(100% Export Oriented Garments Manufacturing Factory)</p>
                 <p class="contact-info">{!!general()->address_one!!}</p>
                 <p class="contact-info">Mobile: {{general()->mobile}}, {{general()->email}}</p>
                 
-                <div class="transaction-badge">TRANSACTION SLIP</div>
+                <div class="transaction-badge">I.O.U</div>
             </div>
             
             <div class="date-field">
                 <span class="date-label">Date:</span>
-                <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('Y-m-d')}}">
+                <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('Y-m-d')}}">
             </div>
             
             <div class="form-section">
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="amountWriteText">
-                            <label class="form-label">Account: </label>
-                            <input type="text" class="input-underline handwritten" value="S/o {{$exp->account?$exp->account->name:''}} Exp {{$exp->category?$exp->category->name:''}}">
+                            <label class="form-label">Employee: </label>
+                            <input type="text" class="input-underline handwritten" value="{{$Iou->employee?$Iou->employee->name:'N/A'}}">
                         </div>
-                
                     </div>
                 </div>
             </div>
@@ -677,8 +657,8 @@
                         <td style="min-width: 150px;width: 150px;"><b>Taka</b></td>
                     </tr>
                     <tr>
-                        <td>{!! nl2br(e($exp->description)) !!}</td>
-                        <td>{{numberFormat($exp->amount,2)}}</td>
+                        <td>{!! nl2br(e($dpm->description)) !!}</td>
+                        <td>{{numberFormat($dpm->amount,2)}}</td>
                     </tr>
                     <tr>
                         <td style="height:30px;"></td>
@@ -690,7 +670,7 @@
                     </tr>
                     <tr>
                         <td style="text-align: right;"><b>Total </b></td>
-                        <td>{{numberFormat($exp->amount,2)}}</td>
+                        <td>{{numberFormat($dpm->amount,2)}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -699,7 +679,7 @@
                     <div class="col-12">
                         <div class="amountWriteText">
                             <label class="form-label" style="min-width: 120px;width: 120px;">Taka in word:</label>
-                            <span class="input-underline handwritten TotalAmoutnInWord" data-amount="{{$exp->amount}}" ></span>
+                            <span class="input-underline handwritten TotalAmoutnInWord" data-amount="{{$dpm->amount}}" ></span>
                         </div>
                     
                     </div>
@@ -729,7 +709,12 @@
 	 </div>
    </div>
  </div>
+
+
 @endforeach
+
+
+@endisset
 
 
 

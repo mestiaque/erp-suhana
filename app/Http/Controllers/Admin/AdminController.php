@@ -33,6 +33,7 @@ use App\Models\LeadPerson;
 use App\Models\Meeting;
 use App\Models\Salary;
 use App\Models\Expense;
+use App\Models\ExpenseIou;
 use App\Models\Review;
 use App\Models\General;
 use App\Models\Country;
@@ -3327,25 +3328,41 @@ class AdminController extends Controller
                         }
                     }
 
-                Session()->flash('success','Action Successfully Completed!');
+                    Session()->flash('success','Action Successfully Completed!');
 
-            }else{
-              Session()->flash('info','Please Need To Select Minimum One Post');
+                }else{
+                Session()->flash('info','Please Need To Select Minimum One Post');
+                }
+
+                return redirect()->back();
             }
-
-            return redirect()->back();
-          }
 
         $expenses =Expense::latest()->where('status','<>','temp')
                     ->where(function($q) use ($r) {
 
                               if($r->search){
-                                  $q->where('name','LIKE','%'.$r->search.'%');
+                                    $search = ltrim($r->search, '0');
+                                  $q->where('id','LIKE','%'.$search.'%');
                               }
 
                               if($r->status){
                                  $q->where('status',$r->status);
                               }
+
+                              if($r->startDate || $r->endDate)
+                                {
+                                    if($r->startDate){
+                                        $from =$r->startDate;
+                                    }else{
+                                        $from=Carbon::now()->format('Y-m-d');
+                                    }
+                                    if($r->endDate){
+                                        $to =$r->endDate;
+                                    }else{
+                                        $to=Carbon::now()->format('Y-m-d');
+                                    }
+                                    $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+                                }
 
                         })
                         ->paginate(25)->appends([
@@ -3526,7 +3543,6 @@ class AdminController extends Controller
 
     }
 
-
     public function expensesTypes(Request $r){
 
         if(
@@ -3696,6 +3712,315 @@ class AdminController extends Controller
 
     }
 
+    public function expensesIOU(Request $r){
+
+        // Filter Action Start
+            if($r->action){
+
+                if($r->checkid){
+
+                    $datas=ExpenseIou::latest()->whereIn('id',$r->checkid)->get();
+                    foreach($datas as $data){
+
+                        if($r->action==1){
+                          $data->status='active';
+                          $data->save();
+                        }elseif($r->action==2){
+                          $data->status='inactive';
+                          $data->save();
+                        }elseif($r->action==5){
+
+                          if($method=$data->account){
+                            $method->amount +=$data->amount;
+                            $method->save();
+                          }
+                          if($trans =$data->transection){
+                              $trans->delete();
+                          }
+
+                          $medias =Media::latest()->where('src_type',8)->where('src_id',$data->id)->get();
+                          foreach($medias as $media){
+                            if(File::exists($media->file_url)){
+                              File::delete($media->file_url);
+                            }
+                            $media->delete();
+                          }
+
+                          $data->delete();
+                        }
+                    }
+
+                    Session()->flash('success','Action Successfully Completed!');
+
+                }else{
+                Session()->flash('info','Please Need To Select Minimum One Post');
+                }
+
+                return redirect()->back();
+            }
+
+        $expenseIou =ExpenseIou::latest()->where('status','<>','temp')
+                    ->where(function($q) use ($r) {
+
+                              if($r->search){
+                                  
+                                  $q->where('id','LIKE','%'.$r->search.'%')
+                                    ->orWhere(function($qq)use($r){
+                                        $qq->whereHas('employee',function($qqq)use($r){
+                                            $qqq->where('name','LIKE','%'.$r->search.'%');
+                                        });
+                                    });
+                              }
+
+                              if($r->status){
+                                 $q->where('status',$r->status);
+                              }
+
+                              if($r->startDate || $r->endDate)
+                                {
+                                    if($r->startDate){
+                                        $from =$r->startDate;
+                                    }else{
+                                        $from=Carbon::now()->format('Y-m-d');
+                                    }
+                                    if($r->endDate){
+                                        $to =$r->endDate;
+                                    }else{
+                                        $to=Carbon::now()->format('Y-m-d');
+                                    }
+                                    $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+                                }
+
+                        })
+                        ->paginate(25)->appends($r->all());
+
+        $paymentMethods =Attribute::where('type',9)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
+        $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
+        $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+        $users =User::where('status',1)->orderBy('name')->select(['id','name'])->get();
+        $report=[
+            'today_expenses'=>numberFormat(
+                    ExpenseIou::where('status', '<>', 'temp')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount'),
+                    2
+                ),
+            'monthly_expenses'=>numberFormat(
+                    ExpenseIou::where('status', '<>', 'temp')
+                        ->whereMonth('created_at', Carbon::now()->month)
+                        ->whereYear('created_at', Carbon::now()->year)
+                        ->sum('amount'),
+                    2
+                )
+        ];
+
+        return view(adminTheme().'expenses.expensesIOU',compact('expenseIou','branches','users','accountMethods','paymentMethods','report'));
+    }
+
+    public function expensesIOUAction(Request $r,$action,$id=null){
+
+        if($action=='create'){
+            $check = $r->validate([
+                'employee_id' => 'required|numeric',
+                'payment' => 'required|numeric',
+                'account' => 'required|numeric',
+                'branch_id' => 'required|numeric',
+                'amount' => 'required|numeric',
+                // 'title' => 'required|max:100',
+                'created_at' => 'nullable|date',
+                'attachment' => 'nullable||file|max:25600',
+            ]);
+
+            $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+
+            $method =Attribute::where('type',10)->where('status','active')->find($r->account);
+            if(!$method){
+                Session()->flash('error','Account method Are Not found');
+                return redirect()->back();
+            }
+            if($r->amount > $method->amount){
+                Session()->flash('error','Account Balance Are Not Available');
+                return redirect()->back();
+            }
+
+            $expense =new ExpenseIou();
+            $expense->user_id=$r->employee_id;
+            $expense->method_id=$r->payment;
+            $expense->account_id=$method->id;
+            $expense->branch_id=$r->branch_id;
+            $expense->amount=$r->amount;
+            $expense->description=$r->description;
+            $expense->status ='pending';
+            $expense->addedby_id =Auth::id();
+            $expense->created_at = $createDate;
+            $expense->save();
+
+            $method->amount -=$expense->amount;
+            $method->save();
+
+            $transection =new Transaction();
+            $transection->type=7;
+            $transection->src_id=$expense->id;
+            $transection->payment_method_id=$expense->account_id;
+            $transection->amount=$expense->amount;
+            $transection->status ='success';
+            $transection->addedby_id =Auth::id();
+            $transection->created_at =$expense->created_at;
+            $transection->balance =$method->amount;
+            $transection->save();
+
+            ///////Image Upload End////////////
+            if($r->hasFile('attachment')){
+              $file =$r->attachment;
+              $src  =$expense->id;
+              $srcType  =8;
+              $fileUse  =1;
+              uploadFile($file,$src,$srcType,$fileUse);
+            }
+            ///////Image Upload End////////////
+
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+
+            return $r;
+
+        }
+
+         $expense =ExpenseIou::find($id);
+        if(!$expense){
+            Session()->flash('error','This I.O.U Are Not Found');
+            return redirect()->route('admin.expensesIOU');
+        }
+
+        if($action=='update'){
+
+            $check = $r->validate([
+                'employee_id' => 'required|numeric',
+                'payment' => 'required|numeric',
+                'branch_id' => 'required|numeric',
+                'amount' => 'required|numeric',
+                // 'title' => 'required|max:100',
+                'created_at' => 'nullable|date',
+                'attachment' => 'nullable||file|max:25600',
+            ]);
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
+
+
+            $expense->user_id=$r->employee_id;
+            $expense->method_id=$r->payment;
+            $expense->branch_id=$r->branch_id;
+            $expense->amount=$r->amount?:0;
+            $expense->description=$r->description;
+            $expense->status =$r->status?'completed':'pending';
+            $expense->editedby_id =Auth::id();
+            if (!$createDate->isSameDay($expense->created_at)) {
+                $expense->created_at = $createDate;
+            }
+            $expense->save();
+
+            if($transection = $expense->transection){
+                $amount =$expense->amount;
+                if($transection->amount > $amount){
+                    $needAmount =$transection->amount - $amount;
+                    $transection->amount -=$needAmount;
+
+                    if($method=$expense->account){
+                        $method->amount +=$needAmount;
+                        $method->save();
+                    }
+
+                }elseif($transection->amount < $amount){
+                    $needAmount =$amount - $transection->amount;
+                    $transection->amount +=$needAmount;
+                    if($method=$expense->account){
+                        $method->amount -=$needAmount;
+                        $method->save();
+                    }
+                }
+
+                $transection->created_at =$expense->created_at;
+                $transection->save();
+            }
+
+            ///////Image Upload End////////////
+            if($r->hasFile('attachment')){
+              $file =$r->attachment;
+              $src  =$expense->id;
+              $srcType  =10;
+              $fileUse  =1;
+              uploadFile($file,$src,$srcType,$fileUse);
+            }
+            ///////Image Upload End////////////
+
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+
+        }
+
+        if($action=='delete'){
+            $medias =Media::latest()->where('src_type',8)->where('src_id',$expense->id)->get();
+              foreach($medias as $media){
+                if(File::exists($media->file_url)){
+                  File::delete($media->file_url);
+                }
+                $media->delete();
+              }
+            if($expense->transection){
+                $expense->transection->delete();
+            }
+            $expense->delete();
+
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+
+        }
+
+
+        return back();
+
+    }
+
+
+
+    public function expenseIOUReports(Request $r){
+
+        if($r->startDate){
+            $from =Carbon::parse($r->startDate);
+        }else{
+            $from=Carbon::now();
+        }
+
+        if($r->endDate){
+            $to =Carbon::parse($r->endDate);
+        }else{
+            $to=Carbon::now();
+        }
+
+        $expenses = ExpenseIou::latest()->where('status','active')
+            ->where(function($q) use ($r) {
+
+                if($r->search){
+                    $q->where('member_id',$r->search);
+                }
+                
+                if($r->branch_id){
+                    $q->where('branch_id',$r->branch_id);
+                }
+
+                if($r->employee_id){
+                    $q->where('user_id',$r->employee_id);
+                }
+            })
+            ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
+            ->get();
+
+
+        $users =User::where('status',1)->orderBy('name')->select(['id','name'])->get();
+        $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+
+        return view(adminTheme().'expenses.expenseIOUReports',compact('expenses','users','from','to','branches'));
+    }
+   
     public function expenseReports(Request $r){
 
         if($r->startDate){

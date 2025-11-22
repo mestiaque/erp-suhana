@@ -157,6 +157,20 @@ return [
                     'permission'  => ''
                 ],
                 [
+                    'title'       => 'I.O.U List',
+                    'icon'        => 'fa-solid fa-layer-group',
+                    'route'       => '/admin/expenses/iou',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'I.O.U Reports',
+                    'icon'        => 'fa-solid fa-layer-group',
+                    'route'       => '/admin/expenses/iou-reports',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
                     'title'       => 'Expense Reports',
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/reports',
