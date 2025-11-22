@@ -222,11 +222,11 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Method</th>
-                            <th>Expense Head</th>
-                            <th>Branch/Factory</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Total</th>
                             <th>{{numberFormat($expenses->sum('amount'),2)}}</th>
                         </tr>
                     </tfoot>

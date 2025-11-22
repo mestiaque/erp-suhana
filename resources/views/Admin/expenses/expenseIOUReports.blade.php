@@ -165,9 +165,9 @@
                     <thead>
                         <tr>
                             <th style="width: 120px;min-width: 120px;">Date</th>
+                            <th style="width: 150px;min-width: 150px;">Employee</th>
                             <th style="min-width: 250px;">Purpose/Referance</th>
                             <th style="width: 150px;min-width: 150px;">Method</th>
-                            <th style="width: 150px;min-width: 150px;">Employee</th>
                             <th style="width: 150px;min-width: 150px;">Branch/Factory</th>
                             <th style="width: 150px;min-width: 150px;">Amount</th>
                         </tr>
@@ -176,9 +176,9 @@
                         @foreach($expenses as $expense)
                         <tr>
                             <td>{{$expense->created_at->format('d.m.Y')}}</td>
+                            <td>{{$expense->employee?$expense->employee->name:'not found'}}</td>
                             <td>{!! nl2br(e($expense->description)) !!}</td>
                             <td>{{$expense->method?$expense->method->name:'not found'}}</td>
-                            <td>{{$expense->employee?$expense->employee->name:'not found'}}</td>
                             <td>{{$expense->branch?$expense->branch->name:'not found'}}</td>
                             <td>{{numberFormat($expense->amount,2)}}</td>
                         </tr>
@@ -191,11 +191,11 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Method</th>
-                            <th>Employee</th>
-                            <th>Branch/Factory</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Total</th>
                             <th>{{numberFormat($expenses->sum('amount'),2)}}</th>
                         </tr>
                     </tfoot>
