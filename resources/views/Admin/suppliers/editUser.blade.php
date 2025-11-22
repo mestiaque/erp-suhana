@@ -27,7 +27,7 @@
         <li class="item">Profile</li>
     </ol>
 </div>
- 
+
 @include(adminTheme().'alerts')
 
 
@@ -71,9 +71,9 @@
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                                     <label for="name">Company Name</label>
-                                    <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" />
-                                    @if ($errors->has('name'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                                    <input type="text" class="form-control {{$errors->has('company_name')?'error':''}}" name="company_name" placeholder="Enter Company Name" value="{{$user->company_name?:old('company_name')}}" />
+                                    @if ($errors->has('company_name'))
+                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('company_name') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">

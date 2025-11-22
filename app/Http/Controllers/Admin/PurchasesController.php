@@ -659,7 +659,6 @@ class PurchasesController extends Controller
       ->selectRaw("count(case when status = 1 then 1 end) as active")
       ->selectRaw("count(case when status = 0 then 1 end) as inactive")
       ->first();
-
       return view(adminTheme().'suppliers.users',compact('users','total'));
     }
 
@@ -711,9 +710,12 @@ class PurchasesController extends Controller
       }
 
       if($action=='view'){
-        $orders =$user->orders()->whereIn('order_type',['purchase_order'])
+        $orders =$user->orders()->whereIn('status',['approved'])
                 ->paginate(10);
-        return view(adminTheme().'suppliers.viewUser',compact('user','orders'));
+        $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
+        $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
+        $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id', 'desc')->paginate(10);
+        return view(adminTheme().'suppliers.viewUser',compact('user','orders', 'transactions', 'paymentMethods', 'transactions'));
       }
 
       //Update User Profile Start
@@ -774,14 +776,145 @@ class PurchasesController extends Controller
         }
         //Delete User End
 
+
+        if($action == 'payment'){
+            $supplier_id = $r->user_id;
+            $pay_amount  = floatval($r->pay_amount);
+            $payment_method_id = $r->payment_method_id;
+            $note = $r->note;
+
+            $paymentMethod = Attribute::findOrFail($payment_method_id);
+            $purchases = PurchaseOrder::where('supplier_id', $supplier_id)
+                                        ->where('due_amount', '>', 0)
+                                        ->where('can_pay', 1)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+
+            if ($purchases->count() == 0) {
+                return back()->with('error', 'No due found for this supplier.');
+            }
+
+            $remaining = $pay_amount;
+
+
+            foreach ($purchases as $purchase) {
+
+                if ($remaining <= 0)
+                    break;
+
+                $due = $purchase->due_amount;
+
+                $payToThis = min($due, $remaining); // this purchase e joto jabe
+
+                // Update purchase paid/due
+                $purchase->paid_amount += $payToThis;
+                $purchase->due_amount -= $payToThis;
+
+                // Update payment_status
+                if ($purchase->due_amount <= 0) {
+                    $purchase->payment_status = 'paid';
+                    $purchase->due_amount = 0;
+                } elseif ($purchase->paid_amount > 0) {
+                    $purchase->payment_status = 'partial';
+                } else {
+                    $purchase->payment_status = 'due';
+                }
+
+                $purchase->save();
+
+                // ==========================
+                //   Create Transaction Log
+                // ==========================
+                Transaction::create([
+                    "src_id"            => $purchase->id,
+                    "user_id"           => $purchase->supplier_id,
+
+                    "billing_name"      => $purchase->supplier_name,
+                    "billing_mobile"    => $purchase->supplier_mobile,
+                    "billing_email"     => $purchase->supplier_email,
+                    "billing_address"   => $purchase->supplier_address,
+                    "billing_note"      => $note,
+
+                    "type"              => 3, // purchase payment
+                    "account_id"        => $r->account_id,
+                    "transection_id"    => date('Ymd') . random_int(1000, 9999),
+
+                    "payment_method"    => $paymentMethod->name,
+                    "payment_method_id" => $paymentMethod->id,
+                    "amount"            => $payToThis,
+                    "currency"          => "BDT",
+                    "status"            => "Pending",
+                    "addedby_id"        => Auth::id(),
+                ]);
+
+                // Remaining reduce
+                $remaining -= $payToThis;
+            }
+            return back()->with('success', 'Supplier payment successfully completed!');
+        }
+
       return view(adminTheme().'suppliers.editUser',compact('user'));
 
     }
 
-    
-    public function suppliersLegers(){
 
-      return view(adminTheme().'suppliers.supplierLadgers');
+    public function suppliersLegers(Request $request){
+
+        $suppliers = User::where('supplier',1)->get();
+
+        $ledgerEntries = collect();
+        $supplier = null;
+
+        if($request->has('supplier_id') && $request->supplier_id) {
+            $supplier = User::findOrFail($request->supplier_id);
+
+            $purchases = PurchaseOrder::where('supplier_id', $supplier->id)->orderBy('created_at')->get();
+            $transactions = Transaction::where('user_id', $supplier->id)->where('type',3)->orderBy('created_at')->get();
+
+            // Purchase credit
+            foreach($purchases as $p){
+                $ledgerEntries->push([
+                    'date' => $p->created_at,
+                    'supplier' => $supplier->name,
+                    'ref' => $p->order_no,
+                    'debit' => $p->grand_total,
+                    'credit' => 0,
+                ]);
+            }
+
+            // Payment debit
+            foreach($transactions as $t){
+                $ledgerEntries->push([
+                    'date' => $t->created_at,
+                    'supplier' => $supplier->name,
+                    'ref' => $t->transection_id,
+                    'debit' => 0,
+                    'credit' => $t->amount,
+                ]);
+            }
+
+            // Sort by date
+            $ledgerEntries = $ledgerEntries->sortBy('date')->values();
+
+            // Calculate running balance
+            $balance = 0;
+            $ledgerEntries = $ledgerEntries->map(function($entry) use (&$balance, &$key){
+                $balance += $entry['debit'] - $entry['credit'];
+                $key = isset($key) ? $key + 1 : 1;
+                return [
+                    'sl' => $key,
+                    'date' => $entry['date'],
+                    'supplier' => $entry['supplier'],
+                    'ref' => $entry['ref'],
+                    'debit' => $entry['debit'],
+                    'credit' => $entry['credit'],
+                    'balance' => $balance,
+                ];
+            });
+
+        }
+
+        return view(adminTheme().'suppliers.supplierLadgers', compact('ledgerEntries', 'supplier', 'suppliers'));
     }
 
 
@@ -1307,8 +1440,6 @@ class PurchasesController extends Controller
 
         return view(adminTheme().'purchases.bill-payments.index', compact('purchases','totals'));
     }
-
-
 
     public function billPaymentAction($action, $id = null)
     {

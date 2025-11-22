@@ -72,7 +72,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.purchasesOrdersAction',['pay',$p->id]) }}">
+                                        <a href="{{ route('admin.purchasesOrdersAction',['view',$p->id]) }}">
                                             {{ $p->order_no }}
                                         </a>
                                     </td>
@@ -106,7 +106,6 @@
                                             <button type="button" class="btn-custom info-btn" data-id="{{ $p->id }}">
                                                 <i class="bx bx-info-circle"></i>
                                             </button>
-
                                         @endif
                                     </td>
                                 </tr>
