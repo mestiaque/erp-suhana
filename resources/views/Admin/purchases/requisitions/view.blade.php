@@ -12,7 +12,7 @@
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3>Purchase Order View</h3>
+            <h3>Requisition  View</h3>
             <div class="dropdown">
                 <a href="{{ route('admin.purchasesRequisitions') }}" class="btn-custom primary">
                     <i class="bx bx-left-arrow-alt"></i> Back List
@@ -165,18 +165,17 @@
                     </div>
 
                     <div class="inviceTitleId">
-                        <div class="invoice-title">Purchases #{{ $requisition->order_no}}</div>
+                        <div class="invoice-title">Requisition #{{ $requisition->requisition_no}}</div>
                         <div class="invoice-dates">
                             <p>
                                 <b>Request Date:</b> {{ $requisition->created_at->format('d.m.Y') }} <br>
-                                <b>Supplier:</b> {{$requisition->supplier_name}} {{$requisition->company_name?'- '.$requisition->company_name:''}} <br>
-                                <b>Mobile:</b> {{$requisition->supplier_name}} <b>Address:</b> {{$requisition->supplier_address}}
+                                <b>Assinge By:</b> {{$requisition->user?->name}} <br>
+                                <b>Department:</b> {{$requisition->department?->name ?? 'N/A'}}
                             </p>
                         </div>
                     </div>
 
-                    <div class="invoiced-to-title">Requested By
-                         <p>{{ $requisition->user->name ?? 'N/A' }} </p>
+                    <div class="invoiced-to-title"><b>Expected Date :</b> {{$requisition->expected_date?Carbon\Carbon::parse($requisition->expected_date)->format('d.m.Y'):old('expected_date')}}
                     </div>
                     <table class="items-table">
                         <thead>

@@ -19,4 +19,9 @@ class PurchaseRequisitionItem extends Model
     {
         return $this->belongsTo(PurchaseRequisition::class, 'requisition_id');
     }
+    public function material()
+    {
+        return $this->belongsTo(Post::class, 'material_id'); // assuming Post model stores materials
+    }
+    
 }

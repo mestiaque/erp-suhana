@@ -505,7 +505,21 @@ class PurchasesController extends Controller
         }
 
         // Add / Update / Remove Items
-        if(in_array($action,['add-item','update-item','remove-item'])){
+        if(in_array($action,['add-material','add-item','update-item','remove-item'])){
+            if ($action == 'add-material') {
+                $item =$requisition->items()->where('material_id',$r->item_id)->first();
+                if(!$item){
+                  $item = new PurchaseRequisitionItem();
+                  $item->requisition_id = $requisition->id;
+                  $item->material_id = $r->item_id?: null;
+                }
+                $item->material_name = $item->material?$item->material->name: null;
+                if($item->material){
+                  $item->unit = $item->material->unit?$item->material->unit->name: null;
+                }
+                $item->addedby_id = Auth::id();
+                $item->save();
+            }
             if($action=='add-item'){
                 $item = new PurchaseRequisitionItem();
                 $item->requisition_id = $requisition->id;
@@ -535,6 +549,7 @@ class PurchasesController extends Controller
             }
 
             // Update totals
+            $requisition->total_qty =$requisition->items()->sum('qty');
             $requisition->save();
 
             $goods = Post::where('type',3)->where('status','active')->limit(10)->get();
