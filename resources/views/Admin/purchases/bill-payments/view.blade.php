@@ -22,7 +22,7 @@
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header mb-2">
-            <h3>Bill Payment - Order #<a href="{{ route('admin.purchasesOrdersAction',['pay',$purchase->id]) }}">{{ $purchase->order_no }}</a></h3>
+            <h3>Bill Payment - Order #<a href="{{ route('admin.purchasesOrdersAction',['view',$purchase->id]) }}">{{ $purchase->order_no }}</a></h3>
         </div>
 
         <div class="card-body">
@@ -122,7 +122,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">No payment history found</td>
+                                        <td colspan="7" class="text-center">No payment history found</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -141,7 +141,7 @@
                                 <input type="hidden" value="{{ $purchase->id }}" name="purchase_id" hidden readonly>
                                 <div class="mb-2">
                                     <label>Pay Amount</label>
-                                    <input type="number" name="pay_amount" step="any" max="{{ $purchase->due_amount }}" class="form-control" required>
+                                    <input type="number" placeholder="{{ $purchase->due_amount }}" name="pay_amount" step="any" max="{{ $purchase->due_amount }}" class="form-control" required>
                                 </div>
 
                                 {{-- <div class="mb-2">
@@ -166,7 +166,7 @@
 
                                 <div class="mb-2">
                                     <label>Note</label>
-                                    <textarea name="note" class="form-control" cols="30" rows="1"></textarea>
+                                    <textarea name="note" placeholder="Write note here..." class="form-control" cols="30" rows="1"></textarea>
                                 </div>
 
                                 {{-- <button type="submit" class="btn btn-success w-50 mt-2">Submit Payment</button> --}}

@@ -215,7 +215,7 @@ class User extends Authenticatable
     public function user(){
         return $this->belongsTo(User::class,'id');
     }
-   
+
     public function fullAddress(){
 
         $addr =$this->address_line1;
@@ -251,7 +251,7 @@ class User extends Authenticatable
 
     public function orders()
     {
-        return $this->hasMany(Order::class)->orderBy('id','desc');
+        return $this->hasMany(PurchaseOrder::class, 'supplier_id')->orderBy('id','desc');
     }
     public function duePurchaseAmount()
     {
