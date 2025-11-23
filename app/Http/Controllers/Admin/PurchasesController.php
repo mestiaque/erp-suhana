@@ -736,7 +736,7 @@ class PurchasesController extends Controller
         $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
         $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
         $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id', 'desc')->paginate(10, ['*'], 'trans_page');
-        return view(adminTheme().'suppliers.viewUser',compact('user','orders', 'transactions', 'paymentMethods', 'transactions'));
+        return view(adminTheme().'suppliers.viewUser',compact('user','orders', 'transactions', 'accountMethods', 'paymentMethods', 'transactions'));
       }
 
       //Update User Profile Start
@@ -803,6 +803,16 @@ class PurchasesController extends Controller
             $pay_amount  = floatval($r->pay_amount);
             $payment_method_id = $r->payment_method_id;
             $note = $r->note;
+
+            $accountMethod =Attribute::where('type',10)->where('status','active')->find($r->account_id);
+            if(!$accountMethod){
+                Session()->flash('error','Account method Are Not found');
+                return redirect()->back();
+            }
+            if($pay_amount > $accountMethod->amount){
+                Session()->flash('error','Account Balance Are Not Available');
+                return redirect()->back();
+            }
 
             $paymentMethod = Attribute::findOrFail($payment_method_id);
             $purchases = PurchaseOrder::where('supplier_id', $supplier_id)
@@ -871,6 +881,9 @@ class PurchasesController extends Controller
                 // Remaining reduce
                 $remaining -= $payToThis;
             }
+
+            $accountMethod->amount -=$pay_amount;
+            $accountMethod->save();
             return back()->with('success', 'Supplier payment successfully completed!');
         }
 

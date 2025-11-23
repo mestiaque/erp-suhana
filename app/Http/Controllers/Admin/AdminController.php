@@ -3915,65 +3915,84 @@ class AdminController extends Controller
                 'amount' => 'required|numeric',
                 'company_name' => 'required',
                 'receiver_name' => 'required',
-                // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
-                'attachment' => 'nullable||file|max:25600',
+                'attachment' => 'nullable|file|max:25600',
             ]);
+
             $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
+            $expense->user_id = $r->employee_id;
+            $expense->method_id = $r->payment;
+            $expense->branch_id = $r->branch_id;
+            $expense->amount = $r->amount ?: 0;
+            $expense->description = $r->description;
+            $expense->company_name = $r->company_name;
+            $expense->receiver_name = $r->receiver_name;
 
-            $expense->user_id=$r->employee_id;
-            $expense->method_id=$r->payment;
-            $expense->branch_id=$r->branch_id;
-            $expense->amount=$r->amount?:0;
-            $expense->description=$r->description;
-            $expense->company_name=$r->company_name;
-            $expense->receiver_name=$r->receiver_name;
-            $expense->status =$r->status?'completed':'pending';
-            $expense->editedby_id =Auth::id();
+            $prevStatus = $expense->status; // Store previous status
+            $expense->status = $r->status ? 'completed' : 'pending';
+            $expense->editedby_id = Auth::id();
+
             if (!$createDate->isSameDay($expense->created_at)) {
                 $expense->created_at = $createDate;
             }
+
             $expense->save();
 
+            // Handle transaction updates
             if($transection = $expense->transection){
-                $amount =$expense->amount;
-                if($transection->amount > $amount){
-                    $needAmount =$transection->amount - $amount;
-                    $transection->amount -=$needAmount;
+                $amount = $expense->amount;
 
-                    if($method=$expense->account){
-                        $method->amount +=$needAmount;
+                // If status changed to completed, refund the account
+                if($prevStatus != 'completed' && $expense->status == 'completed'){
+                    if($method = $expense->account){
+                        $method->amount += $amount; // refund
                         $method->save();
                     }
+                    $transection->status = 'Refund';
+                    $transection->amount = $amount;
+                    $transection->balance = $method->amount ?? 0;
+                    $transection->created_at = $expense->created_at;
+                    $transection->save();
+                } else {
+                    // Normal update for amount changes
+                    if($transection->amount > $amount){
+                        $needAmount = $transection->amount - $amount;
+                        $transection->amount -= $needAmount;
 
-                }elseif($transection->amount < $amount){
-                    $needAmount =$amount - $transection->amount;
-                    $transection->amount +=$needAmount;
-                    if($method=$expense->account){
-                        $method->amount -=$needAmount;
-                        $method->save();
+                        if($method = $expense->account){
+                            $method->amount += $needAmount;
+                            $method->save();
+                        }
+
+                    } elseif($transection->amount < $amount){
+                        $needAmount = $amount - $transection->amount;
+                        $transection->amount += $needAmount;
+                        if($method = $expense->account){
+                            $method->amount -= $needAmount;
+                            $method->save();
+                        }
                     }
+
+                    $transection->created_at = $expense->created_at;
+                    $transection->save();
                 }
-
-                $transection->created_at =$expense->created_at;
-                $transection->save();
             }
 
-            ///////Image Upload End////////////
+            ///////Image Upload////////////
             if($r->hasFile('attachment')){
-              $file =$r->attachment;
-              $src  =$expense->id;
-              $srcType  =10;
-              $fileUse  =1;
-              uploadFile($file,$src,$srcType,$fileUse);
+                $file = $r->attachment;
+                $src = $expense->id;
+                $srcType = 10;
+                $fileUse = 1;
+                uploadFile($file,$src,$srcType,$fileUse);
             }
             ///////Image Upload End////////////
 
             Session()->flash('success','Your Are Successfully Added');
             return redirect()->back();
-
         }
+
 
         if($action=='delete'){
             $medias =Media::latest()->where('src_type',8)->where('src_id',$expense->id)->get();
@@ -4014,7 +4033,7 @@ class AdminController extends Controller
             $to=Carbon::now();
         }
 
-        $expenses = ExpenseIou::latest()
+        $expenses = ExpenseIou::latest()->whereNotIn('status', ['temp', 'completed'])
             ->where(function($q) use ($r) {
 
                 if($r->search){

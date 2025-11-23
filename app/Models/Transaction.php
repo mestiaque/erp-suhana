@@ -61,5 +61,9 @@ class Transaction extends Model
     	return $this->belongsTo(User::class,'addedby_id');
     }
 
+    public function purchaseOrder(){
+    	return $this->belongsTo(PurchaseOrder::class, 'src_id');
+    }
+
 
 }

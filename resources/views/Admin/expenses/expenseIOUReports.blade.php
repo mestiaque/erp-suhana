@@ -3,7 +3,7 @@
 @endsection @push('css')
 
 <style type="text/css">
-    
+
     .select2.select2-container{
         width:100% !important;
         display:block;
@@ -15,7 +15,7 @@
         top: 5px;
         right: 5px;
     }
-    
+
     .activity-timeline-content ul li::before{
         height: 100%;
     }
@@ -23,20 +23,20 @@
         display:none;
     }
     @media only screen and (min-width: 769px) {
-        
+
         .activity-timeline-content ul li {
             flex: 0 0 25%;
             max-width: 25%;
         }
     }
-    
-    
-    
+
+
+
 </style>
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
@@ -134,16 +134,16 @@
     </div>
     <div class="card-body">
         @if($expenses)
-        
+
         <div class="PrintAreaContact">
             <style>
                 .tableReport tr th{
                     padding: 5px 10px;
-                    border: 1px solid #dee2e6;  
+                    border: 1px solid #dee2e6;
                 }
                 .tableReport tr td{
                     padding: 5px 10px;
-                    border: 1px solid #dee2e6;  
+                    border: 1px solid #dee2e6;
                 }
             </style>
             <div class="text-center mb-4">
@@ -164,18 +164,22 @@
                 <table  class="table tableReport" >
                     <thead>
                         <tr>
-                            <th style="width: 120px;min-width: 120px;">Date</th>
-                            <th style="width: 150px;min-width: 150px;">Employee</th>
-                            <th style="min-width: 250px;">Purpose/Referance</th>
-                            <th style="width: 150px;min-width: 150px;">Method</th>
-                            <th style="width: 150px;min-width: 150px;">Branch/Factory</th>
-                            <th style="width: 150px;min-width: 150px;">Amount</th>
+                            <th style="width: 120px;min-width: 100px;">Date</th>
+                            <th style="min-width: 140px;">Company Name</th>
+                            <th style="min-width: 130px;">Receiver Name</th>
+                            <th style="width: 150px;min-width: 130px;">Employee</th>
+                            <th style="min-width: 120px;">Purpose/Referance</th>
+                            <th style="width: 150px;min-width: 100px;">Method</th>
+                            <th style="width: 150px;min-width: 100px;">Branch/Factory</th>
+                            <th style="width: 150px;min-width: 100px;">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($expenses as $expense)
                         <tr>
                             <td>{{$expense->created_at->format('d.m.Y')}}</td>
+                            <td>{{$expense->company_name}}</td>
+                            <td>{{$expense->receiver_name}}</td>
                             <td>{{$expense->employee?$expense->employee->name:'not found'}}</td>
                             <td>{!! nl2br(e($expense->description)) !!}</td>
                             <td>{{$expense->method?$expense->method->name:'not found'}}</td>
@@ -185,17 +189,13 @@
                         @endforeach
                         @if($expenses->count()==0)
                         <tr>
-                            <td colspan="6" class="text-center">No Data Found</td>
+                            <td colspan="8" class="text-center">No Data Found</td>
                         </tr>
                         @endif
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th>Total</th>
+                            <th colspan="7" style="text-align: right">Total</th>
                             <th>{{numberFormat($expenses->sum('amount'),2)}}</th>
                         </tr>
                     </tfoot>
@@ -215,7 +215,7 @@
 
 
 </div>
-@endsection 
+@endsection
 @push('js')
 
 
@@ -224,14 +224,14 @@
     $(document).ready(function () {
         $(".select2").each(function () {
             var placeHolder = $(this).data('placeholder');
-            
+
             $(this).select2({
                 placeholder: placeHolder,
                 allowClear: true
             });
         });
-        
-        
+
+
         $('#example').DataTable( {
 	        dom: 'Bfrtip',
 	        buttons: [
@@ -239,9 +239,9 @@
 	        ]
 	    } );
 
-        
 
-        
+
+
     });
 
 </script>

@@ -33,64 +33,44 @@
     @include(adminTheme().'alerts')
 
     <div class="row mb-30">
+
         <div class="col-md-3">
-            <div class="card">
-                <div class="card-header" style="border-bottom: 1px solid #e3ebf3;">
-                    <h4 class="card-title">Supplier Profile</h4>
-                </div>
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th style="min-width: 120px;width: 120px;" >Name</th>
-                                    <td style="min-width: 200px;">{{$user->name}}</td>
-                                </tr>
-                                <tr>
-                                    <th>Mobile</th>
-                                    <td>{{$user->mobile}}</td>
-                                </tr>
-                                <tr>
-                                    <th>Email</th>
-                                    <td>{{$user->email}}</td>
-                                </tr>
-                                <tr>
-                                    <th>Address</th>
-                                    <td>{{$user->fullAddress()}}</td>
-                                </tr>
-                                <tr>
-                                    <th>Status</th>
-                                    <td>
-                                        @if($user->status)
-                                        <span class="badge badge-success">Active </span>
-                                        @else
-                                        <span class="badge badge-danger">Inactive </span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Join Date</th>
-                                    <td>{{$user->created_at->format('d M, Y')}}</td>
-                                </tr>
-                                <tr>
-                                    <th>Total Sale</th>
-                                    <td>{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</td>
-                                </tr>
-                                <tr>
-                                    <th>Total Due</th>
-                                    <td>{{priceFullFormat($user->orders->where('status','approved')->sum('due_amount'))}}
-                                        {{-- <a href="{{route('admin.usersCustomerAction',['view',$user->id,'payment_status'=>'due'])}}"><i class="fas fa-external-link-alt"></i></a> --}}
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-3">
+                    <!-- Profile Image -->
+                    <div class="mb-3 position-relative d-inline-block">
+                        <img src="{{ asset($user->image()) }}"
+                            class="rounded-circle img-fluid" alt="Profile" style="width: 6rem; height:6rem">
+
+                        <!-- Status Dot -->
+                        <span class="position-absolute bottom-0 end-0 translate-middle p-1
+                                    rounded-circle"
+                            style="background-color: {{ $user->status ? '#28a745' : '#dc3545' }};
+                                    width: 20px; height: 20px; border: 2px solid #fff;right:5px">
+                        </span>
                     </div>
+
+
+                    <!-- Name & Contact Info -->
+                    <h5 class="mb-1"><strong>{{$user->name}}</strong></h5>
+                    <p class="mb-1"><i class="fas fa-phone me-1"></i> {{$user->mobile}}</p>
+                    <p class="mb-3"><i class="fas fa-envelope me-1"></i> {{$user->email}}</p>
+
+                    <!-- Other Info -->
+                    <ul class="list-group list-group-flush text-start">
+                        <li class="list-group-item py-1"><strong>Address:</strong> {{$user->fullAddress()}}</li>
+                        <li class="list-group-item py-1"><strong>Join Date:</strong> {{$user->created_at->format('d M, Y')}}</li>
+                        <li class="list-group-item py-1"><strong>Total Sale:</strong> <span class="text-success">{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</span></li>
+                        <li class="list-group-item py-1"><strong>Total Due:</strong> <span class="text-danger">{{priceFullFormat($user->orders->where('status','approved')->sum('due_amount'))}}</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
+
+
         <div class="col-md-9">
             <div class="card">
-                <div class="card-header" style="border-bottom: 1px solid #e3ebf3;">
+                <div class="card-header mb-3" style="border-bottom: 1px solid #e3ebf3;">
                     <h4 class="card-title">Purchases List</h4>
                 </div>
                 <div class="card-content">
@@ -102,14 +82,11 @@
                                     <tr>
                                         <th style="width:60px;min-width:60px;" >SL</th>
                                         <th style="width:120px;min-width:120px;">Purchase No.</th>
-                                        <th style="min-width:200px;">Customer</th>
-                                        <th style="width:200px;min-width:200px;">Total Bill</th>
-                                        <th style="width:200px;min-width:200px;">Paid Bill</th>
-                                        <th style="width:200px;min-width:150px;">Due Bill</th>
+                                        <th class="text-right" style="width:200px;min-width:200px;">Total Bill</th>
+                                        <th class="text-right" style="width:200px;min-width:200px;">Paid Bill</th>
+                                        <th class="text-right" style="width:200px;min-width:150px;">Due Bill</th>
                                         <th style="width:130px;min-width:130px;">Date</th>
                                         <th style="width:100px;min-width:100px;">Status</th>
-
-                                        <th style="width:80px;min-width:80px;">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -120,12 +97,7 @@
                                             <a href="{{route('admin.purchasesOrdersAction',['view',$order->id])}}">
                                             {{$order->order_no}}</a>
                                         </td>
-                                        <td>{{$order->company_name}}
-                                        @if($order->company_name && $order->name)
-                                        -
-                                        @endif
-                                        {{$order->name}}
-                                        </td>
+
                                         <td class="text-right">
                                             {{priceFullFormat($order->grand_total)}}
                                         </td>
@@ -156,14 +128,6 @@
                                                 <span class="badge badge-secondary">
                                                     {{ ucfirst($order->payment_status) }}
                                                 </span>
-                                            @endif
-                                        </td>
-
-                                        <td>
-                                            @if($order->can_pay == 1)
-                                                <a href="{{ route('admin.billPaymentAction',['pay',$order->id]) }}" class="btn-custom success">
-                                                    <i class="bx bx-money"></i>
-                                                </a>
                                             @endif
                                         </td>
                                     </tr>
@@ -208,6 +172,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Transaction ID</th>
+                                            <th>Purchase Number</th>
                                             <th>Amount</th>
                                             <th>Paid Date</th>
                                             <th>Note</th>
@@ -220,6 +185,11 @@
                                             <tr>
                                                 <td>{{ $i+1 }}</td>
                                                 <td style="max-width: 5rem">{{ $trans->transection_id }}</td>
+                                                <td>
+                                                    <a href="{{route('admin.purchasesOrdersAction',['view',$trans->src_id])}}">
+                                                        {{$trans?->purchaseOrder?->order_no}}
+                                                    </a>
+                                                </td>
                                                 <td class="text-right">{{ number_format($trans->amount,2) }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($trans->created_at)->format('d-m-Y') }}</td>
                                                 <td style="max-width: 10rem">{{ $trans->billing_note ?? 'N/A' }}</td>
@@ -253,7 +223,7 @@
                                     <input type="number" placeholder="{{ $totalDue }}" name="pay_amount" step="any" max="{{ $totalDue }}" class="form-control" required>
                                 </div>
 
-                                {{-- <div class="mb-2">
+                                <div class="mb-2">
                                     <label>Select Account</label>
                                     <select name="account_id" class="form-control" >
                                         <option value="">Select Account</option>
@@ -261,7 +231,7 @@
                                             <option value="{{ $acc->id }}">{{$acc->name}} - BDT {{priceFormat($acc->amount)}}</option>
                                         @endforeach
                                     </select>
-                                </div> --}}
+                                </div>
 
                                 <div class="mb-2">
                                     <label>Payment Method</label>
