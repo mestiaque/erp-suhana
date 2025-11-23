@@ -66,7 +66,6 @@
                 min-height: auto;
                 box-shadow: none;
                 padding: 0;
-                background: none;
             }
             @page {
                 size: A4;
