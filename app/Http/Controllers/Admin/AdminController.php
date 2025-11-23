@@ -4284,9 +4284,7 @@ class AdminController extends Controller
             $deposit->billing_note=$r->description;
             $deposit->status ='success';
             $deposit->addedby_id =Auth::id();
-            if (!$createDate->isSameDay($deposit->created_at)) {
-                $deposit->created_at = $createDate;
-            }
+            $deposit->created_at = $createDate;
             $deposit->save();
 
             $account->amount +=$deposit->amount;
@@ -5003,35 +5001,35 @@ class AdminController extends Controller
         // Update Department Action Start
         if($action=='update'){
 
-        $check = $r->validate([
-            'name' => 'required|max:100',
-            'description' => 'nullable|max:1000',
-            'created_at' => 'required|date',
-        ]);
+            $check = $r->validate([
+                'name' => 'required|max:100',
+                'description' => 'nullable|max:1000',
+                'created_at' => 'required|date',
+            ]);
 
-        $method->name=$r->name;
-        $method->description=$r->description;
-        $slug =Str::slug($r->name);
-         if($slug==null){
-          $method->slug=$method->id;
-         }else{
-          if(Attribute::where('type',9)->where('slug',$slug)->whereNotIn('id',[$method->id])->count() >0){
-          $method->slug=$slug.'-'.$method->id;
-          }else{
-          $method->slug=$slug;
-          }
+            $method->name=$r->name;
+            $method->description=$r->description;
+            $slug =Str::slug($r->name);
+            if($slug==null){
+            $method->slug=$method->id;
+            }else{
+            if(Attribute::where('type',9)->where('slug',$slug)->whereNotIn('id',[$method->id])->count() >0){
+            $method->slug=$slug.'-'.$method->id;
+            }else{
+            $method->slug=$slug;
+            }
+            }
+
+            $method->status =$r->status?'active':'inactive';
+            $method->fetured =$r->lc_status?1:0;
+            $method->editedby_id =Auth::id();
+            $method->created_at =$r->created_at?:Carbon::now();
+            $method->save();
+
+            Session()->flash('success','Your Are Successfully Updated');
+            return redirect()->back();
+
         }
-
-        $method->status =$r->status?'active':'inactive';
-        $method->fetured =$r->lc_status?1:0;
-        $method->editedby_id =Auth::id();
-        $method->created_at =$r->created_at?:Carbon::now();
-        $method->save();
-
-        Session()->flash('success','Your Are Successfully Updated');
-        return redirect()->back();
-
-      }
 
       // Update Department Action End
 
@@ -5050,13 +5048,27 @@ class AdminController extends Controller
 
         Session()->flash('success','Your Are Successfully Deleted');
         return redirect()->route('admin.accounts');
-
       }
       // Delete Department Action End
+
+      
 
       $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
 
       $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
+
+      $openingBalance = Transaction::where('account_id', $method->id)
+                        ->whereDate('created_at', '<', $from)
+                        ->selectRaw("
+                            SUM(
+                                CASE 
+                                    WHEN type IN (0,1) THEN amount 
+                                    WHEN type IN (3,4,5,6,7) THEN -amount
+                                    ELSE 0 
+                                END
+                            ) as balance
+                        ")
+                        ->value('balance') ?? 0;
 
       //$transections =Transaction::latest()->whereDate('created_at','>=',$from)->where('payment_method_id',$method->id)->whereDate('created_at','<=',$to)->whereIn('type',[0,1,2,3,4])->get();
       $transections = Transaction::whereDate('created_at', '>=', $from)
@@ -5064,23 +5076,23 @@ class AdminController extends Controller
         // ->where('payment_method_id', $method->id)
         ->where('account_id', $method->id)
         //->where('type',1)
-        ->whereIn('type', [0, 1, 6])
+        ->whereIn('type', [0,1,3,4,5,6,7])
+        ->orderBy('created_at')
         ->get();
 
-        $balance = 0;
+        $balance = $openingBalance;
         $transections->map(function ($t) use (&$balance) {
-            if (in_array($t->type, [0, 1])) {
+            if (in_array($t->type, [0,1])) {
                 $balance += $t->amount;
-            }
-            elseif ($t->type == 6) {
+            } else {
                 $balance -= $t->amount;
             }
             $t->running_balance = $balance;
             return $t;
         });
+        $availableBalance = $balance;
 
-
-      return view(adminTheme().'accounts.accountsMethodsView',compact('method','transections','from','to'));
+      return view(adminTheme().'accounts.accountsMethodsView',compact('method','openingBalance','availableBalance','transections','from','to'));
 
 
     }

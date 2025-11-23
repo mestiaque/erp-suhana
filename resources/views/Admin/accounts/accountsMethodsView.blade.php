@@ -12,10 +12,14 @@
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Account View</h3>
          <div class="dropdown">
-             <a href="{{route('admin.accountsMethods')}}" class="btn-custom primary"  style="padding:5px 15px;">
+            <a href="javascript:void(0)" class="btn-custom danger" style="padding:5px 15px;" id="ExportAction" ><i class="fa-solid fa-file-excel"></i> Export</a>
+            <a href="javascript:void(0)" class="btn-custom primary" style="padding:5px 15px;" id="PrintAction" >
+                <i class="fa fa-print"></i> Print
+            </a>
+             <a href="{{route('admin.accounts')}}" class="btn-custom primary"  style="padding:5px 15px;">
                   Account List
              </a>
-             <a href="{{route('admin.accountsMethodsAction',['view',$method->id])}}" class="btn-custom yellow">
+             <a href="{{route('admin.accountsAction',['view',$method->id])}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
          </div>
@@ -24,7 +28,7 @@
         @include(adminTheme().'alerts')
         <div class="row">
             <div class="col-md-6">
-                <form action="{{route('admin.accountsMethodsAction',['view',$method->id])}}">
+                <form action="{{route('admin.accountsAction',['view',$method->id])}}">
                     <div class="row">
                         <div class="col-md-12 mb-0">
                             <label>Seach Here..</label>
@@ -51,86 +55,127 @@
         
         
         <br>
-        <div class="table-responsive">
-            <table id="example" class="display nowrap" cellspacing="0" width="100%">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Method</th>
-                        <th>Concern Person</th>
-                        <th>Reff</th>
-                        <th>Type</th>
-                        <th>Debit</th>
-                        <th>Credit</th>
-                        <th>Balance</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>Date</th>
-                        <th>Method</th>
-                        <th>Concern Person</th>
-                        <th>Reff</th>
-                        <th>Type</th>
-                        <th>Debit</th>
-                        <th>Credit</th>
-                        <th>Balance</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach($transections as $i=>$transection)
-                    <tr>
-                        <td>{{$transection->created_at->format('d-m-Y')}}</td>
-                        <td>
-                            {{$transection->paymentMethod?$transection->paymentMethod->name:''}}
-                        </td>
-                        <td>
-                            @if($transection->type==0)
-                            {{$transection->sale?$transection->sale->name:''}}
-                            @else
-                            {{$transection->transection_id}}
-                            @endif
-                            
-                        </td>
-                        <td>
-                            @if($transection->type==0)
-                            <span>{{$transection->expense?$transection->expense->description:''}}</span>
-                            @elseif($transection->type==2)
-                            {{$transection->billing_note}}
-                            @elseif($transection->type==3)
-                            @if($payBill =$transection->traddingBill)
-                            {{$payBill->title}}
-                            @endif
-                            @elseif($transection->type==4)
-                            {{$transection->billing_note}}
-                            @else
-                            {{$transection->billing_note}}
-                            @endif
-                        </td>
-                        <td>
-                            @if($transection->type==0)
-                            Sales
-                            @elseif($transection->type==1)
-                            Deposit
-                            @elseif($transection->type==6)
-                            Withdrawal
-                            @endif
-                        </td>
-                        <td>
-                            @if($transection->type==6)
-                            {{priceFormat($transection->amount)}}
-                            @endif
-                        </td>
-                        <td>
-                            @if($transection->type==0 || $transection->type==1)
-                            {{priceFormat($transection->amount)}}
-                            @endif
-                        </td>
-                        <td>{{priceFormat($transection->running_balance)}}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div class="PrintAreaContact">
+            <style>
+                .tableReport tr th{
+                    padding: 5px 10px;
+                    border: 1px solid #dee2e6;  
+                }
+                .tableReport tr td{
+                    padding: 5px 10px;
+                    border: 1px solid #dee2e6;  
+                }
+            </style>
+            <div class="text-center mb-4">
+                <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;">
+                <h2>{{general()->title}}</h2>
+                <p>
+                    {!!general()->address_one!!}
+                    <br>
+                    <b>Phone:</b> {{general()->mobile}}
+                    <b>Email:</b> {{general()->email}}
+                    <br>
+                    <b>Date:</b>
+                    {{ date('d M, Y') }}
+                </p>
+                <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">{{$method->name}} Statement</span>
+            </div>
+            <div class="table-responsive">
+                <table  class="table tableReport" >
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;min-width: 120px;">Date</th>
+                            <th style="width: 130px;min-width: 130px;">Method</th>
+                            <th style="min-width: 200px;">Concern Person</th>
+                            <th style="width: 130px;min-width: 130px;">Type</th>
+                            <th style="width: 130px;min-width: 130px;">Debit</th>
+                            <th style="width: 130px;min-width: 130px;">Credit</th>
+                            <th style="width: 150px;min-width: 150px;">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>Opening</td>
+                            <td></td>
+                            <td></td>
+                            <td>{{priceFormat($openingBalance)}}</td>
+                        </tr>
+                        @forelse($transections as $tran)
+                            <tr>
+                                <td>{{ $tran->created_at->format('d-m-Y') }}</td>
+                                <td>{{ $tran->paymentMethod->name ?? '' }}</td>
+                                <td>
+                                    @if($tran->type == 0)
+                                        {{ $tran->sale->name ?? '' }}
+                                    @else
+                                        {{ $tran->transection_id }}
+                                    @endif
+                                </td>
+                                <td>
+                                    @switch($tran->type)
+
+                                        @case(0)
+                                            {{ $tran->expense->description ?? '' }} - Sales
+                                            @break
+
+                                        @case(1)
+                                            {{ $tran->billing_note }} - Deposit
+                                            @break
+
+                                        @case(3)
+                                            {{ optional($tran->traddingBill)->title }} - Supplier Bill
+                                            @break
+
+                                        @case(4)
+                                            {{ $tran->billing_note }} - Transfer Balance
+                                            @break
+
+                                        @case(5)
+                                            {{ $tran->billing_note }} - Expense
+                                            @break
+
+                                        @case(6)
+                                            {{ $tran->billing_note }} - Withdrawal
+                                            @break
+
+                                        @case(7)
+                                            {{ $tran->billing_note }} - Expense IOU
+                                            @break
+
+                                        @default
+                                            {{ $tran->billing_note }}
+                                    @endswitch
+                                </td>
+                                <td>
+                                    @if(in_array($tran->type, [3,4,5,6,7]))
+                                        {{ priceFormat($tran->amount) }}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(in_array($tran->type, [0,1]))
+                                        {{ priceFormat($tran->amount) }}
+                                    @endif
+                                </td>
+                                <td>{{ priceFormat($tran->running_balance) }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" style="text-align:center;">No Record</td>
+                            </tr>
+                            @endforelse
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5"></td>
+                            <td>Available</td>
+                            <td>{{ priceFormat($availableBalance ?? 0) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 </div>
