@@ -137,12 +137,18 @@
                             </td>
                             <td>
                                 <b>TNX Id:</b> {{$transection->transection_id}} @if($transection->imageFile) <a href="{{asset($transection->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif <br>
-                                <b>Accounts:</b> {{$transection->accountMethod?$transection->accountMethod->name:''}}<br>
+                                <b>Accounts:</b> {{$transection->account?$transection->account->name:''}}<br>
                                 <b>Payment Method:</b> {{$transection->method?$transection->method->name:''}}<br>
+                                @if($transection->billing_reason)
+                                <b>Bank Name:</b> {{$transection->billing_reason}} <br>
+                                @endif
                                 <b>Date:</b> {{$transection->created_at->format('d-m-Y')}}<br>
                             </td>
                             <td>
-                                <b>BDT {{priceFormat($transection->amount)}}</b><br>
+                                <b>Previus:</b> <span style="color: #FF9800;"> {{numberFormat($transection->balance - $transection->amount,2)}} </span>
+                                <br> <b>Add Balance:</b> <span style="color: #009688;font-weight: bold;"> {{numberFormat($transection->amount,2)}} </span>
+                                <br> <b>After Balance:</b> <span>{{numberFormat($transection->balance,2)}} </span>
+                                <br>
                                 <span>{!!$transection->billing_note!!}</span>
                             </td>
                         </tr>
@@ -215,7 +221,10 @@
                  	</div>
                     <div class="col-md-12 form-group">
                         <label for="name">Bank Name </label>
-                        <input type="text" class="form-control" placeholder="Enter bank name" name="bank_name">
+                        <input type="text" class="form-control {{$errors->has('bank_name')?'error':''}}" placeholder="Enter bank name" name="bank_name">
+                        @if ($errors->has('bank_name'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bank_name') }}</p>
+        				@endif
                     </div>
              	</div>
     	       <div class="form-group">
@@ -272,7 +281,6 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('account') }}</p>
         				@endif
                  	</div>
-    	            
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -294,6 +302,13 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif
                  	</div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Bank Name </label>
+                        <input type="text" value="{{$dpm->billing_reason}}" class="form-control {{$errors->has('bank_name')?'error':''}}" placeholder="Enter bank name" name="bank_name">
+                        @if ($errors->has('bank_name'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bank_name') }}</p>
+        				@endif
+                    </div>
              	</div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>

@@ -2896,6 +2896,7 @@ class AdminController extends Controller
         return view(adminTheme().'bill-collections.editInvoices',compact('invoice','paymentMethods','accountMethods'));
     }
 
+    
 
     // LC Management Function
     public function lcInvoices(Request $r){
@@ -3439,7 +3440,6 @@ class AdminController extends Controller
             $expense->company_name=$r->company_name;
             $expense->receiver_name=$r->receiver_name;
             $expense->status ='active';
-
             $expense->addedby_id =Auth::id();
             $expense->created_at = $createDate;
             $expense->save();
@@ -3450,12 +3450,14 @@ class AdminController extends Controller
             $transection =new Transaction();
             $transection->type=5;
             $transection->src_id=$expense->id;
-            $transection->payment_method_id=$expense->account_id;
+            $transection->payment_method_id=$expense->method_id;
+            $transection->account_id=$expense->account_id;
             $transection->amount=$expense->amount;
             $transection->status ='success';
             $transection->addedby_id =Auth::id();
             $transection->created_at =$expense->created_at;
             $transection->balance =$method->amount;
+            $transection->transection_id =$expense->created_at->format('ymd') . random_int(1000, 9999);
             $transection->save();
 
             ///////Image Upload End////////////
@@ -3508,8 +3510,8 @@ class AdminController extends Controller
                 $expense->created_at = $createDate;
             }
             $expense->save();
-
             if($transection = $expense->transection){
+                $transection->payment_method_id =$expense->method_id;
                 $transection->created_at =$expense->created_at;
                 $transection->save();
             }
@@ -4285,6 +4287,7 @@ class AdminController extends Controller
                 'account' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'amount' => 'required|numeric',
+                'bank_name' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -4304,6 +4307,7 @@ class AdminController extends Controller
             $deposit->payment_method_id=$r->payment;
             $deposit->amount=$r->amount;
             $deposit->billing_note=$r->description;
+            $deposit->billing_reason=$r->bank_name;
             $deposit->status ='success';
             $deposit->addedby_id =Auth::id();
             $deposit->created_at = $createDate;
@@ -4344,6 +4348,7 @@ class AdminController extends Controller
         if($action=='update'){
             $check = $r->validate([
                 'payment' => 'required|numeric',
+                'bank_name' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -4352,6 +4357,7 @@ class AdminController extends Controller
             $deposit->src_id=$r->payment;
             $deposit->payment_method_id=$r->payment;
             $deposit->billing_note=$r->description;
+            $deposit->billing_reason=$r->bank_name;
             $deposit->editedby_id =Auth::id();
             if (!$createDate->isSameDay($deposit->created_at)) {
                 $deposit->created_at = $createDate;
@@ -4461,6 +4467,7 @@ class AdminController extends Controller
                 'account' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'amount' => 'required|numeric',
+                'bank_name' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -4485,11 +4492,10 @@ class AdminController extends Controller
             $withdrawal->payment_method_id=$r->payment;
             $withdrawal->amount=$r->amount;
             $withdrawal->billing_note=$r->description;
+            $withdrawal->billing_reason=$r->bank_name;
             $withdrawal->status ='success';
             $withdrawal->addedby_id =Auth::id();
-            if (!$createDate->isSameDay($withdrawal->created_at)) {
-                $withdrawal->created_at = $createDate;
-            }
+            $withdrawal->created_at = $createDate;
             $withdrawal->save();
 
             $account->amount -=$withdrawal->amount;
@@ -4527,6 +4533,7 @@ class AdminController extends Controller
         if($action=='update'){
             $check = $r->validate([
                 'payment' => 'required|numeric',
+                'bank_name' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -4535,6 +4542,7 @@ class AdminController extends Controller
             $withdrawal->src_id=$r->payment;
             $withdrawal->payment_method_id=$r->payment;
             $withdrawal->billing_note=$r->description;
+            $withdrawal->billing_reason=$r->bank_name;
             $withdrawal->editedby_id =Auth::id();
             if (!$createDate->isSameDay($withdrawal->created_at)) {
                 $withdrawal->created_at = $createDate;

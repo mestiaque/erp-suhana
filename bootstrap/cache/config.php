@@ -1137,7 +1137,7 @@
           array (
             'title' => 'Bill Collection',
             'icon' => 'fas fa-wallet',
-            'route' => '/admin/bill-collection',
+            'route' => '/admin/bill-collections',
             'icon_color' => 'text-warning',
             'permission' => '',
           ),

@@ -1562,7 +1562,19 @@ class PurchasesController extends Controller
                 $purchase->payment_status = 'due';
             }
 
+            $account =Attribute::where('type',10)->where('status','active')->find(request()->account_id);
+            if(!$account){
+              Session()->flash('error','Account method Are Not found');
+              return redirect()->back();
+            }
+
+            if(request()->pay_amount > $account->amount){
+                 Session()->flash('error','This Account balance Are Not available');
+                 return redirect()->back();
+            }
+
             $paymentMethods =Attribute::find(request()->payment_method_id);
+
             $transactionData = [
                             "src_id"            => $purchase->id,
                             "user_id"           => $purchase->supplier_id,
@@ -1578,14 +1590,16 @@ class PurchasesController extends Controller
                             "payment_method"    => $paymentMethods->name,
                             "payment_method_id" => $paymentMethods->id,
                             "amount"      => request()->pay_amount,
+                            "balance"      => $account->amount-request()->pay_amount,
                             "currency"          => "BDT",
                             "status"            => "Pending",
                             "addedby_id"        => Auth::user()->id,
                         ];
 
-
-            // Save payment history
-            Transaction::create( $transactionData );
+            Transaction::create($transactionData);
+            
+            $account->amount -=request()->pay_amount;
+            $account->save();
 
             $purchase->save();
 
@@ -1659,6 +1673,11 @@ class PurchasesController extends Controller
     }
 
 
+    public function billCollection(Request $request)
+    {
+        return view(adminTheme().'purchases.bill-collections.index');
+    }
+    
     public function purchasesDamageReturn(Request $request)
     {
         return view(adminTheme().'purchases.returns.index');

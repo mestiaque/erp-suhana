@@ -93,29 +93,38 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>Opening</td>
-                                <td></td>
-                                <td></td>
-                                <td>{{priceFormat($openingBalance)}}</td>
-                            </tr>
+
                             @forelse($transections as $tran)
                                 <tr>
                                     <td>{{ $tran->created_at->format('d-m-Y') }}</td>
                                     <td>{{ $tran->paymentMethod->name ?? '' }}</td>
                                     <td>
                                         @if($tran->type == 0)
-                                            {{ $tran->sale->name ?? '' }}
+                                            {{ $tran->sale->name ?? '' }} 
+                                            {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
+                                        @elseif($tran->type==1)
+                                            <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{$tran->account?$tran->account->name:'N/A'}} {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
+                                        @elseif($tran->type==5)
+                                           @if($tran->expense)
+                                            <b>Company:</b> {{ $tran->expense->company_name}} - <b>Receiver:</b> {{ $tran->expense->receiver_name}} {{ $tran->expense->description?'- '.$tran->expense->description:'' }}
+                                            @else
+                                            <span>N/A</span>
+                                            @endif
+                                        @elseif($tran->type==3)
+
+                                            @if($tran->purchase)
+                                               <b>Invoice:</b> {{$tran->purchase->order_no}}
+                                               <b>Supplier:</b> {{$tran->purchase->supplier_name}}
+                                            @else
+                                            <span>N/A</span>
+                                            @endif
                                         @else
                                             {{ $tran->transection_id }}
+
                                         @endif
-                                        {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
+                                        
                                     </td>
                                     <td>
-
 
                                             @if($tran->type==0)
                                                 Sales
@@ -125,7 +134,7 @@
                                                 Supplier Bill
                                             @elseif($tran->type==4)
                                                 Transfer Balance
-                                            @case($tran->type==5)
+                                            @elseif($tran->type==5)
                                                  Expense
                                             @elseif($tran->type==6)
                                                 Withdrawal

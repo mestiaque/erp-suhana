@@ -30,11 +30,19 @@ class Transaction extends Model
     	return $this->hasOne(Media::class,'src_id')->where('src_type',9)->where('use_Of_file',1);
     }
 
+    public function purchase(){
+    	return $this->belongsTo(PurchaseOrder::class,'src_id');
+    }
+    
+    public function expense(){
+    	return $this->belongsTo(Expense::class,'src_id');
+    }
+    
     public function method(){
     	return $this->belongsTo(Attribute::class,'src_id');
     }
 
-    public function accountMethod(){
+    public function account(){
     	return $this->belongsTo(Attribute::class,'account_id');
     }
 
@@ -53,9 +61,6 @@ class Transaction extends Model
     	return $this->belongsTo(Company::class,'user_id');
     }
 
-    public function traddingBill(){
-    	return $this->belongsTo(SupplierTrading::class,'src_id');
-    }
 
     public function assinee(){
     	return $this->belongsTo(User::class,'addedby_id');
