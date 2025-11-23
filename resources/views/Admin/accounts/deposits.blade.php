@@ -213,6 +213,10 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif
                  	</div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Bank Name </label>
+                        <input type="text" class="form-control" placeholder="Enter bank name" name="bank_name">
+                    </div>
              	</div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>

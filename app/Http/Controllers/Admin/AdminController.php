@@ -4277,7 +4277,6 @@ class AdminController extends Controller
         return view(adminTheme().'accounts.deposits',compact('transections','paymentMethods','accountMethods'));
     }
 
-
     public function depositsAction(Request $r,$action,$id=null){
         //Add Service  Start
         if($action=='create'){
@@ -5120,6 +5119,49 @@ class AdminController extends Controller
 
     }
 
+    public function accountsStatement(Request $r){
+        $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
+        $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
+        $method =Attribute::where('type',10)->find($r->account_id);
+        $openingBalance=0;
+        $availableBalance=0;
+        $transections=null;
+        if($method){
+            $openingBalance = Transaction::where('account_id', $method->id)
+            ->whereDate('created_at', '<', $from)
+            ->selectRaw("
+                            SUM(
+                                CASE 
+                                    WHEN type IN (0,1) THEN amount 
+                                    WHEN type IN (3,4,5,6,7) THEN -amount
+                                    ELSE 0 
+                                END
+                            ) as balance
+                        ")
+                        ->value('balance') ?? 0;
+                        
+            $transections = Transaction::whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to)
+            ->where('account_id', $method->id)
+            ->whereIn('type', [0,1,3,4,5,6,7])
+            ->orderBy('created_at')
+            ->get();
+
+            $balance = $openingBalance;
+            $transections->map(function ($t) use (&$balance) {
+                if (in_array($t->type, [0,1])) {
+                    $balance += $t->amount;
+                } else {
+                    $balance -= $t->amount;
+                }
+                $t->running_balance = $balance;
+                return $t;
+            });
+            $availableBalance = $balance;
+        }
+        $accounts =Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
+        return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
+    }
 
     // Services Management Function
 
