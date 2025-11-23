@@ -3407,6 +3407,9 @@ class AdminController extends Controller
                 'account' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
+                'company_name' => 'required',
+                'receiver_name' => 'required',
+                'amount' => 'required|numeric',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3433,7 +3436,10 @@ class AdminController extends Controller
             $expense->title=$r->title;
             $expense->amount=$r->amount;
             $expense->description=$r->description;
+            $expense->company_name=$r->company_name;
+            $expense->receiver_name=$r->receiver_name;
             $expense->status ='active';
+
             $expense->addedby_id =Auth::id();
             $expense->created_at = $createDate;
             $expense->save();
@@ -3480,6 +3486,8 @@ class AdminController extends Controller
                 'expense_type' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'branch_id' => 'required|numeric',
+                'company_name' => 'required',
+                'receiver_name' => 'required',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3492,6 +3500,8 @@ class AdminController extends Controller
             $expense->branch_id=$r->branch_id;
             $expense->title=$r->title;
             $expense->description=$r->description;
+            $expense->company_name=$r->company_name;
+            $expense->receiver_name=$r->receiver_name;
             $expense->status =$r->status?'active':'inactive';
             $expense->editedby_id =Auth::id();
             if (!$createDate->isSameDay($expense->created_at)) {
@@ -3759,11 +3769,11 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
-        $expenseIou =ExpenseIou::latest()->where('status','<>','temp')
+        $expenseIou =ExpenseIou::latest()->whereNotIn('status', ['temp', 'completed'])
                     ->where(function($q) use ($r) {
 
                               if($r->search){
-                                  
+
                                   $q->where('id','LIKE','%'.$r->search.'%')
                                     ->orWhere(function($qq)use($r){
                                         $qq->whereHas('employee',function($qqq)use($r){
@@ -3826,6 +3836,8 @@ class AdminController extends Controller
                 'account' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
+                'company_name' => 'required',
+                'receiver_name' => 'required',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3848,6 +3860,8 @@ class AdminController extends Controller
             $expense->method_id=$r->payment;
             $expense->account_id=$method->id;
             $expense->branch_id=$r->branch_id;
+            $expense->company_name=$r->company_name;
+            $expense->receiver_name=$r->receiver_name;
             $expense->amount=$r->amount;
             $expense->description=$r->description;
             $expense->status ='pending';
@@ -3899,6 +3913,8 @@ class AdminController extends Controller
                 'payment' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
+                'company_name' => 'required',
+                'receiver_name' => 'required',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3911,6 +3927,8 @@ class AdminController extends Controller
             $expense->branch_id=$r->branch_id;
             $expense->amount=$r->amount?:0;
             $expense->description=$r->description;
+            $expense->company_name=$r->company_name;
+            $expense->receiver_name=$r->receiver_name;
             $expense->status =$r->status?'completed':'pending';
             $expense->editedby_id =Auth::id();
             if (!$createDate->isSameDay($expense->created_at)) {
@@ -4002,7 +4020,7 @@ class AdminController extends Controller
                 if($r->search){
                     $q->where('member_id',$r->search);
                 }
-                
+
                 if($r->branch_id){
                     $q->where('branch_id',$r->branch_id);
                 }
@@ -4020,7 +4038,7 @@ class AdminController extends Controller
 
         return view(adminTheme().'expenses.expenseIOUReports',compact('expenses','users','from','to','branches'));
     }
-   
+
     public function expenseReports(Request $r){
 
         if($r->startDate){
@@ -4061,6 +4079,11 @@ class AdminController extends Controller
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+
+        if($r->summery){
+            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches'));
+        }
+
 
         return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches'));
     }

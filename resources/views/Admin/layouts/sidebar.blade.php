@@ -52,9 +52,11 @@
             @if(!$groupHasVisibleMenu) @continue @endif
 
             {{-- Group Title --}}
-            <li class="nav-item-title">
-                {{ $group['group_title'] ?? '' }}
-            </li>
+            @if($group['group_title'])
+                <li class="nav-item-title">
+                    {{ $group['group_title'] ?? '' }}
+                </li>
+            @endif
 
             @foreach($group as $key => $menu)
                 @if($key === 'group_title') @continue @endif

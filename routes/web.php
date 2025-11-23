@@ -61,12 +61,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     // Expenses Management Route
     Route::get('/expenses/types',[AdminController::class,'expensesTypes'])->name('expensesTypes');
     Route::any('/expenses/types/{action}/{id?}',[AdminController::class,'expensesTypesAction'])->name('expensesTypesAction');
-    
+
     Route::get('/expenses/iou-reports',[AdminController::class,'expenseIOUReports'])->name('expenseIOUReports');
     Route::get('/expenses/iou',[AdminController::class,'expensesIOU'])->name('expensesIOU');
     Route::any('/expenses/iou/{action}/{id?}',[AdminController::class,'expensesIOUAction'])->name('expensesIOUAction');
 
     Route::get('/expenses/reports',[AdminController::class,'expenseReports'])->name('expenseReports');
+    // Route::get('/expenses/summery',[AdminController::class,'expenseReports'])->name('expenseReports');
 
     Route::get('/expenses',[AdminController::class,'expenses'])->name('expenses');
     Route::any('/expenses/{action}/{id?}',[AdminController::class,'expensesAction'])->name('expensesAction');
@@ -100,7 +101,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
 
     Route::get('/bill-payments',[PurchasesController::class,'billPayment'])->name('billPayment');
     Route::any('/bill-payments/{action}/{id?}',[PurchasesController::class,'billPaymentAction'])->name('billPaymentAction');
-    
+
     Route::get('/bill-collections',[PurchasesController::class,'billCollection'])->name('billCollection');
     Route::any('/bill-collections/{action}/{id?}',[PurchasesController::class,'billCollectionAction'])->name('billCollectionAction');
     // Purchases Module Route
