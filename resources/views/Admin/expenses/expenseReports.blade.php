@@ -3,7 +3,7 @@
 @endsection @push('css')
 
 <style type="text/css">
-    
+
     .select2.select2-container{
         width:100% !important;
         display:block;
@@ -15,7 +15,7 @@
         top: 5px;
         right: 5px;
     }
-    
+
     .activity-timeline-content ul li::before{
         height: 100%;
     }
@@ -23,20 +23,20 @@
         display:none;
     }
     @media only screen and (min-width: 769px) {
-        
+
         .activity-timeline-content ul li {
             flex: 0 0 25%;
             max-width: 25%;
         }
     }
-    
-    
-    
+
+
+
 </style>
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
@@ -124,8 +124,20 @@
 <div class="card mb-30 pt-2">
     <div class="card-body activity-timeline-chart-box" style="position: relative;">
         <div class="activity-timeline-content">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h3>Summery Report</h3>
+
+                <form action="{{ route('admin.expenseReports') }}" method="GET" target="_blank">
+                    <input type="hidden" name="summery" value="true">
+                    <input type="hidden" name="startDate" value="{{ request()->startDate }}">
+                    <input type="hidden" name="endDate" value="{{ request()->endDate }}">
+                    <input type="hidden" name="expense_type" value="{{ request()->expense_type }}">
+                    <input type="hidden" name="branch_id" value="{{ request()->branch_id }}">
+                    <button type="submit" class="btn-custom primary" style="padding:5px 15px;">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                </form>
+
             </div>
 
             <ul>
@@ -165,16 +177,16 @@
     </div>
     <div class="card-body">
         @if($expenses)
-        
+
         <div class="PrintAreaContact">
             <style>
                 .tableReport tr th{
                     padding: 5px 10px;
-                    border: 1px solid #dee2e6;  
+                    border: 1px solid #dee2e6;
                 }
                 .tableReport tr td{
                     padding: 5px 10px;
-                    border: 1px solid #dee2e6;  
+                    border: 1px solid #dee2e6;
                 }
             </style>
             <div class="text-center mb-4">
@@ -246,7 +258,7 @@
 
 
 </div>
-@endsection 
+@endsection
 @push('js')
 
 
@@ -255,14 +267,14 @@
     $(document).ready(function () {
         $(".select2").each(function () {
             var placeHolder = $(this).data('placeholder');
-            
+
             $(this).select2({
                 placeholder: placeHolder,
                 allowClear: true
             });
         });
-        
-        
+
+
         $('#example').DataTable( {
 	        dom: 'Bfrtip',
 	        buttons: [
@@ -270,9 +282,9 @@
 	        ]
 	    } );
 
-        
 
-        
+
+
     });
 
 </script>

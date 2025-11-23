@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         \Config::set("services.google.client_id", general()->google_client_id);
         \Config::set("services.google.client_secret", general()->google_client_secret);
         \Config::set("services.google.redirect", general()->google_client_redirect_url);
-        
+
         \Config::set("mail.mailers.smtp.transport", general()->mail_driver);
         \Config::set("mail.mailers.smtp.host", general()->mail_host);
         \Config::set("mail.mailers.smtp.port", general()->mail_port);

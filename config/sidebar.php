@@ -21,42 +21,13 @@ return [
 
     // Purchases Management
     [
-        'group_title' => 'PURCHASES MANAGEMENT',
+        'group_title' => '',
         [
-            'title'      => 'Purchase Setup',
+            'title'      => 'Purchases Management',
             'icon'       => 'fa-solid fa-store',
             'icon_color' => 'text-primary',
             'permission' => '',
             'children'   => [
-                [
-                    'title'       => 'Goods Items',
-                    'icon'        => 'fa-solid fa-arrow-right',
-                    'route'       => '/admin/purchases-items',
-                    'icon_color'  => 'text-primary',
-                    'permission'  => ''
-                ],
-                [
-                    'title'       => 'Purchases Suppliers',
-                    'icon'        => 'fa-solid fa-arrow-right',
-                    'route'       => '/admin/suppliers',
-                    'icon_color'  => 'text-primary',
-                    'permission'  => ''
-                ],
-            ]
-        ],
-        [
-            'title'      => ' Purchase Orders',
-            'icon'       => 'fa-solid fa-truck-fast',
-            'icon_color' => 'text-warning',
-            'permission' => '',
-            'children'   => [
-                [
-                    'title'       => 'Requisitions',
-                    'icon'        => 'fa-solid fa-arrow-right',
-                    'route'       => '/admin/purchases-requisitions',
-                    'icon_color'  => 'text-warning',
-                    'permission'  => ''
-                ],
                 [
                     'title'       => 'Purchases',
                     'icon'        => 'fa-solid fa-arrow-right',
@@ -64,6 +35,29 @@ return [
                     'icon_color'  => 'text-warning',
                     'permission'  => ''
                 ],
+                [
+                    'title'       => 'Creditor List',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/suppliers',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Goods Items',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-items',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
+
+                [
+                    'title'       => 'Requisitions',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/purchases-requisitions',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+
                 [
                     'title'       => 'Goods Receive (GRN)',
                     'icon'        => 'fa-solid fa-arrow-right',
@@ -78,14 +72,6 @@ return [
                     'icon_color'  => 'text-warning',
                     'permission'  => ''
                 ],
-            ]
-        ],
-        [
-            'title'      => 'Reports',
-            'icon'       => 'fa-solid fa-chart-line',
-            'icon_color' => 'text-primary',
-            'permission' => '',
-            'children'   => [
                 [
                     'title'       => 'Supplier Ledgers',
                     'icon'        => 'fa-solid fa-arrow-right',
@@ -108,38 +94,16 @@ return [
                     'permission'  => ''
                 ]
             ]
-        ]
+        ],
     ],
 
     // Accounts Management
     [
-        'group_title' => 'ACCOUNTS MANAGEMENT',
+        'group_title' => '',
         [
-            'title'      => 'Account Setup',
+            'title'      => 'Accounts Management',
             'icon'       => 'fa-solid fa-cogs',
             'icon_color' => 'text-primary',
-            'permission' => '',
-            'children'   => [
-                [
-                    'title'       => 'Payment Method',
-                    'icon'        => 'fa-solid fa-credit-card',
-                    'route'       => '/admin/accounts/payment-methods',
-                    'icon_color'  => 'text-primary',
-                    'permission'  => ''
-                ],
-                [
-                    'title'       => 'Account List',
-                    'icon'        => 'fa-solid fa-list',
-                    'route'       => '/admin/accounts/list',
-                    'icon_color'  => 'text-primary',
-                    'permission'  => ''
-                ],
-            ]
-        ],
-        [
-            'title'      => 'Expenses',
-            'icon'       => 'fa-solid fa-file-invoice-dollar',
-            'icon_color' => 'text-warning',
             'permission' => '',
             'children'   => [
                 [
@@ -153,6 +117,13 @@ return [
                     'title'       => 'Expense Head',
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/types',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Expense Reports',
+                    'icon'        => 'fa-solid fa-layer-group',
+                    'route'       => '/admin/expenses/reports',
                     'icon_color'  => 'text-warning',
                     'permission'  => ''
                 ],
@@ -171,20 +142,19 @@ return [
                     'permission'  => ''
                 ],
                 [
-                    'title'       => 'Expense Reports',
-                    'icon'        => 'fa-solid fa-layer-group',
-                    'route'       => '/admin/expenses/reports',
-                    'icon_color'  => 'text-warning',
+                    'title'       => 'Payment Method',
+                    'icon'        => 'fa-solid fa-credit-card',
+                    'route'       => '/admin/accounts/payment-methods',
+                    'icon_color'  => 'text-primary',
                     'permission'  => ''
                 ],
-            ]
-         ],
-        [
-            'title'      => 'Finance',
-            'icon'       => 'fas fa-coins',
-            'icon_color' => 'text-warning',
-            'permission' => '',
-            'children'   => [
+                [
+                    'title'       => 'Account List',
+                    'icon'        => 'fa-solid fa-list',
+                    'route'       => '/admin/accounts/list',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => ''
+                ],
                 [
                     'title'       => 'Bill Payment',
                     'icon'        => 'fas fa-credit-card',
@@ -199,23 +169,44 @@ return [
                     'icon_color'  => 'text-warning',
                     'permission'  => ''
                 ],
+                [
+                    'title'       => 'Deposits',
+                    'icon'        => 'fas fa-wallet',
+                    'route'       => '/admin/accounts/deposits',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Withdrawal',
+                    'icon'        => 'fas fa-wallet',
+                    'route'       => '/admin/accounts/withdrawal',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+                [
+                    'title'       => 'Statement',
+                    'icon'        => 'fas fa-wallet',
+                    'route'       => '/admin/accounts/statement',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
             ]
-        ]
+        ],
     ],
 
     // HR / User Management
     [
-        'group_title' => 'HR / USER MANAGEMENT',
+        'group_title' => '',
         [
-            'title'      => 'User Management',
+            'title'      => 'HR / User Management',
             'icon'       => 'fa-solid fa-users',
             'icon_color' => 'text-success',
             'permission' => '',
             'children'   => [
                 [
-                    'title'       => 'Admin List',
-                    'icon'        => 'fa-solid fa-user-shield',
-                    'route'       => '/admin/users/admin',
+                    'title'       => 'Employee List',
+                    'icon'        => 'fa-solid fa-id-badge',
+                    'route'       => '/admin/users/employee',
                     'icon_color'  => 'text-success',
                     'permission'  => ''
                 ],
@@ -227,9 +218,9 @@ return [
                     'permission'  => ''
                 ],
                 [
-                    'title'       => 'Employee List',
-                    'icon'        => 'fa-solid fa-id-badge',
-                    'route'       => '/admin/users/employee',
+                    'title'       => 'Admin List',
+                    'icon'        => 'fa-solid fa-user-shield',
+                    'route'       => '/admin/users/admin',
                     'icon_color'  => 'text-success',
                     'permission'  => ''
                 ],
@@ -240,14 +231,6 @@ return [
                     'icon_color'  => 'text-success',
                     'permission'  => ''
                 ],
-            ]
-        ],
-        [
-            'title'      => 'HR Setup',
-            'icon'       => 'fa-solid fa-briefcase',
-            'icon_color' => 'text-info',
-            'permission' => '',
-            'children'   => [
                 [
                     'title'       => 'Branch/Factory',
                     'icon'        => 'fa-solid fa-building',

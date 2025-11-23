@@ -3,11 +3,11 @@
 @endsection @push('css')
 
 <style type="text/css">
-    
+
     .expenseTableView tr th{
         padding:5px;
     }
-    
+
     .expenseTableView tr td{
         padding:5px;
     }
@@ -18,7 +18,7 @@
         border-radius: 0px;
     }
 
-    
+
         .stats-card-box{
             background-color: #fafafa;
             border: 1px solid #e0e0e0;
@@ -40,15 +40,15 @@
         .stats-card-box h3 {
             font-size: 20px;
         }
-        
+
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-@endpush 
+@endpush
 @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
@@ -60,7 +60,7 @@
                  <i class="bx bx-plus"></i> I.O.U
              </a>
              @endisset
-             
+
              <a href="{{route('admin.expensesIOU')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -68,13 +68,13 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-    
+
         <div class="row">
             <div class="col-lg-6 col-md-6">
                 <h5><b>Search I.O.U</b></h5>
                 <form action="{{route('admin.expensesIOU')}}">
                     <div class="row">
-                        
+
                         <div class="col-md-6 mb-2">
                             <div class="input-group">
                                 <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
@@ -124,7 +124,7 @@
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
-                    
+
                 </div>
             </div>
             <div class="table-responsive">
@@ -140,10 +140,12 @@
                                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                          </svg>
                                      </span>
-                                     All <span class="checkCounter"></span> 
+                                     All <span class="checkCounter"></span>
                                  </label>
                                 </div>
                             </th>
+                            <th style="min-width: 100px;">Company Name</th>
+                            <th style="min-width: 100px;">Receiver Name</th>
                             <th style="min-width: 120px;">Employee</th>
                             <th style="min-width: 150px;">Purpose/Referance</th>
                             <th style="min-width: 100px;">Amount</th>
@@ -154,7 +156,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        
                         @foreach($expenseIou as $i=>$Iou)
                         <tr>
                             <td>
@@ -179,12 +180,14 @@
                                 </span>
                                 @endif
                             </td>
+                            <td>{{ $Iou->company_name ?? '--' }}</td>
+                            <td>{{ $Iou->receiver_name ?? '--' }}</td>
                             <td>{{$Iou->employee?$Iou->employee->name:''}}</td>
                             <td>
                                 <span>{!! nl2br(e($Iou->description)) !!}</span>
-                                @if($Iou->imageFile) 
+                                @if($Iou->imageFile)
                                 <span style="border: 1px solid #dadada;display: inline-block;padding: 0px 10px;border-radius: 5px;">
-                                    <a href="{{asset($Iou->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> 
+                                    <a href="{{asset($Iou->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a>
                                     <a href="{{route('admin.mediesDelete',$Iou->imageFile->id)}}" class="mediaDelete" style="padding-left: 5px;color: #dc3545;display: inline-block;border-left: 1px solid #d2d2d2;"><i class="bx bx-trash"></i></a>
                                 </span>
                                 @endif
@@ -199,7 +202,7 @@
                                     <i class="bx bx-edit"></i>
                                 </a>
                                 @endisset
-                                
+
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$Iou->id}}" class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
                                 </a>
@@ -211,8 +214,8 @@
 
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>
@@ -251,7 +254,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
         				@endif
                  	</div>
-    	            
+
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -297,6 +300,20 @@
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('branch_id') }}</p>
                         @endif
                     </div>
+                    <div class="col-md-6 form-group">
+        			    <label for="name">Company Name *</label>
+                        <input type="text" name="company_name" id="" class="form-control" placeholder="Company Name" required>
+        				@if ($errors->has('company_name'))
+        				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('company_name') }}</p>
+        				@endif
+                 	</div>
+                 	<div class="col-md-6 form-group">
+        			    <label for="name">Receiver Name *</label>
+                        <input type="text" name="receiver_name" id="" class="form-control" placeholder="Receiver Name" required>
+        				@if ($errors->has('receiver_name'))
+        				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_name') }}</p>
+        				@endif
+                 	</div>
     	       </div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>
@@ -305,7 +322,7 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-             	
+
     			<div class="form-group">
     				<label for="name">Purpose/Referance</label>
 					<textarea name="description" rows="5" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description"></textarea>
@@ -357,7 +374,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
         				@endif
                  	</div>
-    	            
+
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -400,6 +417,20 @@
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('branch_id') }}</p>
                         @endif
                     </div>
+                    <div class="col-md-6 form-group">
+        			    <label for="name">Company Name *</label>
+                        <input type="text" name="company_name"  value="{{$dpm->company_name}}" id="" class="form-control" placeholder="Company Name" required>
+        				@if ($errors->has('company_name'))
+        				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('company_name') }}</p>
+        				@endif
+                 	</div>
+                 	<div class="col-md-6 form-group">
+        			    <label for="name">Receiver Name *</label>
+                        <input type="text" name="receiver_name"  value="{{$dpm->receiver_name}}" id="" class="form-control" placeholder="Receiver Name" required>
+        				@if ($errors->has('receiver_name'))
+        				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_name') }}</p>
+        				@endif
+                 	</div>
     	       </div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>
@@ -408,7 +439,7 @@
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
 					@endif
              	</div>
-    	   		
+
     			 <div class="form-group">
     				<label for="name">Purpose/Referance</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>
@@ -467,11 +498,11 @@
                             padding: 20px;
                             position: relative;
                     }
-                    
+
                     .header {
                         text-align: center;
                     }
-                    
+
                     .company-name {
                         font-size: 30px;
                         font-weight: bold;
@@ -480,20 +511,20 @@
                         letter-spacing: 1px;
                         font-family: serif;
                     }
-                    
+
                     .subtitle {
                         font-size: 13px;
                         font-weight: bold;
                         color: #000 !important;
                         margin: 0px 0;
                     }
-                    
+
                     .contact-info {
                             font-size: 12px;
                             color: #000 !important;
                             margin: 0px 0;
                     }
-                    
+
                     .transaction-badge {
                         background: #000;
                         color: white;
@@ -504,87 +535,87 @@
                         font-size: 12px;
                         font-weight: bold;
                     }
-                    
+
                     .date-field {
                         position: absolute;
                         top: 135px;
                         right: 40px;
                         font-size: 14px;
                     }
-                    
+
                     .date-label {
                         font-weight: bold;
                     }
-                    
+
                     .form-section {
                         margin: 20px 0;
                     }
-                    
+
                     .form-label {
                         font-weight: bold;
                         color: #2d5016;
                         margin-bottom: 0 !important;
                     }
-                    
+
                     .handwritten {
                         font-size: 18px;
                         color: #1a1a1a;
                         font-style: italic;
                     }
-                    
+
                     .slip-table {
                         width: 100%;
                         margin: 20px 0;
                         border-collapse: collapse;
                     }
-                    
+
                     .slip-table td {
                         padding: 10px;
                         border-bottom: 1px solid #5d8a3a;
                     }
-                    
+
                     .amount-column {
                         text-align: right;
                         font-weight: bold;
                         width: 150px;
                     }
-                    
+
                     .total-row {
                         border-top: 2px solid #2d5016;
                         font-weight: bold;
                         font-size: 16px;
                     }
-                    
+
                     .amount-words {
                         margin: 15px 0;
                         font-style: italic;
                     }
-                    
+
                     .signature-section {
                         display: flex;
                         justify-content: space-between;
                         margin-top: 0;
                         padding-top: 20px;
                     }
-                    
+
                     .signature-box {
                         text-align: center;
                         flex: 1;
                     }
-                    
+
                     .signature-line {
                         border-top: 1px solid #000;
                         margin: 40px 20px 5px 20px;
                         position: relative;
                     }
-                    
+
                     .signature-text {
                         font-family: 'Brush Script MT', cursive;
                         font-size: 24px;
                         margin-top: -35px;
                         color: #1a3d0a;
                     }
-                    
+
                     .input-underline {
                         border: none;
                         border-bottom: 1px solid #000;
@@ -592,7 +623,7 @@
                         width: 100%;
                         font-size: 14px;
                     }
-                    
+
                     .input-underline:focus {
                         outline: none;
                         border-bottom-color: #2d5016;
@@ -615,7 +646,7 @@
 
                 /* slip css end */
             </style>
-            
+
             <!-- <div class="date-field siral">
                 <span class="date-label">SL:</span>
                 <input type="text" class="input-underline" style="width: 100px;" value="{{ str_pad($dpm->id, 10, '0', STR_PAD_LEFT) }}">
@@ -626,26 +657,30 @@
                         data-no="{{ str_pad($dpm->id, 10, '0', STR_PAD_LEFT) }}">
                     </svg>
                 </span> -->
-                 
+
                 <h1 class="company-name">{{$Iou->branch?$Iou->branch->name:general()->title}}</h1>
                 <p class="subtitle">(100% Export Oriented Garments Manufacturing Factory)</p>
                 <p class="contact-info">{!!general()->address_one!!}</p>
                 <p class="contact-info">Mobile: {{general()->mobile}}, {{general()->email}}</p>
-                
+
                 <div class="transaction-badge">I.O.U</div>
             </div>
-            
+
             <div class="date-field">
                 <span class="date-label">Date:</span>
                 <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('Y-m-d')}}">
             </div>
-            
+
             <div class="form-section">
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="amountWriteText">
-                            <label class="form-label">Employee: </label>
-                            <input type="text" class="input-underline handwritten" value="{{$Iou->employee?$Iou->employee->name:'N/A'}}">
+                            <label class="form-label" style="white-space: nowrap;">Pay To : &nbsp;</label>
+                            <input type="text" class="input-underline handwritten" value="( Name of company ) {{$dpm->company_name}}">
+                        </div>
+                        <div class="amountWriteText">
+                            <label class="form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </label>
+                            <input type="text" class="input-underline handwritten" value="( Name of receiver ) {{$dpm->receiver_name}}">
                         </div>
                     </div>
                 </div>
@@ -681,7 +716,7 @@
                             <label class="form-label" style="min-width: 120px;width: 120px;">Taka in word:</label>
                             <span class="input-underline handwritten TotalAmoutnInWord" data-amount="{{$dpm->amount}}" ></span>
                         </div>
-                    
+
                     </div>
                 </div>
             </div>
@@ -718,7 +753,7 @@
 
 
 
-@endsection 
+@endsection
 @push('js')
 
 <script>
@@ -774,13 +809,13 @@
 
         $(".select2").each(function () {
             var placeHolder = $(this).data('placeholder');
-            
+
             $(this).select2({
                 placeholder: placeHolder,
                 allowClear: true
             });
-        });      
-        
+        });
+
         $('.showBarcode').each(function () {
             let code = $(this).data('no');
             console.log("BARCODE =>", code);
