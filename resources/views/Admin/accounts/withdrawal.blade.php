@@ -127,7 +127,13 @@
                             </td>
                             <td>
                                 <b>TNX Id:</b> {{$transection->transection_id}} @if($transection->imageFile) <a href="{{asset($transection->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif <br>
-                                <b>Accounts:</b> {{$transection->accountMethod?$transection->accountMethod->name:''}}<br>
+                                <b>Accounts:</b> {{$transection->account?$transection->account->name:''}}
+                                    @if($transection->account)
+                                            <a target="_blank" href="{{ route('admin.accountsAction', ['view', $transection->account->id]) }}">
+                                                &nbsp;<i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        @endif
+                                    <br>
                                 <b>Payment Method:</b> {{$transection->method?$transection->method->name:''}}<br>
                                 @if($transection->billing_reason)
                                 <b>Bank Name:</b> {{$transection->billing_reason}} <br>

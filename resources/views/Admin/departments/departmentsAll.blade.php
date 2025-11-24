@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">

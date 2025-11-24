@@ -137,10 +137,9 @@
                                             </td>
                                             <td>{{ $typeName }}</td>
                                             <td>
-                                                @if(in_array($tran->type, [3,4,5,6,7]))
+
                                                     {{ priceFormat($tran->amount) }}
                                                     @php $subDebit += $tran->amount; @endphp
-                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

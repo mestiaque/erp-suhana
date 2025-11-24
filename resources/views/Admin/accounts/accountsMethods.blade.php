@@ -34,7 +34,7 @@
             </form>
         <br>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th style="min-width: 250px;">Account</th>

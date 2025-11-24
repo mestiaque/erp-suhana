@@ -53,7 +53,7 @@
         <form class="actionForm" action="{{route('admin.expensesTypes')}}">
             <input type="hidden" name="action" value="" class="actionInput">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
