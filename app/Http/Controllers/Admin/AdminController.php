@@ -3837,13 +3837,13 @@ class AdminController extends Controller
 
         if($action=='create'){
             $check = $r->validate([
-                'employee_id' => 'required|numeric',
+                'employee_id' => 'nullable|numeric',
                 'payment' => 'required|numeric',
                 'account' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
-                'company_name' => 'required',
-                'receiver_name' => 'required',
+                'company_name' => 'nullable|max:100',
+                'receiver_name' => 'nullable|max:100',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3918,12 +3918,12 @@ class AdminController extends Controller
         if($action=='update'){
 
             $check = $r->validate([
-                'employee_id' => 'required|numeric',
+                'employee_id' => 'nullable|numeric',
                 'payment' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
-                'company_name' => 'required',
-                'receiver_name' => 'required',
+                'company_name' => 'nullable|max:100',
+                'receiver_name' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable|file|max:25600',
             ]);
@@ -5154,9 +5154,11 @@ class AdminController extends Controller
     }
 
     public function accountsStatement(Request $r){
+        $user = Auth::user()->accounts;
+        $firstAccount = Auth::user()->accounts()->first() ?? null;
         $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
         $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
-        $method =Attribute::where('type',10)->find($r->account_id);
+        $method =Attribute::with('user')->where('type',10)->find($r?->account_id ?? $firstAccount?->id);
         $openingBalance=0;
         $availableBalance=0;
         $transections=null;
@@ -5193,7 +5195,7 @@ class AdminController extends Controller
             });
             $availableBalance = $balance;
         }
-        $accounts =Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
+        $accounts =Attribute::with('user')->where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
         return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
     }
 

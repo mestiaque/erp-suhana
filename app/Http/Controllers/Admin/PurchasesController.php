@@ -806,6 +806,13 @@ class PurchasesController extends Controller
 
 
         if($action == 'payment'){
+            $check = $r->validate([
+                'pay_amount' => 'required',
+                'account_id' => 'required',
+                'payment_method_id' => 'required',
+                'attachment' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,PNG,pdf|max:2048',
+            ]);
+
             $supplier_id = $r->user_id;
             $pay_amount  = floatval($r->pay_amount);
             $payment_method_id = $r->payment_method_id;
@@ -863,7 +870,7 @@ class PurchasesController extends Controller
                 // ==========================
                 //   Create Transaction Log
                 // ==========================
-                Transaction::create([
+                $trans = Transaction::create([
                     "src_id"            => $purchase->id,
                     "user_id"           => $purchase->supplier_id,
 
@@ -887,10 +894,22 @@ class PurchasesController extends Controller
 
                 // Remaining reduce
                 $remaining -= $payToThis;
+
+
+                ///////Image Upload End////////////
+                if($r->hasFile('attachment')){
+                $file =$r->attachment;
+                $src  =$trans->id;
+                $srcType  =9;
+                $fileUse  =1;
+                uploadFile($file,$src,$srcType,$fileUse);
+                }
+                ///////Image Upload End////////////
             }
 
             $accountMethod->amount -=$pay_amount;
             $accountMethod->save();
+
             return back()->with('success', 'Supplier payment successfully completed!');
         }
 
@@ -1571,6 +1590,12 @@ class PurchasesController extends Controller
         }
 
         if ($action == 'save') {
+            $check = $request->validate([
+                'pay_amount' => 'required',
+                'account_id' => 'required',
+                'payment_method_id' => 'required',
+                'attachment' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,PNG,pdf|max:2048',
+            ]);
             $purchase = PurchaseOrder::findOrFail($id);
 
             $pay_amount = floatval(request()->pay_amount);
@@ -1623,17 +1648,34 @@ class PurchasesController extends Controller
                             "addedby_id"        => Auth::user()->id,
                         ];
 
-            Transaction::create($transactionData);
-            
+            $trans = Transaction::create($transactionData);
+
             $account->amount -=request()->pay_amount;
             $account->save();
 
             $purchase->save();
 
+            ///////Image Upload End////////////
+            if($request->hasFile('attachment')){
+            $file =$request->attachment;
+            $src  =$trans->id;
+            $srcType  =9;
+            $fileUse  =1;
+            uploadFile($file,$src,$srcType,$fileUse);
+            }
+            ///////Image Upload End////////////
+
             return redirect()->back()->with('success', 'Payment Successful!');
         }
 
         if ($action == 'update'){
+
+            $check = $request->validate([
+                'pay_amount' => 'required',
+                'account_id' => 'required',
+                'payment_method_id' => 'required',
+                'attachment' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,PNG,pdf|max:2048',
+            ]);
 
             $transaction = Transaction::findOrFail($id);
             $purchase = PurchaseOrder::findOrFail($transaction->src_id);
@@ -1668,6 +1710,17 @@ class PurchasesController extends Controller
             ]);
 
             $purchase->save();
+
+
+            ///////Image Upload End////////////
+            if($request->hasFile('attachment')){
+            $file =$request->attachment;
+            $src  =$transaction->id;
+            $srcType  =9;
+            $fileUse  =1;
+            uploadFile($file,$src,$srcType,$fileUse);
+            }
+            ///////Image Upload End////////////
 
             return back()->with('success', 'Payment Updated Successfully!');
         }
@@ -1704,7 +1757,7 @@ class PurchasesController extends Controller
     {
         return view(adminTheme().'purchases.bill-collections.index');
     }
-    
+
     public function purchasesDamageReturn(Request $request)
     {
         return view(adminTheme().'purchases.returns.index');

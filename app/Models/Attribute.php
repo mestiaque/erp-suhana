@@ -18,13 +18,13 @@ class Attribute extends Model
      * type ==6 : Blog Category
      * type ==7 : Blog Tags
      * type ==8 : Menus
-     * 
+     *
      * ------------------------
      *  Status==temp, active, inactive
      * ------------------------
-     * 
+     *
      * Column:
-     * id            =bigint(20):None, 
+     * id            =bigint(20):None,
      * name          =varchar(191):null,
      * slug          =varchar(255):null,
      * parent_id     =bigint(20):null
@@ -48,14 +48,14 @@ class Attribute extends Model
      * editedby_id   =bigint(20)::null
      * created_at    =timestamp:null
      * updated_at    =timestamp:null
-     * 
-     * 
+     *
+     *
      * *********/
 
 
     //Image and Banner Functions Start
     /********
-     * 
+     *
      * *********/
     public function imageFile(){
         return $this->hasOne(Media::class,'src_id')->where('src_type',3)->where('use_Of_file',1);
@@ -68,9 +68,9 @@ class Attribute extends Model
             return 'public/medies/noimage.jpg';
         }
     }
-    
+
     public function imageName(){
-        
+
         if($this->imageFile){
             return $this->imageFile->file_rename;
         }else{
@@ -89,9 +89,9 @@ class Attribute extends Model
             return 'public/medies/no-banner.png';
         }
     }
-    
+
     public function bannerName(){
-        
+
         if($this->bannerFile){
             return $this->bannerFile->file_rename;
         }else{
@@ -117,7 +117,7 @@ class Attribute extends Model
     public function subAttributes(){
         return $this->hasMany(Attribute::class,'parent_id')->where('status','<>','temp');
     }
-    
+
     public function posts(){
         return $this->belongsToMany(Post::class,PostAttribute::class,'reff_id','src_id');
     }
@@ -130,7 +130,7 @@ class Attribute extends Model
             $qq->where('status','active');
           })
           ->whereDate('created_at','<=',date('Y-m-d'));
- 
+
     }
 
     public function ctgPosts(){
@@ -146,7 +146,7 @@ class Attribute extends Model
     }
 
     //Slider Functions Start
-    
+
     public function subSliders(){
         return $this->hasMany(Attribute::class,'parent_id')->where('status','active')->orderBy('view','asc');
     }
@@ -156,14 +156,14 @@ class Attribute extends Model
     }
 
     //Slider Functions End
-    
+
 
     //Menu Functions Start
     /********
      * Note: menu_type ==1 : Custom Link
      *       menu_type ==2 : blog Category
      *       menu_type ==3 : Service Category
-     * 
+     *
      * *********/
 
     public function pageLink(){
@@ -173,15 +173,15 @@ class Attribute extends Model
     public function blogCtgLink(){
        return $this->belongsTo(Attribute::class,'src_id')->where('type',6)->where('status','<>','temp');
     }
-    
+
     public function serviceCtgLink(){
        return $this->belongsTo(Attribute::class,'src_id')->where('type',0)->where('status','<>','temp');
     }
-    
+
     public function subMenus(){
         return $this->hasMany(Attribute::class,'parent_id')->where('status','<>','temp')->orderBy('view','asc');
     }
-    
+
     public function MenuItems(){
         return $this->hasMany(Attribute::class,'category_id')->where('status','<>','temp')->orderBy('view','asc');
     }
@@ -196,7 +196,7 @@ class Attribute extends Model
                 }else{
                     return $this->pageLink->slug;
                 }
-                
+
             }
 
         }elseif($this->menu_type==2){
@@ -232,7 +232,7 @@ class Attribute extends Model
         }else{
             return $this->name;
         }
-        
+
     }
 
     //Menu Name
@@ -245,7 +245,7 @@ class Attribute extends Model
                 }else{
                     return $this->pageLink->slug;
                 }
-                
+
             }
 
         }elseif($this->menu_type==2){
@@ -261,11 +261,11 @@ class Attribute extends Model
         }
 
     }
-    
+
     //********************************
     //Menu Functions End
-    
-    
+
+
     public function divitionN(){
         return $this->belongsTo(Country::class,'division');
     }
@@ -273,12 +273,12 @@ class Attribute extends Model
     public function districtN(){
         return $this->belongsTo(Country::class,'district');
     }
-    
-    
+
+
     public function cityN(){
         return $this->belongsTo(Country::class,'city');
     }
-    
+
     public function fullAddress(){
 
         $addr =$this->location;
@@ -294,20 +294,20 @@ class Attribute extends Model
         if($this->divitionN){
            $addr .=', '.$this->divitionN->name;
         }
-        
+
          if($this->icon){
            $addr .=' - '.$this->icon;
         }
 
         return $addr;
-        
+
     }
-    
+
     public function user(){
         return $this->belongsTo(User::class,'addedby_id');
     }
 
-    
 
-    
+
+
 }

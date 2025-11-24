@@ -38,12 +38,12 @@
                                     <hr>
                                 </div>
                                 <div class="card-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Company:</strong> {{ $purchase->company_name }}</li>
-                                        <li><strong>Name:</strong> {{ $purchase->supplier_name }}</li>
-                                        <li><strong>Email:</strong> {{ $purchase->supplier_email }}</li>
-                                        <li><strong>Mobile:</strong> {{ $purchase->supplier_mobile }}</li>
-                                        <li><strong>Address:</strong> {{ $purchase->supplier_address }}</li>
+                                    <ul class="list-group list-group-flush text-start mb-0">
+                                        <li class="list-group-item py-1"><strong>Company:</strong> {{ $purchase->company_name }}</li>
+                                        <li class="list-group-item py-1"><strong>Name:</strong> {{ $purchase->supplier_name }}</li>
+                                        <li class="list-group-item py-1"><strong>Email:</strong> {{ $purchase->supplier_email }}</li>
+                                        <li class="list-group-item py-1"><strong>Mobile:</strong> {{ $purchase->supplier_mobile }}</li>
+                                        <li class="list-group-item py-1"><strong>Address:</strong> {{ $purchase->supplier_address }}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -56,12 +56,12 @@
                                     <hr>
                                 </div>
                                 <div class="card-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Order Number:</strong> <span class="text-">{{ $purchase->order_no }}</span></li>
-                                        <li><strong>Grand Total:</strong> <span class="text-primary">{{ number_format($purchase->grand_total,2) }}</span></li>
-                                        <li><strong>Paid Amount:</strong> <span class="text-success">{{ number_format($purchase->paid_amount,2) }}</span></li>
-                                        <li><strong>Due Amount:</strong> <span class="text-danger">{{ number_format($purchase->due_amount,2) }}</span></li>
-                                        <li>
+                                    <ul class="list-group list-group-flush text-start mb-0">
+                                        <li class="list-group-item py-1"><strong>Order Number:</strong> <span class="text-">{{ $purchase->order_no }}</span></li>
+                                        <li class="list-group-item py-1"><strong>Grand Total:</strong> <span class="text-primary">{{ number_format($purchase->grand_total,2) }}</span></li>
+                                        <li class="list-group-item py-1"><strong>Paid Amount:</strong> <span class="text-success">{{ number_format($purchase->paid_amount,2) }}</span></li>
+                                        <li class="list-group-item py-1"><strong>Due Amount:</strong> <span class="text-danger">{{ number_format($purchase->due_amount,2) }}</span></li>
+                                        <li class="list-group-item py-1">
                                             <strong>Payment Status:</strong>
                                             <span class="badge bg-{{ $purchase->payment_status == 'paid' ? 'success' : ($purchase->payment_status == 'partial' ? 'warning' : 'danger') }} text-white">
                                                 {{ ucfirst($purchase->payment_status) }}
@@ -77,17 +77,18 @@
                     <h5>Payment History</h5>
                     <hr>
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered table-striped">
                             <thead >
                                 <tr>
                                     <th>#</th>
-                                    <th>Transaction ID</th>
-                                    <th>Amount</th>
-                                    <th>Paid Date</th>
-                                    <th>Note</th>
-                                    {{-- <th>Account</th> --}}
-                                    <th>Method</th>
-                                    <th>Action</th>
+                                    <th style="min-width: 140px;">Transaction ID</th>
+                                    <th style="min-width: 110px;">Amount</th>
+                                    <th style="min-width: 120px;">Paid Date</th>
+                                    <th style="min-width: 150px;">Note</th>
+                                    <th style="min-width: 150px;">Account</th>
+                                    <th style="min-width: 150px;">Method</th>
+                                    <th style="min-width: 110px;">Attachtment</th>
+                                    <th style="min-width: 110px;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,9 +98,17 @@
                                         <td>{{ $trans->transection_id }}</td>
                                         <td class="text-right">{{ number_format($trans->amount,2) }}</td>
                                         <td>{{ \Carbon\Carbon::parse($trans->created_at)->format('d-m-Y') }}</td>
-                                        <td style="max-width: 10rem">{{ $trans->billing_note ?? 'N/A' }}</td>
-                                        {{-- <td>{{ $trans->accountMethod?->name ?? 'N/A' }}</td> --}}
-                                        <td>{{ $trans->payment_method ?? 'N/A' }}</td>
+                                        <td style="max-width: 10rem">{{ $trans->billing_note ?? '--' }}</td>
+                                        <td>{{ $trans->account?->name ?? '--' }}</td>
+                                        <td>{{ $trans->payment_method ?? '--' }}</td>
+                                        <td class="text-center">
+                                            @if($trans->imageFile)
+                                                <span style="border: 1px solid #dadada;display: inline-block;padding: 0px 10px;border-radius: 5px;">
+                                                    <a href="{{asset($trans->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a>
+                                                    <a href="{{route('admin.mediesDelete',$trans->imageFile->id)}}" class="mediaDelete" style="padding-left: 5px;color: #dc3545;display: inline-block;border-left: 1px solid #d2d2d2;"><i class="bx bx-trash"></i></a>
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="">
                                             <div class="text-center center">
                                                 <button
@@ -136,7 +145,7 @@
                         <div class="card-body">
                             <h5 class="form-title">Make Payment</h5>
                             <hr>
-                            <form id="paymentForm" action="{{ route('admin.billPaymentAction',['save',$purchase->id]) }}" method="POST">
+                            <form id="paymentForm" action="{{ route('admin.billPaymentAction',['save',$purchase->id]) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" value="{{ $purchase->id }}" name="purchase_id" hidden readonly>
                                 <div class="mb-2">
@@ -162,6 +171,13 @@
                                             <option value="{{$method->id}}">{{$method->name}}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="name">Attachtment</label>
+                                    <input type="file" class="form-control {{$errors->has('attachment')?'error':''}}" name="attachment" accept="image/*,application/pdf"  style="padding: 3px;">
+                                    @if ($errors->has('attachment'))
+                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
+                                    @endif
                                 </div>
 
                                 <div class="mb-2">

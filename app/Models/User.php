@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Attribute;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -256,6 +257,11 @@ class User extends Authenticatable
     public function duePurchaseAmount()
     {
         return $this->hasMany(PurchaseOrder::class, 'supplier_id')->where('status','approved')->where('due_amount','>',0)->sum('due_amount');
+    }
+
+    public function accounts()
+    {
+        return $this->hasMany(Attribute::class, 'addedby_id')->where('type', 10);
     }
 
         // User model
