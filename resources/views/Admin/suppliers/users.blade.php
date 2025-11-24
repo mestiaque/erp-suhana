@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
@@ -101,7 +101,9 @@
                             <th style="min-width: 150px;">Company</th>
                             <th style="min-width: 150px;">Mobile/Email</th>
                             <th style="min-width: 200px;">Address</th>
+                            <th style="min-width: 100px;">Total Bill</th>
                             <th style="min-width: 100px;">Due Bill</th>
+                            <th style="min-width: 100px;">Paid Bill</th>
                             <th style="min-width: 90px;">Join Date</th>
                             <th style="min-width: 80px; width: 80px;">Action</th>
                         </tr>
@@ -148,7 +150,9 @@
                             <td>
                                {{$user->address_line1}}
                             </td>
+                            <td>{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</td>
                             <td style="color:red;">{{priceFullFormat($user->duePurchaseAmount())}}</td>
+                            <td >{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</td>
                             <td>{{$user->created_at->format('d M Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
                                 <a href="{{route('admin.suppliersAction',['edit',$user->id])}}" class="btn-custom success">

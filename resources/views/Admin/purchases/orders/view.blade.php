@@ -1,6 +1,7 @@
 @extends(adminTheme().'layouts.app')
+
 @section('title')
-<title>{{ websiteTitle('Purchase Requisition View') }}</title>
+<title>{{ websiteTitle('Purchase Order View') }}</title>
 @endsection
 
 @push('css')
@@ -10,6 +11,7 @@
 @section('contents')
 
 <div class="flex-grow-1">
+    
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>Purchase Order View</h3>
@@ -17,7 +19,7 @@
                 <a href="{{ route('admin.purchasesOrders') }}" class="btn-custom primary">
                     <i class="bx bx-left-arrow-alt"></i> Back List
                 </a>
-                <a href="javascript:void(0)" id="PrintRequisition" class="btn-custom yellow">
+                <a href="javascript:void(0)" id="PrintAction" class="btn-custom yellow">
                     <i class="bx bx-printer"></i> Print
                 </a>
             </div>
@@ -164,14 +166,19 @@
                         </div>
                     </div>
 
-                    <div class="inviceTitleId">
-                        <div class="invoice-title">Purchases #{{ $order->order_no}}</div>
-                        <div class="invoice-dates">
-                            <p>
-                                <b>Request Date:</b> {{ $order->created_at->format('d.m.Y') }} <br>
-                                <b>Supplier:</b> {{$order->supplier_name}} {{$order->company_name?'- '.$order->company_name:''}} <br>
-                                <b>Mobile:</b> {{$order->supplier_name}} <b>Address:</b> {{$order->supplier_address}}
-                            </p>
+                    <div class="inviceTitleId" style="display: block;">
+                        <div class="text" style="width: calc(100% - 200px);">
+                            <div class="invoice-title">Purchases #{{ $order->order_no}}</div>
+                            <div class="invoice-dates">
+                                <p>
+                                    <b>Request Date:</b> {{ $order->created_at->format('d.m.Y') }} <br>
+                                    <b>Supplier:</b> {{$order->supplier_name}} {{$order->company_name?'- '.$order->company_name:''}} <br>
+                                    <b>Mobile:</b> {{$order->supplier_name}} <b>Address:</b> {{$order->supplier_address}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="barcode" style="width: 200px;">
+                            <span class="showBarcode"></span>
                         </div>
                     </div>
 
@@ -197,7 +204,7 @@
                                     <td>{{ numberFormat($item->qty,1) }}</td>
                                     <td>{{ $item->unit }}</td>
                                     <td>{{ numberFormat($item->price,3)}}</td>
-                                    <td>{{ numberFormat($item->qty*$item->price,3)}}</td>
+                                    <td>{{ numberFormat($item->qty*$item->price,3,$order->currency)}}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -210,7 +217,7 @@
                                 <th>{{ numberFormat($order->total_qty,1) }}</th>
                                 <th></th>
                                 <th>Total</th>
-                                <th>{{numberFormat($order->grand_total,3)}}</th>
+                                <th>{{numberFormat($order->grand_total,3,$order->currency)}}</th>
                             </tr>
                         </tbody>
                     </table>
@@ -248,17 +255,15 @@
     </div>
 </div>
 
+
 @endsection
 
 @push('js')
 <script>
-$(document).ready(function(){
-    $('#PrintRequisition').on("click", function () {
-        $('.PrintAreaContact').printThis({
-            importCSS: false,
-            loadCSS: "https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap-grid.min.css",
-        });
+
+    $(document).ready(function(){
+
+
     });
-});
 </script>
 @endpush

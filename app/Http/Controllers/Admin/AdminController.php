@@ -3408,8 +3408,9 @@ class AdminController extends Controller
                 'account' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
-                'company_name' => 'required',
-                'receiver_name' => 'required',
+                'company_name' => 'required|max:100',
+                'receiver_name' => 'required|max:100',
+                'receiver_mobile' => 'nullable|max:100',
                 'amount' => 'required|numeric',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
@@ -3439,6 +3440,7 @@ class AdminController extends Controller
             $expense->description=$r->description;
             $expense->company_name=$r->company_name;
             $expense->receiver_name=$r->receiver_name;
+            $expense->receiver_mobile=$r->receiver_mobile;
             $expense->status ='active';
             $expense->addedby_id =Auth::id();
             $expense->created_at = $createDate;
@@ -3488,8 +3490,9 @@ class AdminController extends Controller
                 'expense_type' => 'required|numeric',
                 'payment' => 'required|numeric',
                 'branch_id' => 'required|numeric',
-                'company_name' => 'required',
-                'receiver_name' => 'required',
+                'company_name' => 'required|max:100',
+                'receiver_name' => 'required|max:100',
+                'received_mobile' => 'nullable|max:100',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3504,6 +3507,7 @@ class AdminController extends Controller
             $expense->description=$r->description;
             $expense->company_name=$r->company_name;
             $expense->receiver_name=$r->receiver_name;
+            $expense->receiver_mobile=$r->receiver_mobile;
             $expense->status =$r->status?'active':'inactive';
             $expense->editedby_id =Auth::id();
             if (!$createDate->isSameDay($expense->created_at)) {

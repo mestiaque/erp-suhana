@@ -77,7 +77,7 @@
             <form action="{{ route('admin.purchasesOrdersAction', ['update', $order->id]) }}" method="POST">
                 @csrf
                 <div class="row ">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label>Company /Supplier*</label>
                         <select id="supplier_id" name="supplier_id" class="form-control" required>
                             <option value="">Select Company</option>
@@ -92,14 +92,20 @@
                         @endif
                     </div>
 
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label>Order Date*</label>
                         <input type="date" name="created_at" value="{{ $order->created_at?->format('Y-m-d') }}" class="form-control" required>
                         @if ($errors->has('created_at'))
                         <p style="color: red; margin: 0;">{{ $errors->first('created_at') }}</p>
                         @endif
                     </div>
-
+                    <div class="col-md-2 mb-3">
+                        <label>Currency</label>
+                        <select class="form-control" name="currency" required="">
+                            <option value="BDT" {{$order->currency=='BDT'?'selected':''}} >BDT</option>
+                            <option value="USD" {{$order->currency=='USD'?'selected':''}} > USD</option>
+                        </select>
+                    </div>
                     <div class="col-md-3 mb-3">
                         <label>Order Number</label>
                         <input type="text"  value="{{ $order->order_no }}" class="form-control" readonly>

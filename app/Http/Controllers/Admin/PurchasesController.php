@@ -563,12 +563,18 @@ class PurchasesController extends Controller
             $r->validate([
                 'status'=>'nullable|max:20',
                 'department_id'=>'required|numeric',
+                'designation_id'=>'required|numeric',
+                'name'=>'required|max:100',
+                'employe_number'=>'nullable|max:100',
                 'created_at'=>'required|date',
                 'expected_date'=>'required|date',
                 'note'=>'nullable',
             ]);
 
             $requisition->department_id = $r->department_id;
+            $requisition->designation_id = $r->designation_id;
+            $requisition->name = $r->name;
+            $requisition->employe_number = $r->employe_number;
             $requisition->status = $r->status?:'pending';
             $requisition->note = $r->note;
             $requisition->expected_date = $r->expected_date ?: Carbon::now();
@@ -587,7 +593,8 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $departments = Attribute::where('type', 3)->get(['id', 'name']);
+        $departments = Attribute::where('type', 3)->where('status','active')->get(['id', 'name']);
+        $designations = Attribute::where('type', 2)->where('status','active')->get(['id', 'name']);
         $requisition = PurchaseRequisition::with('items')->findOrFail($id);
 
         $goods = Post::where('type',3)->where('status','active')
@@ -595,7 +602,7 @@ class PurchasesController extends Controller
                     $q->where('name','like','%'.$r->search.'%');
                 })->limit(10)->get();
 
-        return view(adminTheme().'purchases.requisitions.edit', compact('requisition', 'departments', 'goods'));
+        return view(adminTheme().'purchases.requisitions.edit', compact('requisition','designations', 'departments', 'goods'));
     }
 
     public function suppliers(Request $r){
@@ -1067,8 +1074,8 @@ class PurchasesController extends Controller
                 $order->created_date = now();
                 $order->save();
             }
-
-            $order->order_no = now()->format('Ymd') . $order->id;
+            $order->currency = general()->currency;
+            $order->order_no = now()->format('ymd') . $order->id;
             $order->save();
 
             return redirect()->route('admin.purchasesOrdersAction', ['edit', $order->id]);
@@ -1182,6 +1189,7 @@ class PurchasesController extends Controller
             $r->validate([
                 'supplier_id' => 'nullable|numeric',
                 'status' => 'required|max:20',
+                'currency' => 'required|max:5',
                 'created_at' => 'required|date',
                 'note' => 'nullable',
             ]);
@@ -1193,6 +1201,7 @@ class PurchasesController extends Controller
             }
 
             $order->supplier_id = $supplier->id;
+            $order->currency = $r->currency?:general()->currency;
             $order->company_name = $supplier->company_name;
             $order->supplier_name = $supplier->name;
             $order->supplier_email = $supplier->email;

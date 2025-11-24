@@ -36,4 +36,10 @@ class PurchaseRequisition extends Model
                     ->where('type', 3);
     }
 
+    public function designation()
+    {
+        return $this->belongsTo(Attribute::class, 'designation_id')
+                    ->where('type', 2);
+    }
+
 }

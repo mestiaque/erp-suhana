@@ -49,7 +49,6 @@
 
 <div class="flex-grow-1">
 
-
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -328,6 +327,13 @@
         				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_name') }}</p>
         				@endif
                  	</div>
+                    <div class="col-md-12 form-group">
+        			    <label for="name">Receiver Mobile</label>
+                        <input type="text" name="receiver_mobile"  id="" class="form-control" placeholder="Receiver Mobile">
+        				@if ($errors->has('receiver_mobile'))
+        				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_mobile') }}</p>
+        				@endif
+                 	</div>
     	       </div>
     	       <div class="form-group">
     				<label for="name">Attachtment</label>
@@ -444,6 +450,13 @@
                         <input type="text" name="receiver_name"  value="{{$dpm->receiver_name}}" id="" class="form-control" placeholder="Receiver Name" required>
         				@if ($errors->has('receiver_name'))
         				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_name') }}</p>
+        				@endif
+                 	</div>
+                 	<div class="col-md-12 form-group">
+        			    <label for="name">Receiver Mobile</label>
+                        <input type="text" name="receiver_mobile"  value="{{$dpm->receiver_mobile}}" id="" class="form-control" placeholder="Receiver Mobile">
+        				@if ($errors->has('receiver_mobile'))
+        				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_mobile') }}</p>
         				@endif
                  	</div>
     	       </div>
@@ -710,7 +723,7 @@
                         </div>
                         <div class="amountWriteText">
                             <label class="form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </label>
-                            <input type="text" class="input-underline handwritten" value="( Name of receiver ) {{$exp->receiver_name}}">
+                            <input type="text" class="input-underline handwritten" value="( Name of receiver ) {{$exp->receiver_name}} {{$exp->receiver_mobile?'- '.$exp->receiver_mobile:''}}">
                         </div>
 
                     </div>

@@ -170,7 +170,9 @@
                             <p>
                                 <b>Request Date:</b> {{ $requisition->created_at->format('d.m.Y') }} <br>
                                 <b>Assinge By:</b> {{$requisition->user?->name}} <br>
-                                <b>Department:</b> {{$requisition->department?->name ?? 'N/A'}}
+                                <b>Name:</b> {{$requisition->name}} , <b>ID Number:</b>  {{$requisition->employe_number}} <br>
+                                <b>Department:</b> {{$requisition->department?->name ?? 'N/A'}} <br>
+                                <b>Designation:</b> {{$requisition->designation?->name ?? 'N/A'}}
                             </p>
                         </div>
                     </div>

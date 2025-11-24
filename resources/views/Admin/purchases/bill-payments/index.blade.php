@@ -76,7 +76,13 @@
                                             {{ $p->order_no }}
                                         </a>
                                     </td>
-                                    <td class="">{{ $p->supplier_name }}</td>
+                                    <td class="">
+                                        @if($p->supplier)
+                                        <a href="{{route('admin.suppliersAction',['view',$p->supplier->id])}}" target="_blank" class="mr-1">{{ $p->supplier_name }}</a>
+                                        @else
+                                        {{ $p->supplier_name }}
+                                        @endif
+                                    </td>
                                     <td class="text-right">{{ number_format($p->grand_total,2) }}</td>
                                     <td class="text-right">{{ number_format(($p->paid_amount),2) }}</td>
                                     <td class="text-right">{{ number_format($p->due_amount,2) }}</td>

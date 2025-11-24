@@ -84,6 +84,7 @@
                                 <th style="min-width: 150px;">Items</th>
                                 <th style="min-width: 150px;">Bill Amount</th>
                                 <th style="min-width: 150px;">Due Amount</th>
+                                <th style="min-width: 150px;">Paid Amount</th>
                                 <th style="min-width: 100px;">Status</th>
                                 <th style="min-width: 100px;">Date</th>
                                 <th style="min-width: 100px;">Action</th>
@@ -108,8 +109,9 @@
                                 </td>
                                 <td>{{ $order->user?->name }}</td>
                                 <td>{{ $order->items()->count() }} Items</td>
-                                <td>{{ numberFormat($order->grand_total,3) }}</td>
-                                <td>{{ numberFormat($order->due_amount,3) }}</td>
+                                <td>{{ numberFormat($order->grand_total,3,$order->currency) }}</td>
+                                <td class="text-danger">{{ numberFormat($order->due_amount,3,$order->currency) }}</td>
+                                <td >{{ numberFormat($order->paid_amount,3,$order->currency) }}</td>
                                 <td>
                                     @if($order->status=='temp')
                                         <span class="badge badge-secondary">Temp</span>

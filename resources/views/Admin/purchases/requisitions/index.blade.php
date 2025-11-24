@@ -75,12 +75,14 @@
 
                 <!-- Requisition Table -->
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th style="min-width: 100px;">SL</th>
                                 <th style="min-width: 150px;">Requisition No</th>
                                 <th style="min-width: 150px;">Department</th>
+                                <th style="min-width: 150px;">Designation</th>
+                                <th style="min-width: 200px;">Name/ID</th>
                                 <th style="min-width: 200px;">Requested By</th>
                                 <th style="min-width: 150px;">Items</th>
                                 <th style="min-width: 100px;">Status</th>
@@ -94,6 +96,8 @@
                                 <td>{{ $i+1 }}</td>
                                 <td><a href="{{route('admin.purchasesRequisitionsAction',['view',$req->id])}}" target="_blank">{{$req->requisition_no}}</a></td>
                                 <td>{{$req->department?->name ?? '--'}}</td>
+                                <td>{{$req->designation?->name ?? '--'}}</td>
+                                <td>{{$req->name}} {{$req->employe_number?'- '.$req->employe_number:''}}</td>
                                 <td>{{$req->user?->name}}</td>
                                 <td>{{$req->items()->count()}} Items</td>
                                 <td>

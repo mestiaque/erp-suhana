@@ -78,7 +78,7 @@
                 @csrf
 
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
                         <label>Department*</label>
                         <select class="form-control select2" name="department_id" required>
                             <option value="">Select Department</option>
@@ -90,7 +90,19 @@
                         <p style="color: red; margin: 0;">{{ $errors->first('department_id') }}</p>
                         @endif
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
+                        <label>Designation*</label>
+                        <select class="form-control select2" name="designation_id" required>
+                            <option value="">Select Designation</option>
+                            @foreach($designations as $desg)
+                                <option value="{{ $desg->id }}" {{ old('designation_id', $requisition->designation_id) == $desg->id ? 'selected' : '' }}>{{ $desg->name }}</option>
+                            @endforeach
+                        </select>
+                        @if ($errors->has('designation_id'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('designation_id') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label>Requision Date*</label>
                         <input type="date" class="form-control" name="created_at" value="{{$requisition->created_at->format('Y-m-d')}}" required>
                         @if ($errors->has('created_at'))
@@ -98,14 +110,28 @@
                         @endif
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
                         <label>Expected Receive Date*</label>
                         <input type="date" class="form-control" name="expected_date" value="{{$requisition->expected_date?Carbon\Carbon::parse($requisition->expected_date)->format('Y-m-d'):old('expected_date')}}" required>
                         @if ($errors->has('expected_date'))
                         <p style="color: red; margin: 0;">{{ $errors->first('expected_date') }}</p>
                         @endif
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
+                        <label>Name * </label>
+                        <input type="text" class="form-control" name="name" value="{{$requisition->name?:old('name')}}" placeholder="Enter name" required="">
+                        @if ($errors->has('name'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('name') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>ID Number </label>
+                        <input type="text" class="form-control" name="employe_number" value="{{$requisition->employe_number?:old('employe_number')}}" placeholder="Enter  ID Number">
+                        @if ($errors->has('employe_number'))
+                        <p style="color: red; margin: 0;">{{ $errors->first('employe_number') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label>Status*</label>
                         <select class="form-control" name="status" required="" >
                             <option value="pending" {{$requisition->status=='pending'?'selected':''}} >Pending</option>
