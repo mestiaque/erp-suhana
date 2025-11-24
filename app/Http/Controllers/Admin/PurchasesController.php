@@ -996,7 +996,7 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $orders = PurchaseOrder::latest()
+        $orders = PurchaseOrder::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
 
             ->where(function($q) use ($r){
