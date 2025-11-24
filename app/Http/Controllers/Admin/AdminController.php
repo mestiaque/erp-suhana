@@ -2896,7 +2896,7 @@ class AdminController extends Controller
         return view(adminTheme().'bill-collections.editInvoices',compact('invoice','paymentMethods','accountMethods'));
     }
 
-    
+
 
     // LC Management Function
     public function lcInvoices(Request $r){
@@ -3410,6 +3410,7 @@ class AdminController extends Controller
                 'amount' => 'required|numeric',
                 'company_name' => 'required',
                 'receiver_name' => 'required',
+                'receiver_mobile' => 'required',
                 'amount' => 'required|numeric',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
@@ -3439,6 +3440,7 @@ class AdminController extends Controller
             $expense->description=$r->description;
             $expense->company_name=$r->company_name;
             $expense->receiver_name=$r->receiver_name;
+            $expense->receiver_mobile=$r->receiver_mobile;
             $expense->status ='active';
             $expense->addedby_id =Auth::id();
             $expense->created_at = $createDate;
@@ -3490,6 +3492,7 @@ class AdminController extends Controller
                 'branch_id' => 'required|numeric',
                 'company_name' => 'required',
                 'receiver_name' => 'required',
+                'receiver_mobile' => 'required',
                 // 'title' => 'required|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
@@ -3504,6 +3507,7 @@ class AdminController extends Controller
             $expense->description=$r->description;
             $expense->company_name=$r->company_name;
             $expense->receiver_name=$r->receiver_name;
+            $expense->receiver_mobile=$r->receiver_mobile;
             $expense->status =$r->status?'active':'inactive';
             $expense->editedby_id =Auth::id();
             if (!$createDate->isSameDay($expense->created_at)) {
@@ -5103,7 +5107,7 @@ class AdminController extends Controller
       }
       // Delete Department Action End
 
-      
+
 
       $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
 
@@ -5113,10 +5117,10 @@ class AdminController extends Controller
                         ->whereDate('created_at', '<', $from)
                         ->selectRaw("
                             SUM(
-                                CASE 
-                                    WHEN type IN (0,1) THEN amount 
+                                CASE
+                                    WHEN type IN (0,1) THEN amount
                                     WHEN type IN (3,4,5,6,7) THEN -amount
-                                    ELSE 0 
+                                    ELSE 0
                                 END
                             ) as balance
                         ")
@@ -5144,7 +5148,7 @@ class AdminController extends Controller
         });
         $availableBalance = $balance;
 
-      return view(adminTheme().'accounts.accountsMethodsView',compact('method','openingBalance','availableBalance','transections','from','to'));
+        return view(adminTheme().'accounts.accountsMethodsView',compact('method','openingBalance','availableBalance','transections','from','to'));
 
 
     }
@@ -5161,15 +5165,15 @@ class AdminController extends Controller
             ->whereDate('created_at', '<', $from)
             ->selectRaw("
                             SUM(
-                                CASE 
-                                    WHEN type IN (0,1) THEN amount 
+                                CASE
+                                    WHEN type IN (0,1) THEN amount
                                     WHEN type IN (3,4,5,6,7) THEN -amount
-                                    ELSE 0 
+                                    ELSE 0
                                 END
                             ) as balance
                         ")
                         ->value('balance') ?? 0;
-                        
+
             $transections = Transaction::whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to)
             ->where('account_id', $method->id)

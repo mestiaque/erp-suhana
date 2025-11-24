@@ -675,7 +675,7 @@
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="amountWriteText">
-                            <label class="form-label" style="white-space: nowrap;">Pay To : &nbsp;</label>
+                            <label class="form-label" style="white-space: nowrap;">Paid To : &nbsp;</label>
                             <input type="text" class="input-underline handwritten" value="( Name of company ) {{$dpm->company_name}}">
                         </div>
                         <div class="amountWriteText">
