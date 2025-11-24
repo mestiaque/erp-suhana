@@ -2896,7 +2896,7 @@ class AdminController extends Controller
         return view(adminTheme().'bill-collections.editInvoices',compact('invoice','paymentMethods','accountMethods'));
     }
 
-    
+
 
     // LC Management Function
     public function lcInvoices(Request $r){
@@ -5107,7 +5107,7 @@ class AdminController extends Controller
       }
       // Delete Department Action End
 
-      
+
 
       $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
 
@@ -5117,10 +5117,10 @@ class AdminController extends Controller
                         ->whereDate('created_at', '<', $from)
                         ->selectRaw("
                             SUM(
-                                CASE 
-                                    WHEN type IN (0,1) THEN amount 
+                                CASE
+                                    WHEN type IN (0,1) THEN amount
                                     WHEN type IN (3,4,5,6,7) THEN -amount
-                                    ELSE 0 
+                                    ELSE 0
                                 END
                             ) as balance
                         ")
@@ -5148,7 +5148,7 @@ class AdminController extends Controller
         });
         $availableBalance = $balance;
 
-      return view(adminTheme().'accounts.accountsMethodsView',compact('method','openingBalance','availableBalance','transections','from','to'));
+        return view(adminTheme().'accounts.accountsMethodsView',compact('method','openingBalance','availableBalance','transections','from','to'));
 
 
     }
@@ -5165,15 +5165,15 @@ class AdminController extends Controller
             ->whereDate('created_at', '<', $from)
             ->selectRaw("
                             SUM(
-                                CASE 
-                                    WHEN type IN (0,1) THEN amount 
+                                CASE
+                                    WHEN type IN (0,1) THEN amount
                                     WHEN type IN (3,4,5,6,7) THEN -amount
-                                    ELSE 0 
+                                    ELSE 0
                                 END
                             ) as balance
                         ")
                         ->value('balance') ?? 0;
-                        
+
             $transections = Transaction::whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to)
             ->where('account_id', $method->id)

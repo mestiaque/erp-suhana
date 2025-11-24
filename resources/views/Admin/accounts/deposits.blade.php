@@ -5,7 +5,7 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
@@ -98,7 +98,7 @@
                                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                          </svg>
                                      </span>
-                                     All <span class="checkCounter"></span> 
+                                     All <span class="checkCounter"></span>
                                  </label>
                                 </div>
                             </th>
@@ -137,7 +137,13 @@
                             </td>
                             <td>
                                 <b>TNX Id:</b> {{$transection->transection_id}} @if($transection->imageFile) <a href="{{asset($transection->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif <br>
-                                <b>Accounts:</b> {{$transection->account?$transection->account->name:''}}<br>
+                                <b>Accounts:</b> {{$transection->account?$transection->account->name:''}}
+                                        @if($transection->account)
+                                            <a target="_blank" href="{{ route('admin.accountsAction', ['view', $transection->account->id]) }}">
+                                                &nbsp;<i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        @endif
+                                    <br>
                                 <b>Payment Method:</b> {{$transection->method?$transection->method->name:''}}<br>
                                 @if($transection->billing_reason)
                                 <b>Bank Name:</b> {{$transection->billing_reason}} <br>
@@ -158,8 +164,8 @@
                 {{$transections->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>
@@ -197,7 +203,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('account') }}</p>
         				@endif
                  	</div>
-    	            
+
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -250,7 +256,7 @@
 	 </div>
    </div>
  </div>
- 
+
  <!--Edit Modal -->
 @foreach($transections as $i=>$dpm)
 
@@ -335,8 +341,8 @@
  </div>
 
 @endforeach
- 
- 
- 
+
+
+
 
 @endsection @push('js') @endpush
