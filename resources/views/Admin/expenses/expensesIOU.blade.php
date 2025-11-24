@@ -243,7 +243,7 @@
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-        			    <label for="name">Employee*</label>
+        			    <label for="name">Employee</label>
                         <select class="form-control" name="employee_id">
                             <option value="">Select Employee</option>
                             @foreach($users as $user)
@@ -280,8 +280,8 @@
         			    <label for="name">Account Method *</label>
                         <select class="form-control" name="account" required="">
                             <option value="">Select Account</option>
-                            @foreach($accountMethods as $method)
-                            <option value="{{$method->id}}">{{$method->name}} - BDT {{priceFormat($method->amount)}}</option>
+                            @foreach($accountMethods as $m=>$method)
+                            <option value="{{$method->id}}" {{$m==0?'selected':''}}>{{$method->name}} - BDT {{priceFormat($method->amount)}}</option>
                             @endforeach
                         </select>
         				@if ($errors->has('payment'))
@@ -301,15 +301,15 @@
                         @endif
                     </div>
                     <div class="col-md-6 form-group">
-        			    <label for="name">Company Name *</label>
-                        <input type="text" name="company_name" id="" class="form-control" placeholder="Company Name" required>
+        			    <label for="name">Company Name </label>
+                        <input type="text" name="company_name" id="" class="form-control" placeholder="Company Name">
         				@if ($errors->has('company_name'))
         				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('company_name') }}</p>
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-        			    <label for="name">Receiver Name *</label>
-                        <input type="text" name="receiver_name" id="" class="form-control" placeholder="Receiver Name" required>
+        			    <label for="name">Receiver Name</label>
+                        <input type="text" name="receiver_name" id="" class="form-control" placeholder="Receiver Name">
         				@if ($errors->has('receiver_name'))
         				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_name') }}</p>
         				@endif
@@ -363,7 +363,7 @@
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-                        <label for="name">Employee*</label>
+                        <label for="name">Employee</label>
                         <select class="form-control" name="employee_id">
                             <option value="">Select Employee</option>
                             @foreach($users as $user)
@@ -418,15 +418,15 @@
                         @endif
                     </div>
                     <div class="col-md-6 form-group">
-        			    <label for="name">Company Name *</label>
-                        <input type="text" name="company_name"  value="{{$dpm->company_name}}" id="" class="form-control" placeholder="Company Name" required>
+        			    <label for="name">Company Name</label>
+                        <input type="text" name="company_name"  value="{{$dpm->company_name}}" id="" class="form-control" placeholder="Company Name">
         				@if ($errors->has('company_name'))
         				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('company_name') }}</p>
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-        			    <label for="name">Receiver Name *</label>
-                        <input type="text" name="receiver_name"  value="{{$dpm->receiver_name}}" id="" class="form-control" placeholder="Receiver Name" required>
+        			    <label for="name">Receiver Name</label>
+                        <input type="text" name="receiver_name"  value="{{$dpm->receiver_name}}" id="" class="form-control" placeholder="Receiver Name">
         				@if ($errors->has('receiver_name'))
         				    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('receiver_name') }}</p>
         				@endif
