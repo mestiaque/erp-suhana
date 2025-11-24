@@ -208,8 +208,8 @@
                     <thead>
                         <tr>
                             <th style="width: 100px;min-width: 120px;">Date</th>
-                            <th style="min-width: 130px;">Company Name</th>
-                            <th style="min-width: 130px;">Receiver Name</th>
+                            <th style="min-width: 130px;">Company</th>
+                            <th style="min-width: 130px;">Receiver</th>
                             <th style="min-width: 200px;">Description</th>
                             <th style="width: 150px;min-width: 100px;">Method</th>
                             <th style="width: 150px;min-width: 120px;">Expense Head</th>

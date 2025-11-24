@@ -69,9 +69,9 @@
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$method->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
-                                <a href="{{route('admin.accountsAction',['view',$method->id])}}"  class="btn-custom yellow">
+                                <!-- <a href="{{route('admin.accountsAction',['view',$method->id])}}"  class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
-                                </a>
+                                </a> -->
                                 <a href="{{route('admin.accountsAction',['delete',$method->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                             </td>
                         </tr>

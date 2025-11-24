@@ -155,8 +155,8 @@
                                  </label>
                                 </div>
                             </th>
-                            <th style="min-width: 100px;">Company Name</th>
-                            <th style="min-width: 100px;">Receiver Name</th>
+                            <th style="min-width: 100px;">Company</th>
+                            <th style="min-width: 100px;">Receiver</th>
                             <th style="min-width: 100px;">Serial No</th>
                             <th style="min-width: 150px;">Description</th>
                             <th style="min-width: 100px;">Amount</th>
@@ -170,7 +170,7 @@
                     <tbody>
                         @foreach($expenses as $i=>$expense)
                         <tr>
-                            <td>
+                            <td style="position:relative;">
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$expense->id}}" type="checkbox" name="checkid[]" value="{{$expense->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$expense->id}}">
@@ -705,7 +705,7 @@
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="amountWriteText">
-                            <label class="form-label" style="white-space: nowrap;">Pay To : &nbsp;</label>
+                            <label class="form-label" style="white-space: nowrap;">Paid To : &nbsp;</label>
                             <input type="text" class="input-underline handwritten" value="( Name of company ) {{$exp->company_name}}">
                         </div>
                         <div class="amountWriteText">

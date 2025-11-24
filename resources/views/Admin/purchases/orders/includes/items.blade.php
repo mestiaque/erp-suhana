@@ -22,9 +22,9 @@
             <th class="px-2 pb-1" style="width:80px;">Price</th>
             <th class="px-2 pb-1" style="width:120px;">Total Price</th>
             <th  class="p-1" style="width: 60px;text-align:center;vertical-align: middle;">
-                <span class="btn-custom success addItem" data-url="{{ route('admin.purchasesOrdersAction',['add-item',$order->id]) }}">
+                <!-- <span class="btn-custom success addItem" data-url="{{ route('admin.purchasesOrdersAction',['add-item',$order->id]) }}">
                     <i class="bx bx-plus"></i>
-                </span>
+                </span> -->
             </th>
         </tr>
 

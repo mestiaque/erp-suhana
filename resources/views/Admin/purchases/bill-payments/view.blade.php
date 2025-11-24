@@ -144,7 +144,7 @@
                                     <input type="number" placeholder="{{ $purchase->due_amount }}" name="pay_amount" step="any" max="{{ $purchase->due_amount }}" class="form-control" required>
                                 </div>
 
-                                {{-- <div class="mb-2">
+                                <div class="mb-2">
                                     <label>Select Account</label>
                                     <select name="account_id" class="form-control" >
                                         <option value="">Select Account</option>
@@ -152,7 +152,7 @@
                                             <option value="{{ $acc->id }}">{{$acc->name}} - BDT {{priceFormat($acc->amount)}}</option>
                                         @endforeach
                                     </select>
-                                </div> --}}
+                                </div>
 
                                 <div class="mb-2">
                                     <label>Payment Method</label>

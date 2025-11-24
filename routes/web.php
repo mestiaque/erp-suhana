@@ -119,6 +119,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','re
     Route::get('/accounts/payment-methods',[AdminController::class,'paymentsMethods'])->name('paymentsMethods');
     Route::any('/accounts/payment-methods/{action}/{id?}',[AdminController::class,'paymentsMethodsAction'])->name('paymentsMethodsAction');
 
+    Route::get('/accounts/statement',[AdminController::class,'accountsStatement'])->name('accountsStatement');
     Route::get('/accounts/list',[AdminController::class,'accounts'])->name('accounts');
     Route::any('/accounts/list/{action}/{id?}',[AdminController::class,'accountsAction'])->name('accountsAction');
 

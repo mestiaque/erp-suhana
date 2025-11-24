@@ -74,7 +74,7 @@
 
                 <!-- Orders Table -->
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th style="min-width: 50px;">SL</th>
@@ -96,7 +96,16 @@
                                 <td>
                                     <a href="{{ route('admin.purchasesOrdersAction',['view',$order->id]) }}" target="_blank">{{ $order->order_no }}</a>
                                 </td>
-                                <td>{{ $order->supplier?$order->supplier->company_name : '--' }}</td>
+                                <td>
+                                    @if($order->supplier)
+                                    <a href="{{route('admin.suppliersAction',['view',$order->supplier->id])}}" target="_blank" class="invoice-action-view mr-1">    
+                                    {{ $order->supplier?$order->supplier->name : '--' }}
+</a>
+                                @else
+                                N/A
+                                @endif
+
+                                </td>
                                 <td>{{ $order->user?->name }}</td>
                                 <td>{{ $order->items()->count() }} Items</td>
                                 <td>{{ numberFormat($order->grand_total,3) }}</td>

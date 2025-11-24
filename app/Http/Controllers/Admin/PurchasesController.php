@@ -1064,7 +1064,7 @@ class PurchasesController extends Controller
                 $order = new PurchaseOrder();
                 $order->status = 'temp';
                 $order->addedby_id = Auth::id();
-                $order->created_date = now()->format('Ymd');
+                $order->created_date = now();
                 $order->save();
             }
 
@@ -1191,6 +1191,7 @@ class PurchasesController extends Controller
               session()->flash('error', 'Supplier are not found');
               return back();
             }
+
             $order->supplier_id = $supplier->id;
             $order->company_name = $supplier->company_name;
             $order->supplier_name = $supplier->name;
@@ -1199,7 +1200,11 @@ class PurchasesController extends Controller
             $order->supplier_address = $supplier->address_line1;
             $order->status = $r->status?:'pending';
             $order->note = $r->note;
-            $order->created_at = $r->created_at ?: now();
+
+            $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+            if (!$createDate->isSameDay($order->created_at)) {
+                $order->created_at = $createDate;
+            }
             $order->save();
 
             session()->flash('success', 'Purchase Order Updated');
@@ -1575,7 +1580,19 @@ class PurchasesController extends Controller
                 $purchase->payment_status = 'due';
             }
 
+            $account =Attribute::where('type',10)->where('status','active')->find(request()->account_id);
+            if(!$account){
+              Session()->flash('error','Account method Are Not found');
+              return redirect()->back();
+            }
+
+            if(request()->pay_amount > $account->amount){
+                 Session()->flash('error','This Account balance Are Not available');
+                 return redirect()->back();
+            }
+
             $paymentMethods =Attribute::find(request()->payment_method_id);
+
             $transactionData = [
                             "src_id"            => $purchase->id,
                             "user_id"           => $purchase->supplier_id,
@@ -1591,14 +1608,16 @@ class PurchasesController extends Controller
                             "payment_method"    => $paymentMethods->name,
                             "payment_method_id" => $paymentMethods->id,
                             "amount"      => request()->pay_amount,
+                            "balance"      => $account->amount-request()->pay_amount,
                             "currency"          => "BDT",
                             "status"            => "Pending",
                             "addedby_id"        => Auth::user()->id,
                         ];
 
-
-            // Save payment history
-            Transaction::create( $transactionData );
+            Transaction::create($transactionData);
+            
+            $account->amount -=request()->pay_amount;
+            $account->save();
 
             $purchase->save();
 
@@ -1672,6 +1691,11 @@ class PurchasesController extends Controller
     }
 
 
+    public function billCollection(Request $request)
+    {
+        return view(adminTheme().'purchases.bill-collections.index');
+    }
+    
     public function purchasesDamageReturn(Request $request)
     {
         return view(adminTheme().'purchases.returns.index');
