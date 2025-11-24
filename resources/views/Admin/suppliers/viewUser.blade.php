@@ -59,8 +59,9 @@
                     <!-- Other Info -->
                     <ul class="list-group list-group-flush text-start">
                         <li class="list-group-item py-1"><strong>Address:</strong> {{$user->fullAddress()}}</li>
-                        <li class="list-group-item py-1"><strong>Join Date:</strong> {{$user->created_at->format('d M, Y')}}</li>
-                        <li class="list-group-item py-1"><strong>Total Sale:</strong> <span class="text-success">{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</span></li>
+                        <li class="list-group-item py-1"><strong>Start Date:</strong> {{$user->created_at->format('d M, Y')}}</li>
+                        <li class="list-group-item py-1"><strong>Total Purchases:</strong> <span class="text-success">{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</span></li>
+                        <li class="list-group-item py-1"><strong>Total Paid:</strong> <span class="text-info">{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</span></li>
                         <li class="list-group-item py-1"><strong>Total Due:</strong> <span class="text-danger">{{priceFullFormat($user->orders->where('status','approved')->sum('due_amount'))}}</span></li>
                     </ul>
                 </div>
@@ -115,7 +116,7 @@
                                                 </span>
 
                                             @elseif($order->payment_status == 'due')
-                                                <span class="badge badge-warning" style="background:#f44336;">
+                                                <span class="badge badge-warning" style="background:#f44336;color:white;">
                                                     {{ ucfirst($order->payment_status) }}
                                                 </span>
 

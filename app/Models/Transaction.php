@@ -37,6 +37,10 @@ class Transaction extends Model
     public function expense(){
     	return $this->belongsTo(Expense::class,'src_id');
     }
+   
+    public function expenseIou(){
+    	return $this->belongsTo(ExpenseIou::class,'src_id');
+    }
     
     public function method(){
     	return $this->belongsTo(Attribute::class,'src_id');

@@ -1064,7 +1064,7 @@ class PurchasesController extends Controller
                 $order = new PurchaseOrder();
                 $order->status = 'temp';
                 $order->addedby_id = Auth::id();
-                $order->created_date = now()->format('Ymd');
+                $order->created_date = now();
                 $order->save();
             }
 
@@ -1191,6 +1191,7 @@ class PurchasesController extends Controller
               session()->flash('error', 'Supplier are not found');
               return back();
             }
+
             $order->supplier_id = $supplier->id;
             $order->company_name = $supplier->company_name;
             $order->supplier_name = $supplier->name;
@@ -1199,7 +1200,11 @@ class PurchasesController extends Controller
             $order->supplier_address = $supplier->address_line1;
             $order->status = $r->status?:'pending';
             $order->note = $r->note;
-            $order->created_at = $r->created_at ?: now();
+
+            $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+            if (!$createDate->isSameDay($order->created_at)) {
+                $order->created_at = $createDate;
+            }
             $order->save();
 
             session()->flash('success', 'Purchase Order Updated');

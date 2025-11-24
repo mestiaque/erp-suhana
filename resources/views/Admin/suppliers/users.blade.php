@@ -1,6 +1,6 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('Supplier List')}}</title>
+<title>{{websiteTitle('Creditor List')}}</title>
 @endsection
 @push('css')
 
@@ -13,11 +13,11 @@
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
-         <h3>Supplier List</h3>
+         <h3>Creditor List</h3>
          <div class="dropdown">
 
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddSupplier">
-                 <i class="bx bx-plus"></i> Supplier
+                 <i class="bx bx-plus"></i> Creditor
              </a>
              <a href="{{route('admin.suppliers')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>

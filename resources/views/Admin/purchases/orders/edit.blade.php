@@ -78,7 +78,7 @@
                 @csrf
                 <div class="row ">
                     <div class="col-md-4 mb-3">
-                        <label>Company *</label>
+                        <label>Company /Supplier*</label>
                         <select id="supplier_id" name="supplier_id" class="form-control" required>
                             <option value="">Select Company</option>
                             @foreach($suppliers as $s)

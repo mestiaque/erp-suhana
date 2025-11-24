@@ -110,6 +110,14 @@
                                             @else
                                             <span>N/A</span>
                                             @endif
+                                        @elseif($tran->type==7)
+                                            @if($tran->expenseIou)
+                                            <b>Company:</b> {{ $tran->expenseIou->company_name}} - <b>Receiver:</b> {{ $tran->expenseIou->receiver_name}} {{ $tran->expenseIou->description?'- '.$tran->expenseIou->description:'' }}
+                                            @else
+                                            <span>N/A</span>
+                                            @endif
+                                        @elseif($tran->type==6)
+                                            <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{$tran->account?$tran->account->name:'N/A'}} {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
                                         @elseif($tran->type==3)
 
                                             @if($tran->purchase)
@@ -139,7 +147,7 @@
                                             @elseif($tran->type==6)
                                                 Withdrawal
                                             @elseif($tran->type==7)
-                                                Expense IOU
+                                                I.O.U
                                             @else
                                                 Unknown
                                             @endif

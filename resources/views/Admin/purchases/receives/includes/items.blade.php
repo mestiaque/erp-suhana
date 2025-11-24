@@ -16,7 +16,7 @@
                     <td style="text-align:center;">{{ numberFormat($item->orderItem?->qty ?? 0,1)}}  ({{ numberFormat($item->orderItem?->received_qty ?? 0,1)}})</td>
                     <td>
                         <input type="hidden" value="{{$item->id}}" name="item_id" >
-                        <input type="number" step="any" min="0" max="{{ $item->orderItem?->received_qty ?? 0 }}" name="qty_{{$item->id}}" class="form-control form-control-sm"
+                        <input type="number" step="any" min="0"  name="qty_{{$item->id}}" class="form-control form-control-sm"
                                data-item="{{ $item->id }}"
                                value="{{ ($item->received_qty > 0) ? $item->received_qty : '' }}">
                     </td>

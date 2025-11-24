@@ -3877,12 +3877,15 @@ class AdminController extends Controller
             $transection =new Transaction();
             $transection->type=7;
             $transection->src_id=$expense->id;
-            $transection->payment_method_id=$expense->account_id;
+            $transection->billing_name=$expense->receiver_name;
+            $transection->payment_method_id=$expense->method_id;
+            $transection->account_id=$expense->account_id;
             $transection->amount=$expense->amount;
             $transection->status ='success';
             $transection->addedby_id =Auth::id();
             $transection->created_at =$expense->created_at;
             $transection->balance =$method->amount;
+            $transection->transection_id =$expense->created_at->format('ymd') . random_int(1000, 9999);
             $transection->save();
 
             ///////Image Upload End////////////
