@@ -38,12 +38,12 @@
                                     <hr>
                                 </div>
                                 <div class="card-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Company:</strong> {{ $purchase->company_name }}</li>
-                                        <li><strong>Name:</strong> {{ $purchase->supplier_name }}</li>
-                                        <li><strong>Email:</strong> {{ $purchase->supplier_email }}</li>
-                                        <li><strong>Mobile:</strong> {{ $purchase->supplier_mobile }}</li>
-                                        <li><strong>Address:</strong> {{ $purchase->supplier_address }}</li>
+                                    <ul class="list-group list-group-flush text-start mb-0">
+                                        <li class="list-group-item py-1"><strong>Company:</strong> {{ $purchase->company_name }}</li>
+                                        <li class="list-group-item py-1"><strong>Name:</strong> {{ $purchase->supplier_name }}</li>
+                                        <li class="list-group-item py-1"><strong>Email:</strong> {{ $purchase->supplier_email }}</li>
+                                        <li class="list-group-item py-1"><strong>Mobile:</strong> {{ $purchase->supplier_mobile }}</li>
+                                        <li class="list-group-item py-1"><strong>Address:</strong> {{ $purchase->supplier_address }}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -56,12 +56,12 @@
                                     <hr>
                                 </div>
                                 <div class="card-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Order Number:</strong> <span class="text-">{{ $purchase->order_no }}</span></li>
-                                        <li><strong>Grand Total:</strong> <span class="text-primary">{{ number_format($purchase->grand_total,2) }}</span></li>
-                                        <li><strong>Paid Amount:</strong> <span class="text-success">{{ number_format($purchase->paid_amount,2) }}</span></li>
-                                        <li><strong>Due Amount:</strong> <span class="text-danger">{{ number_format($purchase->due_amount,2) }}</span></li>
-                                        <li>
+                                    <ul class="list-group list-group-flush text-start mb-0">
+                                        <li class="list-group-item py-1"><strong>Order Number:</strong> <span class="text-">{{ $purchase->order_no }}</span></li>
+                                        <li class="list-group-item py-1"><strong>Grand Total:</strong> <span class="text-primary">{{ number_format($purchase->grand_total,2) }}</span></li>
+                                        <li class="list-group-item py-1"><strong>Paid Amount:</strong> <span class="text-success">{{ number_format($purchase->paid_amount,2) }}</span></li>
+                                        <li class="list-group-item py-1"><strong>Due Amount:</strong> <span class="text-danger">{{ number_format($purchase->due_amount,2) }}</span></li>
+                                        <li class="list-group-item py-1">
                                             <strong>Payment Status:</strong>
                                             <span class="badge bg-{{ $purchase->payment_status == 'paid' ? 'success' : ($purchase->payment_status == 'partial' ? 'warning' : 'danger') }} text-white">
                                                 {{ ucfirst($purchase->payment_status) }}

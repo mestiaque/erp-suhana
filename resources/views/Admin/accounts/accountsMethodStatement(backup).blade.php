@@ -5,7 +5,7 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
     <!-- Start -->
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -50,19 +50,19 @@
 
                 </div>
             </div>
-            
-            
+
+
             <br>
             @if($method)
             <div class="PrintAreaContact">
                 <style>
                     .tableReport tr th{
                         padding: 5px 10px;
-                        border: 1px solid #dee2e6;  
+                        border: 1px solid #dee2e6;
                     }
                     .tableReport tr td{
                         padding: 5px 10px;
-                        border: 1px solid #dee2e6;  
+                        border: 1px solid #dee2e6;
                     }
                 </style>
                 <div class="text-center mb-4">
@@ -79,107 +79,94 @@
                     </p>
                     <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">{{$method->name}} Statement</span>
                 </div>
-                <div class="table-responsive">
-                    <table  class="table tableReport" >
-                        <thead>
-                            <tr>
-                                <th style="width: 120px;min-width: 120px;">Date</th>
-                                <th style="width: 130px;min-width: 130px;">Method</th>
-                                <th style="min-width: 200px;">Concern Person</th>
-                                <th style="width: 130px;min-width: 130px;">Type</th>
-                                <th style="width: 130px;min-width: 130px;">Debit</th>
-                                <th style="width: 130px;min-width: 130px;">Credit</th>
-                                <th style="width: 150px;min-width: 150px;">Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                @php
+                    $types = [
+                        0 => 'Sales',
+                        1 => 'Deposit',
+                        3 => 'Supplier Bill',
+                        4 => 'Transfer Balance',
+                        5 => 'Expense',
+                        6 => 'Withdrawal',
+                        7 => 'I.O.U',
+                    ];
+                @endphp
 
-                            @forelse($transections as $tran)
-                                <tr>
-                                    <td>{{ $tran->created_at->format('d-m-Y') }}</td>
-                                    <td>{{ $tran->paymentMethod->name ?? '' }}</td>
-                                    <td>
-                                        @if($tran->type == 0)
-                                            {{ $tran->sale->name ?? '' }} 
-                                            {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
-                                        @elseif($tran->type==1)
-                                            <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{$tran->account?$tran->account->name:'N/A'}} {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
-                                        @elseif($tran->type==5)
-                                           @if($tran->expense)
-                                            <b>Company:</b> {{ $tran->expense->company_name}} - <b>Receiver:</b> {{ $tran->expense->receiver_name}} {{ $tran->expense->description?'- '.$tran->expense->description:'' }}
-                                            @else
-                                            <span>N/A</span>
-                                            @endif
-                                        @elseif($tran->type==7)
-                                            @if($tran->expenseIou)
-                                            <b>Company:</b> {{ $tran->expenseIou->company_name}} - <b>Receiver:</b> {{ $tran->expenseIou->receiver_name}} {{ $tran->expenseIou->description?'- '.$tran->expenseIou->description:'' }}
-                                            @else
-                                            <span>N/A</span>
-                                            @endif
-                                        @elseif($tran->type==6)
-                                            <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{$tran->account?$tran->account->name:'N/A'}} {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
-                                        @elseif($tran->type==3)
+                @foreach($types as $typeId => $typeName)
+                    @php
+                        $group = $transections->where('type', $typeId);
+                        $subDebit = 0;
+                        $subCredit = 0;
+                    @endphp
 
-                                            @if($tran->purchase)
-                                               <b>Invoice:</b> {{$tran->purchase->order_no}}
-                                               <b>Supplier:</b> {{$tran->purchase->supplier_name}}
-                                            @else
-                                            <span>N/A</span>
-                                            @endif
-                                        @else
-                                            {{ $tran->transection_id }}
+                    @if($group->count())
+                        <h5 style="margin-top:20px;">{{ $typeName }} Transactions</h5>
+                        <div class="table-responsive">
+                            <table class="table tableReport table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:120px;min-width:120px;">Date</th>
+                                        <th style="width:130px;min-width:130px;">Method</th>
+                                        <th style="min-width:200px;">Concern Person</th>
+                                        <th style="width:130px;min-width:130px;">Type</th>
+                                        <th style="width:130px;min-width:130px;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($group as $tran)
+                                        <tr>
+                                            <td>{{ $tran->created_at->format('d-m-Y') }}</td>
+                                            <td>{{ $tran->paymentMethod->name ?? '' }}</td>
+                                            <td>
+                                                @if($tran->type == 0)
+                                                    {{ $tran->sale->name ?? '' }} {{ $tran->billing_note ? '- '.$tran->billing_note : '' }}
+                                                @elseif($tran->type == 1)
+                                                    <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{ $tran->account->name ?? 'N/A' }}
+                                                @elseif($tran->type == 3)
+                                                    {{ $tran->purchase ? 'Invoice: '.$tran->purchase->order_no.' - Supplier: '.$tran->purchase->supplier_name : 'N/A' }}
+                                                @elseif($tran->type == 4)
+                                                    Transfer
+                                                @elseif($tran->type == 5)
+                                                    {{ $tran->expense ? 'Company: '.$tran->expense->company_name.' - Receiver: '.$tran->expense->receiver_name : 'N/A' }}
+                                                @elseif($tran->type == 6)
+                                                    <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{ $tran->account->name ?? 'N/A' }}
+                                                @elseif($tran->type == 7)
+                                                    {{ $tran->expenseIou ? 'Company: '.$tran->expenseIou->company_name.' - Receiver: '.$tran->expenseIou->receiver_name : 'N/A' }}
+                                                @else
+                                                    {{ $tran->transection_id }}
+                                                @endif
+                                            </td>
+                                            <td>{{ $typeName }}</td>
+                                            <td>
 
-                                        @endif
-                                        
-                                    </td>
-                                    <td>
+                                                    {{ priceFormat($tran->amount) }}
+                                                    @php $subDebit += $tran->amount; @endphp
+                                            </td>
+                                        </tr>
+                                    @endforeach
 
-                                            @if($tran->type==0)
-                                                Sales
-                                            @elseif($tran->type==1)
-                                                Deposit
-                                            @elseif($tran->type==3)
-                                                Supplier Bill
-                                            @elseif($tran->type==4)
-                                                Transfer Balance
-                                            @elseif($tran->type==5)
-                                                 Expense
-                                            @elseif($tran->type==6)
-                                                Withdrawal
-                                            @elseif($tran->type==7)
-                                                I.O.U
-                                            @else
-                                                Unknown
-                                            @endif
+                                    {{-- Subtotal for this type --}}
+                                    <tr style="font-weight:bold; background:#f0f0f0;">
+                                        <td colspan="4" style="text-align:right;">Subtotal</td>
+                                        <td>{{ priceFormat($subDebit) }}</td>
+                                    </tr>
 
-                                    </td>
-                                    <td>
-                                        @if(in_array($tran->type, [3,4,5,6,7]))
-                                            {{ priceFormat($tran->amount) }}
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if(in_array($tran->type, [0,1]))
-                                            {{ priceFormat($tran->amount) }}
-                                        @endif
-                                    </td>
-                                    <td>{{ priceFormat($tran->running_balance) }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" style="text-align:center;">No Record</td>
-                                </tr>
-                                @endforelse
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="5"></td>
-                                <td>Available</td>
-                                <td>{{ priceFormat($availableBalance ?? 0) }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                @endforeach
+
+                {{-- Grand Total --}}
+                @php
+                    $grandDebit = $transections->whereIn('type',[3,4,5,6,7])->sum('amount');
+                    $grandCredit = $transections->whereIn('type',[0,1])->sum('amount');
+                @endphp
+
+                <div class="" style="margin-top:20px; font-size:25px; font-weight:bold; text-align:center;">
+                    Grand Total: {{ priceFormat($grandDebit) }}
                 </div>
+
+
             </div>
             @endif
         </div>
@@ -187,17 +174,17 @@
 </div>
 
 
-@endsection @push('js') 
+@endsection @push('js')
 <script>
     $(document).ready(function () {
-        
+
         $('#example').DataTable( {
 	        dom: 'Bfrtip',
 	        buttons: [
 	            'excel', 'pdf', 'print'
 	        ]
 	    } );
-        
+
     });
 </script>
 
