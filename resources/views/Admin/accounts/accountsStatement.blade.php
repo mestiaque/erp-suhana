@@ -31,7 +31,10 @@
                                 <select class="form-control" name="account_id">
                                     <option value="">Select Method</option>
                                     @foreach($accounts as $account)
-                                    <option value="{{$account->id}}" {{$account->id==request()->account_id || $account->id==$method->id ?'selected':''}}>{{$account->name}}</option>
+                                    <option value="{{ $account->id }}"
+                                        {{ $account->id == request()->account_id || (isset($method) && $account->id == $method->id) ? 'selected' : '' }}>
+                                        {{ $account->name }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
