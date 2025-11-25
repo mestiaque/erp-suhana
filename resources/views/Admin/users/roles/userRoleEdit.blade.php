@@ -84,13 +84,10 @@
                                 $parentId = sanitizeId($moduleKey . '_' . $subKey);
                             @endphp
                             <div class="mb-3 shadows shadow-sm px-3 py-1">
-
-                                <div class="sub-permissions" style="">
-                                    <strong class="" style="display:flex; align-items:center; gap:6px; font-size: 18px">
-                                        <!-- Parent checkbox -->
-                                        <input type="checkbox" class="parent-cbx inp-cbx"
-                                            id="{{ $parentId }}"
-                                            style="display:none;">
+                                <div class="sub-permissions" style="display:flex; gap:10px; align-items:flex-start;">
+                                    <!-- Parent label part (30%) -->
+                                    <div style="flex: 0 0 20%; display:flex; align-items:center; gap:6px; font-size: 18px;">
+                                        <input type="checkbox" class="parent-cbx inp-cbx" id="{{ $parentId }}" style="display:none;">
                                         <label class="cbx" for="{{ $parentId }}">
                                             <span>
                                                 <svg width="12px" height="10px" viewBox="0 0 12 10">
@@ -98,31 +95,36 @@
                                                 </svg>
                                             </span>
                                         </label>
-                                        {{ $subModule['label'] }} :
-                                    </strong>
-                                    @foreach($subModule['permissions'] as $permKey => $permLabel)
-                                        @php
-                                            $childId = $parentId . '_' . $permKey;
-                                        @endphp
-                                        <div style="display:flex; align-items:center; gap:6px;">
-                                            <input type="checkbox" class="inp-cbx child-cbx"
-                                                   id="{{ $childId }}"
-                                                   data-parent="{{ $parentId }}"
-                                                   name="permission[{{ $subKey }}][{{ $permKey }}]"
-                                                   @isset($rolePermissions[$subKey ][$permKey]) checked @endisset
-                                                   style="display:none;" />
-                                            <label class="cbx" for="{{ $childId }}">
-                                                <span>
-                                                    <svg width="12px" height="10px" viewBox="0 0 12 10">
-                                                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                            <label for="{{ $childId }}">{{ $permLabel }}</label>
-                                        </div>
-                                    @endforeach
+                                        <strong>{{ $subModule['label'] }}:</strong>
+                                    </div>
+
+                                    <!-- Child checkboxes grid (70%) -->
+                                    <div style="flex: 0 0 80%; display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
+                                        @foreach($subModule['permissions'] as $permKey => $permLabel)
+                                            @php
+                                                $childId = $parentId . '_' . $permKey;
+                                            @endphp
+                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                <input type="checkbox" class="inp-cbx child-cbx"
+                                                    id="{{ $childId }}"
+                                                    data-parent="{{ $parentId }}"
+                                                    name="permission[{{ $subKey }}][{{ $permKey }}]"
+                                                    @isset($rolePermissions[$subKey][$permKey]) checked @endisset
+                                                    style="display:none;" />
+                                                <label class="cbx" for="{{ $childId }}">
+                                                    <span>
+                                                        <svg width="12px" height="10px" viewBox="0 0 12 10">
+                                                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                                        </svg>
+                                                    </span>
+                                                </label>
+                                                <label for="{{ $childId }}">{{ $permLabel }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
+
                         @endif
                     @endforeach
                 </div>
