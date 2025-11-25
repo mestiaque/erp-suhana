@@ -3552,11 +3552,6 @@ class AdminController extends Controller
 
     public function expensesTypes(Request $r){
 
-        if(
-            empty(json_decode(Auth::user()->permission->permission, true)['expenses']['type'])
-        ){
-          return  abort(401);
-        }
 
         // Filter Action Start
         if($r->action){
@@ -3828,7 +3823,7 @@ class AdminController extends Controller
 
         if($action=='create'){
             $check = $r->validate([
-                'employee_id' => 'nullable|numeric',
+                'employee_id' => 'nullable|max:100',
                 'payment' => 'required|numeric',
                 'account' => 'required|numeric',
                 'branch_id' => 'required|numeric',
@@ -3927,7 +3922,7 @@ class AdminController extends Controller
         if($action=='update'){
 
             $check = $r->validate([
-                'employee_id' => 'nullable|numeric',
+                'employee_id' => 'nullable|max:100',
                 'payment' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
@@ -3939,7 +3934,8 @@ class AdminController extends Controller
 
             $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
-            $expense->user_id = $r->employee_id;
+            $expense->employee_id=$r->employee_id;
+            $expense->user_id=$expense->employeeUser?$expense->employeeUser->id:null;
             $expense->method_id = $r->payment;
             $expense->branch_id = $r->branch_id;
             $expense->amount = $r->amount ?: 0;
