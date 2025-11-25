@@ -24,24 +24,24 @@
             @php
                 $groupHasVisibleMenu = false;
 
-                // Check if any menu in group is visible
                 foreach ($group as $key => $menu) {
+
                     if ($key === 'group_title') continue;
                     if (!isset($menu['title'])) continue;
 
+                    // Single item
                     if (!isset($menu['children'])) {
-                        // Single item: visible if no permission required or user has permission
-                        if (!isset($menu['permission']) || hasChildPermission($menu['permission'])) {
+                        if ($menu['permission'] === '' || hasParentPermission($menu['permission'])) {
                             $groupHasVisibleMenu = true;
                             break;
                         }
                         continue;
                     }
 
-                    // Parent with children
+                    // Item with children
                     foreach ($menu['children'] as $child) {
                         $childPermission = $child['permission'] ?? '';
-                        if ($childPermission === '' || hasChildPermission($childPermission)) {
+                        if ($childPermission === '' || hasChildPermission($menu['permission'] ?? '', $childPermission)) {
                             $groupHasVisibleMenu = true;
                             break 2;
                         }
@@ -52,9 +52,9 @@
             @if(!$groupHasVisibleMenu) @continue @endif
 
             {{-- Group Title --}}
-            @if(isset($group['group_title']) && $group['group_title'])
+            @if($group['group_title'])
                 <li class="nav-item-title">
-                    {{ $group['group_title'] }}
+                    {{ $group['group_title'] ?? '' }}
                 </li>
             @endif
 
@@ -62,10 +62,10 @@
                 @if($key === 'group_title') @continue @endif
                 @if(!isset($menu['title'])) @continue @endif
 
-                {{-- Single Item --}}
+                {{-- ================== SINGLE ITEM ================== --}}
                 @if(!isset($menu['children']))
                     @php
-                        $show = !isset($menu['permission']) || hasChildPermission($menu['permission']);
+                        $show = $menu['permission'] === '' || hasParentPermission($menu['permission']);
                         $route = $menu['route'] ?? '';
                         $pattern = trim($route, '/');
                         $prefix  = $pattern . '/*';
@@ -84,8 +84,9 @@
                     @continue
                 @endif
 
-                {{-- Parent with Children --}}
+                {{-- ================== PARENT WITH CHILDREN ================== --}}
                 @php
+                    $showParent = $menu['permission'] === '' || hasParentPermission($menu['permission']);
                     $visibleChildren = [];
                     $parentActive = false;
 
@@ -93,23 +94,22 @@
                         $childPermission = $child['permission'] ?? '';
                         $route = $child['route'] ?? '';
 
-                        if ($childPermission === '' || hasChildPermission($childPermission)) {
+                        if ($childPermission === '' || hasChildPermission($menu['permission'] ?? '', $childPermission)) {
                             $visibleChildren[] = $child;
 
                             if (!empty($route)) {
                                 $pattern = trim($route, '/');
                                 $prefix  = $pattern . '/*';
+
                                 if (request()->is($pattern) || request()->is($prefix)) {
                                     $parentActive = true;
                                 }
                             }
                         }
                     }
-
-                    $showParent = count($visibleChildren) > 0;
                 @endphp
 
-                @if($showParent)
+                @if($showParent && count($visibleChildren) > 0)
                     <li class="nav-item {{ $parentActive ? 'mm-active' : '' }}">
                         <a href="javascript:void(0)" class="collapsed-nav-link nav-link" aria-expanded="{{ $parentActive ? 'true' : 'false' }}">
                             <span class="icon"><i class="{{ $menu['icon'] }}"></i></span>

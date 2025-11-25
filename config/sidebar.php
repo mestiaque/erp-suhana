@@ -111,21 +111,21 @@ return [
                     'icon'        => 'fa-solid fa-list',
                     'route'       => '/admin/expenses',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'expenses'
                 ],
                 [
                     'title'       => 'Expense Head',
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/types',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'expenses_type'
                 ],
                 [
                     'title'       => 'Expense Reports',
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/reports',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'expenses_report'
                 ],
                 [
                     'title'       => 'I.O.U List',
@@ -139,56 +139,56 @@ return [
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/iou-reports',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'iou_report'
                 ],
                 [
                     'title'       => 'Payment Method',
                     'icon'        => 'fa-solid fa-credit-card',
                     'route'       => '/admin/accounts/payment-methods',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'payment_methods'
                 ],
                 [
                     'title'       => 'Account List',
                     'icon'        => 'fa-solid fa-list',
                     'route'       => '/admin/accounts/list',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'accounts'
                 ],
                 [
                     'title'       => 'Creditor Payment',
                     'icon'        => 'fas fa-credit-card',
                     'route'       => '/admin/bill-payments',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'bill_payments'
                 ],
                 [
                     'title'       => 'Bill Collection',
                     'icon'        => 'fas fa-wallet',
                     'route'       => '/admin/bill-collections',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'bill_collections'
                 ],
                 [
                     'title'       => 'Fund Receiver',
                     'icon'        => 'fas fa-wallet',
                     'route'       => '/admin/accounts/deposits',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'deposits'
                 ],
                 [
                     'title'       => 'Withdrawal',
                     'icon'        => 'fas fa-wallet',
                     'route'       => '/admin/accounts/withdrawal',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'withdrawal'
                 ],
                 [
                     'title'       => 'Statement',
                     'icon'        => 'fas fa-wallet',
                     'route'       => '/admin/accounts/statement',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'statement'
                 ],
             ]
         ],
