@@ -106,7 +106,7 @@
                             <td>
                                 <span>{!!$type->description!!}</span>
                             </td>
-                            <td>{{$type->created_at->format('d-m-Y')}}</td>
+                            <td>{{$type->created_at->format('d.m.Y')}}</td>
                             <td class="center">
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$type->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>

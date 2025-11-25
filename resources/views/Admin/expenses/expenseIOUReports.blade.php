@@ -168,6 +168,7 @@
                             <th style="min-width: 140px;">Company Name</th>
                             <th style="min-width: 130px;">Receiver Name</th>
                             <th style="width: 150px;min-width: 130px;">Employee</th>
+                            <th style="width: 150px;min-width: 130px;">Employee ID</th>
                             <th style="min-width: 120px;">Purpose/Referance</th>
                             <th style="width: 150px;min-width: 100px;">Method</th>
                             <th style="width: 150px;min-width: 100px;">Branch/Factory</th>
@@ -181,6 +182,7 @@
                             <td>{{$expense->company_name}}</td>
                             <td>{{$expense->receiver_name}}</td>
                             <td>{{$expense->employee?$expense->employee->name:'not found'}}</td>
+                            <td>{{$expense->employee_id}}</td>
                             <td>{!! nl2br(e($expense->description)) !!}</td>
                             <td>{{$expense->method?$expense->method->name:'not found'}}</td>
                             <td>{{$expense->branch?$expense->branch->name:'not found'}}</td>
@@ -189,13 +191,13 @@
                         @endforeach
                         @if($expenses->count()==0)
                         <tr>
-                            <td colspan="8" class="text-center">No Data Found</td>
+                            <td colspan="9" class="text-center">No Data Found</td>
                         </tr>
                         @endif
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="7" style="text-align: right">Total</th>
+                            <th colspan="8" style="text-align: right">Total</th>
                             <th>{{numberFormat($expenses->sum('amount'),2)}}</th>
                         </tr>
                     </tfoot>

@@ -1,5 +1,5 @@
 @extends(adminTheme().'layouts.app') @section('title')
-<title>{{websiteTitle('Deposit List')}}</title>
+<title>{{websiteTitle('Fund Received List')}}</title>
 @endsection @push('css')
 <style type="text/css"></style>
 @endpush @section('contents')
@@ -10,10 +10,10 @@
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h3>Deposit List</h3>
+        <h3>Fund Received List</h3>
         <div class="dropdown">
             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddDeposit" style="padding:5px 15px;">
-                 <i class="bx bx-plus"></i> Deposit
+                 <i class="bx bx-plus"></i> Fund Received 
              </a>
              <a href="{{route('admin.deposits')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
@@ -93,16 +93,16 @@
                                 <div class="checkbox mr-3">
                                  <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                  <label class="cbx" for="checkall">
-                                     <span>
-                                         <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                             <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                         </svg>
-                                     </span>
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
                                      All <span class="checkCounter"></span>
                                  </label>
                                 </div>
                             </th>
-                            <th style="min-width: 200px;">Deposit</th>
+                            <th style="min-width: 200px;">Fund Received </th>
                             <th style="min-width: 300px;">Balance - Description</th>
                         </tr>
                     </thead>
@@ -144,7 +144,9 @@
                                             </a>
                                         @endif
                                     <br>
-                                <b>Payment Method:</b> {{$transection->method?$transection->method->name:''}}<br>
+                                <b>Received Method:</b> {{$transection->payment_method}}<br>
+                                <b>Received From:</b> {{$transection->billing_name}}<br>
+                                <!-- <b>Payment Method:</b> {{$transection->method?$transection->method->name:''}}<br> -->
                                 @if($transection->billing_reason)
                                 <b>Bank Name:</b> {{$transection->billing_reason}} <br>
                                 @endif
@@ -177,21 +179,56 @@
 	 <form action="{{route('admin.depositsAction','create')}}" method="post" enctype="multipart/form-data">
 	   	  @csrf
     	   <div class="modal-header">
-    		 <h4 class="modal-title">Add Deposit</h4>
+    		 <h4 class="modal-title">Add Fund</h4>
     		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
     		   <span aria-hidden="true">&times; </span>
     		 </button>
     	   </div>
     	   <div class="modal-body">
     	       <div class="row">
-    	           <div class="col-md-6 form-group">
+    	           <div class="col-md-12 form-group">
         			    <label for="name">Date* </label>
                         <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{Carbon\Carbon::now()->format('Y-m-d')}}"  required="">
         				@if ($errors->has('created_at'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
         				@endif
                  	</div>
-                 	<div class="col-md-6 form-group">
+                    <div class="col-md-12 form-group">
+        			    <label for="name">Received Method* </label>
+                        <input type="text" name="received_method" class="form-control" placeholder="Enter received method" required="">
+        				@if ($errors->has('received_method'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('received_method') }}</p>
+        				@endif
+                 	</div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Received From*</label>
+                        <input type="text" class="form-control" placeholder="Enter Received From" name="received_from" required="" >
+                        @if ($errors->has('received_from'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('received_from') }}</p>
+        				@endif
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Attachtment</label>
+                        <input type="file" class="form-control {{$errors->has('attachment')?'error':''}}" name="attachment" accept="image/*" style="padding: 3px;">
+                        @if ($errors->has('attachment'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Particulars</label>
+                        <input type="text" class="form-control" placeholder="Enter Perticulars" name="description">
+                        @if ($errors->has('description'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-12 form-group">
+        			    <label for="name">Amount* </label>
+                        <input type="number" step="any" name="amount" class="form-control {{$errors->has('amount')?'error':''}}" placeholder="Amount" required="" >
+        				@if ($errors->has('amount'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
+        				@endif
+                 	</div>
+                 	<div class="col-md-12 form-group">
         			    <label for="name">Account*</label>
                         <select class="form-control" name="account" required="">
                             <option value="">Select Account</option>
@@ -203,54 +240,11 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('account') }}</p>
         				@endif
                  	</div>
-
     	       </div>
-    	       <div class="row">
-    	           <div class="col-md-6 form-group">
-        			    <label for="name">Payment method* </label>
-                        <select class="form-control" name="payment" required="">
-                            <option value="">Select Method</option>
-                            @foreach($paymentMethods as $method)
-                            <option value="{{$method->id}}">{{$method->name}}</option>
-                            @endforeach
-                        </select>
-        				@if ($errors->has('payment'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('payment') }}</p>
-        				@endif
-                 	</div>
-    	           <div class="col-md-6 form-group">
-        			    <label for="name">Amount* </label>
-                        <input type="number" step="any" class="form-control {{$errors->has('amount')?'error':''}}" name="amount" placeholder="Amount"  required="">
-        				@if ($errors->has('amount'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
-        				@endif
-                 	</div>
-                    <div class="col-md-12 form-group">
-                        <label for="name">Bank Name </label>
-                        <input type="text" class="form-control {{$errors->has('bank_name')?'error':''}}" placeholder="Enter bank name" name="bank_name">
-                        @if ($errors->has('bank_name'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bank_name') }}</p>
-        				@endif
-                    </div>
-             	</div>
-    	       <div class="form-group">
-    				<label for="name">Attachtment</label>
-					<input type="file" class="form-control {{$errors->has('attachment')?'error':''}}" name="attachment" accept="image/*" style="padding: 3px;">
-					@if ($errors->has('attachment'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
-					@endif
-             	</div>
-    			<div class="form-group">
-    				<label for="name">Description</label>
-					<textarea name="description" rows="5" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description"></textarea>
-					@if ($errors->has('description'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
-					@endif
-             	</div>
     	   </div>
     	   <div class="modal-footer">
     		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add Deposit</button>
+    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add Fund</button>
     	   </div>
 	   </form>
 	 </div>
@@ -266,21 +260,56 @@
 	 <form action="{{route('admin.depositsAction',['update',$dpm->id])}}" method="post" enctype="multipart/form-data">
 	   	  @csrf
     	   <div class="modal-header">
-    		 <h4 class="modal-title">Deposit #{{$dpm->transection_id}}</h4>
+    		 <h4 class="modal-title">Fund #{{$dpm->transection_id}}</h4>
     		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
     		   <span aria-hidden="true">&times; </span>
     		 </button>
     	   </div>
     	   <div class="modal-body">
     	       <div class="row">
-    	           <div class="col-md-6 form-group">
+    	           <div class="col-md-12 form-group">
         			    <label for="name">Date* </label>
                         <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{$dpm->created_at->format('Y-m-d')}}"  required="">
         				@if ($errors->has('created_at'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
         				@endif
                  	</div>
-                 	<div class="col-md-6 form-group">
+                    <div class="col-md-12 form-group">
+        			    <label for="name">Received Method* </label>
+                        <input type="text" name="received_method" value="{{$dpm->payment_method}}" class="form-control" placeholder="Enter received method" required="">
+        				@if ($errors->has('received_method'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('received_method') }}</p>
+        				@endif
+                 	</div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Received From</label>
+                        <input type="text" value="{{$dpm->billing_name}}" class="form-control" placeholder="Enter bank name" name="received_from" required="">
+                        @if ($errors->has('received_from'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('received_from') }}</p>
+        				@endif
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Attachtment</label>
+                        <input type="file" class="form-control {{$errors->has('attachment')?'error':''}}" name="attachment" accept="image/*" style="padding: 3px;">
+                        @if ($errors->has('attachment'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label for="name">Particulars</label>
+                        <input type="text" value="{{$dpm->billing_note}}" class="form-control" placeholder="Enter bank name" name="description">
+                        @if ($errors->has('description'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-12 form-group">
+        			    <label for="name">Amount* </label>
+                        <input type="number" step="any"  value="{{$dpm->amount}}" disabled="" class="form-control {{$errors->has('amount')?'error':''}}" placeholder="Amount"  >
+        				@if ($errors->has('amount'))
+        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
+        				@endif
+                 	</div>
+                 	<div class="col-md-12 form-group">
         			    <label for="name">Account*</label>
                         <input value="{{$dpm->accountMethod?$dpm->accountMethod->name:''}}" class="form-control" disabled="" />
         				@if ($errors->has('account'))
@@ -288,52 +317,10 @@
         				@endif
                  	</div>
     	       </div>
-    	       <div class="row">
-    	           <div class="col-md-6 form-group">
-        			    <label for="name">Payment method* </label>
-                        <select class="form-control" name="payment" required="">
-                            <option value="">Select Method</option>
-                            @foreach($paymentMethods as $method)
-                            <option value="{{$method->id}}" {{$dpm->src_id==$method->id?'selected':''}}>{{$method->name}}</option>
-                            @endforeach
-                        </select>
-        				@if ($errors->has('payment'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('payment') }}</p>
-        				@endif
-                 	</div>
-    	           <div class="col-md-6 form-group">
-        			    <label for="name">Amount* </label>
-                        <input type="number" step="any"  value="{{$dpm->amount}}" disabled="" class="form-control {{$errors->has('amount')?'error':''}}" placeholder="Amount"  >
-        				@if ($errors->has('amount'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
-        				@endif
-                 	</div>
-                    <div class="col-md-12 form-group">
-                        <label for="name">Bank Name </label>
-                        <input type="text" value="{{$dpm->billing_reason}}" class="form-control {{$errors->has('bank_name')?'error':''}}" placeholder="Enter bank name" name="bank_name">
-                        @if ($errors->has('bank_name'))
-        				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bank_name') }}</p>
-        				@endif
-                    </div>
-             	</div>
-    	       <div class="form-group">
-    				<label for="name">Attachtment</label>
-					<input type="file" class="form-control {{$errors->has('attachment')?'error':''}}" name="attachment" accept="image/*" style="padding: 3px;">
-					@if ($errors->has('attachment'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('attachment') }}</p>
-					@endif
-             	</div>
-    			<div class="form-group">
-    				<label for="name">Description</label>
-					<textarea name="description" rows="5" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->billing_note!!}</textarea>
-					@if ($errors->has('description'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
-					@endif
-             	</div>
     	   </div>
     	   <div class="modal-footer">
     		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Update Deposit</button>
+    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Update Fund</button>
     	   </div>
 	   </form>
 	 </div>

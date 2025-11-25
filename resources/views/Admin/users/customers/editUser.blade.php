@@ -79,8 +79,8 @@
                                 @endif
                             </div>
                             <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="email">Email* </label>
-                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
+                                <label for="email">Email </label>
+                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" />
                                 @if ($errors->has('email'))
                                 <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
                                 @endif

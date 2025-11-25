@@ -3417,7 +3417,6 @@ class AdminController extends Controller
                 'attachment' => 'nullable||file|max:25600',
             ]);
 
-
             $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
 
             $method =Attribute::where('type',10)->where('status','active')->find($r->account);
@@ -3862,7 +3861,8 @@ class AdminController extends Controller
             }
 
             $expense =new ExpenseIou();
-            $expense->user_id=$r->employee_id;
+            $expense->employee_id=$r->employee_id;
+            $expense->user_id=$expense->employeeUser?$expense->employeeUser->id:null;
             $expense->method_id=$r->payment;
             $expense->account_id=$method->id;
             $expense->branch_id=$r->branch_id;
@@ -3909,7 +3909,24 @@ class AdminController extends Controller
 
         }
 
-         $expense =ExpenseIou::find($id);
+        if($action=='search-employee'){
+
+            $employee = User::where('status',1)->whereNotNull('employee_id')->where('employee_id', $r->search)->first();
+            if ($employee) {
+                return response()->json([
+                    'status' => true,
+                    'name'   => $employee->name
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'name'   => null
+                ]);
+            }
+
+        }
+
+        $expense =ExpenseIou::find($id);
         if(!$expense){
             Session()->flash('error','This I.O.U Are Not Found');
             return redirect()->route('admin.expensesIOU');
@@ -4311,9 +4328,10 @@ class AdminController extends Controller
 
             $check = $r->validate([
                 'account' => 'required|numeric',
-                'payment' => 'required|numeric',
+                // 'payment' => 'required|numeric',
                 'amount' => 'required|numeric',
-                'bank_name' => 'nullable|max:100',
+                'received_method' => 'nullable|max:100',
+                'received_from' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
@@ -4328,7 +4346,9 @@ class AdminController extends Controller
 
             $deposit =new Transaction();
             $deposit->type=1;
-            $deposit->src_id=$r->payment;
+            // $deposit->src_id=$r->payment;
+            $deposit->payment_method=$r->received_method;
+            $deposit->billing_name=$r->received_from;
             $deposit->account_id=$account->id;
             $deposit->payment_method_id=$r->payment;
             $deposit->amount=$r->amount;
@@ -4373,15 +4393,17 @@ class AdminController extends Controller
 
         if($action=='update'){
             $check = $r->validate([
-                'payment' => 'required|numeric',
-                'bank_name' => 'nullable|max:100',
+                // 'payment' => 'required|numeric',
+                'received_method' => 'nullable|max:100',
+                'received_from' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
                 'attachment' => 'nullable||file|max:25600',
             ]);
             $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
-            $deposit->src_id=$r->payment;
-            $deposit->payment_method_id=$r->payment;
+            $deposit->payment_method=$r->received_method;
+            $deposit->billing_name=$r->received_from;
+            // $deposit->payment_method_id=$r->payment;
             $deposit->billing_note=$r->description;
             $deposit->billing_reason=$r->bank_name;
             $deposit->editedby_id =Auth::id();
@@ -5196,6 +5218,8 @@ class AdminController extends Controller
             $availableBalance = $balance;
         }
         $accounts =Attribute::with('user')->where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
+
+        // return $openingBalance;
         return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
     }
 
@@ -10460,7 +10484,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name','email','designation_id','mobile','created_at','addedby_id','status'])
+      ->select(['id','permission_id','name','email','employee_id','designation_id','mobile','created_at','addedby_id','status'])
         ->paginate(25)->appends([
           'search'=>$r->search,
           'status'=>$r->status,
@@ -10553,8 +10577,8 @@ class AdminController extends Controller
 
             $check = $r->validate([
                 'name' => 'required|max:100',
-                'email' => 'required|max:100|unique:users,email,'.$user->id,
-                'mobile' => 'nullable|max:20|unique:users,mobile,'.$user->id,
+                'email' => 'nullable|max:100|unique:users,email,'.$user->id,
+                'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
                 'date_of_birth' => 'nullable|date',
                 'gender' => 'nullable|max:10',
                 'marital_status' => 'nullable|max:20',

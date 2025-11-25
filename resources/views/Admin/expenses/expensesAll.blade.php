@@ -154,16 +154,16 @@
                                  </label>
                                 </div>
                             </th>
-                            <th style="min-width: 100px;">Company</th>
-                            <th style="min-width: 100px;">Receiver</th>
                             <th style="min-width: 100px;">Serial No</th>
-                            <th style="min-width: 150px;">Description</th>
-                            <th style="min-width: 100px;">Amount</th>
-                            <th style="min-width: 120px;">Type</th>
-                            <th style="min-width: 100px;">Account</th>
                             <th style="min-width: 100px;">Date</th>
+                            <th style="min-width: 150px;">Company</th>
+                            <th style="min-width: 150px;">Receiver</th>
+                            <th style="min-width: 160px;">Type Of Expense</th>
+                            <th style="min-width: 100px;">Amount</th>
+                            <th style="min-width: 150px;">Description</th>
+                            <th style="min-width: 100px;">Accounts</th>
                             <th style="min-width: 120px;">Branch/Factory</th>
-                            <th style="min-width: 130px;width:130px;">Action</th>
+                            <th style="min-width: 100px;width:100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -191,9 +191,12 @@
                                 </span>
                                 @endif
                             </td>
+                            <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{$expense->created_at->format('d.m.Y')}}</td>
                             <td>{{ $expense->company_name ?? '--' }}</td>
                             <td>{{ $expense->receiver_name ?? '--' }}</td>
-                            <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{$expense->category?$expense->category->name:''}}</td>
+                            <td>{{priceFormat($expense->amount)}}</td>
                             <td>
                                 <span>{!! nl2br(e($expense->description)) !!}</span>
                                 @if($expense->imageFile)
@@ -203,10 +206,7 @@
                                 </span>
                                 @endif
                             </td>
-                            <td>{{priceFormat($expense->amount)}}</td>
-                            <td>{{$expense->category?$expense->category->name:''}}</td>
                             <td>{{$expense->account?$expense->account->name:''}}</td>
-                            <td>{{$expense->created_at->format('d-m-Y')}}</td>
                             <td>{{$expense->branch?$expense->branch->name:''}}</td>
                             <td class="center">
                                 @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
@@ -711,7 +711,7 @@
 
             <div class="date-field">
                 <span class="date-label">Date:</span>
-                <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('Y-m-d')}}">
+                <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('d.m.Y')}}">
             </div>
 
             <div class="form-section">
