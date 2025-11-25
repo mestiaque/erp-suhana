@@ -144,13 +144,14 @@
                                  </label>
                                 </div>
                             </th>
-                            <th style="min-width: 100px;">Company Name</th>
-                            <th style="min-width: 100px;">Receiver Name</th>
+                            <th style="min-width: 100px;">Date</th>
+                            <th style="min-width: 100px;">Company</th>
+                            <th style="min-width: 100px;">Receiver</th>
                             <th style="min-width: 120px;">Employee</th>
+                            <th style="min-width: 120px;">Employee ID</th>
                             <th style="min-width: 150px;">Purpose/Referance</th>
                             <th style="min-width: 100px;">Amount</th>
                             <th style="min-width: 100px;">Account</th>
-                            <th style="min-width: 100px;">Date</th>
                             <th style="min-width: 120px;">Branch/Factory</th>
                             <th style="min-width: 130px;width:130px;">Action</th>
                         </tr>
@@ -180,9 +181,11 @@
                                 </span>
                                 @endif
                             </td>
+                            <td>{{$Iou->created_at->format('d.m.Y')}}</td>
                             <td>{{ $Iou->company_name ?? '--' }}</td>
                             <td>{{ $Iou->receiver_name ?? '--' }}</td>
                             <td>{{$Iou->employee?$Iou->employee->name:''}}</td>
+                            <td>{{$Iou->employee_id}}</td>
                             <td>
                                 <span>{!! nl2br(e($Iou->description)) !!}</span>
                                 @if($Iou->imageFile)
@@ -194,7 +197,6 @@
                             </td>
                             <td>{{priceFormat($Iou->amount)}}</td>
                             <td>{{$Iou->account?$Iou->account->name:''}}</td>
-                            <td>{{$Iou->created_at->format('d-m-Y')}}</td>
                             <td>{{$Iou->branch?$Iou->branch->name:''}}</td>
                             <td class="center">
                                 @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
@@ -235,7 +237,7 @@
     	   </div>
     	   <div class="modal-body">
     	       <div class="row">
-    	           <div class="col-md-6 form-group">
+    	           <div class="col-md-12 form-group">
         			    <label for="name">Date* </label>
                         <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{Carbon\Carbon::now()->format('Y-m-d')}}"  required="">
         				@if ($errors->has('created_at'))
@@ -243,16 +245,15 @@
         				@endif
                  	</div>
                  	<div class="col-md-6 form-group">
-        			    <label for="name">Employee</label>
-                        <select class="form-control" name="employee_id">
-                            <option value="">Select Employee</option>
-                            @foreach($users as $user)
-                            <option value="{{$user->id}}">{{$user->name}}</option>
-                            @endforeach
-                        </select>
+        			    <label for="name">Employee ID</label>
+                        <input type="text" name="employee_id" value="" class="form-control EmployeeIDInput" data-url="{{route('admin.expensesIOUAction','search-employee')}}" placeholder="Enter employee ID" />
         				@if ($errors->has('employee_id'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
         				@endif
+                 	</div>
+                 	<div class="col-md-6 form-group">
+        			    <label for="name">Employee</label>
+                        <input type="text" readonly="" class="form-control EmployeeName" placeholder="Employee Name">
                  	</div>
 
     	       </div>
@@ -758,6 +759,33 @@
 
 <script>
     $(document).ready(function(){
+
+        let timer = null;
+        $(document).on('keyup', '.EmployeeIDInput', function () {
+            let input = $(this);
+            let data = input.val();
+            let url = input.data('url');
+            clearTimeout(timer);
+            $('.EmployeeName').attr('placeholder','Searching..');
+            timer = setTimeout(function () {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: { search: data },
+                    success: function (response) {
+                        console.log("Success:", response);
+                        $('.EmployeeName').val(response.name);
+                    },
+                    error: function (xhr) {
+                        console.log("Error:", xhr);
+                    },
+                    complete: function () {
+                        console.log("Completed");
+                        $('.EmployeeName').attr('placeholder','Employee Name');
+                    }
+                });
+            }, 1000); // 1 sec delay
+        });
 
         $(document).on('click', '.printBtn', function () {
 

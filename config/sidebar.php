@@ -156,7 +156,7 @@ return [
                     'permission'  => 'accounts'
                 ],
                 [
-                    'title'       => 'Bill Payment',
+                    'title'       => 'Creditor Payment',
                     'icon'        => 'fas fa-credit-card',
                     'route'       => '/admin/bill-payments',
                     'icon_color'  => 'text-warning',
@@ -170,7 +170,7 @@ return [
                     'permission'  => 'bill_collections'
                 ],
                 [
-                    'title'       => 'Deposits',
+                    'title'       => 'Fund Receiver',
                     'icon'        => 'fas fa-wallet',
                     'route'       => '/admin/accounts/deposits',
                     'icon_color'  => 'text-warning',

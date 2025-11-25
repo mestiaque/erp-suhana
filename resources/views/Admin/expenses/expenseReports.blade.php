@@ -207,27 +207,29 @@
                 <table  class="table tableReport" >
                     <thead>
                         <tr>
-                            <th style="width: 100px;min-width: 120px;">Date</th>
-                            <th style="min-width: 130px;">Company</th>
-                            <th style="min-width: 130px;">Receiver</th>
-                            <th style="min-width: 200px;">Description</th>
+                            <th style="width: 100px;min-width: 100px;">Serial No</th>
+                            <th style="width: 80px;min-width: 80px;">Date</th>
+                            <th style="min-width: 120px;">Company</th>
+                            <th style="min-width: 120px;">Receiver</th>
+                            <th style="width: 150px;min-width: 150px;">Type Of Expense</th>
+                            <th style="width: 100px;min-width: 100px;">Amount</th>
+                            <th style="min-width: 120px;">Description</th>
                             <th style="width: 150px;min-width: 100px;">Method</th>
-                            <th style="width: 150px;min-width: 120px;">Expense Head</th>
                             <th style="width: 150px;min-width: 100px;">Branch/Factory</th>
-                            <th style="width: 150px;min-width: 100px;">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($expenses as $expense)
                         <tr>
+                            <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
                             <td>{{$expense->created_at->format('d.m.Y')}}</td>
                             <td>{{$expense->company_name}}</td>
                             <td>{{$expense->receiver_name}}</td>
+                            <td>{{$expense->category?$expense->category->name:'not found'}}</td>
+                            <td>{{numberFormat($expense->amount,1)}}</td>
                             <td>{!! nl2br(e($expense->description)) !!}</td>
                             <td>{{$expense->method?$expense->method->name:'not found'}}</td>
-                            <td>{{$expense->category?$expense->category->name:'not found'}}</td>
                             <td>{{$expense->branch?$expense->branch->name:'not found'}}</td>
-                            <td>{{numberFormat($expense->amount,2)}}</td>
                         </tr>
                         @endforeach
                         @if($expenses->count()==0)
@@ -238,8 +240,10 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="7" style="text-align: right">Total</th>
-                            <th>{{numberFormat($expenses->sum('amount'),2)}}</th>
+                            <th colspan="4"></th>
+                            <th style="text-align: right">Total</th>
+                            <th>{{numberFormat($expenses->sum('amount'),1)}}</th>
+                            <th colspan="3"></th>
                         </tr>
                     </tfoot>
                 </table>
