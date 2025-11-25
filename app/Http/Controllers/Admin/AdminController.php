@@ -3306,7 +3306,7 @@ class AdminController extends Controller
                             $method->save();
                           }
                           if($trans =$data->transection){
-                              $trans->delete();
+                                $trans->delete();
                           }
 
                           $medias =Media::latest()->where('src_type',8)->where('src_id',$data->id)->get();
@@ -3340,6 +3340,9 @@ class AdminController extends Controller
 
                               if($r->status){
                                  $q->where('status',$r->status);
+                              }
+                              if($r->expense_type){
+                                 $q->where('category_id',$r->expense_type);
                               }
 
                               if($r->startDate || $r->endDate)
@@ -3766,6 +3769,8 @@ class AdminController extends Controller
                               if($r->search){
 
                                   $q->where('id','LIKE','%'.$r->search.'%')
+                                    ->orWhere('company_name','LIKE','%'.$r->search.'%')
+                                    ->orWhere('company_name','LIKE','%'.$r->search.'%')
                                     ->orWhere(function($qq)use($r){
                                         $qq->whereHas('employee',function($qqq)use($r){
                                             $qqq->where('name','LIKE','%'.$r->search.'%');
