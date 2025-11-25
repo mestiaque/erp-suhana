@@ -3552,12 +3552,6 @@ class AdminController extends Controller
 
     public function expensesTypes(Request $r){
 
-        if(
-            empty(json_decode(Auth::user()->permission->permission, true)['expenses']['type'])
-        ){
-          return  abort(401);
-        }
-
         // Filter Action Start
         if($r->action){
 

@@ -199,7 +199,7 @@
                             <td>{{$Iou->account?$Iou->account->name:''}}</td>
                             <td>{{$Iou->branch?$Iou->branch->name:''}}</td>
                             <td class="center">
-                                @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
+                                @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['edit'])
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$Iou->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
@@ -222,7 +222,6 @@
 </div>
 </div>
 
-@isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
 <!-- Add Modal -->
  <div class="modal fade text-left" id="AddExpense" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
@@ -669,7 +668,7 @@
 
             <div class="date-field">
                 <span class="date-label">Date:</span>
-                <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('Y-m-d')}}">
+                <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('d.m.Y')}}">
             </div>
 
             <div class="form-section">
@@ -748,11 +747,6 @@
 
 
 @endforeach
-
-
-@endisset
-
-
 
 @endsection
 @push('js')
