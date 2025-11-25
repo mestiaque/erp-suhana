@@ -15,7 +15,6 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 10px;
-        margin-bottom: 10px;
     }
     .sub-permissions label {
         margin: 0;
@@ -44,7 +43,7 @@
         @csrf
         <div class="card mb-30">
             <div class="card-header d-flex justify-content-between align-items-center">
-                 <h3>Role Update</h3>
+                 <h3 class="mb-0">Role Update</h3>
             </div>
             <div class="card-body">
                 <div class="form-group">
@@ -83,9 +82,9 @@
                             @php
                                 $parentId = sanitizeId($moduleKey . '_' . $subKey);
                             @endphp
-                            <div class="mb-3 shadows shadow-sm px-3 py-1">
+                            <div class="mb-2 sub-permissions-row shadows shadow-sm px-3 py-1">
                                 <div class="sub-permissions" style="display:flex; gap:10px; align-items:flex-start;">
-                                    <!-- Parent label part (30%) -->
+                                    <!-- Parent label part (20%) -->
                                     <div style="flex: 0 0 20%; display:flex; align-items:center; gap:6px; font-size: 18px;">
                                         <input type="checkbox" class="parent-cbx inp-cbx" id="{{ $parentId }}" style="display:none;">
                                         <label class="cbx" for="{{ $parentId }}">
@@ -98,7 +97,7 @@
                                         <strong>{{ $subModule['label'] }}:</strong>
                                     </div>
 
-                                    <!-- Child checkboxes grid (70%) -->
+                                    <!-- Child checkboxes grid (80%) -->
                                     <div style="flex: 0 0 80%; display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
                                         @foreach($subModule['permissions'] as $permKey => $permLabel)
                                             @php
@@ -137,32 +136,42 @@
 @endsection
 
 @push('js')
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Initialize parent checkbox based on saved children
+            $('.parent-cbx').each(function() {
+                var parentId = $(this).attr('id');
+                var allChildren = $('.child-cbx[data-parent="' + parentId + '"]');
+                var allChecked = allChildren.length === allChildren.filter(':checked').length;
+                $(this).prop('checked', allChecked);
+            });
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        // Initialize parent checkbox based on saved children
-        $('.parent-cbx').each(function() {
-            var parentId = $(this).attr('id');
-            var allChildren = $('.child-cbx[data-parent="' + parentId + '"]');
-            var allChecked = allChildren.length === allChildren.filter(':checked').length;
-            $(this).prop('checked', allChecked);
+            // Parent checkbox toggles children
+            $('.parent-cbx').change(function() {
+                var parentId = $(this).attr('id');
+                var checked = $(this).prop('checked');
+                $('.child-cbx[data-parent="' + parentId + '"]').prop('checked', checked);
+            });
+
+            // Children update parent checkbox
+            $('.child-cbx').change(function() {
+                var parentId = $(this).data('parent');
+                var allChildren = $('.child-cbx[data-parent="' + parentId + '"]');
+                $('#' + parentId).prop('checked', allChildren.length === allChildren.filter(':checked').length);
+            });
+
         });
+    </script>
+@endpush
 
-        // Parent checkbox toggles children
-        $('.parent-cbx').change(function() {
-            var parentId = $(this).attr('id');
-            var checked = $(this).prop('checked');
-            $('.child-cbx[data-parent="' + parentId + '"]').prop('checked', checked);
-        });
+@push('css')
+    <style>
+        .sub-permissions-row:nth-child(odd) {
+            background-color: #f2f2f2; /* light grey */
+        }
+        .sub-permissions-row:hover {
+            background-color: #e6f7ff;
+        }
 
-        // Children update parent checkbox
-        $('.child-cbx').change(function() {
-            var parentId = $(this).data('parent');
-            var allChildren = $('.child-cbx[data-parent="' + parentId + '"]');
-            $('#' + parentId).prop('checked', allChildren.length === allChildren.filter(':checked').length);
-        });
-
-    });
-</script>
-
+    </style>
 @endpush
