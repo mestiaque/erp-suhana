@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Attribute;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -274,6 +275,28 @@ class User extends Authenticatable
     {
         return $this->admin ==  1;
     }
+
+
+    public function hasPermission($permission)
+    {
+
+        // $permission must be like: expenses.edit
+        list($module, $action) = explode('.', $permission);
+
+        // Get user permission JSON
+        $permissions = json_decode($this->permission->permission ?? '{}', true);
+
+        // Module exists?
+        if (!isset($permissions[$module])) {
+            return false;
+        }
+
+        // Child permission exists and is ON?
+        return isset($permissions[$module][$action])
+            && in_array($permissions[$module][$action], ['on', '1', 1, true], true);
+    }
+
+
 
 
 }

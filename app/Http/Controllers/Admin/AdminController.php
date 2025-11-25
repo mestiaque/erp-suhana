@@ -3285,14 +3285,6 @@ class AdminController extends Controller
 // Expensess Management Function
 
     public function expenses(Request $r){
-
-        if(
-            empty(json_decode(Auth::user()->permission->permission, true)['expenses']['add']) &&
-            empty(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
-        ){
-          return  abort(401);
-        }
-
         // Filter Action Start
             if($r->action){
 
@@ -10892,7 +10884,6 @@ class AdminController extends Controller
 
 
   public function userRoleAction(Request $r,$action,$id=null){
-
     if($action=='create'){
         $role  =Permission::where('addedby_id',Auth::id())->where('status','temp')->first();
         if(!$role){
@@ -10913,7 +10904,6 @@ class AdminController extends Controller
     }
 
     if($action=='update'){
-
       //Role Update
       $check = $r->validate([
           'name' => 'required|max:100',
