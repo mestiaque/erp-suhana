@@ -30,8 +30,7 @@
                     if (!isset($menu['title'])) continue;
 
                     if (!isset($menu['children'])) {
-                        // Single item: visible if no permission required or user has permission
-                        if (!isset($menu['permission']) || hasChildPermission($menu['permission'])) {
+                        if ($menu['permission'] === '' || hasParentPermission($menu['permission'])) {
                             $groupHasVisibleMenu = true;
                             break;
                         }
@@ -65,7 +64,7 @@
                 {{-- Single Item --}}
                 @if(!isset($menu['children']))
                     @php
-                        $show = !isset($menu['permission']) || hasChildPermission($menu['permission']);
+                        $show = $menu['permission'] === '' || hasChildPermission($menu['permission']);
                         $route = $menu['route'] ?? '';
                         $pattern = trim($route, '/');
                         $prefix  = $pattern . '/*';

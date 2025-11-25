@@ -3552,7 +3552,6 @@ class AdminController extends Controller
 
     public function expensesTypes(Request $r){
 
-
         // Filter Action Start
         if($r->action){
 
