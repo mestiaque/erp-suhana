@@ -157,7 +157,7 @@
                                 <br> <b>Add Balance:</b> <span style="color: #009688;font-weight: bold;"> {{numberFormat($transection->amount,2)}} </span>
                                 <br> <b>After Balance:</b> <span>{{numberFormat($transection->balance,2)}} </span>
                                 <br>
-                                <span>{!!$transection->billing_note!!}</span>
+                                <b>Perticulars:</b> <span>{!!$transection->billing_note!!}</span>
                             </td>
                         </tr>
                         @endforeach

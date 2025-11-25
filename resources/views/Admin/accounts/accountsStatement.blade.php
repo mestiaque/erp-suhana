@@ -87,12 +87,12 @@
                         <thead>
                             <tr>
                                 <th style="width: 120px;min-width: 120px;">Date</th>
-                                <th style="width: 130px;min-width: 130px;">Method</th>
-                                <th style="min-width: 200px;">Concern Person</th>
-                                <th style="width: 130px;min-width: 130px;">Type</th>
+                                <th style="width: 130px;min-width: 130px;">Reference</th>
+                                <th style="min-width: 200px;">Particulars</th>
                                 <th style="width: 130px;min-width: 130px;">Debit</th>
                                 <th style="width: 130px;min-width: 130px;">Credit</th>
                                 <th style="width: 150px;min-width: 150px;">Balance</th>
+                                <th style="width: 130px;min-width: 130px;">Accounts</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,13 +102,33 @@
                                 <td>Previus Balance</td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
                                 <td>{{priceFormat($openingBalance)}}</td>
+                                <td></td>
                             </tr>
                             @forelse($transections as $tran)
                                 <tr>
                                     <td>{{ $tran->created_at->format('d-m-Y') }}</td>
-                                    <td>{{ $tran->paymentMethod->name ?? '' }}</td>
+                                    <td>
+
+                                            @if($tran->type==0)
+                                                Sales
+                                            @elseif($tran->type==1)
+                                                Deposit
+                                            @elseif($tran->type==3)
+                                                Supplier Bill
+                                            @elseif($tran->type==4)
+                                                Transfer Balance
+                                            @elseif($tran->type==5)
+                                                 Expense
+                                            @elseif($tran->type==6)
+                                                Withdrawal
+                                            @elseif($tran->type==7)
+                                                I.O.U
+                                            @else
+                                                Unknown
+                                            @endif
+
+                                    </td>
                                     <td>
                                         @if($tran->type == 0)
                                             {{ $tran->sale->name ?? '' }}
@@ -143,27 +163,7 @@
                                         @endif
 
                                     </td>
-                                    <td>
-
-                                            @if($tran->type==0)
-                                                Sales
-                                            @elseif($tran->type==1)
-                                                Deposit
-                                            @elseif($tran->type==3)
-                                                Supplier Bill
-                                            @elseif($tran->type==4)
-                                                Transfer Balance
-                                            @elseif($tran->type==5)
-                                                 Expense
-                                            @elseif($tran->type==6)
-                                                Withdrawal
-                                            @elseif($tran->type==7)
-                                                I.O.U
-                                            @else
-                                                Unknown
-                                            @endif
-
-                                    </td>
+                                    
                                     <td>
                                         @if(in_array($tran->type, [3,4,5,6,7]))
                                             {{ priceFormat($tran->amount) }}
@@ -175,6 +175,7 @@
                                         @endif
                                     </td>
                                     <td>{{ priceFormat($tran->running_balance) }}</td>
+                                    <td>{{$method->name}}</td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -184,9 +185,10 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="5"></td>
+                                <td colspan="4"></td>
                                 <td>Available</td>
                                 <td>{{ priceFormat($availableBalance ?? 0) }}</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
