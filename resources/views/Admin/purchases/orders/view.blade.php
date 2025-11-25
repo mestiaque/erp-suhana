@@ -11,7 +11,7 @@
 @section('contents')
 
 <div class="flex-grow-1">
-    
+
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>Purchase Order View</h3>
@@ -109,25 +109,25 @@
                         margin-top: 0;
                         padding-top: 20px;
                     }
-                    
+
                     .signature-box {
                         text-align: center;
                         flex: 1;
                     }
-                    
+
                     .signature-line {
                         border-top: 1px solid #000;
                         margin: 40px 20px 5px 20px;
                         position: relative;
                     }
-                    
+
                     .signature-text {
                         font-family: 'Brush Script MT', cursive;
                         font-size: 24px;
                         margin-top: -35px;
                         color: #1a3d0a;
                     }
-                    
+
                     .input-underline {
                         border: none;
                         border-bottom: 1px solid #000;
@@ -135,7 +135,7 @@
                         width: 100%;
                         font-size: 14px;
                     }
-                    
+
                     .input-underline:focus {
                         outline: none;
                         border-bottom-color: #2d5016;
@@ -144,7 +144,7 @@
                     @media print {
                         .invoice-container {
                             box-shadow: none;
-                            padding: 20px;
+                            padding: 50px;
                         }
                     }
                     </style>

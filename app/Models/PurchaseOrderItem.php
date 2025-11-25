@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PurchaseOrderItem extends Model
 {
@@ -28,7 +28,7 @@ class PurchaseOrderItem extends Model
     {
         return $this->belongsTo(Post::class, 'material_id'); // assuming Post model stores materials
     }
-    
+
     public function product()
     {
         return $this->belongsTo(Post::class, 'material_id'); // assuming Post model stores materials

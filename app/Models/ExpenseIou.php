@@ -39,6 +39,10 @@ class ExpenseIou extends Model
     	return $this->belongsTo(User::class,'user_id');
     }
     
+    public function employeeUser(){
+    	return $this->belongsTo(User::class,'employee_id','employee_id');
+    }
+    
     public function branch(){
     	return $this->belongsTo(Attribute::class,'branch_id')->where('type',0);
     }

@@ -118,19 +118,16 @@
         <form action="{{route('admin.expenses')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            <!-- @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            @endisset -->
-                            @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
+
                             <option value="5">Delete</option>
-                            @endisset
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endisset
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
@@ -142,6 +139,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
+                                @can('expenses.delete')
                                 <div class="checkbox mr-3">
                                  <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                  <label class="cbx" for="checkall">
@@ -153,23 +151,25 @@
                                      All <span class="checkCounter"></span>
                                  </label>
                                 </div>
+                                @endcan
                             </th>
-                            <th style="min-width: 100px;">Company</th>
-                            <th style="min-width: 100px;">Receiver</th>
                             <th style="min-width: 100px;">Serial No</th>
-                            <th style="min-width: 150px;">Description</th>
-                            <th style="min-width: 100px;">Amount</th>
-                            <th style="min-width: 120px;">Type</th>
-                            <th style="min-width: 100px;">Account</th>
                             <th style="min-width: 100px;">Date</th>
+                            <th style="min-width: 150px;">Company</th>
+                            <th style="min-width: 150px;">Receiver</th>
+                            <th style="min-width: 160px;">Type Of Expense</th>
+                            <th style="min-width: 100px;">Amount</th>
+                            <th style="min-width: 150px;">Description</th>
+                            <th style="min-width: 100px;">Accounts</th>
                             <th style="min-width: 120px;">Branch/Factory</th>
-                            <th style="min-width: 130px;width:130px;">Action</th>
+                            <th style="min-width: 100px;width:100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($expenses as $i=>$expense)
                         <tr>
                             <td style="position:relative;">
+                                @can('expenses.delete')
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$expense->id}}" type="checkbox" name="checkid[]" value="{{$expense->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$expense->id}}">
@@ -180,6 +180,7 @@
                                          </span>
                                      </label>
                                  </div>
+                                 @endcan
                                 <span style="margin:0 5px;">{{$expenses->currentpage()==1?$i+1:$i+($expenses->perpage()*($expenses->currentpage() - 1))+1}}</span>
                                 @if($expense->status=='active')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
@@ -191,9 +192,12 @@
                                 </span>
                                 @endif
                             </td>
+                            <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{$expense->created_at->format('d.m.Y')}}</td>
                             <td>{{ $expense->company_name ?? '--' }}</td>
                             <td>{{ $expense->receiver_name ?? '--' }}</td>
-                            <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{$expense->category?$expense->category->name:''}}</td>
+                            <td>{{priceFormat($expense->amount)}}</td>
                             <td>
                                 <span>{!! nl2br(e($expense->description)) !!}</span>
                                 @if($expense->imageFile)
@@ -203,21 +207,19 @@
                                 </span>
                                 @endif
                             </td>
-                            <td>{{priceFormat($expense->amount)}}</td>
-                            <td>{{$expense->category?$expense->category->name:''}}</td>
                             <td>{{$expense->account?$expense->account->name:''}}</td>
-                            <td>{{$expense->created_at->format('d-m-Y')}}</td>
                             <td>{{$expense->branch?$expense->branch->name:''}}</td>
                             <td class="center">
-                                @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                @endisset
-
+                                @can('expenses.edit')
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                @endcan
+                                @can('expenses.view')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$expense->id}}" class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
                                 </a>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach
@@ -711,7 +713,7 @@
 
             <div class="date-field">
                 <span class="date-label">Date:</span>
-                <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('Y-m-d')}}">
+                <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('d.m.Y')}}">
             </div>
 
             <div class="form-section">

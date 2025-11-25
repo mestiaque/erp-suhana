@@ -106,6 +106,7 @@
                             </th>
                             <th style="min-width: 70px; width: 70px;">Image</th>
                             <th style="min-width: 200px; width: 200px;">Name</th>
+                            <th style="min-width: 100px; width: 100px;">ID Number</th>
                             <th style="min-width: 150px;">Email</th>
                             <th style="min-width: 100px;">Designation</th>
                             <th style="min-width: 90px;">Join Date</th>
@@ -149,6 +150,7 @@
                                 <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
                                 @endif
                             </td>
+                            <td>{{$user->employee_id}}</td>
                             <td>{{$user->email}}</td>
                             <td>
                                 @if($user->designation)

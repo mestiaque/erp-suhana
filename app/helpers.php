@@ -292,8 +292,27 @@ if (!function_exists('hasParentPermission')) {
     }
 }
 
+// if (!function_exists('hasChildPermission')) {
+//     function hasChildPermission(string $parent, string $child): bool
+//     {
+//         if (!Auth::check()) return false;
+
+//         $roles = Auth::user()->permission;
+//         if (!$roles) return false;
+
+//         $permissions = json_decode($roles->permission, true);
+//         // dd($permissions, $parent);
+//         // Parent must exist first
+//         if (!isset($permissions[$parent])) return false;
+
+//         // Check if child exists and is 'on', '1' or true
+//         return isset($permissions[$parent][$child]) && in_array($permissions[$parent][$child], ['on', '1', true]);
+//     }
+// }
+
+
 if (!function_exists('hasChildPermission')) {
-    function hasChildPermission(string $parent, string $child): bool
+    function hasChildPermission(string $module, string $permissionKey = null): bool
     {
         if (!Auth::check()) return false;
 
@@ -302,12 +321,20 @@ if (!function_exists('hasChildPermission')) {
 
         $permissions = json_decode($roles->permission, true);
 
-        // Parent must exist first
-        if (!isset($permissions[$parent])) return false;
+        // If $permissionKey is null, check if module exists with any 'on' permission
+        if ($permissionKey === null) {
+            if (!isset($permissions[$module])) return false;
 
-        // Check if child exists and is 'on', '1' or true
-        return isset($permissions[$parent][$child]) && in_array($permissions[$parent][$child], ['on', '1', true]);
+            foreach ($permissions[$module] as $value) {
+                if (in_array($value, ['on', '1', true])) return true;
+            }
+            return false;
+        }
+
+        // Check specific child permission
+        return isset($permissions[$module][$permissionKey]) && in_array($permissions[$module][$permissionKey], ['on', '1', true]);
     }
 }
+
 
 
