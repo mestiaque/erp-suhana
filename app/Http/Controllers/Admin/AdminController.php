@@ -3768,9 +3768,9 @@ class AdminController extends Controller
 
                               if($r->search){
 
-                                  $q->where('id','LIKE','%'.$r->search.'%')
+                                  $q->where('employee_id','LIKE','%'.$r->search.'%')
                                     ->orWhere('company_name','LIKE','%'.$r->search.'%')
-                                    ->orWhere('company_name','LIKE','%'.$r->search.'%')
+                                    ->orWhere('receiver_name','LIKE','%'.$r->search.'%')
                                     ->orWhere(function($qq)use($r){
                                         $qq->whereHas('employee',function($qqq)use($r){
                                             $qqq->where('name','LIKE','%'.$r->search.'%');
@@ -5189,8 +5189,10 @@ class AdminController extends Controller
                             ) as balance
                         ")
                         ->value('balance') ?? 0;
+            
 
             $transections = Transaction::whereDate('created_at', '>=', $from)
+            ->where('status','success')
             ->whereDate('created_at', '<=', $to)
             ->where('account_id', $method->id)
             ->whereIn('type', [0,1,3,4,5,6,7])
