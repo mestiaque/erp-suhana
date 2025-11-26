@@ -77,7 +77,7 @@
             </div>
             <div class="collapse show" id="{{ $collapseId }}">
 
-                <div class="card-body">
+                <div class="card-body" style="font-size: 15px !important">
                     @foreach($module as $subKey => $subModule)
                         @if(is_array($subModule) && isset($subModule['permissions']))
                             @php
@@ -86,7 +86,7 @@
                             <div class="mb-3 shadows shadow-sm px-3 py-1">
 
                                 <div class="sub-permissions" style="">
-                                    <strong class="" style="display:flex; align-items:center; gap:6px; font-size: 18px">
+                                    <span class="" style="display:flex; align-items:center; gap:6px; font-size: 15px">
                                         <!-- Parent checkbox -->
                                         <input type="checkbox" class="parent-cbx inp-cbx"
                                             id="{{ $parentId }}"
@@ -99,7 +99,7 @@
                                             </span>
                                         </label>
                                         {{ $subModule['label'] }} :
-                                    </strong>
+                                    </span>
                                     @foreach($subModule['permissions'] as $permKey => $permLabel)
                                         @php
                                             $childId = $parentId . '_' . $permKey;
