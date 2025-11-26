@@ -78,6 +78,7 @@ class AdminController extends Controller
 
         $reports =[
             'total_expenses' => Expense::sum('amount'),
+            'total_IOU' => ExpenseIou::where('status','pending')->sum('amount'),
         ];
 
         return view('Admin.dashboard',compact('reports'));

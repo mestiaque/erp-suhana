@@ -2,10 +2,11 @@
 
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\ActivityLoggable;
 
 class Expense extends Model
 {
-    
+    use ActivityLoggable;   
     //Models Information Data
     /********
      * ------------------------

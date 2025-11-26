@@ -222,7 +222,10 @@
     // -------------------------
     // Update QTY / UNIT
     // -------------------------
-    $(document).on('keyup change','.update-field', function(){
+    $(document).on('keyup','.update-field', function(){
+         updateTotalSummary();
+    });
+    $(document).on('change','.update-field', function(){
         let url = $(this).data('url');
         let value = $(this).val();
         $.ajax({
@@ -232,7 +235,7 @@
             success: function(res){
                 if(res.view){
                     // $('.cardItems').html(res.view);
-                    updateTotalSummary();
+                   
                 }
             },
             error: function(){

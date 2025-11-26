@@ -6,6 +6,8 @@
 <style type="text/css"></style>
 @endpush 
 @section('contents')
+
+<div class="flex-grow-1">
 <!-- Breadcrumb Area -->
 <div class="breadcrumb-area">
     <h1>Setting</h1>
@@ -121,7 +123,7 @@
         </div>
     </div>
 </form>
-
+</div>
 @endsection 
 @push('js') 
 @endpush
