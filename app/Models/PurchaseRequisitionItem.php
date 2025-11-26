@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\ActivityLoggable;
 
 class PurchaseRequisitionItem extends Model
-{
+{   
+    use ActivityLoggable;
     protected $fillable = [
         'requisition_id',
         'material_id',

@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ActivityLoggable;
 
 class PurchaseOrderItem extends Model
 {
     use HasFactory;
+    use ActivityLoggable;
 
     protected $fillable = [
         'order_id',

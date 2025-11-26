@@ -17,17 +17,18 @@
                  <div class="d-table-cell">
                      <div class="login-form">
                          <div class="logo">
-                             <a href="javascript:void(0)"><img src="{{ asset(general()->logo()) }}" alt="logo" /></a>
+                             <a href="javascript:void(0)"><img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height 100px" /></a>
                          </div>
                          <h2>Welcome </h2>
                          @include('alerts')
                         <form action="#" method="post">
                             @csrf
                             <div class="form-group">
-                                <input type="email" class="form-control" name="email" placeholder="Email" value="{{old('email')}}" required="" />
+                                <input type="text" class="form-control" name="user" placeholder="Email or Mobile" value="{{ old('user') }}" required />
                                 <span class="label-title"><i class='bx bx-user'></i></span>
-                                @if($errors->has('email'))
-                                    <span style="color:red;display: block;">{{ $errors->first('email') }}</span>
+
+                                @if($errors->has('user'))
+                                    <span style="color:red;display: block;">{{ $errors->first('user') }}</span>
                                 @endif
                             </div>
 

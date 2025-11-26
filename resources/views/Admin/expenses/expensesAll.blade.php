@@ -54,11 +54,11 @@
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Expenses List</h3>
          <div class="dropdown">
-             @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
+            @can('expenses.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddExpense" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Expense
              </a>
-             @endisset
+             @endcan
 
              <a href="{{route('admin.expenses')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
@@ -118,7 +118,7 @@
         <form action="{{route('admin.expenses')}}">
             <div class="row">
                 <div class="col-md-4">
-                    @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
+                    @can('expenses.delete')
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
@@ -127,7 +127,7 @@
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
-                    @endisset
+                    @endcan
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
@@ -149,8 +149,9 @@
                                          </svg>
                                      </span>
                                      All <span class="checkCounter"></span>
-                                 </label>
+                                    </label>
                                 </div>
+                                @else All
                                 @endcan
                             </th>
                             <th style="min-width: 100px;">Serial No</th>
@@ -209,17 +210,19 @@
                             </td>
                             <td>{{$expense->account?$expense->account->name:''}}</td>
                             <td>{{$expense->branch?$expense->branch->name:''}}</td>
-                            <td class="center">
-                                @can('expenses.edit')
-                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
-                                        <i class="bx bx-edit"></i>
+                            <td class="text-center">
+                                 @if(auth()->user()->hasPermission('expenses.edit') || auth()->user()->hasPermission('expenses.view'))
+                                    @can('expenses.edit')
+                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @can('expenses.view')
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$expense->id}}" class="btn-custom yellow">
+                                        <i class="bx bx-show"></i>
                                     </a>
-                                @endcan
-                                @can('expenses.view')
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$expense->id}}" class="btn-custom yellow">
-                                    <i class="bx bx-show"></i>
-                                </a>
-                                @endcan
+                                    @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach

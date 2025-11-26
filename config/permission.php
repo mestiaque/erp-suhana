@@ -7,6 +7,7 @@ return [
             'purchases_orders' => [
                 'label'       => 'Purchases Orders',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -17,6 +18,7 @@ return [
             'creditor' => [
                 'label'       => 'Creditor',
                 'permissions' => [
+                    'list'    => 'List',
                     'add'     => 'Create',
                     'edit'    => 'Edit',
                     'view'    => 'View',
@@ -28,82 +30,91 @@ return [
             'purchases_items' => [
                 'label'       => 'Goods Items',
                 'permissions' => [
-                    'add'     => 'Create',
-                    'edit'    => 'Edit',
-                    'view'    => 'View',
-                    'delete'  => 'Delete',
-                    'all'     => 'All',
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
                 ],
             ],
             'purchases_items_units' => [
                 'label'       => 'Goods Items (Unit)',
                 'permissions' => [
-                    'add'     => 'Create',
-                    'edit'    => 'Edit',
-                    'view'    => 'View',
-                    'delete'  => 'Delete',
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
                     'all'    => 'All',
                 ],
             ],
             'purchases_items_categories' => [
                 'label'       => 'Goods Items (Categories)',
                 'permissions' => [
-                    'add'     => 'Create',
-                    'edit'    => 'Edit',
-                    'view'    => 'View',
-                    'delete'  => 'Delete',
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
                     'all'    => 'All',
                 ],
             ],
             'purchases_requisitions' => [
                 'label'       => 'Purchases Requisition',
                 'permissions' => [
-                    'add'     => 'Create',
-                    'edit'    => 'Edit',
-                    'view'    => 'View',
-                    'delete'  => 'Delete',
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
                     'all'    => 'All',
                 ],
             ],
             'purchases_received' => [
                 'label'       => 'Purchases Received',
                 'permissions' => [
-                    'add'     => 'Create',
-                    'edit'    => 'Edit',
-                    'view'    => 'View',
-                    'delete'  => 'Delete',
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
                     'all'    => 'All',
                 ],
             ],
             'purchases_damage_returns' => [
                 'label'       => 'Purchases Damage Returns',
                 'permissions' => [
-                    'add'     => 'Create',
-                    'edit'    => 'Edit',
-                    'view'    => 'View',
-                    'delete'  => 'Delete',
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
                     'all'    => 'All',
                 ],
             ],
             'suppliers_ladgers' => [
                 'label'       => 'Suppliers ladgers',
                 'permissions' => [
-                    'view'    => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
             'purchases_reports' => [
                 'label'       => 'Purchases Reports',
                 'permissions' => [
-                    'view'    => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
             'purchases_stocks' => [
                 'label'       => 'Purchases Stock',
                 'permissions' => [
-                    'view'    => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
         ],
@@ -112,6 +123,7 @@ return [
             'expenses' => [
                 'label'       => 'Expenses',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -122,9 +134,9 @@ return [
             'expenses_type' => [
                 'label'       => 'Expenses Head',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
@@ -132,13 +144,14 @@ return [
             'expenses_report' => [
                 'label'       => 'Expenses Report',
                 'permissions' => [
-                    'view'  => 'View',
-                    'all'   => 'All',
+                    'list' => 'List',
+                    'all'  => 'All',
                 ],
             ],
             'iou' => [
                 'label'       => 'I.O.U',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -149,16 +162,16 @@ return [
             'iou_report' => [
                 'label'       => 'I.O.U Report',
                 'permissions' => [
-                    'view'  => 'View',
-                    'all'   => 'All',
+                    'list' => 'List',
+                    'all'  => 'All',
                 ],
             ],
             'payment_methods' => [
                 'label'       => 'Payment Methods',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
@@ -166,6 +179,7 @@ return [
             'accounts' => [
                 'label'       => 'Accounts',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -176,6 +190,7 @@ return [
             'bill_payments' => [
                 'label'       => 'Bill Payments',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -186,6 +201,7 @@ return [
             'bill_collections' => [
                 'label'       => 'Bill Collections',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -196,6 +212,7 @@ return [
             'deposits' => [
                 'label'       => 'Deposits',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'delete' => 'Delete',
@@ -205,6 +222,7 @@ return [
             'withdrawal' => [
                 'label'       => 'Withdrawal',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'delete' => 'Delete',
@@ -214,8 +232,9 @@ return [
             'statement' => [
                 'label'       => 'Statement',
                 'permissions' => [
-                    'view'  => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
 
@@ -225,6 +244,7 @@ return [
             'employee' => [
                 'label'       => 'Employee',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -235,6 +255,7 @@ return [
             'staff' => [
                 'label'       => 'Staff',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -245,6 +266,7 @@ return [
             'admin' => [
                 'label'       => 'Admin',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -255,9 +277,9 @@ return [
             'roles' => [
                 'label'       => 'Roles',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
@@ -265,6 +287,7 @@ return [
             'branchs' => [
                 'label'       => 'Branchs',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -275,6 +298,7 @@ return [
             'departments' => [
                 'label'       => 'Departments',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -285,6 +309,7 @@ return [
             'designations' => [
                 'label'       => 'Designations',
                 'permissions' => [
+                    'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
@@ -298,6 +323,7 @@ return [
             'general' => [
                 'label'       => 'General',
                 'permissions' => [
+                    'list'   => 'List',
                     'edit'   => 'Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
@@ -307,17 +333,19 @@ return [
             'mail' => [
                 'label'       => 'Mail',
                 'permissions' => [
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'edit' => 'Edit',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
             'sms' => [
                 'label'       => 'SMS',
                 'permissions' => [
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'edit' => 'Edit',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
 

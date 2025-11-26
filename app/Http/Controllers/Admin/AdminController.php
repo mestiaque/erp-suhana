@@ -78,6 +78,7 @@ class AdminController extends Controller
 
         $reports =[
             'total_expenses' => Expense::sum('amount'),
+            'total_IOU' => ExpenseIou::where('status','pending')->sum('amount'),
         ];
 
         return view('Admin.dashboard',compact('reports'));
@@ -4282,10 +4283,10 @@ class AdminController extends Controller
                             }
 
                             if($r->account){
-                                $q->where('src_id',$r->account);
+                                $q->where('account_id',$r->account);
                             }
 
-                            if($r->method){
+                            if($r->payment){
                                 $q->where('payment_method_id',$r->method);
                             }
 
@@ -4431,7 +4432,7 @@ class AdminController extends Controller
         // Filter Action Start
         if($r->action){
             if($r->checkid){
-                $datas=Transaction::where('type',1)->whereIn('id',$r->checkid)->get();
+                $datas=Transaction::where('type',6)->whereIn('id',$r->checkid)->get();
                 foreach($datas as $data){
                     if($r->action==5){
 
@@ -5189,7 +5190,7 @@ class AdminController extends Controller
                             ) as balance
                         ")
                         ->value('balance') ?? 0;
-            
+
 
             $transections = Transaction::whereDate('created_at', '>=', $from)
             ->where('status','success')
@@ -10007,7 +10008,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status'])
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
       ->paginate(12)->appends([
         'search'=>$r->search,
         'startDate'=>$r->startDate,
@@ -10244,7 +10245,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status'])
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
       ->paginate(12)->appends([
         'search'=>$r->search,
         'startDate'=>$r->startDate,
@@ -10503,12 +10504,30 @@ class AdminController extends Controller
       //Add New User Start
       if($action=='create' && $r->isMethod('post')){
 
-        $user =User::where('email',$r->email)->first();
+        $r->validate([
+            'name'   => 'required|string|max:255',
+            'mobile' => 'required|digits:11|regex:/^0[0-9]{10}$/',
+            'email'  => 'nullable|email|max:255',
+        ], [
+            'name.required'   => 'Name is required.',
+            'mobile.required' => 'Mobile number is required.',
+            'mobile.digits'   => 'Mobile number must be exactly 11 digits.',
+            'mobile.regex'    => 'Mobile number must be start with 0.',
+            'email.email'     => 'Please enter a valid email address.',
+        ]);
+
+        $query = User::where('mobile', $r->mobile);
+        if (!empty($r->email)) {
+            $query->orWhere('email', $r->email);
+        }
+        $user = $query->first();
+
         if(!$user){
           $password=Str::random(8);
           $user =new User();
           $user->name =$r->name;
-          $user->email =$r->email;
+          $user->mobile =$r->mobile;
+          $user->email =$r->email ?? null;
           $user->password_show=$password;
           $user->password=Hash::make($password);
           $user->save();

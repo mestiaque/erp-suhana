@@ -29,7 +29,7 @@
             @include(adminTheme().'alerts')
             <div class="row">
                 {{-- Payment History --}}
-                <div class="col-md-8">
+                <div class="{{ auth()->user()->hasPermission('bill_payments.add') ? 'col-md-8' : 'col-md-12' }}">
                     <div class="row mb-4">
                         <div class="col-md-6 d-flex">
                             <div class="card shadow-sm mb-3 flex-fill">
@@ -111,20 +111,26 @@
                                         </td>
                                         <td class="">
                                             <div class="text-center center">
-                                                <button
-                                                    class="btn-custom success edit-btn"
-                                                    data-id="{{ $trans->id }}"
-                                                    data-amount="{{ $trans->amount }}"
-                                                    data-date="{{ $trans->created_at }}"
-                                                    data-account="{{ $trans->account_id }}"
-                                                    data-method="{{ $trans->payment_method_id }}"
-                                                    data-note="{{ $trans->billing_note }}"
-                                                    >
-                                                    <i class="bx bx-edit"></i>
-                                                </button>
-                                                <a href="{{route('admin.billPaymentAction',['delete',$trans->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                                    <i class="bx bx-trash"></i>
-                                                </a>
+                                                @if(auth()->user()->hasPermission('bill_payments.edit') || auth()->user()->hasPermission('bill_payments.delete'))
+                                                    @can('bill_payments.edit')
+                                                        <button
+                                                            class="btn-custom success edit-btn"
+                                                            data-id="{{ $trans->id }}"
+                                                            data-amount="{{ $trans->amount }}"
+                                                            data-date="{{ $trans->created_at }}"
+                                                            data-account="{{ $trans->account_id }}"
+                                                            data-method="{{ $trans->payment_method_id }}"
+                                                            data-note="{{ $trans->billing_note }}"
+                                                            >
+                                                            <i class="bx bx-edit"></i>
+                                                        </button>
+                                                    @endcan
+                                                    @can('bill_payments.delete')
+                                                        <a href="{{route('admin.billPaymentAction',['delete',$trans->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
+                                                            <i class="bx bx-trash"></i>
+                                                        </a>
+                                                    @endcan
+                                                @else --  @endif
                                             </div>
                                         </td>
 
@@ -140,6 +146,7 @@
                 </div>
 
                 {{-- Payment Form --}}
+                @can('bill_payments.add')
                 <div class="col-md-4">
                     <div class="card shadow payment-form-card">
                         <div class="card-body">
@@ -195,6 +202,7 @@
                         </div>
                     </div>
                 </div>
+                @endcan
             </div>
 
         </div>

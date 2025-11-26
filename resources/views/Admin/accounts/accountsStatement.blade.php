@@ -58,8 +58,6 @@
 
             @if($method)
             <div class="PrintAreaContact">
-
-            
                 <style>
                     .tableReport tr th{
                         padding: 5px 10px;

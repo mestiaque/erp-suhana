@@ -5,16 +5,18 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Designations List</h3>
          <div class="dropdown">
+            @can('designations.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddDesignations" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Designation
              </a>
+             @endcan
              <a href="{{route('admin.designations')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -48,15 +50,21 @@
         <form action="{{route('admin.designations')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @if(auth()->user()->hasPermission('designations.edit')  || auth()->user()->hasPermission('designations.delete'))
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
+                            @can('designations.edit')
+                                <option value="1">Active</option>
+                                <option value="2">Inactive</option>
+                            @endcan
+                            @can('designations.delete')
                             <option value="5">Delete</option>
+                            @endcan
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endif
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
@@ -72,17 +80,19 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
-                                <div class="checkbox mr-3">
-                                 <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
-                                 <label class="cbx" for="checkall">
-                                     <span>
-                                         <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                             <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                         </svg>
-                                     </span>
-                                     All <span class="checkCounter"></span> 
-                                 </label>
-                                </div>
+                                @if(auth()->user()->hasPermission('designations.edit')  || auth()->user()->hasPermission('designations.delete'))
+                                    <div class="checkbox mr-3">
+                                    <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
+                                    <label class="cbx" for="checkall">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                        All <span class="checkCounter"></span>
+                                    </label>
+                                    </div>
+                                @else All @endif
                             </th>
                             <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 300px;">Description</th>
@@ -94,16 +104,18 @@
                         @foreach($designations as $i=>$designation)
                         <tr>
                             <td>
-                                <div class="checkbox">
-                                     <input class="inp-cbx" id="cbx_{{$designation->id}}" type="checkbox" name="checkid[]" value="{{$designation->id}}" style="display: none;" />
-                                     <label class="cbx" for="cbx_{{$designation->id}}">
-                                         <span>
-                                             <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                                 <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                             </svg>
-                                         </span>
-                                     </label>
-                                 </div>
+                                @if(auth()->user()->hasPermission('designations.edit')  || auth()->user()->hasPermission('designations.delete'))
+                                    <div class="checkbox">
+                                        <input class="inp-cbx" id="cbx_{{$designation->id}}" type="checkbox" name="checkid[]" value="{{$designation->id}}" style="display: none;" />
+                                        <label class="cbx" for="cbx_{{$designation->id}}">
+                                            <span>
+                                                <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                    <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
                                 <span style="margin:0 5px;">{{$designations->currentpage()==1?$i+1:$i+($designations->perpage()*($designations->currentpage() - 1))+1}}</span>
                                 @if($designation->status=='active')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
@@ -122,11 +134,18 @@
                                 <span>{!!$designation->description!!}</span>
                             </td>
                             <td>{{$designation->created_at->format('d-m-Y')}}</td>
-                            <td class="center">
+                            <td class="text-center">
+                                @if(auth()->user()->hasPermission('designations.edit')  || auth()->user()->hasPermission('designations.delete'))
+                                 @can('designations.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDesignations_{{$designation->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('designations.delete')
                                 <a href="{{route('admin.designationsAction',['delete',$designation->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                @endcan
+                                @else -- @endif
+
                             </td>
                         </tr>
                         @endforeach
@@ -135,8 +154,8 @@
                 {{$designations->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>

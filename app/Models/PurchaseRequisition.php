@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Models\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\ActivityLoggable;
 
 class PurchaseRequisition extends Model
 {
+    use ActivityLoggable;
     protected $fillable = [
         'requested_by',
         'department_id',

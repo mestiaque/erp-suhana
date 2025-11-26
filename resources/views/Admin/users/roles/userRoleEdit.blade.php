@@ -71,21 +71,21 @@
             $collapseId = 'collapse_' . sanitizeId($moduleKey);
         @endphp
         <div class="card mb-30 shadow">
-            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="true" aria-controls="{{ $collapseId }}">
+            <div class="card-header pb-2" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="true" aria-controls="{{ $collapseId }}">
                 <h3>{{ strtoupper($moduleKey) }}</h3>
             </div>
             <div class="collapse show" id="{{ $collapseId }}">
 
-                <div class="card-body">
+                <div class="card-body" style="font-size: 15px !important">
                     @foreach($module as $subKey => $subModule)
                         @if(is_array($subModule) && isset($subModule['permissions']))
                             @php
                                 $parentId = sanitizeId($moduleKey . '_' . $subKey);
                             @endphp
-                            <div class="mb-2 sub-permissions-row shadows shadow-sm px-3 py-1">
+                            <div class="mb-0 sub-permissions-row px-3 py-1">
                                 <div class="sub-permissions" style="display:flex; gap:10px; align-items:flex-start;">
                                     <!-- Parent label part (20%) -->
-                                    <div style="flex: 0 0 20%; display:flex; align-items:center; gap:6px; font-size: 18px;">
+                                    <div style="flex: 0 0 20%; display:flex; align-items:center; gap:6px;">
                                         <input type="checkbox" class="parent-cbx inp-cbx" id="{{ $parentId }}" style="display:none;">
                                         <label class="cbx" for="{{ $parentId }}">
                                             <span>
@@ -94,11 +94,11 @@
                                                 </svg>
                                             </span>
                                         </label>
-                                        <strong>{{ $subModule['label'] }}:</strong>
+                                        {{ $subModule['label'] }}:
                                     </div>
 
                                     <!-- Child checkboxes grid (80%) -->
-                                    <div style="flex: 0 0 80%; display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
+                                    <div style="flex: 0 0 80%; display:grid; grid-template-columns: repeat(7, 1fr); gap:10px;">
                                         @foreach($subModule['permissions'] as $permKey => $permLabel)
                                             @php
                                                 $childId = $parentId . '_' . $permKey;

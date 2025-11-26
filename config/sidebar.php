@@ -132,7 +132,7 @@ return [
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/iou',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'iou'
                 ],
                 [
                     'title'       => 'I.O.U Reports',
