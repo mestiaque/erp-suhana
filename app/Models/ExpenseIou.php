@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\ActivityLoggable;
 
 class ExpenseIou extends Model
 {
+    use ActivityLoggable; 
     
     //Models Information Data
     /********

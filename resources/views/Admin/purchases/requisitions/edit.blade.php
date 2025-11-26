@@ -196,15 +196,17 @@ $(document).ready(function(){
         $('.totalPrice').text(totalPrice.toFixed(2));
     }
 
-    $(document).on('keyup change', '.qty, .price', function(){
+    $(document).on('keyup', '.qty, .price', function(){
         updateTotalSummary();
     });
 
     // === Update individual item via AJAX ===
-    $(document).on('keyup change', '.updateItem, .changeMode', function(){
+    $(document).on('change', '.updateItem', function(){
+
         let url = $(this).data('url');
         let name = $(this).data('name');
         let value = $(this).val();
+        updateTotalSummary();
 
         $.ajax({
             url: url,
@@ -214,7 +216,7 @@ $(document).ready(function(){
             success: function(res){
                 if(res.view){
                     // $('.cardItems').html(res.view);
-                    updateTotalSummary();
+                    
                 }
             },
             error: function(){
