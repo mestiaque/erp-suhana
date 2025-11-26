@@ -5,16 +5,18 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Expense Types</h3>
          <div class="dropdown">
+            @can('expenses_type.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddTypes" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Type
              </a>
+             @endcan
              <a href="{{route('admin.expensesTypes')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -22,17 +24,23 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-    
+
         <div class="row">
             <div class="col-md-4">
+                @if(auth()->user()->hasPermission('expenses_type.edit') || auth()->user()->hasPermission('expenses_type.delete'))
                 <div class="input-group mb-1">
                     <select class="form-control form-control-sm rounded-0 actionSelect" name="action" required="">
                         <option value="">Select Action</option>
+                        @can('expenses_type.edit')
                         <option value="1">Active</option>
                         <option value="2">Inactive</option>
+                        @endcan
+                        @can('expenses_type.edit')
                         <option value="5">Delete</option>
+                        @endcan
                     </select>
                     <button class="btn btn-sm btn-primary rounded-0 SubmitAction">Action</button>
+                    @endif
                 </div>
             </div>
             <div class="col-md-4"></div>
@@ -49,7 +57,6 @@
                 </form>
             </div>
         </div>
-        
         <form class="actionForm" action="{{route('admin.expensesTypes')}}">
             <input type="hidden" name="action" value="" class="actionInput">
             <div class="table-responsive">
@@ -57,17 +64,20 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
+                                @if(auth()->user()->hasPermission('expenses_type.edit') || auth()->user()->hasPermission('expenses_type.delete'))
                                 <div class="checkbox mr-3">
-                                 <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
-                                 <label class="cbx" for="checkall">
+                                    <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
+                                    <label class="cbx" for="checkall">
                                      <span>
                                          <svg width="12px" height="10px" viewbox="0 0 12 10">
                                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                          </svg>
                                      </span>
-                                     All <span class="checkCounter"></span> 
-                                 </label>
+                                     All <span class="checkCounter"></span>
+                                    </label>
                                 </div>
+                                @else All
+                                @endif
                             </th>
                             <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 300px;">Description</th>
@@ -79,6 +89,7 @@
                         @foreach($categories as $i=>$type)
                         <tr>
                             <td>
+                                @if(auth()->user()->hasPermission('expenses_type.edit') || auth()->user()->hasPermission('expenses_type.delete'))
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$type->id}}" type="checkbox" name="checkid[]" value="{{$type->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$type->id}}">
@@ -89,6 +100,7 @@
                                          </span>
                                      </label>
                                  </div>
+                                 @endif
                                 <span style="margin:0 5px;">{{$categories->currentpage()==1?$i+1:$i+($categories->perpage()*($categories->currentpage() - 1))+1}}</span>
                                 @if($type->status=='active')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
@@ -107,13 +119,17 @@
                                 <span>{!!$type->description!!}</span>
                             </td>
                             <td>{{$type->created_at->format('d.m.Y')}}</td>
-                            <td class="center">
+                            <td class="text-center">
+                                @if(auth()->user()->hasPermission('expenses_type.edit') || auth()->user()->hasPermission('expenses_type.view'))
+                                @can('expenses_type.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$type->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
-                                @isset(json_decode(Auth::user()->permission->permission, true)['clients']['delete'])
+                                @endcan
+                                @can('expenses_type.delete')
                                 <a href="{{route('admin.expensesTypesAction',['delete',$type->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
-                                @endisset
+                                @endcan
+                                @else --  @endif
                             </td>
                         </tr>
                         @endforeach
@@ -122,8 +138,8 @@
                 {{$categories->links('pagination::bootstrap-4')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>
@@ -230,7 +246,7 @@
 
 
 
-@endsection 
+@endsection
 @push('js')
 <script>
     $(document).ready(function(){
@@ -250,7 +266,7 @@
                 alert('Please select at least one checkbox');
                 return false;
             }
- 
+
              var url = "{{ route('admin.expensesTypes') }}?action=" + action;
             $('.actionForm').attr('action', url);
             $('.actionForm').submit();

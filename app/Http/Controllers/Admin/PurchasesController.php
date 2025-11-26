@@ -1090,7 +1090,7 @@ class PurchasesController extends Controller
                 $order = new PurchaseOrder();
                 $order->status = 'temp';
                 $order->addedby_id = Auth::id();
-                $order->created_date = now();
+                $order->created_at = now();
                 $order->save();
             }
             $order->currency = general()->currency;

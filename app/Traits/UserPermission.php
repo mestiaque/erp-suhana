@@ -5,7 +5,6 @@ use App\Models\Permission;
 use Auth;
 trait UserPermission{
 	public function checkRequestPermission(){
-
 		if($activeRole =Permission::find(Auth::user()->permission_id)){
             $p = json_decode($activeRole->permission, true);
 			if(

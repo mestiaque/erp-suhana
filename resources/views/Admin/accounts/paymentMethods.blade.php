@@ -5,16 +5,18 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Payment Methods</h3>
          <div class="dropdown">
+            @can('payment_methods.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddTypes" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Method
              </a>
+             @endcan
              <a href="{{route('admin.paymentsMethods')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -73,11 +75,17 @@
                                 <span>{!!$type->description!!}</span>
                             </td>
                             <td>{{$type->created_at->format('d-m-Y')}}</td>
-                            <td class="center">
+                            <td class="text-center">
+                                @if(auth()->user()->hasPermission('payment_methods.edit') || auth()->user()->hasPermission('payment_methods.delete'))
+                                @can('payment_methods.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$type->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('payment_methods.delete')
                                 <a href="{{route('admin.paymentsMethodsAction',['delete',$type->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                @endcan
+                                @else --  @endif
                             </td>
                         </tr>
                         @endforeach
@@ -86,8 +94,8 @@
                 {{$paymentMethods->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>

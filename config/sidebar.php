@@ -33,21 +33,21 @@ return [
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-orders',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'purchases_orders'
                 ],
                 [
                     'title'       => 'Creditor List',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/suppliers',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'creditor'
                 ],
                 [
                     'title'       => 'Goods Items',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-items',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'purchases_items'
                 ],
 
                 [
@@ -55,7 +55,7 @@ return [
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-requisitions',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'purchases_requisitions'
                 ],
 
                 [
@@ -63,35 +63,35 @@ return [
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-received',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'purchases_received'
                 ],
                 [
                     'title'       => 'Damages / Returns',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-damage-returns',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'purchases_damage_returns'
                 ],
                 [
                     'title'       => 'Supplier Ledgers',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/suppliers-ladgers',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'suppliers_ladgers'
                 ],
                 [
                     'title'       => 'Purchase Reports',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-reports',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'purchases_reports'
                 ],
                 [
                     'title'       => 'Purchase Stock',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-stocks',
                     'icon_color'  => 'text-primary',
-                    'permission'  => ''
+                    'permission'  => 'purchases_stocks'
                 ]
             ]
         ],
@@ -132,7 +132,7 @@ return [
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/iou',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'iou'
                 ],
                 [
                     'title'       => 'I.O.U Reports',
@@ -208,49 +208,49 @@ return [
                     'icon'        => 'fa-solid fa-id-badge',
                     'route'       => '/admin/users/employee',
                     'icon_color'  => 'text-success',
-                    'permission'  => ''
+                    'permission'  => 'employee'
                 ],
                 [
                     'title'       => 'Staff List',
                     'icon'        => 'fa-solid fa-user-tie',
                     'route'       => '/admin/users/staff',
                     'icon_color'  => 'text-success',
-                    'permission'  => ''
+                    'permission'  => 'staff'
                 ],
                 [
                     'title'       => 'Admin List',
                     'icon'        => 'fa-solid fa-user-shield',
                     'route'       => '/admin/users/admin',
                     'icon_color'  => 'text-success',
-                    'permission'  => ''
+                    'permission'  => 'admin'
                 ],
                 [
                     'title'       => 'Roles Setup',
                     'icon'        => 'fa-solid fa-user-gear',
                     'route'       => '/admin/users/roles',
                     'icon_color'  => 'text-success',
-                    'permission'  => ''
+                    'permission'  => 'roles'
                 ],
                 [
                     'title'       => 'Branch/Factory',
                     'icon'        => 'fa-solid fa-building',
                     'route'       => '/admin/hr/branchs',
                     'icon_color'  => 'text-info',
-                    'permission'  => ''
+                    'permission'  => 'branchs'
                 ],
                 [
                     'title'       => 'Departments',
                     'icon'        => 'fa-solid fa-sitemap',
                     'route'       => '/admin/hr/departments',
                     'icon_color'  => 'text-info',
-                    'permission'  => ''
+                    'permission'  => 'departments'
                 ],
                 [
                     'title'       => 'Designation',
                     'icon'        => 'fa-solid fa-id-card-clip',
                     'route'       => '/admin/hr/designations',
                     'icon_color'  => 'text-info',
-                    'permission'  => ''
+                    'permission'  => 'designations'
                 ],
             ]
         ],
@@ -270,21 +270,21 @@ return [
                     'icon'        => 'fa-solid fa-cog',
                     'route'       => '/admin/setting/general',
                     'icon_color'  => 'text-secondary',
-                    'permission'  => ''
+                    'permission'  => 'general'
                 ],
                 [
                     'title'       => 'Mail Setting',
                     'icon'        => 'fa-solid fa-envelope',
                     'route'       => '/admin/setting/mail',
                     'icon_color'  => 'text-secondary',
-                    'permission'  => ''
+                    'permission'  => 'mail'
                 ],
                 [
                     'title'       => 'SMS Setting',
                     'icon'        => 'fa-solid fa-sms',
                     'route'       => '/admin/setting/sms',
                     'icon_color'  => 'text-secondary',
-                    'permission'  => ''
+                    'permission'  => 'sms'
                 ],
             ]
         ],
