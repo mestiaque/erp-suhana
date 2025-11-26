@@ -101,7 +101,9 @@ h4{
     font-size: 20px;
 }
 
-
+.browser-used-box table thead th{
+        color: white !important;
+}
 
 
 

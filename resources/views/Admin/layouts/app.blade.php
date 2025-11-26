@@ -91,6 +91,16 @@
             padding: 5px;
             border-bottom: 1px solid #e3d9d9;
         }
+        table.table thead
+        {
+            background: #7c7c7c;
+            color: white;
+        }
+        .badge-warning
+        {
+            color: #ffffff;
+            background-color: #d9a50c;
+        }
      </style>
 
      @stack('css')
