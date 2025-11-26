@@ -3306,7 +3306,7 @@ class AdminController extends Controller
                             $method->save();
                           }
                           if($trans =$data->transection){
-                              $trans->delete();
+                                $trans->delete();
                           }
 
                           $medias =Media::latest()->where('src_type',8)->where('src_id',$data->id)->get();
@@ -3340,6 +3340,9 @@ class AdminController extends Controller
 
                               if($r->status){
                                  $q->where('status',$r->status);
+                              }
+                              if($r->expense_type){
+                                 $q->where('category_id',$r->expense_type);
                               }
 
                               if($r->startDate || $r->endDate)
@@ -3551,12 +3554,6 @@ class AdminController extends Controller
     }
 
     public function expensesTypes(Request $r){
-
-        if(
-            empty(json_decode(Auth::user()->permission->permission, true)['expenses']['type'])
-        ){
-          return  abort(401);
-        }
 
         // Filter Action Start
         if($r->action){
@@ -3771,7 +3768,9 @@ class AdminController extends Controller
 
                               if($r->search){
 
-                                  $q->where('id','LIKE','%'.$r->search.'%')
+                                  $q->where('employee_id','LIKE','%'.$r->search.'%')
+                                    ->orWhere('company_name','LIKE','%'.$r->search.'%')
+                                    ->orWhere('receiver_name','LIKE','%'.$r->search.'%')
                                     ->orWhere(function($qq)use($r){
                                         $qq->whereHas('employee',function($qqq)use($r){
                                             $qqq->where('name','LIKE','%'.$r->search.'%');
@@ -3828,7 +3827,7 @@ class AdminController extends Controller
 
         if($action=='create'){
             $check = $r->validate([
-                'employee_id' => 'nullable|numeric',
+                'employee_id' => 'nullable|max:100',
                 'payment' => 'required|numeric',
                 'account' => 'required|numeric',
                 'branch_id' => 'required|numeric',
@@ -3927,7 +3926,7 @@ class AdminController extends Controller
         if($action=='update'){
 
             $check = $r->validate([
-                'employee_id' => 'nullable|numeric',
+                'employee_id' => 'nullable|max:100',
                 'payment' => 'required|numeric',
                 'branch_id' => 'required|numeric',
                 'amount' => 'required|numeric',
@@ -3939,7 +3938,8 @@ class AdminController extends Controller
 
             $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
-            $expense->user_id = $r->employee_id;
+            $expense->employee_id=$r->employee_id;
+            $expense->user_id=$expense->employeeUser?$expense->employeeUser->id:null;
             $expense->method_id = $r->payment;
             $expense->branch_id = $r->branch_id;
             $expense->amount = $r->amount ?: 0;
@@ -4282,10 +4282,10 @@ class AdminController extends Controller
                             }
 
                             if($r->account){
-                                $q->where('src_id',$r->account);
+                                $q->where('account_id',$r->account);
                             }
 
-                            if($r->method){
+                            if($r->payment){
                                 $q->where('payment_method_id',$r->method);
                             }
 
@@ -4431,7 +4431,7 @@ class AdminController extends Controller
         // Filter Action Start
         if($r->action){
             if($r->checkid){
-                $datas=Transaction::where('type',1)->whereIn('id',$r->checkid)->get();
+                $datas=Transaction::where('type',6)->whereIn('id',$r->checkid)->get();
                 foreach($datas as $data){
                     if($r->action==5){
 
@@ -5190,7 +5190,9 @@ class AdminController extends Controller
                         ")
                         ->value('balance') ?? 0;
 
+
             $transections = Transaction::whereDate('created_at', '>=', $from)
+            ->where('status','success')
             ->whereDate('created_at', '<=', $to)
             ->where('account_id', $method->id)
             ->whereIn('type', [0,1,3,4,5,6,7])

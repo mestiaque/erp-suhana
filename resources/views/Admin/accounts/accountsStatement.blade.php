@@ -57,31 +57,33 @@
             <br>
 
             @if($method)
+            <div class="PrintAreaContact">
 
-            <style>
-                .tableReport tr th{
-                    padding: 5px 10px;
-                    border: 1px solid #dee2e6;
-                }
-                .tableReport tr td{
-                    padding: 5px 10px;
-                    border: 1px solid #dee2e6;
-                }
-            </style>
-            <div class="text-center mb-4">
-                <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;">
-                <h2>{{general()->title}}</h2>
-                <p>
-                    {!!general()->address_one!!}
-                    <br>
-                    <b>Phone:</b> {{general()->mobile}}
-                    <b>Email:</b> {{general()->email}}
-                    <br>
-                    <b>Date:</b>
-                    {{ date('d M, Y') }}
-                </p>
-                <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">{{$method->name}} Statement</span>
-            </div>
+            
+                <style>
+                    .tableReport tr th{
+                        padding: 5px 10px;
+                        border: 1px solid #dee2e6;
+                    }
+                    .tableReport tr td{
+                        padding: 5px 10px;
+                        border: 1px solid #dee2e6;
+                    }
+                </style>
+                <div class="text-center mb-4">
+                    <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;">
+                    <h2>{{general()->title}}</h2>
+                    <p>
+                        {!!general()->address_one!!}
+                        <br>
+                        <b>Phone:</b> {{general()->mobile}}
+                        <b>Email:</b> {{general()->email}}
+                        <br>
+                        <b>Date:</b>
+                        {{ date('d M, Y') }}
+                    </p>
+                    <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">{{$method->name}} Statement</span>
+                </div>
                 <div class="table-responsive">
                     <table  class="table tableReport" >
                         <thead>
@@ -193,7 +195,7 @@
                         </tfoot>
                     </table>
                 </div>
-
+            </div>
             @endif
 
         </div>

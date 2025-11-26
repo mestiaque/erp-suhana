@@ -32,7 +32,7 @@
                         </div>
                         <div class="col-md-6 mb-1">
                             <div class="input-group">
-                                <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Order No, Company" class="form-control" />
+                                <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Order No, Creditor" class="form-control" />
                                 <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                             </div>
                         </div>
@@ -46,13 +46,14 @@
                             <thead>
                                 <tr>
                                     <th>SL</th>
+                                    <th>Date</th>
                                     <th>Order No</th>
-                                    <th>Supplier</th>
-                                    <th>Grand Total</th>
-                                    <th>Paid</th>
-                                    <th>Due</th>
-                                    <th>Payment Status</th>
-                                    <th>Action</th>
+                                    <th>Creditor</th>
+                                    <th class="text-right">Grand Total</th>
+                                    <th class="text-right">Paid</th>
+                                    <th class="text-right">Due</th>
+                                    <th class="text-center">Payment Status</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
 
@@ -70,6 +71,9 @@
                                                 <i class="bx bx-analyse"></i>
                                             </span>
                                         @endif
+                                    </td>
+                                    <td>
+                                        {{ $p->created_at->format('d.m.Y') }}
                                     </td>
                                     <td>
                                         <a href="{{ route('admin.purchasesOrdersAction',['view',$p->id]) }}">
@@ -101,9 +105,12 @@
 
                                     <td class="text-center">
                                         @if($p->can_pay == 1)
+                                            @can('bill_payments.view')
                                             <a href="{{ route('admin.billPaymentAction',['pay',$p->id]) }}" class="btn-custom success">
                                                 <i class="bx bx-money"></i>
                                             </a>
+                                            @else -- 
+                                            @endcan
                                         @else
                                             <button type="button" class="btn-custom info-btn" data-id="{{ $p->id }}">
                                                 <i class="bx bx-info-circle"></i>

@@ -888,7 +888,7 @@ class PurchasesController extends Controller
                     "payment_method_id" => $paymentMethod->id,
                     "amount"            => $payToThis,
                     "currency"          => "BDT",
-                    "status"            => "Pending",
+                    "status"            => "success",
                     "addedby_id"        => Auth::id(),
                 ]);
 
@@ -1090,7 +1090,7 @@ class PurchasesController extends Controller
                 $order = new PurchaseOrder();
                 $order->status = 'temp';
                 $order->addedby_id = Auth::id();
-                $order->created_date = now();
+                $order->created_at = now();
                 $order->save();
             }
             $order->currency = general()->currency;
@@ -1644,7 +1644,7 @@ class PurchasesController extends Controller
                             "amount"      => request()->pay_amount,
                             "balance"      => $account->amount-request()->pay_amount,
                             "currency"          => "BDT",
-                            "status"            => "Pending",
+                            "status"            => "success",
                             "addedby_id"        => Auth::user()->id,
                         ];
 

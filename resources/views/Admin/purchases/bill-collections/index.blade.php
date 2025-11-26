@@ -11,16 +11,18 @@
                 <h3>Bill Collection List</h3>
 
                 <div class="dropdown d-flex">
+                    @can('bill_collections.add')
                     <a href="javascript:void(0)" class="btn-custom primary mr-1" style="padding:5px 15px;" data-toggle="modal" data-target="#createReceiveModal"  >
                         <i class="fa fa-plus"></i> Add Bill
                     </a>
+                    @endcan
                     <a href="{{route('admin.billCollection')}}" class="btn-custom yellow">
                         <i class="bx bx-rotate-left"></i>
                     </a>
 
                 </div>
             </div>
-            
+
             <div class="card-body">
                 @include(adminTheme().'alerts')
                 <!-- Search Form -->

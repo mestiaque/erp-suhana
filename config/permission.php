@@ -137,7 +137,6 @@ return [
                     'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
@@ -146,7 +145,6 @@ return [
                 'label'       => 'Expenses Report',
                 'permissions' => [
                     'list' => 'List',
-                    'view' => 'View',
                     'all'  => 'All',
                 ],
             ],
@@ -165,7 +163,6 @@ return [
                 'label'       => 'I.O.U Report',
                 'permissions' => [
                     'list' => 'List',
-                    'view' => 'View',
                     'all'  => 'All',
                 ],
             ],
@@ -175,7 +172,6 @@ return [
                     'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],

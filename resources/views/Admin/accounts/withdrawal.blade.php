@@ -5,16 +5,18 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3>Withdrawal List</h3>
         <div class="dropdown">
+            @can('withdrawal.add')
             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddDeposit" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Withdrawal
              </a>
+             @endcan
              <a href="{{route('admin.withdrawal')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -22,7 +24,7 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-        
+
         <form action="{{route('admin.withdrawal')}}">
             <div class="row">
                 <div class="col-md-6 mb-0">
@@ -43,10 +45,10 @@
                 </div>
                 <div class="col-md-3 mb-0">
                     <div class="form-group">
-                        <select class="form-control" name="payment" >
+                        <select class="form-control" name="method" >
                             <option value="">Select Method</option>
                             @foreach($paymentMethods as $method)
-                            <option value="{{$method->id}}" {{request()->payment==$method->id?'selected':''}}>{{$method->name}}</option>
+                            <option value="{{$method->id}}" {{request()->method==$method->id?'selected':''}}>{{$method->name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -61,9 +63,10 @@
         </form>
         <hr>
 
-        <form action="{{route('admin.deposits')}}">
+        <form action="{{route('admin.withdrawal')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @can('withdrawal.add')
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
@@ -71,6 +74,7 @@
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endcan
                 </div>
                 <div class="col-md-8">
                 </div>
@@ -80,6 +84,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
+                                @can('withdrawal.delete')
                                 <div class="checkbox mr-3">
                                  <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                  <label class="cbx" for="checkall">
@@ -88,11 +93,13 @@
                                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                          </svg>
                                      </span>
-                                     All <span class="checkCounter"></span> 
-                                 </label>
+                                     All <span class="checkCounter"></span>
+                                    </label>
                                 </div>
+                                @else All
+                                @endcan
                             </th>
-                            <th style="min-width: 200px;">Deposit</th>
+                            <th style="min-width: 200px;">Withdrawal</th>
                             <th style="min-width: 300px;">Balance - Description</th>
                         </tr>
                     </thead>
@@ -103,11 +110,13 @@
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$transection->id}}" type="checkbox" name="checkid[]" value="{{$transection->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$transection->id}}">
+                                        @can('withdrawal.delete')
                                          <span>
                                              <svg width="12px" height="10px" viewbox="0 0 12 10">
                                                  <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                              </svg>
                                          </span>
+                                        @endcan
                                      </label>
                                  </div>
                                 <span style="margin:0 5px;">{{$transections->currentpage()==1?$i+1:$i+($transections->perpage()*($transections->currentpage() - 1))+1}}</span>
@@ -120,10 +129,12 @@
                                     <i class="bx bx-analyse"></i>
                                 </span>
                                 @endif
+                                @can('withdrawal.edit')
                                 <br><br>
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDeposit_{{$transection->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
                             </td>
                             <td>
                                 <b>TNX Id:</b> {{$transection->transection_id}} @if($transection->imageFile) <a href="{{asset($transection->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif <br>
@@ -154,8 +165,8 @@
                 {{$transections->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>
@@ -193,7 +204,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('account') }}</p>
         				@endif
                  	</div>
-    	            
+
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -246,7 +257,7 @@
 	 </div>
    </div>
  </div>
- 
+
  <!--Edit Modal -->
 @foreach($transections as $i=>$dpm)
 
@@ -277,7 +288,7 @@
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('account') }}</p>
         				@endif
                  	</div>
-    	            
+
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -332,8 +343,8 @@
  </div>
 
 @endforeach
- 
- 
- 
+
+
+
 
 @endsection @push('js') @endpush

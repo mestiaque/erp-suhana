@@ -55,12 +55,11 @@
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>I.O.U List</h3>
          <div class="dropdown">
-             @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
+             @can('iou.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddExpense" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> I.O.U
              </a>
-             @endisset
-
+             @endcan
              <a href="{{route('admin.expensesIOU')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -112,15 +111,15 @@
         <form action="{{route('admin.expensesIOU')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @can('iou.delete')
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['delete'])
                             <option value="5">Delete</option>
-                            @endisset
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endcan
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
@@ -132,6 +131,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
+                                @can('iou.delete')
                                 <div class="checkbox mr-3">
                                  <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                  <label class="cbx" for="checkall">
@@ -141,8 +141,10 @@
                                          </svg>
                                      </span>
                                      All <span class="checkCounter"></span>
-                                 </label>
+                                    </label>
                                 </div>
+                                @else All
+                                @endcan
                             </th>
                             <th style="min-width: 100px;">Date</th>
                             <th style="min-width: 100px;">Company</th>
@@ -162,6 +164,7 @@
                             <td>
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$Iou->id}}" type="checkbox" name="checkid[]" value="{{$Iou->id}}" style="display: none;" />
+                                      @can('iou.delete')
                                      <label class="cbx" for="cbx_{{$Iou->id}}">
                                          <span>
                                              <svg width="12px" height="10px" viewbox="0 0 12 10">
@@ -169,6 +172,7 @@
                                              </svg>
                                          </span>
                                      </label>
+                                     @endcan
                                  </div>
                                 <span style="margin:0 5px;">{{$expenseIou->currentpage()==1?$i+1:$i+($expenseIou->perpage()*($expenseIou->currentpage() - 1))+1}}</span>
                                 @if($Iou->status=='completed')
@@ -198,16 +202,20 @@
                             <td>{{priceFormat($Iou->amount)}}</td>
                             <td>{{$Iou->account?$Iou->account->name:''}}</td>
                             <td>{{$Iou->branch?$Iou->branch->name:''}}</td>
-                            <td class="center">
-                                @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
+                            <td class="text-center">
+                                @if(auth()->user()->hasPermission('iou.edit') || auth()->user()->hasPermission('iou.delete'))
+
+                                 @can('iou.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$Iou->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
-                                @endisset
-
+                                @endcan
+                                @can('iou.delete')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$Iou->id}}" class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
                                 </a>
+                                @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach
@@ -222,7 +230,6 @@
 </div>
 </div>
 
-@isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
 <!-- Add Modal -->
  <div class="modal fade text-left" id="AddExpense" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
@@ -255,7 +262,6 @@
         			    <label for="name">Employee</label>
                         <input type="text" readonly="" class="form-control EmployeeName" placeholder="Employee Name">
                  	</div>
-
     	       </div>
     	       <div class="row">
     	           <div class="col-md-6 form-group">
@@ -356,24 +362,23 @@
     	   </div>
     	   <div class="modal-body">
     	       <div class="row">
-    	           <div class="col-md-6 form-group">
+    	           <div class="col-md-12 form-group">
         			    <label for="name">Date* </label>
                         <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{$dpm->created_at->format('Y-m-d')}}"  required="">
         				@if ($errors->has('created_at'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
         				@endif
                  	</div>
-                 	<div class="col-md-6 form-group">
-                        <label for="name">Employee</label>
-                        <select class="form-control" name="employee_id">
-                            <option value="">Select Employee</option>
-                            @foreach($users as $user)
-                            <option value="{{$user->id}}" {{$dpm->user_id==$user->id?'selected':''}}>{{$user->name}}</option>
-                            @endforeach
-                        </select>
+                    <div class="col-md-6 form-group">
+        			    <label for="name">Employee ID</label>
+                        <input type="text" name="employee_id" value="{{$dpm->employee_id}}" class="form-control EmployeeIDInput" data-url="{{route('admin.expensesIOUAction','search-employee')}}" placeholder="Enter employee ID" />
         				@if ($errors->has('employee_id'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
         				@endif
+                 	</div>
+                 	<div class="col-md-6 form-group">
+        			    <label for="name">Employee</label>
+                        <input type="text" readonly="" value="{{$dpm->employee?$dpm->employee->name:''}}" class="form-control EmployeeName" placeholder="Employee Name">
                  	</div>
 
     	       </div>
@@ -669,7 +674,7 @@
 
             <div class="date-field">
                 <span class="date-label">Date:</span>
-                <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('Y-m-d')}}">
+                <input type="text" class="input-underline" style="width: 100px;" value="{{$dpm->created_at->format('d.m.Y')}}">
             </div>
 
             <div class="form-section">
@@ -748,11 +753,6 @@
 
 
 @endforeach
-
-
-@endisset
-
-
 
 @endsection
 @push('js')
