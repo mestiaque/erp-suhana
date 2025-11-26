@@ -161,6 +161,7 @@
       21 => 'Illuminate\\Validation\\ValidationServiceProvider',
       22 => 'Illuminate\\View\\ViewServiceProvider',
       23 => 'App\\Providers\\AppServiceProvider',
+      24 => 'App\\Providers\\AuthServiceProvider',
     ),
     'aliases' => 
     array (
@@ -684,133 +685,388 @@
   array (
     'modules' => 
     array (
-      'company' => 
+      'Purchases Management' => 
       array (
-        'label' => 'Customers Management',
-        'permissions' => 
+        'purchases_orders' => 
         array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'export' => 'Export',
-          'sales' => 'Sales',
-          'duecollect' => 'Due Collect',
-          'service' => 'Services',
-          'all' => 'All',
+          'label' => 'Purchases Orders',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'creditor' => 
+        array (
+          'label' => 'Creditor',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'payment' => 'Payment',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_items' => 
+        array (
+          'label' => 'Goods Items',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_items_units' => 
+        array (
+          'label' => 'Goods Items (Unit)',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_items_categories' => 
+        array (
+          'label' => 'Goods Items (Categories)',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_requisitions' => 
+        array (
+          'label' => 'Purchases Requisition',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_received' => 
+        array (
+          'label' => 'Purchases Received',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_damage_returns' => 
+        array (
+          'label' => 'Purchases Damage Returns',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'suppliers_ladgers' => 
+        array (
+          'label' => 'Suppliers ladgers',
+          'permissions' => 
+          array (
+            'view' => 'View',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_reports' => 
+        array (
+          'label' => 'Purchases Reports',
+          'permissions' => 
+          array (
+            'view' => 'View',
+            'all' => 'All',
+          ),
+        ),
+        'purchases_stocks' => 
+        array (
+          'label' => 'Purchases Stock',
+          'permissions' => 
+          array (
+            'view' => 'View',
+            'all' => 'All',
+          ),
         ),
       ),
-      'engineers' => 
+      'Accounts Management' => 
       array (
-        'label' => 'Engineers Management',
-        'permissions' => 
+        'expenses' => 
         array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'export' => 'Export',
-          'all' => 'All',
+          'label' => 'Expenses',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'expenses_type' => 
+        array (
+          'label' => 'Expenses Head',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'expenses_report' => 
+        array (
+          'label' => 'Expenses Report',
+          'permissions' => 
+          array (
+            'view' => 'View',
+            'all' => 'All',
+          ),
+        ),
+        'iou' => 
+        array (
+          'label' => 'I.O.U',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'iou_report' => 
+        array (
+          'label' => 'I.O.U Report',
+          'permissions' => 
+          array (
+            'view' => 'View',
+            'all' => 'All',
+          ),
+        ),
+        'payment_methods' => 
+        array (
+          'label' => 'Payment Methods',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'accounts' => 
+        array (
+          'label' => 'Accounts',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'bill_payments' => 
+        array (
+          'label' => 'Bill Payments',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'bill_collections' => 
+        array (
+          'label' => 'Bill Collections',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'deposits' => 
+        array (
+          'label' => 'Deposits',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'withdrawal' => 
+        array (
+          'label' => 'Withdrawal',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'statement' => 
+        array (
+          'label' => 'Statement',
+          'permissions' => 
+          array (
+            'view' => 'View',
+            'all' => 'All',
+          ),
         ),
       ),
-      'leads' => 
+      'HR/Users Management' => 
       array (
-        'label' => 'Leads Management',
-        'permissions' => 
+        'employee' => 
         array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'all' => 'All',
+          'label' => 'Employee',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'staff' => 
+        array (
+          'label' => 'Staff',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'admin' => 
+        array (
+          'label' => 'Admin',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'roles' => 
+        array (
+          'label' => 'Roles',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'branchs' => 
+        array (
+          'label' => 'Branchs',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'departments' => 
+        array (
+          'label' => 'Departments',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
+        ),
+        'designations' => 
+        array (
+          'label' => 'Designations',
+          'permissions' => 
+          array (
+            'add' => 'Create',
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
         ),
       ),
-      'tasks' => 
+      'Setting' => 
       array (
-        'label' => 'Task Management',
-        'permissions' => 
+        'general' => 
         array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'all' => 'All',
+          'label' => 'General',
+          'permissions' => 
+          array (
+            'edit' => 'Edit',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'all' => 'All',
+          ),
         ),
-      ),
-      'meetings' => 
-      array (
-        'label' => 'Meeting Management',
-        'permissions' => 
+        'mail' => 
         array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'all' => 'All',
+          'label' => 'Mail',
+          'permissions' => 
+          array (
+            'edit' => 'Edit',
+            'view' => 'View',
+            'all' => 'All',
+          ),
         ),
-      ),
-      'visits' => 
-      array (
-        'label' => 'Visit Management',
-        'permissions' => 
+        'sms' => 
         array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'all' => 'All',
-        ),
-      ),
-      'sales' => 
-      array (
-        'label' => 'Sales Invoice',
-        'permissions' => 
-        array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'all' => 'All',
-        ),
-      ),
-      'quotation' => 
-      array (
-        'label' => 'Quotation',
-        'permissions' => 
-        array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'all' => 'All',
-        ),
-      ),
-      'expenses' => 
-      array (
-        'label' => 'expenses',
-        'permissions' => 
-        array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'type' => 'Type',
-          'all' => 'All',
-        ),
-      ),
-      'accounts' => 
-      array (
-        'label' => 'Accounts',
-        'permissions' => 
-        array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'type' => 'Type',
-          'all' => 'All',
-        ),
-      ),
-      'paymentMethod' => 
-      array (
-        'label' => 'Payment Method',
-        'permissions' => 
-        array (
-          'add' => 'Create/Update',
-          'view' => 'View',
-          'delete' => 'Delete',
-          'type' => 'Type',
-          'all' => 'All',
+          'label' => 'SMS',
+          'permissions' => 
+          array (
+            'edit' => 'Edit',
+            'view' => 'View',
+            'all' => 'All',
+          ),
         ),
       ),
     ),
@@ -989,7 +1245,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-orders',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'purchases_orders',
           ),
           1 => 
           array (
@@ -997,7 +1253,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/suppliers',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'creditor',
           ),
           2 => 
           array (
@@ -1005,7 +1261,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-items',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'purchases_items',
           ),
           3 => 
           array (
@@ -1013,7 +1269,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-requisitions',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'purchases_requisitions',
           ),
           4 => 
           array (
@@ -1021,7 +1277,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-received',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'purchases_received',
           ),
           5 => 
           array (
@@ -1029,7 +1285,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-damage-returns',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'purchases_damage_returns',
           ),
           6 => 
           array (
@@ -1037,7 +1293,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/suppliers-ladgers',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'suppliers_ladgers',
           ),
           7 => 
           array (
@@ -1045,7 +1301,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-reports',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'purchases_reports',
           ),
           8 => 
           array (
@@ -1053,7 +1309,7 @@
             'icon' => 'fa-solid fa-arrow-right',
             'route' => '/admin/purchases-stocks',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'purchases_stocks',
           ),
         ),
       ),
@@ -1075,7 +1331,7 @@
             'icon' => 'fa-solid fa-list',
             'route' => '/admin/expenses',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'expenses',
           ),
           1 => 
           array (
@@ -1083,7 +1339,7 @@
             'icon' => 'fa-solid fa-layer-group',
             'route' => '/admin/expenses/types',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'expenses_type',
           ),
           2 => 
           array (
@@ -1091,7 +1347,7 @@
             'icon' => 'fa-solid fa-layer-group',
             'route' => '/admin/expenses/reports',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'expenses_report',
           ),
           3 => 
           array (
@@ -1107,7 +1363,7 @@
             'icon' => 'fa-solid fa-layer-group',
             'route' => '/admin/expenses/iou-reports',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'iou_report',
           ),
           5 => 
           array (
@@ -1115,7 +1371,7 @@
             'icon' => 'fa-solid fa-credit-card',
             'route' => '/admin/accounts/payment-methods',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'payment_methods',
           ),
           6 => 
           array (
@@ -1123,15 +1379,15 @@
             'icon' => 'fa-solid fa-list',
             'route' => '/admin/accounts/list',
             'icon_color' => 'text-primary',
-            'permission' => '',
+            'permission' => 'accounts',
           ),
           7 => 
           array (
-            'title' => 'Bill Payment',
+            'title' => 'Creditor Payment',
             'icon' => 'fas fa-credit-card',
             'route' => '/admin/bill-payments',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'bill_payments',
           ),
           8 => 
           array (
@@ -1139,15 +1395,15 @@
             'icon' => 'fas fa-wallet',
             'route' => '/admin/bill-collections',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'bill_collections',
           ),
           9 => 
           array (
-            'title' => 'Deposits',
+            'title' => 'Fund Receiver',
             'icon' => 'fas fa-wallet',
             'route' => '/admin/accounts/deposits',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'deposits',
           ),
           10 => 
           array (
@@ -1155,7 +1411,7 @@
             'icon' => 'fas fa-wallet',
             'route' => '/admin/accounts/withdrawal',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'withdrawal',
           ),
           11 => 
           array (
@@ -1163,7 +1419,7 @@
             'icon' => 'fas fa-wallet',
             'route' => '/admin/accounts/statement',
             'icon_color' => 'text-warning',
-            'permission' => '',
+            'permission' => 'statement',
           ),
         ),
       ),
@@ -1185,7 +1441,7 @@
             'icon' => 'fa-solid fa-id-badge',
             'route' => '/admin/users/employee',
             'icon_color' => 'text-success',
-            'permission' => '',
+            'permission' => 'employee',
           ),
           1 => 
           array (
@@ -1193,7 +1449,7 @@
             'icon' => 'fa-solid fa-user-tie',
             'route' => '/admin/users/staff',
             'icon_color' => 'text-success',
-            'permission' => '',
+            'permission' => 'staff',
           ),
           2 => 
           array (
@@ -1201,7 +1457,7 @@
             'icon' => 'fa-solid fa-user-shield',
             'route' => '/admin/users/admin',
             'icon_color' => 'text-success',
-            'permission' => '',
+            'permission' => 'admin',
           ),
           3 => 
           array (
@@ -1209,7 +1465,7 @@
             'icon' => 'fa-solid fa-user-gear',
             'route' => '/admin/users/roles',
             'icon_color' => 'text-success',
-            'permission' => '',
+            'permission' => 'roles',
           ),
           4 => 
           array (
@@ -1217,7 +1473,7 @@
             'icon' => 'fa-solid fa-building',
             'route' => '/admin/hr/branchs',
             'icon_color' => 'text-info',
-            'permission' => '',
+            'permission' => 'branchs',
           ),
           5 => 
           array (
@@ -1225,7 +1481,7 @@
             'icon' => 'fa-solid fa-sitemap',
             'route' => '/admin/hr/departments',
             'icon_color' => 'text-info',
-            'permission' => '',
+            'permission' => 'departments',
           ),
           6 => 
           array (
@@ -1233,7 +1489,7 @@
             'icon' => 'fa-solid fa-id-card-clip',
             'route' => '/admin/hr/designations',
             'icon_color' => 'text-info',
-            'permission' => '',
+            'permission' => 'designations',
           ),
         ),
       ),
@@ -1255,7 +1511,7 @@
             'icon' => 'fa-solid fa-cog',
             'route' => '/admin/setting/general',
             'icon_color' => 'text-secondary',
-            'permission' => '',
+            'permission' => 'general',
           ),
           1 => 
           array (
@@ -1263,7 +1519,7 @@
             'icon' => 'fa-solid fa-envelope',
             'route' => '/admin/setting/mail',
             'icon_color' => 'text-secondary',
-            'permission' => '',
+            'permission' => 'mail',
           ),
           2 => 
           array (
@@ -1271,7 +1527,7 @@
             'icon' => 'fa-solid fa-sms',
             'route' => '/admin/setting/sms',
             'icon_color' => 'text-secondary',
-            'permission' => '',
+            'permission' => 'sms',
           ),
         ),
       ),
