@@ -30,60 +30,56 @@
             <h3>Admin List</h3>
             <div class="dropdown">
 
+                @can('admin.add')
                 <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
                     <i class="bx bx-plus"></i> User
                 </a>
+                @endcan
                 <a href="{{route('admin.usersAdmin')}}" class="btn-custom yellow">
                     <i class="bx bx-rotate-left"></i>
                 </a>
             </div>
         </div>
         <div class="card-body">
-            <div class="accordion-box">
-                <div class="accordion">
-                    <div class="accordion-item">
-                    <a class="accordion-title" href="javascript:void(0)">
-                        <i class="bx bx-filter-alt"></i>
-                        Search click Here..
-                    </a>
-                    <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                        <form action="{{route('admin.usersAdmin')}}">
-                            <div class="row">
-                                <div class="col-md-4 mb-1">
-                                <select name="role" class="form-control {{$errors->has('role')?'error':''}}">
-                                    <option value="">Select Role</option>
-                                    @foreach($roles as $role)
-                                    <option value="{{$role->id}}" {{request()->role==$role->id?'selected':''}}>{{$role->name}}</option>
-                                    @endforeach
-                                </select>
-                                </div>
-                                <div class="col-md-8 mb-1">
-                                    <div class="input-group">
-                                        <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
-                                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+            <form action="{{route('admin.usersAdmin')}}">
+                <div class="row">
+                    <div class="col-md-4 mb-1">
+                    <select name="role" class="form-control {{$errors->has('role')?'error':''}}">
+                        <option value="">Select Role</option>
+                        @foreach($roles as $role)
+                        <option value="{{$role->id}}" {{request()->role==$role->id?'selected':''}}>{{$role->name}}</option>
+                        @endforeach
+                    </select>
                     </div>
+                    <div class="col-md-8 mb-1">
+                        <div class="input-group">
+                            <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
+                            <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
             <br>
 
             <form action="{{route('admin.usersAdmin')}}">
 
                 <div class="row">
                     <div class="col-md-4">
+                        @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
                         <div class="input-group mb-1">
-                            <select class="form-control form-control-sm rounded-0" name="action" required>
+                            <select class="form-control form-control-sm rounded-0" name="action" required="">
                                 <option value="">Select Action</option>
+                                @can('admin.edit')
                                 <option value="1">Active</option>
                                 <option value="2">Inactive</option>
+                                @endcan
+                                @can('admin.delete')
                                 <option value="5">Delete</option>
+                                @endcan
                             </select>
                             <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                         </div>
+                        @endif
                     </div>
 
                     <div class="col-md-4"></div>
@@ -98,11 +94,13 @@
                 </div>
 
                 {{-- Staff Table --}}
+
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-hover table-striped">
                         <thead>
                             <tr>
-                                <th style="min-width: 100px; width: 100px;padding-right:0;">
+                                <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
+                                    @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
                                     <div class="checkbox mr-3">
                                         <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                         <label class="cbx" for="checkall">
@@ -114,23 +112,23 @@
                                             All <span class="checkCounter"></span>
                                         </label>
                                     </div>
+                                    @else -- @endif
                                 </th>
-
-                                <th style="min-width: 70px;">Image</th>
-                                <th style="min-width: 200px;">Name</th>
-                                <th style="min-width: 150px;">Email</th>
-                                <th style="min-width: 100px;">Role</th>
+                                <th style="min-width: 70px; width: 70px;">Image</th>
+                                <th style="min-width: 200px; width: 200px;">Name</th>
+                                <th style="min-width: 100px; width: 100px;">ID Number</th>
+                                <th style="min-width: 150px;">Mobile / Email</th>
+                                <th style="min-width: 100px;">Designation</th>
                                 <th style="min-width: 90px;">Join Date</th>
-                                <th style="min-width: 80px;">Action</th>
+                                <th style="min-width: 80px; width: 80px;">Action</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             @foreach($users as $i=>$user)
                             <tr>
-
-                                <td>
-                                    @if($user->id!=Auth::id())
+                                <td style=" position: relative;">
+                                    @if($user->id==Auth::id()) @else
+                                    @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
                                     <div class="checkbox">
                                         <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
                                         <label class="cbx" for="cbx_{{$user->id}}">
@@ -142,67 +140,58 @@
                                         </label>
                                     </div>
                                     @endif
-
-                                    <span style="margin:0 5px;">
-                                        {{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}
-                                    </span>
-
+                                    @endif
+                                    <span style="margin:0 5px;">{{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}</span>
                                     @if($user->status)
-                                    <span style="color: #43d39e;font-size: 20px;">
+                                    <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
                                         <i class="bx bx-check-circle"></i>
                                     </span>
                                     @else
-                                    <span style="color: #FF9800;font-size: 20px;">
+                                    <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
                                         <i class="bx bx-analyse"></i>
                                     </span>
                                     @endif
-
                                 </td>
-
                                 <td style="padding: 0 3px;">
-                                    <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
+                                    <span>
+                                        <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
+                                    </span>
                                 </td>
-
-                                <td>
-                                    <a href="{{route('admin.usersAdminAction',['view',$user->id])}}" target="_blank">
-                                        {{$user->name}}
-                                    </a>
-                                    <br>
+                                <td><a href="{{route('admin.usersAdminAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
                                     @if($user->permission)
-                                    <span class="badge badge-info">{{$user->permission->name}}</span>
+                                    <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
                                     @endif
                                 </td>
-
-                                <td>{{$user->email}}</td>
-
+                                <td>{{ $user->employee_id ?? '--' }}</td>
+                                <td>{{$user->mobile ?? $user->email ?? '--'}}</td>
                                 <td>
                                     @if($user->designation)
                                     <span style="color: #009688;font-weight: bold;">{{$user->designation->name}}</span>
                                     @else
-                                    <span style="color: #FF9800;">No Role</span>
+                                    <span style="color: #FF9800;">No Designation</span>
                                     @endif
                                 </td>
-
-                                <td>{{$user->created_at}}</td>
-
-                                <td style="text-align: center;">
-                                    <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom success">
-                                        <i class="bx bx-edit"></i>
-                                    </a>
-
-                                    @if($user->id!=Auth::id())
-                                    <a href="{{route('admin.usersAdminAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                        <i class="bx bx-trash"></i>
-                                    </a>
-                                    @endif
+                                <td>{{ $user?->addedby_at?->format('d.m.Y') ?? '--' }}</td>
+                                <td style="padding: 8px 5px; text-align: center;">
+                                     @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
+                                        @can('admin.edit')
+                                            <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom success">
+                                                <i class="bx bx-edit"></i>
+                                            </a>
+                                        @endcan
+                                        @if($user->id==Auth::id()) @else
+                                            @can('admin.delete')
+                                                <a href="{{route('admin.usersAdminAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
+                                                    <i class="bx bx-trash"></i>
+                                                </a>
+                                            @endcan
+                                        @endif
+                                    @else -- @endif
                                 </td>
-
                             </tr>
                             @endforeach
                         </tbody>
-
                     </table>
-                    {{$users->links('pagination')}}
                 </div>
             </form>
 

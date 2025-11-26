@@ -5,16 +5,18 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Departments List</h3>
          <div class="dropdown">
+            @can('departments.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddDepartment" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Department
              </a>
+             @endcan
              <a href="{{route('admin.departments')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -22,41 +24,35 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                    <form action="{{route('admin.departments')}}">
-                        <div class="row">
-                            <div class="col-md-12 mb-0">
-                                <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Department Name" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <form action="{{route('admin.departments')}}">
+            <div class="row">
+                <div class="col-md-12 mb-0">
+                    <div class="input-group">
+                        <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Department Name" class="form-control {{$errors->has('search')?'error':''}}" />
+                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
         <br>
         <form action="{{route('admin.departments')}}">
             <div class="row">
                 <div class="col-md-4">
+                     @if(auth()->user()->hasPermission('departments.edit')  || auth()->user()->hasPermission('departments.delete'))
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
+                            @can('departments.edit')
+                                <option value="1">Active</option>
+                                <option value="2">Inactive</option>
+                            @endcan
+                            @can('departments.delete')
                             <option value="5">Delete</option>
+                            @endcan
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endif
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
@@ -72,6 +68,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
+                                @if(auth()->user()->hasPermission('departments.edit')  || auth()->user()->hasPermission('departments.delete'))
                                 <div class="checkbox mr-3">
                                  <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                  <label class="cbx" for="checkall">
@@ -80,9 +77,10 @@
                                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                          </svg>
                                      </span>
-                                     All <span class="checkCounter"></span> 
+                                     All <span class="checkCounter"></span>
                                  </label>
                                 </div>
+                                @else All @endif
                             </th>
                             <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 300px;">Description</th>
@@ -94,6 +92,7 @@
                         @foreach($departments as $i=>$department)
                         <tr>
                             <td>
+                                @if(auth()->user()->hasPermission('departments.edit')  || auth()->user()->hasPermission('departments.delete'))
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$department->id}}" type="checkbox" name="checkid[]" value="{{$department->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$department->id}}">
@@ -104,6 +103,7 @@
                                          </span>
                                      </label>
                                  </div>
+                                @endif
                                 <span style="margin:0 5px;">{{$departments->currentpage()==1?$i+1:$i+($departments->perpage()*($departments->currentpage() - 1))+1}}</span>
                                 @if($department->status=='active')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
@@ -119,14 +119,20 @@
                                 <span>{{$department->name}}</span>
                             </td>
                             <td>
-                                <span>{!!$department->description!!}</span>
+                                <span>{!!$department->description ?? '--' !!}</span>
                             </td>
                             <td>{{$department->created_at->format('d-m-Y')}}</td>
-                            <td class="center">
+                            <td class="text-center">
+                                @if(auth()->user()->hasPermission('departments.edit')  || auth()->user()->hasPermission('departments.delete'))
+                                @can('departments.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDepartment_{{$department->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('departments.delete')
                                 <a href="{{route('admin.departmentsAction',['delete',$department->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach
@@ -135,8 +141,8 @@
                 {{$departments->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>

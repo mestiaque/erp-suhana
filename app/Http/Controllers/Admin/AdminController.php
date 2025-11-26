@@ -10007,7 +10007,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status'])
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
       ->paginate(12)->appends([
         'search'=>$r->search,
         'startDate'=>$r->startDate,
@@ -10244,7 +10244,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status'])
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
       ->paginate(12)->appends([
         'search'=>$r->search,
         'startDate'=>$r->startDate,
@@ -10503,12 +10503,30 @@ class AdminController extends Controller
       //Add New User Start
       if($action=='create' && $r->isMethod('post')){
 
-        $user =User::where('email',$r->email)->first();
+        $r->validate([
+            'name'   => 'required|string|max:255',
+            'mobile' => 'required|digits:11|regex:/^0[0-9]{10}$/',
+            'email'  => 'nullable|email|max:255',
+        ], [
+            'name.required'   => 'Name is required.',
+            'mobile.required' => 'Mobile number is required.',
+            'mobile.digits'   => 'Mobile number must be exactly 11 digits.',
+            'mobile.regex'    => 'Mobile number must be start with 0.',
+            'email.email'     => 'Please enter a valid email address.',
+        ]);
+
+        $query = User::where('mobile', $r->mobile);
+        if (!empty($r->email)) {
+            $query->orWhere('email', $r->email);
+        }
+        $user = $query->first();
+
         if(!$user){
           $password=Str::random(8);
           $user =new User();
           $user->name =$r->name;
-          $user->email =$r->email;
+          $user->mobile =$r->mobile;
+          $user->email =$r->email ?? null;
           $user->password_show=$password;
           $user->password=Hash::make($password);
           $user->save();

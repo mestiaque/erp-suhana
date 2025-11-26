@@ -280,7 +280,6 @@ return [
                     'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],

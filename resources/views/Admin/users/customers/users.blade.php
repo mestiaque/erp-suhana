@@ -16,9 +16,11 @@
          <h3>Employee List</h3>
          <div class="dropdown">
 
+            @can('employee.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
                  <i class="bx bx-plus"></i> Employee
              </a>
+             @endcan
              <a href="{{route('admin.usersCustomer')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -26,14 +28,10 @@
     </div>
     <div class="card-body">
 
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
+        <div class="accordionx-box">
+            <div class="accordionx">
+                <div class="accordionx-item">
+                 <div class="accordionx-content">
                      <form action="{{route('admin.usersCustomer')}}">
                         <div class="row">
                             <div class="col-md-5 mb-1">
@@ -66,15 +64,21 @@
         <form action="{{route('admin.usersCustomer')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
+                            @can('employee.edit')
                             <option value="1">Active</option>
                             <option value="2">Inactive</option>
+                            @endcan
+                            @can('employee.delete')
                             <option value="5">Delete</option>
+                            @endcan
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endif
                 </div>
                 <div class="col-md-4">
 
@@ -88,10 +92,11 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover table-striped">
                     <thead>
                         <tr>
                             <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
+                                @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
                                 <div class="checkbox mr-3">
                                      <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                      <label class="cbx" for="checkall">
@@ -103,11 +108,12 @@
                                          All <span class="checkCounter"></span>
                                      </label>
                                  </div>
+                                 @else -- @endif
                             </th>
                             <th style="min-width: 70px; width: 70px;">Image</th>
                             <th style="min-width: 200px; width: 200px;">Name</th>
                             <th style="min-width: 100px; width: 100px;">ID Number</th>
-                            <th style="min-width: 150px;">Email</th>
+                            <th style="min-width: 150px;">Mobile / Email</th>
                             <th style="min-width: 100px;">Designation</th>
                             <th style="min-width: 90px;">Join Date</th>
                             <th style="min-width: 80px; width: 80px;">Action</th>
@@ -118,6 +124,7 @@
                         <tr>
                             <td style=" position: relative;">
                                 @if($user->id==Auth::id()) @else
+                                @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$user->id}}">
@@ -128,6 +135,7 @@
                                          </span>
                                      </label>
                                  </div>
+                                 @endif
                                 @endif
                                 <span style="margin:0 5px;">{{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}</span>
                                 @if($user->status)
@@ -150,8 +158,8 @@
                                 <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
                                 @endif
                             </td>
-                            <td>{{$user->employee_id}}</td>
-                            <td>{{$user->email}}</td>
+                            <td>{{ $user->employee_id ?? '--' }}</td>
+                            <td>{{$user->mobile ?? $user->email ?? '--'}}</td>
                             <td>
                                 @if($user->designation)
                                 <span style="color: #009688;font-weight: bold;">{{$user->designation->name}}</span>
@@ -161,14 +169,20 @@
                             </td>
                             <td>{{$user->created_at->format('d M Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
-                                <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                @if($user->id==Auth::id()) @else
-                                <a href="{{route('admin.usersCustomerAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                    <i class="bx bx-trash"></i>
-                                </a>
-                                @endif
+                                @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
+                                    @can('employee.edit')
+                                        <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @if($user->id==Auth::id()) @else
+                                        @can('employee.delete')
+                                            <a href="{{route('admin.usersCustomerAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
+                                                <i class="bx bx-trash"></i>
+                                            </a>
+                                        @endcan
+                                    @endif
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach
@@ -206,9 +220,18 @@
 				</div>
          	</div>
 			 <div class="form-group">
-				<label for="name">Email* </label>
+				<label for="name">Mobile* </label>
 				<div class="controls">
-					<input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" required="">
+					<input type="mobile" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required>
+					@if ($errors->has('mobile'))
+					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
+					@endif
+				</div>
+         	</div>
+			 <div class="form-group">
+				<label for="name">Email </label>
+				<div class="controls">
+					<input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
 					@if ($errors->has('email'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
 					@endif
