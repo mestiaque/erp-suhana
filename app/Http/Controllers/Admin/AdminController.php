@@ -4282,10 +4282,10 @@ class AdminController extends Controller
                             }
 
                             if($r->account){
-                                $q->where('src_id',$r->account);
+                                $q->where('account_id',$r->account);
                             }
 
-                            if($r->method){
+                            if($r->payment){
                                 $q->where('payment_method_id',$r->method);
                             }
 
@@ -4431,7 +4431,7 @@ class AdminController extends Controller
         // Filter Action Start
         if($r->action){
             if($r->checkid){
-                $datas=Transaction::where('type',1)->whereIn('id',$r->checkid)->get();
+                $datas=Transaction::where('type',6)->whereIn('id',$r->checkid)->get();
                 foreach($datas as $data){
                     if($r->action==5){
 
@@ -5189,7 +5189,7 @@ class AdminController extends Controller
                             ) as balance
                         ")
                         ->value('balance') ?? 0;
-            
+
 
             $transections = Transaction::whereDate('created_at', '>=', $from)
             ->where('status','success')

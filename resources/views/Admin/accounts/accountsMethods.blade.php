@@ -12,9 +12,11 @@
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Account List</h3>
          <div class="dropdown">
+            @can('accounts.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddTypes" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Account
              </a>
+             @endcan
              <a href="{{route('admin.accounts')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -66,13 +68,19 @@
                             </td>
                             <td class="center">
 
+                                @can('accounts.add')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$method->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('accounts.add')
                                 <a href="{{route('admin.accountsAction',['view',$method->id])}}"  class="btn-custom yellow">
                                     <i class="bx bx-show"></i>
                                 </a>
+                                @endcan
+                                @can('accounts.add')
                                 <a href="{{route('admin.accountsAction',['delete',$method->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

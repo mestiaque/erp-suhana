@@ -11,6 +11,10 @@ class PurchaseOrder extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'created_date' => 'date',
+    ];
+
     // Relationships
 
     public function items()
