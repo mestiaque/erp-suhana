@@ -10,7 +10,7 @@
 </style>
 @endpush
 @section('contents')
-
+<div class="flex-grow-1">
 <!-- Breadcrumb Area -->
 <div class="breadcrumb-area">
     <h1>Setting</h1>
@@ -24,7 +24,7 @@
     </ol>
 </div>
 <!-- End Breadcrumb Area -->
-<div class="flex-grow-1">
+
 @include(adminTheme().'alerts')
 <form action="{{route('admin.settingUpdate',$type)}}" method="post" enctype="multipart/form-data">
     @csrf

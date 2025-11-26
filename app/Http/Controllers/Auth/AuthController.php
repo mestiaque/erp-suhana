@@ -48,8 +48,8 @@ class AuthController extends Controller
             //Login Post Action
 
             $check = $r->validate([
-            'email' => 'required|max:100',
-            'password' => 'required|max:50'
+                'user'    => 'required|max:100',
+                'password' => 'required|max:50'
             ]);
 
             if(!$check){
@@ -59,7 +59,7 @@ class AuthController extends Controller
 
             $remember_me  = ( !empty( $r->remember ) )? TRUE : FALSE;
 
-            $user =User::where('email',$r->email)->first();
+            $user =User::where('mobile',$r->user)->orWhere('email',$r->user)->first();
 
             if($user){
                 if(Hash::check($r->password, $user->password)){

@@ -5,16 +5,18 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Branch/Factory List</h3>
          <div class="dropdown">
+            @can('branchs.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddDepartment" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> Branch/Factory
              </a>
+             @endcan
              <a href="{{route('admin.branchs')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -22,28 +24,17 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                    <form action="{{route('admin.branchs')}}">
-                        <div class="row">
-                            <div class="col-md-12 mb-0">
-                                <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Branch/Factory Name" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <form action="{{route('admin.branchs')}}">
+            <div class="row">
+                <div class="col-md-12 mb-0">
+                    <div class="input-group">
+                        <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Branch/Factory Name" class="form-control {{$errors->has('search')?'error':''}}" />
+                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
+
         <br>
         <form action="{{route('admin.branchs')}}">
             <div class="row">
@@ -59,7 +50,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover table-striped">
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;">SL</th>
@@ -88,14 +79,20 @@
                                 <span>{{$branch->name}}</span>
                             </td>
                             <td>
-                                <span>{!!$branch->description!!}</span>
+                                <span>{!!$branch->description ?? '--' !!}</span>
                             </td>
                             <td>{{$branch->created_at->format('d-m-Y')}}</td>
-                            <td class="center">
+                            <td class="text-center">
+                                @if(auth()->user()->hasPermission('branchs.edit')  || auth()->user()->hasPermission('branchs.delete'))
+                                @can('branchs.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDepartment_{{$branch->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('branchs.delete')
                                 <a href="{{route('admin.branchsAction',['delete',$branch->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach
@@ -104,8 +101,8 @@
                 {{$branchs->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>
