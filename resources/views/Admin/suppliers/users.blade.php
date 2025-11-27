@@ -15,10 +15,11 @@
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Creditor List</h3>
          <div class="dropdown">
-
+            @can('creditor.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddSupplier">
                  <i class="bx bx-plus"></i> Creditor
              </a>
+             @endcan
              <a href="{{route('admin.suppliers')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -26,47 +27,41 @@
     </div>
     <div class="card-body">
 
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                     <form action="{{route('admin.suppliers')}}">
-                        <div class="row">
-                            <div class="col-md-7 mb-1">
-                                <div class="input-group">
-                                    <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                                    <input type="date" value="{{request()->endDate?:''}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
-                                </div>
-                            </div>
-                            <div class="col-md-5 mb-1">
-                                <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                 </div>
-                </div>
-            </div>
-        </div>
+        <form action="{{route('admin.suppliers')}}">
+           <div class="row">
+               <div class="col-md-7 mb-1">
+                   <div class="input-group">
+                       <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
+                       <input type="date" value="{{request()->endDate?:''}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
+                   </div>
+               </div>
+               <div class="col-md-5 mb-1">
+                   <div class="input-group">
+                       <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
+                       <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                   </div>
+               </div>
+           </div>
+       </form>
         <br>
         <form action="{{route('admin.suppliers')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @if(can('creditor.edit')  || can('creditor.delete'))
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
+                            @can('creditor.edit')
                             <option value="1">Active</option>
                             <option value="2">Inactive</option>
+                            @endcan
+                            @can('creditor.delete')
                             <option value="5">Delete</option>
+                            @endcan
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endif
                 </div>
                 <div class="col-md-4">
 
@@ -84,6 +79,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
+                                 @if(can('creditor.edit')  || can('creditor.delete'))
                                 <div class="checkbox mr-3">
                                      <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                      <label class="cbx" for="checkall">
@@ -95,6 +91,7 @@
                                          All <span class="checkCounter"></span>
                                      </label>
                                  </div>
+                                 @else All @endif
                             </th>
                             <th style="min-width: 70px; width: 70px;">Image</th>
                             <th style="min-width: 200px; width: 200px;">Name</th>
@@ -112,6 +109,7 @@
                         @foreach($users as $i=>$user)
                         <tr>
                             <td style=" position: relative;">
+                                @if(can('creditor.edit')  || can('creditor.delete'))
                                 @if($user->id==Auth::id()) @else
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
@@ -123,6 +121,7 @@
                                          </span>
                                      </label>
                                  </div>
+                                @endif
                                 @endif
                                 <span style="margin:0 5px;">{{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}</span>
                                 @if($user->status)
@@ -155,14 +154,20 @@
                             <td >{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</td>
                             <td>{{$user->created_at->format('d M Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
+                                 @if(can('creditor.edit')  || can('creditor.delete'))
+                                 @can('creditor.edit')
                                 <a href="{{route('admin.suppliersAction',['edit',$user->id])}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('creditor.delete')
                                 @if($user->id==Auth::id()) @else
                                 <a href="{{route('admin.suppliersAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
                                     <i class="bx bx-trash"></i>
                                 </a>
                                 @endif
+                                @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach

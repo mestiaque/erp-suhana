@@ -42,9 +42,7 @@ return [
                 'label'       => 'Goods Items (Unit)',
                 'permissions' => [
                     'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
+                    'add'    => 'Create/Edit',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
@@ -53,8 +51,7 @@ return [
                 'label'       => 'Goods Items (Categories)',
                 'permissions' => [
                     'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
+                    'add'    => 'Create/Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
@@ -97,7 +94,6 @@ return [
                 'label'       => 'Suppliers ladgers',
                 'permissions' => [
                     'list' => 'List',
-                    'view' => 'View',
                     'all'  => 'All',
                 ],
             ],
@@ -105,7 +101,6 @@ return [
                 'label'       => 'Purchases Reports',
                 'permissions' => [
                     'list' => 'List',
-                    'view' => 'View',
                     'all'  => 'All',
                 ],
             ],
@@ -113,7 +108,6 @@ return [
                 'label'       => 'Purchases Stock',
                 'permissions' => [
                     'list' => 'List',
-                    'view' => 'View',
                     'all'  => 'All',
                 ],
             ],

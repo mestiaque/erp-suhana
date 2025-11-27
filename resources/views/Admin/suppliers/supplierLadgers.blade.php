@@ -55,7 +55,7 @@
         <div class="card-body">
             @if(isset($ledgerEntries) && !is_null($supplier))
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>SL</th>

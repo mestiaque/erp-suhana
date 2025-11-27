@@ -162,7 +162,7 @@
 
             <div class="row">
                 {{-- Payment History --}}
-                <div class="col-md-8">
+                <div class="{{ can('creditor.payment') ? 'col-md-8': 'col-md-12' }}">
                     <div class="card">
                         <div class="card-body">
                             <h5>Transaction History</h5>
@@ -221,6 +221,7 @@
                 </div>
 
                 {{-- Payment Form --}}
+                @can('creditor.payment')
                 <div class="col-md-4">
                     <div class="card shadow payment-form-card">
                         <div class="card-body">
@@ -277,6 +278,7 @@
                         </div>
                     </div>
                 </div>
+                @endcan
             </div>
 
         </div>

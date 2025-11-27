@@ -15,9 +15,11 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Purchase Order List</h3>
              <div class="dropdown">
+                @can('purchases_orders.add')
                  <a href="{{ route('admin.purchasesOrdersAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Purchase Order
                  </a>
+                 @endcan
                  <a href="{{ route('admin.purchasesOrders') }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
@@ -99,9 +101,9 @@
                                 </td>
                                 <td>
                                     @if($order->supplier)
-                                    <a href="{{route('admin.suppliersAction',['view',$order->supplier->id])}}" target="_blank" class="invoice-action-view mr-1">    
+                                    <a href="{{route('admin.suppliersAction',['view',$order->supplier->id])}}" target="_blank" class="invoice-action-view mr-1">
                                     {{ $order->supplier?$order->supplier->name : '--' }}
-</a>
+                                    </a>
                                 @else
                                 N/A
                                 @endif
@@ -125,8 +127,14 @@
                                 </td>
                                 <td>{{ $order->created_at->format('d.m.Y') }}</td>
                                 <td>
-                                    <a href="{{ route('admin.purchasesOrdersAction',['edit',$order->id]) }}" class="btn-custom"><i class="bx bx-edit"></i></a>
+                                     @if(can('purchases_orders.edit')  || can('purchases_orders.delete'))
+                                     @can('purchases_orders.edit')
+                                     <a href="{{ route('admin.purchasesOrdersAction',['edit',$order->id]) }}" class="btn-custom success"><i class="bx bx-edit"></i></a>
+                                    @endcan
+                                    @can('purchases_orders.delete')
                                     <a href="{{ route('admin.purchasesOrdersAction',['delete',$order->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
+                                    @endcan
+                                    @else -- @endif
                                 </td>
                             </tr>
                             @endforeach
