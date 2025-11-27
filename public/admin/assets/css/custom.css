@@ -6,7 +6,7 @@ a:hover{
 }
 .btn-custom {
     height: 30px;
-    background-color: #f3f3f3;
+    background-color: #37ff8747;
     -webkit-transition: 0.5s;
     color: #434343;
     transition: 0.5s;
@@ -93,7 +93,7 @@ ul.statuslist li:last-child:before {
 }
 
 ul.statuslist li a {
-    color: black;
+    color: #7e7e7e;
     text-decoration: none;
 }
 

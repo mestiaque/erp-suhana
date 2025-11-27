@@ -3,7 +3,25 @@
 <title>{{websiteTitle('Creditor List')}}</title>
 @endsection
 @push('css')
+<style type="text/css">
+table.table thead {
+    background: #7fd0b42e;
+    color: #3c3a3a;
+}
 
+
+
+ @media (max-width: 1400px) {
+        table tr td {
+            font-size: 12px;
+        }
+        .table thead th {
+            font-size: 14px;
+        }
+ }
+
+    
+</style>
 @endpush
 @section('contents')
 
@@ -101,7 +119,7 @@
                             <th style="min-width: 100px;">Total Bill</th>
                             <th style="min-width: 100px;">Due Bill</th>
                             <th style="min-width: 100px;">Paid Bill</th>
-                            <th style="min-width: 90px;">Join Date</th>
+                            <th style="min-width: 95px;">Join Date</th>
                             <th style="min-width: 80px; width: 80px;">Action</th>
                         </tr>
                     </thead>

@@ -40,6 +40,20 @@
         .stats-card-box h3 {
             font-size: 20px;
         }
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgb(0 0 0 / 3%) !important;
+}
+        table.table thead {
+    background: #7fd0b42e;
+    color: #3c3a3a;
+}
+
+          @media (max-width: 1400px) {
+            .stats-card-box h3 {
+                font-size: 14px;
+            }
+          }
+   
 
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -73,16 +87,16 @@
 
                 <form action="{{route('admin.expenses')}}">
                     <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-12 mb-3">
                             <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Serial No">
                         </div>
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-6 mb-3">
                             <div class="input-group">
                                 <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
                                 <input type="date" name="endDate" value="{{request()->endDate}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
                             </div>
                         </div>
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-6 mb-3">
                             <div class="input-group">
                                 <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
                                     <option value="">Select Expense Type</option>
@@ -117,7 +131,7 @@
         </div>
         <form action="{{route('admin.expenses')}}">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-4 mb-3">
                     @can('expenses.delete')
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
