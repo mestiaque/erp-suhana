@@ -5,7 +5,7 @@
 
 @push('css')
 <style>
- 
+
 
 .stats-card-box .icon-box {
     display: flex;
@@ -135,7 +135,7 @@ h4{
                     <div class="bar-inner">
                         <div class="bar progress-line" data-width="56.9" style="width: 56.9%;"></div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -359,7 +359,7 @@ h4{
                 <div class="card-body" style="position: relative;">
                     <div id="website-analytics-chart" class="extra-margin"></div>
                 </div>
-            </div>      
+            </div>
         </div>
         <div class="col-lg-4">
                 <div class="card mb-30">
@@ -392,56 +392,33 @@ h4{
 
                     <div class="card-body browser-used-box">
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
                                         <th>Mobile</th>
                                         <th>Date & Time</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>MD. Nasim Billah</td>
-                                        <td>01745354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Emon Hasan</td>
-                                        <td>01475354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td>MD. Rabiul Hasan</td>
-                                        <td>01475354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                     <tr>
-                                        <td>MD. Nasim Billah</td>
-                                        <td>01745354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Emon Hasan</td>
-                                        <td>01475354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td>MD. Rabiul Hasan</td>
-                                        <td>01475354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                      <tr>
-                                        <td>Emon Hasan</td>
-                                        <td>01475354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                    <tr>
-                                        <td>MD. Rabiul Hasan</td>
-                                        <td>01475354374</td>
-                                        <td>11.02.2025 10:14 AM</td>
-                                    </tr>
-                                
+                                    @forelse ($userActivity as $ua)
+                                        <tr>
+                                            <td>{{ $ua['name'] }}</td>
+                                            <td>{{ $ua['mobile'] }}</td>
+                                            <td>{{ $ua['login_at'] }}</td>
+                                            <td>
+                                                @if($ua['active_status'])
+                                                    <span class="badge bg-success text-light">Active Now</span>
+                                                @else
+                                                    <span class="badge bg-secondary text-light">{{ $ua['last_active_ago'] ?? '--' }}</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+
+                                    @endforelse
+
                                 </tbody>
                             </table>
                         </div>

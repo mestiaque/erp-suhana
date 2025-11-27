@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\Seller;
 use Redirect,Response;
 use App\Models\General;
+use App\Models\ActivityLog;
 use App\Mail\VerifyCodeMail;
 use Illuminate\Http\Request;
 use App\Mail\RegistrationMail;
@@ -65,6 +66,22 @@ class AuthController extends Controller
                 if(Hash::check($r->password, $user->password)){
                     Auth::login($user, $remember_me);
 
+                    ActivityLog::create([
+                        'uuid' => Str::uuid()->toString(),
+                        'event' => 'login',
+                        'title' => "User Logged In: {$user->name}",
+                        'user_type' => get_class($user),
+                        'user_id' => $user->id,
+                        'loggable_type' => get_class($user),
+                        'loggable_id' => $user->id,
+                        'data' => json_encode([
+                            'ip' => $r->ip(),
+                            'user_agent' => $r->userAgent(),
+                            'url' => $r->fullUrl(),
+                            'last_active_at' => now()->toDateTimeString(),
+                        ]),
+                    ]);
+
                     $redirect =Session::get('url.intended');
                     //Session::forget('url.intended');
                     if($redirect){
@@ -98,6 +115,26 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+
+         $user = Auth::user();
+
+        if ($user) {
+            ActivityLog::create([
+                'uuid' => Str::uuid()->toString(),
+                'event' => 'logout',
+                'title' => "User Logged Out: {$user->name}",
+                'user_type' => get_class($user),
+                'user_id' => $user->id,
+                'loggable_type' => get_class($user),
+                'loggable_id' => $user->id,
+                'data' => json_encode([
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'url' => $request->fullUrl(),
+                    'logged_out_at' => now()->toDateTimeString(),
+                ]),
+            ]);
+        }
 
         // Laravel logout
         Auth::logout();

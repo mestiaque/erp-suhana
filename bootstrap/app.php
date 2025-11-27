@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\LogUserActivity;
 use App\Http\Middleware\PermissionMiddleware;
 use App\Http\Middleware\RedirectUserMiddleware;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'redirectUser' => RedirectUserMiddleware::class,
+            'redirectUser' => RedirectUserMiddleware::class,
+            'logUserActivity' => LogUserActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

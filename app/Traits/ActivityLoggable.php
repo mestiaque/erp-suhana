@@ -56,5 +56,28 @@ trait ActivityLoggable
             'loggable_id' => $model->id,
             'data' => $data
         ]);
+
+        if ($user) {
+            self::logUserActivity($user);
+        }
+    }
+
+
+    protected static function logUserActivity($user)
+    {
+        ActivityLog::create([
+            'uuid' => Str::uuid(),
+            'event' => 'user_active',
+            'title' => "User Active: {$user->name}",
+            'user_type' => get_class($user),
+            'user_id' => $user->id,
+            'loggable_type' => get_class($user),
+            'loggable_id' => $user->id,
+            'data' => [
+                'last_active_at' => now()->toDateTimeString(),
+                'ip' => request()->ip() ?? null,
+                'user_agent' => request()->userAgent() ?? null,
+            ]
+        ]);
     }
 }
