@@ -2,50 +2,51 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Auth;
-use Str;
-use Hash;
-use File;
 use DB;
 use Pdf;
+use Str;
+use Auth;
+use File;
+use Hash;
 use Image;
 use Artisan;
 use Session;
 use Validator;
-use Redirect,Response;
 use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Post;
-use App\Models\Company;
-use App\Models\CompanyPerson;
-use App\Models\CompanyMachinery;
-use App\Models\ReffMember;
-use App\Models\Transaction;
-use App\Models\PostExtra;
-use App\Models\Service;
-use App\Models\Task;
-use App\Models\Visit;
-use App\Models\Note;
 use App\Models\Lead;
-use App\Models\LeadPerson;
-use App\Models\Meeting;
-use App\Models\Salary;
-use App\Models\Expense;
-use App\Models\ExpenseIou;
-use App\Models\Review;
-use App\Models\General;
-use App\Models\Country;
-use App\Models\UserLocation;
+use App\Models\Note;
+use App\Models\Post;
+use App\Models\Task;
+use App\Models\User;
 use App\Models\Media;
+use App\Models\Order;
+use App\Models\Visit;
+use App\Models\Review;
+use App\Models\Salary;
+use Redirect,Response;
+use App\Models\Company;
+use App\Models\Country;
+use App\Models\Expense;
+use App\Models\General;
+use App\Models\Meeting;
+use App\Models\Service;
 use App\Models\Attribute;
+use App\Models\OrderItem;
+use App\Models\PostExtra;
+use App\Models\ExpenseIou;
+use App\Models\LeadPerson;
 use App\Models\Permission;
+use App\Models\ReffMember;
+use App\Models\ActivityLog;
+use App\Models\Transaction;
+use Illuminate\Support\Arr;
+use App\Models\UserLocation;
+use Illuminate\Http\Request;
+use App\Models\CompanyPerson;
 use App\Models\PostAttribute;
 use Illuminate\Validation\Rule;
+use App\Models\CompanyMachinery;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 class AdminController extends Controller
 {
@@ -75,15 +76,135 @@ class AdminController extends Controller
     }
 
     public function dashboard(){
-
         $reports =[
             'total_expenses' => Expense::sum('amount'),
             'total_IOU' => ExpenseIou::where('status','pending')->sum('amount'),
         ];
 
-        return view('Admin.dashboard',compact('reports'));
+        $userActivity = $this->getUserActivityReport(new Request());
+        return view('Admin.dashboard',compact('reports', 'userActivity'));
     }
 
+    public function getUserActivityReport(Request $request)
+    {
+        $start = Carbon::now()->subDays(30);
+        $end = Carbon::now();
+        $tenMinutesAgo = Carbon::now()->subMinutes(10);
+
+        $limit = $request->input('limit', 10); // default 10
+        $all = $request->input('all', false); // if true, use paginate
+
+        // 1. Login logs in last 30 days
+        $loginLogsByUser = ActivityLog::where('event', 'login')
+            ->whereBetween('created_at', [$start, $end])
+            ->select('user_id', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
+        $userIds = $loginLogsByUser->keys();
+
+        if ($userIds->isEmpty()) {
+            return collect(); // no users
+        }
+
+        // 2. Last active logs for all users
+        $lastActive = ActivityLog::whereIn('user_id', $userIds)
+            ->where('event', 'user_active')
+            ->whereBetween('created_at', [$start, $end])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
+        // 3. Recent activity and logout in last 10 minutes
+        $recentActiveLogs = ActivityLog::whereIn('user_id', $userIds)
+            ->where('event', 'user_active')
+            ->where('created_at', '>=', $tenMinutesAgo)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
+        $recentLogoutLogs = ActivityLog::whereIn('user_id', $userIds)
+            ->where('event', 'logout')
+            ->where('created_at', '>=', $tenMinutesAgo)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
+        // 4. Determine active users
+        $activeUserIds = [];
+        foreach ($recentActiveLogs as $userId => $logs) {
+            $lastActiveTime = $logs->first()->created_at;
+            $lastLogoutTime = $recentLogoutLogs->get($userId)?->first()?->created_at ?? null;
+
+            if (!$lastLogoutTime || $lastActiveTime->gt($lastLogoutTime)) {
+                $activeUserIds[] = $userId;
+            }
+        }
+
+        // 5. Get user info
+        $users = User::whereIn('id', $userIds)
+            ->select('id', 'name', 'mobile')
+            ->get()
+            ->keyBy('id');
+
+        // 6. Build report
+        $userActivity = collect($userIds)->map(function ($userId) use ($users, $loginLogsByUser, $lastActive, $activeUserIds) {
+            $user = $users[$userId];
+
+            $lastLogin = $loginLogsByUser->get($userId)?->first()?->created_at ?? null;
+            $lastActiveAt = $lastActive->get($userId)?->first()?->created_at ?? null;
+
+            return [
+                'name' => $user->name,
+                'mobile' => $user->mobile,
+                'login_at' => $lastLogin ? $lastLogin->format('d.m.Y h:i A') : null,
+                'last_active_at' => $lastActiveAt ? $lastActiveAt->format('d.m.Y h:i A') : null,
+                'active_status' => in_array($userId, $activeUserIds),
+                'last_active_ago' => $lastActiveAt ? $lastActiveAt->diffForHumans() : null,
+            ];
+        });
+
+        // 7. Sort: active first, then inactive; both by last_active_at desc
+        // $userActivity = $userActivity->sort(function ($a, $b) {
+        //     if ($a['active_status'] && !$b['active_status']) return -1;
+        //     if (!$a['active_status'] && $b['active_status']) return 1;
+
+        //     $aTime = $a['last_active_at'] ? Carbon::createFromFormat('d.m.Y h:i A', $a['last_active_at']) : Carbon::minValue();
+        //     $bTime = $b['last_active_at'] ? Carbon::createFromFormat('d.m.Y h:i A', $b['last_active_at']) : Carbon::minValue();
+
+        //     return $bTime->timestamp <=> $aTime->timestamp;
+        // })->values();
+
+        $userActivity = $userActivity->sort(function ($a, $b) {
+            if ($a['active_status'] && !$b['active_status']) return -1;
+            if (!$a['active_status'] && $b['active_status']) return 1;
+
+            $aTime = $a['last_active_at']
+                ? Carbon::createFromFormat('d.m.Y h:i A', $a['last_active_at'])
+                : Carbon::createFromTimestamp(0);
+
+            $bTime = $b['last_active_at']
+                ? Carbon::createFromFormat('d.m.Y h:i A', $b['last_active_at'])
+                : Carbon::createFromTimestamp(0);
+
+            return $bTime->timestamp <=> $aTime->timestamp;
+        })->values();
+
+        // 8. Handle pagination or limit
+        if ($all) {
+            // Use Laravel LengthAwarePaginator
+            $page = LengthAwarePaginator::resolveCurrentPage();
+            $perPage = $limit;
+            $currentItems = $userActivity->slice(($page - 1) * $perPage, $perPage)->values();
+            return new LengthAwarePaginator($currentItems, $userActivity->count(), $perPage, $page, [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+            ]);
+        } else {
+            // Just return limited results
+            return $userActivity->take($limit);
+        }
+    }
 
     public function myProfile(Request $r){
       $user =Auth::user();
@@ -10587,7 +10708,6 @@ class AdminController extends Controller
 
       //Update User Profile Start
       if($action=='update' && $r->isMethod('post')){
-
             $check = $r->validate([
                 'name' => 'required|max:100',
                 'email' => 'nullable|max:100|unique:users,email,'.$user->id,
@@ -10644,7 +10764,7 @@ class AdminController extends Controller
             if($user->id!=Auth::id() && Auth::user()->permission_id==1){
 
                 if($r->role){
-                    $user->admin=true;
+                    // $user->admin=true;
                     $user->permission_id=$r->role;
                     $user->addedby_at=Carbon::now();
                     $user->addedby_id=Auth::id();
