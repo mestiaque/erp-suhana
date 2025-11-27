@@ -52,7 +52,6 @@ return [
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create/Edit',
-                    'view'   => 'View',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
