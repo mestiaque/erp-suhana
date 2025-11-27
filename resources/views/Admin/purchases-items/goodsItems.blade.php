@@ -14,6 +14,10 @@
     .loadImg img {
         max-width: 100px;
     }
+    table.table thead {
+    background: #7fd0b42e;
+    color: #3c3a3a;
+}
 
 </style>
 @endpush @section('contents')

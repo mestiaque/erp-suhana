@@ -48,7 +48,7 @@
              </a>
          </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="background: #2bef9d0d; padding: 10px; border-radius: 10px;">
         @include(adminTheme().'alerts')
         <form action="{{route('admin.expenseIOUReports')}}">
             <div class="row">

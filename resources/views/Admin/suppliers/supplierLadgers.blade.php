@@ -9,6 +9,7 @@
         max-width: 64px;
         max-height: 64px;
     }
+    
 </style>
 @endpush
 
