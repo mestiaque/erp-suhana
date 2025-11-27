@@ -4,6 +4,27 @@
 <title>{{ websiteTitle('Purchase Receive List') }}</title>
 @endsection
 
+@push('css')
+<style type="text/css">
+table.table thead {
+    background: #7fd0b42e;
+    color: #3c3a3a;
+}
+table.table a {
+    color: #000;
+}
+.badge-warning {
+    color: #000;
+    background-color: #d9a50c4d;
+}
+.badge-success {
+    color: #035415;
+    background-color: #17e64642;
+}
+    
+</style>
+@endpush
+
 @section('contents')
     <div class="flex-grow-1">
         <div class="card mb-30">

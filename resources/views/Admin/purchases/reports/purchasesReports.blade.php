@@ -4,7 +4,22 @@
 @endsection
 
 @push('css')
-<style type="text/css"></style>
+<style type="text/css">
+    table.table thead {
+    background: #7fd0b42e;
+    color: #3c3a3a;
+}
+span {
+    margin-bottom: 8px;
+}
+
+span b {
+    margin-right: 5px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #7e7e7e;
+}
+</style>
 @endpush
 
 @section('contents')
@@ -127,7 +142,7 @@
                     @endforeach
 
                     <div>
-                        <p style="font-size: 24px;text-align: center;">
+                        <p style="font-size: 20px;text-align: center;">
                             <b>Total Qty:</b> {{number_format($orders->sum('total_qty'))}}
                             <b>Total Amount:</b> {{number_format($orders->sum('grand_total'),2)}}
                         </p>
