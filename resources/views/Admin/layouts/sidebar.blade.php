@@ -1,7 +1,7 @@
 <div class="sidemenu-area">
     <div class="sidemenu-header">
         <a href="" class="navbar-brand d-flex align-items-center">
-            <img src="{{ asset(general()->logo()) }}" alt="logo" />
+            <img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height: 50px;" />
         </a>
 
         <div class="burger-menu d-none d-lg-block">
