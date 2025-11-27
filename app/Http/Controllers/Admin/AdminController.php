@@ -47,6 +47,7 @@ use App\Models\PostAttribute;
 use Illuminate\Validation\Rule;
 use App\Models\CompanyMachinery;
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AdminController extends Controller
 {
@@ -87,10 +88,10 @@ class AdminController extends Controller
 
     public function getUserActivityReport(Request $request)
     {
+        $this->tollaranceTime = 10 ;
         $start = Carbon::now()->subDays(30);
         $end = Carbon::now();
-        $tenMinutesAgo = Carbon::now()->subMinutes(10);
-
+        $nMinutesAgo = Carbon::now()->subMinutes($this->tollaranceTime);
         $limit = $request->input('limit', 10); // default 10
         $all = $request->input('all', false); // if true, use paginate
 
@@ -119,14 +120,14 @@ class AdminController extends Controller
         // 3. Recent activity and logout in last 10 minutes
         $recentActiveLogs = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'user_active')
-            ->where('created_at', '>=', $tenMinutesAgo)
+            ->where('created_at', '>=', $nMinutesAgo)
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('user_id');
 
         $recentLogoutLogs = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'logout')
-            ->where('created_at', '>=', $tenMinutesAgo)
+            ->where('created_at', '>=', $nMinutesAgo)
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('user_id');
@@ -161,7 +162,7 @@ class AdminController extends Controller
                 'login_at' => $lastLogin ? $lastLogin->format('d.m.Y h:i A') : null,
                 'last_active_at' => $lastActiveAt ? $lastActiveAt->format('d.m.Y h:i A') : null,
                 'active_status' => in_array($userId, $activeUserIds),
-                'last_active_ago' => $lastActiveAt ? $lastActiveAt->diffForHumans() : null,
+                'last_active_ago' => $lastActiveAt ? $lastActiveAt->copy()->subMinutes($this->tollaranceTime)->diffForHumans() : null,
             ];
         });
 
