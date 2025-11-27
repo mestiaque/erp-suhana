@@ -11,9 +11,11 @@
                 <h3>Purchase Receive List</h3>
 
                 <div class="dropdown d-flex">
+                    @can('purchases_received.add')
                     <a href="javascript:void(0)" class="btn-custom primary mr-1" style="padding:5px 15px;" data-toggle="modal" data-target="#createReceiveModal"  >
                         <i class="fa fa-plus"></i> Add Receive
                     </a>
+                    @endcan
                     <a href="{{route('admin.purchasesReceived')}}" class="btn-custom yellow">
                         <i class="bx bx-rotate-left"></i>
                     </a>
@@ -113,11 +115,17 @@
                                         @endif
                                     </td>
                                     <td>{{ $r->created_at->format('d.m.Y') }}</td>
-                                    <td>
-                                        <a href="{{route('admin.purchasesReceivedAction',['edit',$r->id])}}" class="btn-custom"><i class="bx bx-edit"></i></a>
+                                    <td class="text-center">
+                                        @if(can('purchases_received.edit') || can('purchases_received.delete'))
+                                        @can('purchases_received.edit')
+                                        <a href="{{route('admin.purchasesReceivedAction',['edit',$r->id])}}" class="btn-custom success"><i class="bx bx-edit"></i></a>
+                                        @endcan
+                                        @can('purchases_received.delete')
                                         <a href="{{route('admin.purchasesReceivedAction',['delete',$r->id])}}"
-                                        onclick="return confirm('Are You Sure To Delete?')"
-                                        class="btn-custom danger"><i class="bx bx-trash"></i></a>
+                                            onclick="return confirm('Are You Sure To Delete?')"
+                                            class="btn-custom danger"><i class="bx bx-trash"></i></a>
+                                        @endcan
+                                        @else -- @endif
                                     </td>
                                 </tr>
                             @endforeach

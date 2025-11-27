@@ -19,22 +19,28 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Purchases Items List</h3>
          <div class="dropdown">
+            @can('purchases_items_units.list')
              <a href="javascript:void(0)" class="btn-custom success" data-toggle="modal" data-target="#Units" style="padding:5px 15px;">
                  <i class="bx bx-list"></i> Units
              </a>
+             @endcan
+             @can('purchases_items_categories.list')
              <a href="javascript:void(0)" class="btn-custom info" data-toggle="modal" data-target="#Categories" style="padding:5px 15px;">
                  <i class="bx bx-list"></i> Categories
              </a>
+             @endcan
+             @can('purchases_items.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddItem" style="padding:5px 15px;">
                  <i class="bx bx-plus"></i> items
              </a>
+             @endcan
              <a href="{{route('admin.purchasesItems')}}" class="btn-custom yellow">
                  <i class="bx bx-rotate-left"></i>
              </a>
@@ -42,41 +48,35 @@
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                    <form action="{{route('admin.purchasesItems')}}">
-                        <div class="row">
-                            <div class="col-md-12 mb-0">
-                                <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Item Name" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <form action="{{route('admin.purchasesItems')}}">
+            <div class="row">
+                <div class="col-md-12 mb-0">
+                    <div class="input-group">
+                        <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Item Name" class="form-control {{$errors->has('search')?'error':''}}" />
+                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
         <br>
         <form action="{{route('admin.purchasesItems')}}">
             <div class="row">
                 <div class="col-md-4">
+                    @if(can('purchases_items.edit') || can('purchases_items.delete'))
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            <option value="5">Delete</option>
+                            @can('purchases_items.edit')
+                                <option value="1">Active</option>
+                                <option value="2">Inactive</option>
+                            @endcan
+                            @can('purchases_items.delete')
+                                <option value="5">Delete</option>
+                            @endcan
                         </select>
                         <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
                     </div>
+                    @endif
                 </div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
@@ -92,6 +92,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px;width: 100px;padding-right:0;">
+                                @if(can('purchases_items.edit') || can('purchases_items.delete'))
                                 <div class="checkbox mr-3">
                                  <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                  <label class="cbx" for="checkall">
@@ -100,9 +101,10 @@
                                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                                          </svg>
                                      </span>
-                                     All <span class="checkCounter"></span> 
+                                     All <span class="checkCounter"></span>
                                  </label>
                                 </div>
+                                @else All @endif
                             </th>
                             <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 100px;">Unit</th>
@@ -116,6 +118,7 @@
                         @foreach($goodsItems as $i=>$designation)
                         <tr>
                             <td style="position:relative;">
+                                @if(can('purchases_items.edit') || can('purchases_items.delete'))
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$designation->id}}" type="checkbox" name="checkid[]" value="{{$designation->id}}" style="display: none;" />
                                      <label class="cbx" for="cbx_{{$designation->id}}">
@@ -126,6 +129,7 @@
                                          </span>
                                      </label>
                                  </div>
+                                 @endif
                                 <span style="margin:0 5px;">{{$goodsItems->currentpage()==1?$i+1:$i+($goodsItems->perpage()*($goodsItems->currentpage() - 1))+1}}</span>
                                 @if($designation->status=='active')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
@@ -150,12 +154,18 @@
                                 <span>{!!$designation->description!!}</span>
                             </td>
                             <td>{{$designation->created_at->format('d-m-Y')}}</td>
-                            <td class="center">
+                            <td class="text-center">
+                                @if(can('purchases_items.edit') || can('purchases_items.delete'))
+                                @can('purchases_items.edit')
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDesignations_{{$designation->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
                                 </a>
+                                @endcan
+                                @can('purchases_items.delete')
                                 <a href="{{route('admin.purchasesItemsAction',['delete',$designation->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                                @endcan
                             </td>
+                            @else -- @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -163,8 +173,8 @@
                 {{$goodsItems->links('pagination')}}
             </div>
         </form>
-        
-        
+
+
     </div>
 </div>
 </div>
@@ -180,12 +190,14 @@
                 </button>
             </div>
             <div class="modal-body">
+                @can('purchases_items_units.add')
                 <div class="addUnit">
                     <div class="input-group mb-2">
                         <input type="text" class="form-control mr-2 {{$errors->has('name')?'error':''}} addUnitInput" name="name" placeholder="Enter Unit Name" required="">
                         <button type="submit" data-url="{{route('admin.purchasesItemsAction','addUnit')}}" class="btn btn-primary addUnitBtn"><i class="bx bx-plus"></i> Add Unit</button>
                     </div>
                 </div>
+                @endcan
                 <div class="UnitsTableArea" style="position:relative;">
                     <div class="table-responsive UnitsTable" style="min-height:300px;">
                         @include(adminTheme().'purchases-items.includes.unitsTable')
@@ -207,12 +219,14 @@
             </button>
         </div>
         <div class="modal-body">
+            @can('purchases_items_categories.add')
             <div class="addCaterogy">
                 <div class="input-group mb-2">
                     <input type="text" class="form-control mr-2 {{$errors->has('name')?'error':''}} addCtgInput" name="name" placeholder="Enter Category Name" required="">
                     <button type="submit" data-url="{{route('admin.purchasesItemsAction','addCtg')}}" class="btn btn-primary addCtgBtn"><i class="bx bx-plus"></i> Add Category</button>
                 </div>
             </div>
+            @endcan
             <div class="CtgTableArea" style="position:relative;">
                 <div class="table-responsive CtgTable" style="min-height:300px;">
                     @include(adminTheme().'purchases-items.includes.categoryTable')
@@ -376,9 +390,9 @@
 
 
 
-@endsection 
+@endsection
 
-@push('js') 
+@push('js')
 
 <script>
     $(document).ready(function(){
@@ -386,14 +400,14 @@
 
         $('#Units').on('hidden.bs.modal', function () {
             if (reloadAfterClose) {
-                location.reload(); 
+                location.reload();
             }
             reloadAfterClose = false;
         });
-        
+
         $('#Categories').on('hidden.bs.modal', function () {
             if (reloadAfterClose) {
-                location.reload(); 
+                location.reload();
             }
             reloadAfterClose = false;
         });
@@ -401,7 +415,7 @@
         // Add Unit
         $(document).on('click', '.editUnit', function () {
             let url = $(this).data('url');
-            let tr = $(this).closest('tr');     
+            let tr = $(this).closest('tr');
             let name = tr.find('.unitName').text();
             $('.addUnitInput').val(name);
             $('.addUnitBtn')
@@ -497,7 +511,7 @@
                 }
             });
         });
-        
+
         // Add Category
         $(document).on('click', '.addCtgBtn', function () {
             var url =$(this).data('url');
@@ -532,7 +546,7 @@
 
         $(document).on('click', '.editCtg', function () {
             let url = $(this).data('url');
-            let tr = $(this).closest('tr');     
+            let tr = $(this).closest('tr');
             let name = tr.find('.ctgName').text();
             $('.addCtgInput').val(name);
             $('.addCtgBtn')

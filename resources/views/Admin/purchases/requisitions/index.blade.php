@@ -14,11 +14,11 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Requisition List</h3>
              <div class="dropdown">
-                {{-- @isset(json_decode(Auth::user()->permission->permission, true)['requision']['add']) --}}
+                @can('purchases_requisitions.add')
                  <a href="{{route('admin.purchasesRequisitionsAction','create')}}" class="btn-custom primary" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Requisition
                  </a>
-                {{-- @endisset --}}
+                @endcan
                  <a href="{{route('admin.purchasesRequisitions')}}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
@@ -51,16 +51,22 @@
             <form action="{{route('admin.purchasesRequisitions')}}">
                 <div class="row">
                     <div class="col-md-4">
+                        @if(can('purchases_requisitions.edit') || can('purchases_requisitions.delete'))
                         <div class="input-group mb-1">
                             <select class="form-control form-control-sm rounded-0" name="action" required>
                                 <option value="">Select Action</option>
+                                @can('purchases_requisitions.edit')
                                 <option value="1">Pending</option>
                                 <option value="2">Approved</option>
                                 <option value="3">Rejected</option>
+                                @endcan
+                                @can('purchases_requisitions.delete')
                                 <option value="4">Delete</option>
+                                @endcan
                             </select>
                             <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Sure?')">Apply</button>
                         </div>
+                        @endif
                     </div>
                     <div class="col-md-8">
                         <ul class="statuslist p-0">
@@ -75,7 +81,7 @@
 
                 <!-- Requisition Table -->
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th style="min-width: 100px;">SL</th>
@@ -112,9 +118,15 @@
                                     @endif
                                 </td>
                                 <td>{{$req->created_at->format('d.m.Y')}}</td>
-                                <td>
-                                    <a href="{{route('admin.purchasesRequisitionsAction',['edit',$req->id])}}" class="btn-custom"><i class="bx bx-edit"></i></a>
-                                    <a href="{{route('admin.purchasesRequisitionsAction',['delete',$req->id])}}" onclick="return confirm('Are You Want To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
+                                <td class="text-center">
+                                    @if(can('purchases_requisitions.edit') || can('purchases_requisitions.delete'))
+                                    @can('purchases_requisitions.edit')
+                                        <a href="{{route('admin.purchasesRequisitionsAction',['edit',$req->id])}}" class="btn-custom success"><i class="bx bx-edit"></i></a>
+                                    @endcan
+                                    @can('purchases_requisitions.delete')
+                                        <a href="{{route('admin.purchasesRequisitionsAction',['delete',$req->id])}}" onclick="return confirm('Are You Want To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
+                                    @endcan
+                                    @else -- @endif
                                 </td>
                             </tr>
                             @endforeach

@@ -8,6 +8,7 @@ use App\Models\General;
 use App\Models\Attribute;
 use App\Models\PostExtra;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 
 function general(){
@@ -336,5 +337,10 @@ if (!function_exists('hasChildPermission')) {
     }
 }
 
+if (! function_exists('can')) {
+    function can($ability, $arguments = []) {
+        return auth()->check() && Gate::allows($ability, $arguments);
+    }
+}
 
 

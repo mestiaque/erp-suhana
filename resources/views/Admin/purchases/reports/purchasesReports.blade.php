@@ -56,11 +56,11 @@
                 <style>
                     .tableReport tr th{
                         padding: 5px 10px;
-                        border: 1px solid #dee2e6;  
+                        border: 1px solid #dee2e6;
                     }
                     .tableReport tr td{
                         padding: 5px 10px;
-                        border: 1px solid #dee2e6;  
+                        border: 1px solid #dee2e6;
                     }
                 </style>
                 <div class="text-center mb-4">
@@ -84,14 +84,14 @@
                         <b>Date:</b> {{$order->created_at?->format('d-m-Y')}}
                         <b>Supplier:</b>
                         @if($order->supplier)
-                        {{$order->supplier->name}} {{$order->supplier->company_name?'- '.$order->supplier->company_name:''}}   
+                        {{$order->supplier->name}} {{$order->supplier->company_name?'- '.$order->supplier->company_name:''}}
                         @endif
                         <span style="float:right;">
                             <b>Due Bill:</b> {{numberFormat($order->due_amount,3)}}
                             <b>Creaqted By:</b> {{$order->user?$order->user->name:'-'}}
                         </span>
                     </span>
-                    <table class="table tableReport">
+                    <table class="table tableReport table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th style="min-width: 50px;width:50px;">SL</th>
@@ -113,7 +113,7 @@
                                     <td style="text-align:right">{{ numberFormat($item->total_price,3) }}</td>
                                 </tr>
                             @endforeach
-                        
+
                             <tr>
                                 <td></td>
                                 <td><b>Total</b></td>

@@ -9,11 +9,12 @@
         <div class="card mb-30">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3>Damage/Return List</h3>
-
                 <div class="dropdown d-flex">
+                    @can('purchases_damage_returns.add')
                     <a href="javascript:void(0)" class="btn-custom primary mr-1" style="padding:5px 15px;" data-toggle="modal" data-target="#createReceiveModal"  >
                         <i class="fa fa-plus"></i> Add Retun
                     </a>
+                    @endcan
                     <a href="{{route('admin.purchasesDamageReturn')}}" class="btn-custom yellow">
                         <i class="bx bx-rotate-left"></i>
                     </a>
