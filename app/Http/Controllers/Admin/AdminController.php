@@ -166,12 +166,27 @@ class AdminController extends Controller
         });
 
         // 7. Sort: active first, then inactive; both by last_active_at desc
+        // $userActivity = $userActivity->sort(function ($a, $b) {
+        //     if ($a['active_status'] && !$b['active_status']) return -1;
+        //     if (!$a['active_status'] && $b['active_status']) return 1;
+
+        //     $aTime = $a['last_active_at'] ? Carbon::createFromFormat('d.m.Y h:i A', $a['last_active_at']) : Carbon::minValue();
+        //     $bTime = $b['last_active_at'] ? Carbon::createFromFormat('d.m.Y h:i A', $b['last_active_at']) : Carbon::minValue();
+
+        //     return $bTime->timestamp <=> $aTime->timestamp;
+        // })->values();
+
         $userActivity = $userActivity->sort(function ($a, $b) {
             if ($a['active_status'] && !$b['active_status']) return -1;
             if (!$a['active_status'] && $b['active_status']) return 1;
 
-            $aTime = $a['last_active_at'] ? Carbon::createFromFormat('d.m.Y h:i A', $a['last_active_at']) : Carbon::minValue();
-            $bTime = $b['last_active_at'] ? Carbon::createFromFormat('d.m.Y h:i A', $b['last_active_at']) : Carbon::minValue();
+            $aTime = $a['last_active_at']
+                ? Carbon::createFromFormat('d.m.Y h:i A', $a['last_active_at'])
+                : Carbon::createFromTimestamp(0);
+
+            $bTime = $b['last_active_at']
+                ? Carbon::createFromFormat('d.m.Y h:i A', $b['last_active_at'])
+                : Carbon::createFromTimestamp(0);
 
             return $bTime->timestamp <=> $aTime->timestamp;
         })->values();
