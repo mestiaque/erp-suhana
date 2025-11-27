@@ -88,7 +88,7 @@ class AdminController extends Controller
 
     public function getUserActivityReport(Request $request)
     {
-        $this->tollaranceTime = 10 ;
+        $this->tollaranceTime = 5 ;
         $start = Carbon::now()->subDays(30);
         $end = Carbon::now();
         $nMinutesAgo = Carbon::now()->subMinutes($this->tollaranceTime);
@@ -162,7 +162,7 @@ class AdminController extends Controller
                 'login_at' => $lastLogin ? $lastLogin->format('d.m.Y h:i A') : null,
                 'last_active_at' => $lastActiveAt ? $lastActiveAt->format('d.m.Y h:i A') : null,
                 'active_status' => in_array($userId, $activeUserIds),
-                'last_active_ago' => $lastActiveAt ? $lastActiveAt->copy()->subMinutes($this->tollaranceTime)->diffForHumans() : null,
+                'last_active_ago' => $lastActiveAt ? $lastActiveAt->copy()->addMinutes($this->tollaranceTime)->diffForHumans() : null,
             ];
         });
 
