@@ -12,10 +12,7 @@
         border-radius: 3px;
         margin: 1px 3px;
     }
-    table.table thead {
-        background: #7fd0b42e;
-        color: #3c3a3a;
-    }
+   
 </style>
 @endpush
 

@@ -287,6 +287,84 @@ h4{
             font-weight: 600;
         }
 
+
+
+
+
+
+
+
+
+
+
+
+.header-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .data-table {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            font-size: 0.85rem;
+        }
+        .table .deliRport th {
+            background-color: #6c757d;
+            color: white;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .table tbody td {
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        .line-label {
+            font-weight: 600;
+            background-color: #e9ecef;
+            text-align: left;
+        }
+        .data-row {
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+        .total-column {
+            background-color: #fff3cd;
+            font-weight: 600;
+        }
+        .date-header {
+            font-size: 0.75rem;
+            padding: 5px;
+        }
+        .crossed-out {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .notes-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+
+
+
+
+
+
+
+
+
+
         @media (max-width: 1400px) {
             .production-table h2 {
                 font-size: 18px;
@@ -685,251 +763,159 @@ h4{
 
     <div>
 
-     <div class="">
-        <!-- <div class="header">
-            <h1>🏭 Line 14 - Daily Production Report</h1>
-            <div class="header-info">
-                <div><strong>Date:</strong> November 27, 2025</div>
-                <div><strong>Shift:</strong> Day Shift</div>
-                <div><strong>Style:</strong> DG-2547 Denim Jacket</div>
-                <div><strong>Supervisor:</strong> Sarah Johnson</div>
-            </div>
-        </div> -->
-
-        <!-- <div class="metrics">
-            <div class="metric-card">
-                <div class="metric-label">Target Production</div>
-                <div class="metric-value">1,680</div>
-                <div class="metric-subtext">units/day</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Actual Production</div>
-                <div class="metric-value">1,542</div>
-                <div class="metric-subtext">units completed</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Efficiency</div>
-                <div class="metric-value efficiency">91.8%</div>
-                <div class="metric-subtext">achievement rate</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Defect Rate</div>
-                <div class="metric-value defect-rate">2.3%</div>
-                <div class="metric-subtext">35 defective units</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Operators</div>
-                <div class="metric-value">28</div>
-                <div class="metric-subtext">active workers</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Downtime</div>
-                <div class="metric-value">42</div>
-                <div class="metric-subtext">minutes total</div>
-            </div>
-        </div> -->
-
-        <div class="production-table">
-            <h2>📊 Hourly Production Report</h2>
-            <table>
-                <thead>
+  
+  <div class="">
+        <div class="data-table">
+            <table class="table table-bordered table-striped mb-0">
+                <thead class="deliRport">
                     <tr>
-                        <th>Line No.</th>
-                        <th>Hour</th>
+                        <th style="width: 130px;">Line</th>
+                        <th>Style</th>
                         <th>Target</th>
-                        <th>Actual</th>
-                        <th>Variance</th>
-                        <th>Efficiency</th>
-                        <th>Defects</th>
-                        <th>Downtime</th>
-                        <th>Status</th>
+                        <th>8-9</th>
+                        <th>9-10</th>
+                        <th>10-11</th>
+                        <th>11-12</th>
+                        <th>12-01</th>
+                        <th>01-02</th>
+                        <th>02-03</th>
+                        <th>03-04</th>
+                        <th>04-05</th>
+                        <th>05-06</th>
+                        <th>06-07</th>
+                        <th>07-08</th>
+                        <th rowspan="2">Total</th>
                     </tr>
+               
                 </thead>
                 <tbody>
+                    <!-- Row 1: SONAR -->
                     <tr>
-                         <td>01</td>
-                        <td><strong>08:00 - 09:00</strong></td>
-                        <td>120</td>
-                        <td>115</td>
-                        <td>-5</td>
-                        <td class="status-good">95.8%</td>
-                        <td>2</td>
-                        <td>5 min</td>
-                        <td class="status-good">✓ Good</td>
+                        <td class="line-label">Flor 01 - Line 01</td>
+                        <td>11262A<br>T/S</td>
+                        <td>23-24</td>
+                        <td class="data-row">120</td>
+                        <td class="data-row">130</td>
+                        <td class="data-row">140</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">160</td>
+                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">170</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row">190</td>
+                        <td class="data-row">200</td>
+                        <td class="data-row">210</td>
+                        <td class="data-row">220</td>
+                        <td class="total-column">2000</td>
                     </tr>
+
+                    <!-- Row 2: HAVE -->
                     <tr>
-                         <td>02</td>
-                        <td><strong>09:00 - 10:00</strong></td>
-                        <td>120</td>
-                        <td>118</td>
-                        <td>-2</td>
-                        <td class="status-good">98.3%</td>
-                        <td>3</td>
-                        <td>0 min</td>
-                        <td class="status-good">✓ Good</td>
+                        <td class="line-label">Flor 01 - Line 02</td>
+                        <td>46<br>T/S</td>
+                        <td>22 - 12</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">160</td>
+                        <td class="data-row">170</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row">190</td>
+                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">200</td>
+                        <td class="data-row">210</td>
+                        <td class="data-row">220</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="total-column">1800</td>
                     </tr>
+
+                    <!-- Row 3: SENSOR -->
                     <tr>
-                         <td>03</td>
-                        <td><strong>10:00 - 11:00</strong></td>
-                        <td>120</td>
-                        <td>122</td>
-                        <td>+2</td>
-                        <td class="status-good">101.7%</td>
-                        <td>2</td>
-                        <td>0 min</td>
-                        <td class="status-good">✓ Excellent</td>
+                        <td class="line-label">Flor 01 - Line 03</td>
+                        <td>T/S</td>
+                        <td>28+18</td>
+                        <td class="data-row">80</td>
+                        <td class="data-row">90</td>
+                        <td class="data-row">100</td>
+                        <td class="data-row">110</td>
+                        <td class="data-row">120</td>
+                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">130</td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="total-column">730</td>
                     </tr>
+
+                    <!-- Row 4: SENSOR (continued) -->
                     <tr>
-                         <td>04</td>
-                        <td><strong>11:00 - 12:00</strong></td>
-                        <td>120</td>
-                        <td>110</td>
-                        <td>-10</td>
-                        <td class="status-warning">91.7%</td>
-                        <td>4</td>
-                        <td>8 min</td>
-                        <td class="status-warning">⚠ Below Target</td>
+                        <td class="line-label">Flor 02 - Line 01</td>
+                        <td>23+26F</td>
+                        <td>28+2-13</td>
+                        <td class="data-row">120</td>
+                        <td class="data-row">130</td>
+                        <td class="data-row">140</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">160</td>
+                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">170</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row">190</td>
+                        <td class="data-row">200</td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="total-column">1300</td>
                     </tr>
+
+                    <!-- Row 5: HAQUE -->
                     <tr>
-                         <td>05</td>
-                        <td><strong>12:00 - 13:00</strong></td>
-                        <td>120</td>
-                        <td>95</td>
-                        <td>-25</td>
-                        <td class="status-poor">79.2%</td>
-                        <td>3</td>
-                        <td>15 min</td>
-                        <td class="status-poor">✗ Lunch Break</td>
+                        <td class="line-label">Flor 02 - Line 02</td>
+                        <td>S. PANT<br>48<br>T/S</td>
+                        <td>22 - 13</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row">200</td>
+                        <td class="data-row">220</td>
+                        <td class="data-row">240</td>
+                        <td class="data-row">260</td>
+                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">280</td>
+                        <td class="data-row">200</td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="total-column">2000</td>
                     </tr>
+
+                    <!-- Row 6: S+M/30M -->
                     <tr>
-                         <td>06</td>
-                        <td><strong>13:00 - 14:00</strong></td>
-                        <td>120</td>
-                        <td>108</td>
-                        <td>-12</td>
-                        <td class="status-warning">90.0%</td>
-                        <td>2</td>
-                        <td>6 min</td>
-                        <td class="status-warning">⚠ Below Target</td>
+                        <td class="line-label">Flor 02 - Line 03</td>
+                        <td>72013<br>T/S</td>
+                        <td>24 - 13</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">160</td>
+                        <td class="data-row">170</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row">190</td>
+                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">200</td>
+                        <td class="data-row">160</td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="data-row"></td>
+                        <td class="total-column">1650</td>
                     </tr>
-                    <tr>
-                         <td>07</td>
-                        <td><strong>14:00 - 15:00</strong></td>
-                        <td>120</td>
-                        <td>117</td>
-                        <td>-3</td>
-                        <td class="status-good">97.5%</td>
-                        <td>3</td>
-                        <td>2 min</td>
-                        <td class="status-good">✓ Good</td>
-                    </tr>
-                    <tr>
-                         <td>08</td>
-                        <td><strong>15:00 - 16:00</strong></td>
-                        <td>120</td>
-                        <td>119</td>
-                        <td>-1</td>
-                        <td class="status-good">99.2%</td>
-                        <td>2</td>
-                        <td>0 min</td>
-                        <td class="status-good">✓ Good</td>
-                    </tr>
-                    <tr>
-                         <td>09</td>
-                        <td><strong>16:00 - 17:00</strong></td>
-                        <td>120</td>
-                        <td>114</td>
-                        <td>-6</td>
-                        <td class="status-good">95.0%</td>
-                        <td>3</td>
-                        <td>4 min</td>
-                        <td class="status-good">✓ Good</td>
-                    </tr>
-                    <tr>
-                         <td>10</td>
-                        <td><strong>17:00 - 18:00</strong></td>
-                        <td>120</td>
-                        <td>112</td>
-                        <td>-8</td>
-                        <td class="status-warning">93.3%</td>
-                        <td>2</td>
-                        <td>2 min</td>
-                        <td class="status-warning">⚠ Below Target</td>
-                    </tr>
-                    <tr>
-                         <td>11</td>
-                        <td><strong>18:00 - 19:00</strong></td>
-                        <td>120</td>
-                        <td>116</td>
-                        <td>-4</td>
-                        <td class="status-good">96.7%</td>
-                        <td>3</td>
-                        <td>0 min</td>
-                        <td class="status-good">✓ Good</td>
-                    </tr>
-                    <tr>
-                         <td>12</td>
-                        <td><strong>19:00 - 20:00</strong></td>
-                        <td>120</td>
-                        <td>118</td>
-                        <td>-2</td>
-                        <td class="status-good">98.3%</td>
-                        <td>2</td>
-                        <td>0 min</td>
-                        <td class="status-good">✓ Good</td>
-                    </tr>
-                    <tr>
-                         <td>13</td>
-                        <td><strong>20:00 - 21:00</strong></td>
-                        <td>120</td>
-                        <td>113</td>
-                        <td>-7</td>
-                        <td class="status-warning">94.2%</td>
-                        <td>2</td>
-                        <td>0 min</td>
-                        <td class="status-warning">⚠ Below Target</td>
-                    </tr>
-                    <tr>
-                         <td>14</td>
-                        <td><strong>21:00 - 22:00</strong></td>
-                        <td>120</td>
-                        <td>105</td>
-                        <td>-15</td>
-                        <td class="status-warning">87.5%</td>
-                        <td>2</td>
-                        <td>0 min</td>
-                        <td class="status-warning">⚠ Below Target</td>
-                    </tr>
+
                 </tbody>
             </table>
-            
-            <!-- <div style="margin-top: 20px;">
-                <strong>Overall Progress:</strong>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 91.8%"></div>
-                </div>
-            </div> -->
         </div>
 
-        <!-- <div class="summary">
-            <div>
-                <span>Total Production</span>
-                <strong>1,542 units</strong>
-            </div>
-            <div>
-                <span>Target Achievement</span>
-                <strong>91.8%</strong>
-            </div>
-            <div>
-                <span>Quality Rate</span>
-                <strong>97.7%</strong>
-            </div>
-            <div>
-                <span>Total Downtime</span>
-                <strong>42 minutes</strong>
-            </div>
-        </div> -->
+      
     </div>
+
 
     </div>
 

@@ -4,10 +4,6 @@
 @endsection
 @push('css')
 <style type="text/css">
-table.table thead {
-    background: #7fd0b42e;
-    color: #3c3a3a;
-}
 
 
 
