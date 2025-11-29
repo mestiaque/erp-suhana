@@ -120,6 +120,7 @@ return [
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
+                    'audit'  => 'Audit',
                     'delete' => 'Delete',
                     'all'    => 'All',
                 ],
@@ -137,8 +138,8 @@ return [
             'expenses_report' => [
                 'label'       => 'Expenses Report',
                 'permissions' => [
-                    'list' => 'List',
-                    'all'  => 'All',
+                    'list'  => 'List',
+                    'all'   => 'All',
                 ],
             ],
             'iou' => [

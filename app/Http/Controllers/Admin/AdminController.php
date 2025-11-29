@@ -3516,6 +3516,17 @@ class AdminController extends Controller
 
 
     public function expensesAction(Request $r,$action,$id=null){
+        if($action == 'audit'){
+            $auditIds = $r->audit_data;
+            $expensesToAudit = Expense::whereIn('id', $auditIds)->whereNull('audit_at')->get();
+            foreach ($expensesToAudit as $expense) {
+                $expense->audit_at = now();
+                $expense->audit_by = auth()->id();
+                $expense->save();
+            }
+            Session()->flash('success','You have successfully audited the report');
+            return redirect()->back();
+        }
 
         //Add Service  Start
         if($action=='create'){
@@ -4243,7 +4254,6 @@ class AdminController extends Controller
         if($r->summery){
             return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches'));
         }
-
 
         return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches'));
     }

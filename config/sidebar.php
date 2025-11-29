@@ -256,6 +256,120 @@ return [
         ],
     ],
 
+
+
+    [
+        'group_title' => 'PRODUCTION WORKFLOW',
+        [
+            'title'      => 'Order Management',
+            'icon'       => 'fa-solid fa-shopping-cart',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Buyer List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/buyers', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Order Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/create', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Order Status', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/status', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Order History', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/history', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Order Approval', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/approval', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Merchandising',
+            'icon'       => 'fa-solid fa-tags',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Style / Product Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/styles', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'BOM (Bill of Materials)', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/bom', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Costing & Quotation', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/costing', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Sample Approval', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/samples/approval', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Fabric & Trim Requirement', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/fabrics/requirement', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Planning',
+            'icon'       => 'fa-solid fa-calendar',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Production Plan', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/production', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Cutting Plan', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/cutting', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Line Assignment', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/line-assignment', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Capacity Planning', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/capacity', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Cutting',
+            'icon'       => 'fa-solid fa-cut',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Cutting Plan', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/plan', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Cut Panel / Bundle Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/panel', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Cutting Output', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/output', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Fabric Consumption Report', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/report', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Sewing / Production',
+            'icon'       => 'fa-solid fa-industry',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Line / Operator Assignment', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/line-assignment', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Daily Target vs Output', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/daily-target', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Defect Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/defect-entry', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Rework Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/rework-entry', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Bundle / Cartoon Tracking', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/bundle-tracking', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Finishing & Packing',
+            'icon'       => 'fa-solid fa-archive',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Quality Check (QC)', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/qc', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Ironing / Pressing', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/ironing', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Packing Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/packing', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Shipment Ready Status', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/shipment', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Shipping',
+            'icon'       => 'fa-solid fa-ship',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Shipment Schedule', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/shipping/schedule', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Shipment Tracking', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/shipping/tracking', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Invoice / Packing List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/shipping/invoice', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Machines / Lines',
+            'icon'       => 'fa-solid fa-cogs',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Machine List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/machines', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Line List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/lines', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+        [
+            'title'      => 'Units / Sizes / Colors',
+            'icon'       => 'fa-solid fa-palette',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                ['title' => 'Unit List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/units', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Size List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/sizes', 'icon_color' => 'text-warning', 'permission' => ''],
+                ['title' => 'Color List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/colors', 'icon_color' => 'text-warning', 'permission' => ''],
+            ]
+        ],
+    ],
+
+
     // App Settings
     [
         'group_title' => 'APP SETTING',

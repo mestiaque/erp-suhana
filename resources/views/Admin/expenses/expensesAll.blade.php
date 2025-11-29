@@ -183,7 +183,8 @@
                                  </div>
                                  @endcan
                                 <span style="margin:0 5px;">{{$expenses->currentpage()==1?$i+1:$i+($expenses->perpage()*($expenses->currentpage() - 1))+1}}</span>
-                                @if($expense->status=='active')
+
+                                @if(!is_null($expense->audit_at))
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
                                     <i class="bx bx-check-circle"></i>
                                 </span>
@@ -192,6 +193,7 @@
                                     <i class="bx bx-analyse"></i>
                                 </span>
                                 @endif
+
                             </td>
                             <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
                             <td>{{$expense->created_at->format('d.m.Y')}}</td>

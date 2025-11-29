@@ -123,16 +123,15 @@
 <div class="print-container">
 
     @if($expenses)
-
     <div class="text-center mb-2">
-        <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;">
-        <h2>{{general()->title}}</h2>
-        <p>
+        
+        <h2><img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 40px;"> {{general()->title}}</h2>
+        <p style="margin-top: -1rem;">
             {!!general()->address_one!!}<br>
             <b>Phone:</b> {{general()->mobile}}
             &nbsp; | &nbsp;
             <b>Email:</b> {{general()->email}}<br>
-            <b>Date:</b> {{ date('d M, Y') }}
+            {{-- <b>Date:</b> {{ date('d M, Y') }} --}}
         </p>
 
         <span style="display: inline-block;padding: 2px 25px;border: 1px solid #ddd;border-radius: 4px;background: #fbfbfb;">
@@ -158,7 +157,14 @@
         $leftSubTotal = 0;
         $rightSubTotal = 0;
     @endphp
-
+    <p> 
+        <b>Date:</b>
+        @if($from->toDateString() == $to->toDateString())
+            {{ $to->format('d.m.Y') }} 
+        @else
+            {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }} 
+        @endif
+    </p>
     <table>
         <thead>
             <tr>

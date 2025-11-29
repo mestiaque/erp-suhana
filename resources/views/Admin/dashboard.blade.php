@@ -418,7 +418,7 @@ h4{
                                     @empty
 
                                     @endforelse
-
+                                        
                                 </tbody>
                             </table>
                         </div>

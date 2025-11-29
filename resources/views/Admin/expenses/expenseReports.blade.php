@@ -189,20 +189,25 @@
                     border: 1px solid #dee2e6;
                 }
             </style>
-            <div class="text-center mb-4">
-                <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;">
-                <h2>{{general()->title}}</h2>
-                <p>
+            <div class="text-center mb-1">
+                
+                <h2><img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 40px;">   {{general()->title}}</h2>
+                <p style="margin-top: -10px; margin-bottom:2px">
                     {!!general()->address_one!!}
                     <br>
                     <b>Phone:</b> {{general()->mobile}}
                     <b>Email:</b> {{general()->email}}
-                    <br>
-                    <b>Date:</b>
-                    {{ date('d M, Y') }}
                 </p>
                 <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">Expense Report</span>
             </div>
+            <p style="margin-bottom:2px"> 
+                <b>Date:</b>
+                @if($from->toDateString() == $to->toDateString())
+                    {{ $to->format('d.m.Y') }} 
+                @else
+                    {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }} 
+                @endif
+            </p>
             <div class="table-responsive">
                 <table  class="table tableReport" >
                     <thead>
@@ -215,7 +220,7 @@
                             <th style="width: 100px;min-width: 100px;">Amount</th>
                             <th style="min-width: 120px;">Description</th>
                             <th style="width: 150px;min-width: 100px;">Method</th>
-                            <th style="width: 150px;min-width: 100px;">Branch/Factory</th>
+                            <th style="width: 150px;min-width: 100px;">Branch</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -254,6 +259,20 @@
         @else
         <span>No Report Data Found</span>
         @endif
+        <div class="w-100 text-center mt-4">
+            @if(count($expenses) > 0)
+                @can('expenses.audit')
+                    <form action="{{ route('admin.expensesAction', ['audit']) }}" method="POST">
+                        @csrf
+                        @foreach($expenses as $expense)
+                            <input type="hidden" name="audit_data[]" value="{{ $expense->id }}">
+                        @endforeach
+                        <button type="submit" class="btn bg-blue text-white" style="background:blue;" onclick="return confirm('Are you sure you want to audit this report?')"><i class="fa fa-check"></i> Audit Report</button>
+                    </form>
+                @endcan
+            @endif
+        </div>
+
     </div>
 </div>
 
