@@ -17,7 +17,7 @@
                  <div class="d-table-cell">
                      <div class="login-form">
                          <div class="logo">
-                             <a href="javascript:void(0)"><img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height 100px" /></a>
+                             <a href="javascript:void(0)"><img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height: 150px;" /></a>
                          </div>
                          <h2>Welcome </h2>
                          @include('alerts')
@@ -54,3 +54,11 @@
          <!-- End Login Area -->
 @endsection
 @push('js') @endpush
+
+
+
+
+
+
+
+

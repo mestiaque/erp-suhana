@@ -134,6 +134,7 @@
                                 @endcan
                             </td>
                             <td>
+                                <b>Date:</b> {{$transection->created_at->format('d-m-Y')}}<br>
                                 <b>TNX Id:</b> {{$transection->transection_id}} @if($transection->imageFile) <a href="{{asset($transection->imageFile->file_url)}}" target="_blank"><i class="bx bx-file"></i></a> @endif <br>
                                 <b>Accounts:</b> {{$transection->account?$transection->account->name:''}}
                                         @if($transection->account)
@@ -148,7 +149,7 @@
                                 @if($transection->billing_reason)
                                 <b>Bank Name:</b> {{$transection->billing_reason}} <br>
                                 @endif
-                                <b>Date:</b> {{$transection->created_at->format('d-m-Y')}}<br>
+                                
                             </td>
                             <td>
                                 <b>Previus:</b> <span style="color: #FF9800;"> {{numberFormat($transection->balance - $transection->amount,2)}} </span>
@@ -220,16 +221,16 @@
                         @endif
                     </div>
                     <div class="col-md-12 form-group">
-        			    <label for="name">Amount* </label>
-                        <input type="number" step="any" name="amount" class="form-control {{$errors->has('amount')?'error':''}}" placeholder="Amount" required="" >
+        			    <label for="name">Amount of BDT* </label>
+                        <input type="number" step="any" name="amount" class="form-control {{$errors->has('amount')?'error':''}}" placeholder="Amount of BDT" required="" >
         				@if ($errors->has('amount'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif
                  	</div>
                  	<div class="col-md-12 form-group">
-        			    <label for="name">Account*</label>
+        			    <label for="name">Receiver Account*</label>
                         <select class="form-control" name="account" required="">
-                            <option value="">Select Account</option>
+                            <option value="">Select Receiver Account</option>
                             @foreach($accountMethods as $method)
                             <option value="{{$method->id}}">{{$method->name}}</option>
                             @endforeach

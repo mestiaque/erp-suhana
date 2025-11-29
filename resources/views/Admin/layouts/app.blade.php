@@ -91,18 +91,17 @@
             padding: 5px;
             border-bottom: 1px solid #e3d9d9;
         }
-       table.table thead {
-          background: #7fd0b42e;
-          color: #3c3a3a;
-      }
-        .badge-warning
-        {
-            color: #ffffff;
-            background-color: #d9a50c;
-        }
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgb(0 0 0 / 2%) !important;
-        }
+      table.table thead {
+        background: #7c7c7c;
+        color: #fff !important;
+    }
+       .badge-warning
+Specificity: (0,1,0)
+ {
+    color: white;
+    background-color: #d9a50c;
+}
+       
      </style>
 
      @stack('css')

@@ -170,6 +170,18 @@
     				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
     				@endif
              	</div>
+                <div class="form-group">
+    			    <label for="name">Account Owner* </label>
+                    <select class="form-control" name="account_owner" required="">
+                        <option value="">Select Owner</option>
+                        @foreach($adminUsers as $user)
+                            <option value="{{$user->id}}" {{ $dpm?->user?->id == $user->id ? 'selected':'' }}>{{$user->name}}</option>
+                        @endforeach
+                    </select>
+    				@if ($errors->has('name'))
+    				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+    				@endif
+             	</div>
     			 <div class="form-group">
     				<label for="name">Description</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>

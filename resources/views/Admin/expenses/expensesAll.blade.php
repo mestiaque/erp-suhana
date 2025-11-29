@@ -40,13 +40,7 @@
         .stats-card-box h3 {
             font-size: 20px;
         }
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgb(0 0 0 / 3%) !important;
-}
-        table.table thead {
-    background: #7fd0b42e;
-    color: #3c3a3a;
-}
+
 
           @media (max-width: 1400px) {
             .stats-card-box h3 {
@@ -197,15 +191,17 @@
                                  </div>
                                  @endcan
                                 <span style="margin:0 5px;">{{$expenses->currentpage()==1?$i+1:$i+($expenses->perpage()*($expenses->currentpage() - 1))+1}}</span>
-                                @if($expense->status=='active')
-                                <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
-                                    <i class="bx bx-check-circle"></i>
-                                </span>
-                                @else
-                                <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
-                                    <i class="bx bx-analyse"></i>
-                                </span>
-                                @endif
+
+                                    @if(!is_null($expense->audit_at))
+                                    <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;" data-bs-toggle="tooltip" title="Audit At {{ $expense->audit_at?->format('d.m.Y h:i A') }}">
+                                        <i class="bx bx-check-circle"></i>
+                                    </span>
+                                    @else
+                                    <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;" data-bs-toggle="tooltip" title="Pending for Audit">
+                                        <i class="bx bx-analyse"></i>
+                                    </span>
+                                    @endif
+
                             </td>
                             <td>{{ str_pad($expense->id, 10, '0', STR_PAD_LEFT) }}</td>
                             <td>{{$expense->created_at->format('d.m.Y')}}</td>
@@ -816,6 +812,20 @@
 
 <script>
     $(document).ready(function(){
+
+    $(function () {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+            new bootstrap.Tooltip(el, {
+                container: 'body',      // tooltip ke body te render korbe
+                placement: 'right',     // primary placement
+                fallbackPlacements: ['left', 'top', 'bottom'], // jodi right e space na thake
+                boundary: 'viewport'    // viewport er bhitore tooltip thakbe
+            });
+        });
+    });
+
+
+
 
         $(document).on('click', '.printBtn', function () {
 
