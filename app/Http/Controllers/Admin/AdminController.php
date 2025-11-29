@@ -5226,6 +5226,7 @@ class AdminController extends Controller
             $method->status =$r->status?'active':'inactive';
             $method->fetured =$r->lc_status?1:0;
             $method->editedby_id =Auth::id();
+            $method->addedby_id =$r->account_owner;
             $method->created_at =$r->created_at?:Carbon::now();
             $method->save();
 
