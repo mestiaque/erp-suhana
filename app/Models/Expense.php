@@ -26,6 +26,11 @@ class Expense extends Model
      * 
      * 
      ****/
+
+    protected $casts = [
+        'audit_at' => 'datetime',
+    ];
+
      
     public function imageFile(){
     	return $this->hasOne(Media::class,'src_id')->where('src_type',8)->where('use_Of_file',1);
@@ -53,6 +58,10 @@ class Expense extends Model
     
     public function transection(){
     	return $this->hasOne(Transaction::class,'src_id')->where('type',5);
+    }
+
+    public function auditBy(){
+    	return $this->belongsTo(User::class,'audit_by');
     }
     
 
