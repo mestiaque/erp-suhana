@@ -4,7 +4,12 @@
 @endsection
 
 @push('css')
-<style type="text/css"></style>
+<style type="text/css">
+    table.table thead {
+    background: #7fd0b42e;
+    color: #3c3a3a;
+}
+</style>
 @endpush
 
 @section('contents')

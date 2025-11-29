@@ -23,7 +23,7 @@
             background-color: #fafafa;
             border: 1px solid #e0e0e0;
             padding: 10px 15px 10px 80px;
-            margin-bottom: 15px;
+            margin-bottom: 0
         }
         .stats-card-box .icon-box {
             display: flex;
@@ -39,6 +39,12 @@
         }
         .stats-card-box h3 {
             font-size: 20px;
+        }
+
+        @media (max-width: 1400px) {
+            .stats-card-box h3 {
+                font-size: 14px;
+            }
         }
 
 </style>
@@ -70,7 +76,6 @@
 
         <div class="row">
             <div class="col-lg-6 col-md-6">
-                <h5><b>Search I.O.U</b></h5>
                 <form action="{{route('admin.expensesIOU')}}">
                     <div class="row">
 
@@ -110,7 +115,7 @@
         </div>
         <form action="{{route('admin.expensesIOU')}}">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-4 mb-2">
                     @can('iou.delete')
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
@@ -176,11 +181,11 @@
                                  </div>
                                 <span style="margin:0 5px;">{{$expenseIou->currentpage()==1?$i+1:$i+($expenseIou->perpage()*($expenseIou->currentpage() - 1))+1}}</span>
                                 @if($Iou->status=='completed')
-                                <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
+                                <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:relative;">
                                     <i class="bx bx-check-circle"></i>
                                 </span>
                                 @else
-                                <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
+                                <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:relative;">
                                     <i class="bx bx-analyse"></i>
                                 </span>
                                 @endif
