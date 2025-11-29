@@ -22,10 +22,7 @@
     .dropdown-toggle::after{
         display:none;
     }
-         table.table thead {
-            background: #7fd0b42e;
-            color: #3c3a3a;
-        }
+     
     @media only screen and (min-width: 769px) {
 
         .activity-timeline-content ul li {

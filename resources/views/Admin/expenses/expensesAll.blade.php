@@ -40,13 +40,7 @@
         .stats-card-box h3 {
             font-size: 20px;
         }
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgb(0 0 0 / 3%) !important;
-}
-        table.table thead {
-    background: #7fd0b42e;
-    color: #3c3a3a;
-}
+
 
           @media (max-width: 1400px) {
             .stats-card-box h3 {
