@@ -102,9 +102,29 @@ h4{
 }
 
 .browser-used-box table thead th{
-        color: #000 !important;
+        color: #fff !important;
 }
 
+.value-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+/* Colors */
+.low-performance {
+    background: #ea3a3b;  /* Red */
+    color: #fff;
+}
+.medium-performance {
+    background: #c8ffcd; /* Light Green */
+    color: #000;
+}
+.high-performance {
+    background: #00994d; /* Deep Green */
+    color: #fff;
+}
 
 
 /* production report css */
@@ -292,12 +312,6 @@ h4{
 
 
 
-
-
-
-
-
-
 .header-info {
             background: white;
             padding: 15px;
@@ -336,7 +350,7 @@ h4{
             font-size: 0.75rem;
         }
         .total-column {
-            background-color: #fff3cd;
+            background-color: #effff6c7;
             font-weight: 600;
         }
         .date-header {
@@ -356,14 +370,11 @@ h4{
         }
 
 
-
-
-
-
-
-
-
-
+        .line-label img {
+            width: 35px;
+            display: block;
+            background: #19ff5b;
+        }
 
         @media (max-width: 1400px) {
             .production-table h2 {
@@ -765,25 +776,25 @@ h4{
 
   
   <div class="">
-        <div class="data-table">
+        <div class="table-responsive data-table">
             <table class="table table-bordered table-striped mb-0">
                 <thead class="deliRport">
                     <tr>
-                        <th style="width: 130px;">Line</th>
-                        <th>Style</th>
+                        <th style="min-width: 130px;">Line</th>
+                        <th style="min-width: 125px;">Style</th>
                         <th>Target</th>
-                        <th>8-9</th>
-                        <th>9-10</th>
-                        <th>10-11</th>
-                        <th>11-12</th>
-                        <th>12-01</th>
-                        <th>01-02</th>
-                        <th>02-03</th>
-                        <th>03-04</th>
-                        <th>04-05</th>
-                        <th>05-06</th>
-                        <th>06-07</th>
-                        <th>07-08</th>
+                        <th>8-9 <span>AM</span></th>
+                        <th>9-10 <span>AM</span></th>
+                        <th>10-11 <span>AM</span></th>
+                        <th>11-12 <span>AM</span></th>
+                        <th>12-01 <span>PM</span></th>
+                        <th>01-02 <span>PM</span></th>
+                        <th>02-03 <span>PM</span></th>
+                        <th>03-04 <span>PM</span></th>
+                        <th>04-05 <span>PM</span></th>
+                        <th>05-06 <span>PM</span></th>
+                        <th>06-07 <span>PM</span></th>
+                        <th>07-08 <span>PM</span></th>
                         <th rowspan="2">Total</th>
                     </tr>
                
@@ -791,121 +802,139 @@ h4{
                 <tbody>
                     <!-- Row 1: SONAR -->
                     <tr>
-                        <td class="line-label">Flor 01 - Line 01</td>
-                        <td>11262A<br>T/S</td>
-                        <td>23-24</td>
+                        <td class="line-label">
+                            <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
+                            Flor 01 - Line 01
+                        </td>
+                        <td>11262A T/S</td>
+                        <td>150</td>
                         <td class="data-row">120</td>
                         <td class="data-row">130</td>
                         <td class="data-row">140</td>
-                        <td class="data-row">150</td>
+                        <td class="data-row">111</td>
                         <td class="data-row">160</td>
-                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
-                        <td class="data-row">170</td>
+                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
+                        <td class="data-row">130</td>
                         <td class="data-row">180</td>
-                        <td class="data-row">190</td>
+                        <td class="data-row">90</td>
                         <td class="data-row">200</td>
                         <td class="data-row">210</td>
-                        <td class="data-row">220</td>
+                        <td class="data-row">130</td>
                         <td class="total-column">2000</td>
                     </tr>
 
                     <!-- Row 2: HAVE -->
                     <tr>
-                        <td class="line-label">Flor 01 - Line 02</td>
-                        <td>46<br>T/S</td>
-                        <td>22 - 12</td>
+                        <td class="line-label">
+                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
+                            Flor 01 - Line 02
+                        </td>
+                        <td>46 T/S</td>
+                        <td>160</td>
                         <td class="data-row">150</td>
                         <td class="data-row">160</td>
-                        <td class="data-row">170</td>
-                        <td class="data-row">180</td>
+                        <td class="data-row">70</td>
+                        <td class="data-row">130</td>
                         <td class="data-row">190</td>
-                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
-                        <td class="data-row">200</td>
+                        <td class="data-row"style="color: #e1000a;background: #f9ecef;">Breack</td>
+                        <td class="data-row">140</td>
                         <td class="data-row">210</td>
                         <td class="data-row">220</td>
-                        <td class="data-row">180</td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
+                        <td class="data-row">120</td>
+                        <td class="data-row">170</td>
+                        <td class="data-row">134</td>
                         <td class="total-column">1800</td>
                     </tr>
 
                     <!-- Row 3: SENSOR -->
                     <tr>
-                        <td class="line-label">Flor 01 - Line 03</td>
+                        <td class="line-label">
+                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
+                            Flor 01 - Line 03
+                        </td>
                         <td>T/S</td>
-                        <td>28+18</td>
+                        <td>140</td>
                         <td class="data-row">80</td>
-                        <td class="data-row">90</td>
-                        <td class="data-row">100</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">160</td>
                         <td class="data-row">110</td>
                         <td class="data-row">120</td>
-                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
+                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
+                        <td class="data-row">120</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">120</td>
+                        <td class="data-row">170</td>
+                        <td class="data-row">100</td>
+                        <td class="data-row">140</td>
                         <td class="total-column">730</td>
                     </tr>
 
                     <!-- Row 4: SENSOR (continued) -->
                     <tr>
-                        <td class="line-label">Flor 02 - Line 01</td>
+                        <td class="line-label">
+                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
+                            Flor 02 - Line 01
+                        </td>
                         <td>23+26F</td>
-                        <td>28+2-13</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">140</td>
+                        <td>150</td>
                         <td class="data-row">150</td>
-                        <td class="data-row">160</td>
-                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
-                        <td class="data-row">170</td>
+                        <td class="data-row">130</td>
+                        <td class="data-row">120</td>
+                        <td class="data-row">140</td>
+                        <td class="data-row">130</td>
+                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
+                        <td class="data-row">120</td>
                         <td class="data-row">180</td>
                         <td class="data-row">190</td>
-                        <td class="data-row">200</td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
+                        <td class="data-row">130</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">111</td>
                         <td class="total-column">1300</td>
                     </tr>
 
                     <!-- Row 5: HAQUE -->
                     <tr>
-                        <td class="line-label">Flor 02 - Line 02</td>
-                        <td>S. PANT<br>48<br>T/S</td>
-                        <td>22 - 13</td>
-                        <td class="data-row">180</td>
+                        <td class="line-label">
+                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
+                            Flor 02 - Line 02
+                        </td>
+                        <td>S. PANT 48 T/S</td>
+                        <td>160</td>
+                        <td class="data-row">130</td>
                         <td class="data-row">200</td>
-                        <td class="data-row">220</td>
+                        <td class="data-row">130</td>
                         <td class="data-row">240</td>
-                        <td class="data-row">260</td>
-                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
+                        <td class="data-row">90</td>
+                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
                         <td class="data-row">280</td>
                         <td class="data-row">200</td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
+                        <td class="data-row">80</td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">180</td>
+                        <td class="data-row">130</td>
                         <td class="total-column">2000</td>
                     </tr>
 
                     <!-- Row 6: S+M/30M -->
                     <tr>
-                        <td class="line-label">Flor 02 - Line 03</td>
-                        <td>72013<br>T/S</td>
-                        <td>24 - 13</td>
-                        <td class="data-row">150</td>
+                        <td class="line-label">
+                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
+                            Flor 02 - Line 03
+                        </td>
+                        <td>72013 T/S</td>
+                        <td>160</td>
+                        <td class="data-row">90</td>
                         <td class="data-row">160</td>
                         <td class="data-row">170</td>
-                        <td class="data-row">180</td>
+                        <td class="data-row">130</td>
                         <td class="data-row">190</td>
-                        <td class="data-row" style="color: #0fdeb8;">Breack</td>
-                        <td class="data-row">200</td>
+                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
+                        <td class="data-row">130</td>
                         <td class="data-row">160</td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
-                        <td class="data-row"></td>
+                        <td class="data-row">150</td>
+                        <td class="data-row">130</td>
+                        <td class="data-row">99</td>
+                        <td class="data-row">160</td>
                         <td class="total-column">1650</td>
                     </tr>
 
@@ -924,6 +953,38 @@ h4{
 @endsection
 
 @push('js')
+
+
+<script>
+   $(document).ready(function () {
+    $("table tbody tr").each(function () {
+        let target = parseInt($(this).find("td").eq(2).text());
+
+        $(this).find("td.data-row").each(function () {
+            let val = parseInt($(this).text());
+
+            if (!isNaN(val)) {
+                let percent = (val / target) * 100;
+
+                // wrap value with tag
+                $(this).html('<span class="value-tag">'+val+'</span>');
+
+                let tag = $(this).find("span");
+
+                if (percent <= 80) {
+                    tag.addClass("low-performance");
+                } 
+                else if (percent <= 90) {
+                    tag.addClass("medium-performance");
+                } 
+                else {
+                    tag.addClass("high-performance");
+                }
+            }
+        });
+    });
+});
+</script>
 
 <script src="{{asset('admin/assets/js/apexcharts/apexcharts.min.js')}}"></script>
 <script src="{{asset('admin/assets/js/apexcharts/apex-custom-line-chart.js')}}"></script>

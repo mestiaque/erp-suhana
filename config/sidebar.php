@@ -357,7 +357,7 @@ return [
             ]
         ],
         [
-            'title'      => 'Units / Sizes / Colors',
+            'title'      => 'Master Data',
             'icon'       => 'fa-solid fa-palette',
             'icon_color' => 'text-primary',
             'permission' => '',
@@ -365,10 +365,12 @@ return [
                 ['title' => 'Unit List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/units', 'icon_color' => 'text-warning', 'permission' => 'dev'],
                 ['title' => 'Size List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/sizes', 'icon_color' => 'text-warning', 'permission' => 'dev'],
                 ['title' => 'Color List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/colors', 'icon_color' => 'text-warning', 'permission' => 'dev'],
+                ['title' => 'Fabric List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/fabrics', 'icon_color' => 'text-warning', 'permission' => 'dev'],
+                ['title' => 'Style List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/styles', 'icon_color' => 'text-warning', 'permission' => 'dev'],
+                ['title' => 'Sku List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/skus', 'icon_color' => 'text-warning', 'permission' => 'dev'],
             ]
         ],
     ],
-
 
     // App Settings
     [
