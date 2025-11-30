@@ -7,12 +7,13 @@ use App\Http\Controllers\Auth\AuthController;
 // Admin Controller
 // ----------------------
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\Admin\OrderController;
 
 
 // ----------------------
 // Staff Controller
 // ----------------------
+use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\Admin\PurchasesController;
 use App\Http\Controllers\Admin\RequisitionController;
 
@@ -122,6 +123,38 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/accounts/statement',[AdminController::class,'accountsStatement'])->name('accountsStatement');
     Route::get('/accounts/list',[AdminController::class,'accounts'])->name('accounts');
     Route::any('/accounts/list/{action}/{id?}',[AdminController::class,'accountsAction'])->name('accountsAction');
+
+
+    //Buyer Order Management
+    Route::get('/buyers',[OrderController::class,'buyers'])->name('buyers');
+    Route::any('/buyers/{action}/{id?}',[OrderController::class,'buyersAction'])->name('buyersAction');
+
+
+    // Units
+    Route::get('/units', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('units');
+    Route::any('/units/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('unitsAction');
+
+    // Sizes
+    Route::get('/sizes', [OrderController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'sizes')->name('sizes');
+    Route::any('/sizes/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'sizes')->name('sizesAction');
+
+    // Colors
+    Route::get('/colors', [OrderController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'colors')->name('colors');
+    Route::any('/colors/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'colors')->name('colorsAction');
+
+    // Fabrics
+    Route::get('/fabrics', [OrderController::class, 'manageAttribute'])->defaults('type', 13)->defaults('view', 'fabrics')->name('fabrics');
+    Route::any('/fabrics/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 13)->defaults('view', 'fabrics')->name('fabricsAction');
+
+    // Styles
+    Route::get('/styles', [OrderController::class, 'manageAttribute'])->defaults('type', 14)->defaults('view', 'styles')->name('styles');
+    Route::any('/styles/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 14)->defaults('view', 'styles')->name('stylesAction');
+
+    // SKUs
+    Route::get('/skus', [OrderController::class, 'manageAttribute'])->defaults('type', 15)->defaults('view', 'skus')->name('skus');
+    Route::any('/skus/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 15)->defaults('view', 'skus')->name('skusAction');
+
+    //end buyer order
 
     // Branch Route
     Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
