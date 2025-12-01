@@ -52,12 +52,24 @@
                     </div>
 
                     <h5 class="mb-1"><strong>{{$user->name}}</strong></h5>
-                    <p class="mb-1"><i class="fas fa-phone me-1"></i> {{$user->mobile}}</p>
-                    <p class="mb-3"><i class="fas fa-envelope me-1"></i> {{$user->email}}</p>
+                    @if($user->mobile)
+                        <p class="mb-1"><i class="fas fa-phone me-1"></i> {{$user->mobile}}</p>
+                    @endif
+                    @if($user->email)
+                        <p class="mb-1"><i class="fas fa-envelope me-1"></i> {{$user->email}}</p>
+                    @endif
+                    @if($user->country_text)
+                        <p class="mb-3"><i class="fa-solid fa-flag me-1"></i> {{$user->country_text}}</p>
+                    @endif
+                    @if($user->company_name)
+                        <p class="mb-3"><i class="fa-solid fa-building"></i> {{$user->company_name}}</p>
+                    @endif
 
                     <!-- Info -->
                     <ul class="list-group list-group-flush text-start">
+                        @if($user->fullAddress())
                         <li class="list-group-item py-1"><strong>Address:</strong> {{$user->fullAddress()}}</li>
+                        @endif
                         <li class="list-group-item py-1"><strong>Start Date:</strong> {{$user->created_at->format('d M, Y')}}</li>
 
                         <li class="list-group-item py-1">

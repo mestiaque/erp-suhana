@@ -77,14 +77,14 @@
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" />
+                                    <label for="email">Email*</label>
+                                    <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required />
                                     @if ($errors->has('email'))
                                     <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="mobile">Mobile* </label>
+                                    <label for="mobile">Mobile </label>
                                     <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" />
                                     @if ($errors->has('mobile'))
                                     <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
@@ -94,6 +94,13 @@
                                     <div class="controls">
                                         <label for="address">Address Line</label>
                                         <input type="text" class="form-control {{$errors->has('address')?'error':''}}" name="address" placeholder="Enter Address" value="{{$user->address_line1?:old('address')}}" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-xl-12 col-lg-12 col-md-12">
+                                    <div class="controls">
+                                        <label for="country">Country</label>
+                                        <input type="text" class="form-control {{$errors->has('country')?'error':''}}" name="country" placeholder="Enter Country" value="{{$user->country_text?:old('country')}}" />
                                     </div>
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">

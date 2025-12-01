@@ -111,7 +111,14 @@ return [
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/samples',
                     'icon_color'  => 'text-warning',
-                    'permission'  => ''
+                    'permission'  => 'samples'
+                ],
+                [
+                    'title'      => 'Buyer List',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/buyers',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'buyers'
                 ],
             ]
         ],
