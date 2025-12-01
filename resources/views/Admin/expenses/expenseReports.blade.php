@@ -22,14 +22,19 @@
     .dropdown-toggle::after{
         display:none;
     }
-     
+    .signature-section{
+        display: none;
+    }
+
     @media only screen and (min-width: 769px) {
 
         .activity-timeline-content ul li {
             flex: 0 0 25%;
             max-width: 25%;
         }
+
     }
+
 
 
 
@@ -189,9 +194,36 @@
                     padding: 5px 10px;
                     border: 1px solid #dee2e6;
                 }
+
+                    @media print{
+                        .signature-section {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 10px;
+                            padding-top: 20px;
+                        }
+
+                        .signature-box {
+                            text-align: center;
+                            flex: 1;
+                        }
+
+                        .signature-line {
+                            border-top: 1px solid #000;
+                            margin: 40px 20px 5px 20px;
+                            position: relative;
+                        }
+
+                        .signature-text {
+                            font-family: 'Brush Script MT', cursive;
+                            font-size: 24px;
+                            margin-top: -35px;
+                            color: #1a3d0a;
+                        }
+                    }
             </style>
             <div class="text-center mb-1">
-                
+
                 <h2><img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 40px;">   {{general()->title}}</h2>
                 <p style="margin-top: -10px; margin-bottom:2px">
                     {!!general()->address_one!!}
@@ -201,12 +233,12 @@
                 </p>
                 <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">Expense Report</span>
             </div>
-            <p style="margin-bottom:2px"> 
+            <p style="margin-bottom:2px">
                 <b>Date:</b>
                 @if($from->toDateString() == $to->toDateString())
-                    {{ $to->format('d.m.Y') }} 
+                    {{ $to->format('d.m.Y') }}
                 @else
-                    {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }} 
+                    {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }}
                 @endif
             </p>
             <div class="table-responsive">
@@ -253,6 +285,28 @@
                         </tr>
                     </tfoot>
                 </table>
+            </div>
+
+
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <div class="signature-text" style="height: 1px;"></div>
+                    </div>
+                    <small>Accounts Officer</small>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <div class="signature-text" style="height: 1px;"></div>
+                    </div>
+                    <small>Accounts Manager</small>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">
+                        <div class="signature-text" style="height: 1px;" ></div>
+                    </div>
+                    <small>Managing Director</small>
+                </div>
             </div>
         </div>
 

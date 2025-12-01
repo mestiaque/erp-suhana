@@ -54,6 +54,33 @@
             page-break-inside: avoid !important;
         }
 
+
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 20px;
+        }
+
+        .signature-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 40px 20px 5px 20px;
+            position: relative;
+        }
+
+        .signature-text {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 24px;
+            margin-top: -35px;
+            color: #1a3d0a;
+        }
+
+
         /* -------- Print Mode -------- */
         @media print {
             body {
@@ -124,7 +151,7 @@
 
     @if($expenses)
     <div class="text-center mb-2">
-        
+
         <h2><img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 40px;"> {{general()->title}}</h2>
         <p style="margin-top: -1rem;">
             {!!general()->address_one!!}<br>
@@ -157,12 +184,12 @@
         $leftSubTotal = 0;
         $rightSubTotal = 0;
     @endphp
-    <p> 
+    <p>
         <b>Date:</b>
         @if($from->toDateString() == $to->toDateString())
-            {{ $to->format('d.m.Y') }} 
+            {{ $to->format('d.m.Y') }}
         @else
-            {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }} 
+            {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }}
         @endif
     </p>
     <table>
@@ -243,6 +270,28 @@
     @else
     <span>No Report Data Found</span>
     @endif
+
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">
+                <div class="signature-text" style="height: 1px;"></div>
+            </div>
+            <small>Accounts Officer</small>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">
+                <div class="signature-text" style="height: 1px;"></div>
+            </div>
+            <small>Accounts Manager</small>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">
+                <div class="signature-text" style="height: 1px;" ></div>
+            </div>
+            <small>Managing Director</small>
+        </div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
