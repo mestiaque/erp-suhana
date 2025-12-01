@@ -217,7 +217,12 @@
             </div>
             <div class="form-group">
                 <label>Country</label>
-                <input type="text" class="form-control" name="country" placeholder="Enter Country">
+                <select name="country" id="" class="form-control">
+                    <option value="">-- Select Country --</option>
+                    @foreach (geoData(1) as $c)
+                        <option value="{{ $c->name }}">{{ $c->name }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="form-group">
                 <label>Address Line</label>

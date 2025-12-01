@@ -100,7 +100,13 @@
                                 <div class="form-group col-xl-12 col-lg-12 col-md-12">
                                     <div class="controls">
                                         <label for="country">Country</label>
-                                        <input type="text" class="form-control {{$errors->has('country')?'error':''}}" name="country" placeholder="Enter Country" value="{{$user->country_text?:old('country')}}" />
+                                        <select name="country" id="" class="form-control">
+                                            <option value="">-- Select Country --</option>
+                                            @foreach (geoData(1) as $c)
+                                                <option value="{{ $c->name }}" {{ $user->country_text == $c->name ? 'selected':'' }}>{{ $c->name }}</option>
+                                            @endforeach
+                                        </select>
+
                                     </div>
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
