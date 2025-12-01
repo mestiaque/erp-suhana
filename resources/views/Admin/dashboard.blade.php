@@ -472,7 +472,7 @@ h4{
                     <i class="fa fa-check-circle"></i>
                 </div>
                 <span class="sub-title">Order total</span>
-                <h3>120 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
+                <h3>{{number_format($reports['total_order'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -489,7 +489,7 @@ h4{
                     <i class="fa fa-check-circle"></i>
                 </div>
                 <span class="sub-title">Confirm order</span>
-                <h3>150 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
+                <h3>{{number_format($reports['total_order_confirmed'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -505,8 +505,8 @@ h4{
                 <div class="icon-box">
                     <i class="fa fa-check-circle"></i>
                 </div>
-                <span class="sub-title">Peding order</span>
-                <h3>333 <span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
+                <span class="sub-title">Pending order</span>
+                <h3>{{number_format($reports['total_order_pending'])}} <span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -521,8 +521,8 @@ h4{
                 <div class="icon-box">
                     <i class="fa fa-times-circle"></i>
                 </div>
-                <span class="sub-title">Cansel order</span>
-                <h3>100 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 26.0%</span></h3>
+                <span class="sub-title">Cancelled order</span>
+                <h3>{{number_format($reports['total_order_cancelled'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 26.0%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -541,7 +541,7 @@ h4{
                     <i class="fa fa-user-friends"></i>
                 </div>
                 <span class="sub-title">Total Staff</span>
-                <h3>1000 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
+                <h3>{{number_format($reports['total_staff'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -557,7 +557,7 @@ h4{
                     <i class="fa fa-check-circle"></i>
                 </div>
                 <span class="sub-title">Present Staff</span>
-                <h3>760 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
+                <h3>{{number_format($reports['total_staff_present'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -574,7 +574,7 @@ h4{
                     <i class="fa fa-times-circle"></i>
                 </div>
                 <span class="sub-title">Absent Staff</span>
-                <h3>123<span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
+                <h3>{{number_format($reports['total_staff_absent'])}} <span class="badge badge-red"><i class="bx bx-down-arrow-alt"></i> 45.5%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -591,7 +591,7 @@ h4{
                     <i class="fa fa-briefcase"></i>
                 </div>
                 <span class="sub-title">Worker Present Staff</span>
-                <h3>856 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 88.0%</span></h3>
+                <h3>{{number_format($reports['total_staff_worked'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 88.0%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -610,7 +610,7 @@ h4{
                     <i class="fa fa-line-chart"></i>
                 </div>
                 <span class="sub-title">Total Sale Amount</span>
-                <h3>13456780 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
+                <h3>{{priceFullFormat($reports['total_sale'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 56.9%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
@@ -626,7 +626,7 @@ h4{
                     <i class="fa fa-file-text"></i>
                 </div>
                 <span class="sub-title">Order Amount</span>
-                <h3>13456780 <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
+                <h3>{{priceFullFormat($reports['total_order_amount'])}} <span class="badge"><i class="bx bx-up-arrow-alt"></i> 32.1%</span></h3>
 
                 <div class="progress-list">
                     <div class="bar-inner">
