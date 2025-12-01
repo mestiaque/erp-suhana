@@ -77,6 +77,7 @@ class AdminController extends Controller
     }
 
     public function dashboard(){
+
         $reports =[
             'total_expenses' => Expense::sum('amount'),
             'total_IOU' => ExpenseIou::where('status','pending')->sum('amount'),
