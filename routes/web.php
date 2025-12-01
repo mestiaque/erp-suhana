@@ -129,6 +129,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/buyers',[OrderController::class,'buyers'])->name('buyers');
     Route::any('/buyers/{action}/{id?}',[OrderController::class,'buyersAction'])->name('buyersAction');
 
+    Route::get('/products',[OrderController::class,'products'])->name('products');
+    Route::any('/products/{action}/{id?}',[OrderController::class,'productsAction'])->name('productsAction');
+
+    Route::get('/orders',[OrderController::class,'orders'])->name('orders');
+    Route::any('/orders/{action}/{id?}',[OrderController::class,'ordersAction'])->name('ordersAction');
 
     // Units
     Route::get('/units', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('units');

@@ -97,6 +97,26 @@ return [
         ],
     ],
 
+    // Merchandising Management
+    [
+        'group_title' => '',
+        [
+            'title'      => 'Merchandising',
+            'icon'       => 'fa-solid fa-cart-shopping',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Sample',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/samples',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => ''
+                ],
+            ]
+        ],
+    ],
+
     // Accounts Management
     [
         'group_title' => '',
@@ -279,7 +299,7 @@ return [
             'icon_color' => 'text-primary',
             'permission' => '',
             'children'   => [
-                ['title' => 'Style / Product Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/styles', 'icon_color' => 'text-warning', 'permission' => 'dev'],
+                ['title' => 'Product Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/products', 'icon_color' => 'text-warning', 'permission' => 'dev'],
                 ['title' => 'BOM (Bill of Materials)', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/bom', 'icon_color' => 'text-warning', 'permission' => 'dev'],
                 ['title' => 'Costing & Quotation', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/costing', 'icon_color' => 'text-warning', 'permission' => 'dev'],
                 ['title' => 'Sample Approval', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/samples/approval', 'icon_color' => 'text-warning', 'permission' => 'dev'],

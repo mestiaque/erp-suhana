@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Media;
+use App\Models\Order;
+use App\Models\Product;
 use App\Models\Attribute;
+use App\Models\OrderItem;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -374,12 +377,124 @@ class OrderController extends Controller
     }
 
 
-    public function garmentsOrders(Request $r)
+
+    public function products(Request $r)
+    {
+        // Bulk actions
+        if ($r->action && $r->checkid) {
+            $products = Product::whereIn('id', $r->checkid)->get();
+
+            foreach ($products as $p) {
+                if ($r->action == 1) { // Activate
+                    $p->status = 1;
+                    $p->save();
+                } elseif ($r->action == 2) { // Deactivate
+                    $p->status = 0;
+                    $p->save();
+                } elseif ($r->action == 5) { // Delete
+                    $p->delete();
+                }
+            }
+
+            Session()->flash('success', 'Action completed successfully!');
+            return redirect()->back();
+        }
+
+        // Product list with search/filter
+        $products = Product::latest()
+            ->where(function ($q) use ($r) {
+                if ($r->search) {
+                    $q->where('sku', 'LIKE', '%' . $r->search . '%')
+                        ->orWhere('name', 'LIKE', '%' . $r->search . '%');
+                }
+                if ($r->status) {
+                    $q->where('status', $r->status == 'inactive' ? 0 : 1);
+                }
+            })
+            ->paginate(25)
+            ->appends($r->all());
+
+        // Master data for dropdowns
+        $styles = Attribute::where('type', 14)->where('status', 'active')->get(); // style
+        $sizes = Attribute::where('type', 11)->where('status', 'active')->get();  // size
+        $fabrics = Attribute::where('type', 13)->where('status', 'active')->get(); // fabric
+        $colors = Attribute::where('type', 12)->where('status', 'active')->get(); // color
+
+        return view(adminTheme() . 'orders.products.product', compact('products', 'styles', 'sizes', 'fabrics', 'colors'));
+    }
+
+    // Create Product
+    public function productsAction(Request $r, $action, $id = null)
+    {
+        if ($action == 'create' && $r->isMethod('post')) {
+            $r->validate([
+                'sku' => 'required|max:50|unique:products,sku',
+                'name' => 'required|max:100',
+                'price' => 'nullable|numeric',
+            ]);
+
+            $product = new Product();
+            $product->sku = $r->sku;
+            $product->name = $r->name;
+            $product->style_id = $r->style_id;
+            $product->size_id = $r->size_id;
+            $product->fabric_id = $r->fabric_id;
+            $product->color_id = $r->color_id;
+            $product->price = $r->price ?: 0;
+            $product->status = 1;
+            $product->addedby_id = auth()->id();
+            $product->save();
+
+            Session()->flash('success', 'Product created successfully!');
+            return redirect()->back();
+        }
+
+        // Edit product view
+        $product = Product::find($id);
+        if (!$product) {
+            Session()->flash('error', 'Product not found!');
+            return redirect()->back();
+        }
+
+        // Update product
+        if ($action == 'update' && $r->isMethod('post')) {
+            $r->validate([
+                'sku' => 'required|max:50|unique:products,sku,' . $product->id,
+                'name' => 'required|max:100',
+                'price' => 'nullable|numeric',
+            ]);
+
+            $product->sku = $r->sku;
+            $product->name = $r->name;
+            $product->style_id = $r->style_id;
+            $product->size_id = $r->size_id;
+            $product->fabric_id = $r->fabric_id;
+            $product->color_id = $r->color_id;
+            $product->price = $r->price ?: 0;
+            $product->status = $r->status ? 1 : 0;
+            $product->save();
+
+            Session()->flash('success', 'Product updated successfully!');
+            return redirect()->back();
+        }
+
+        // Delete product
+        if ($action == 'delete') {
+            $product->delete();
+            Session()->flash('success', 'Product deleted successfully!');
+            return redirect()->back();
+        }
+
+        return view(adminTheme() . 'products.edit', compact('product'));
+    }
+
+
+    public function orders(Request $r)
     {
         // BULK ACTIONS
         if ($r->action && $r->checkid) {
 
-            $orders = GarmentOrder::whereIn('id', $r->checkid)->get();
+            $orders = Order::whereIn('id', $r->checkid)->get();
 
             foreach ($orders as $data) {
                 switch ($r->action) {
@@ -401,7 +516,7 @@ class OrderController extends Controller
         }
 
         // LIST + FILTERS
-        $orders = GarmentOrder::orderBy('id', 'desc')
+        $orders = Order::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
 
             ->where(function($q) use ($r){
@@ -449,21 +564,21 @@ class OrderController extends Controller
             ->selectRaw("count(case when status = 'trash' then 1 end) as trash")
             ->first();
 
-        return view(adminTheme().'garments.orders.index', compact('orders','totals'));
+        return view(adminTheme().'orders.index', compact('orders','totals'));
     }
 
-    public function garmentsOrdersAction(Request $r, $action, $id = null)
+    public function ordersAction(Request $r, $action, $id = null)
     {
         // CREATE NEW ORDER
         if ($action == 'create') {
 
-            $order = GarmentOrder::where('status','temp')
+            $order = Order::where('order_status','temp')
                     ->where('addedby_id',Auth::id())
                     ->first();
 
             if (!$order) {
-                $order = new GarmentOrder();
-                $order->status = 'temp';
+                $order = new Order();
+                $order->order_status = 'temp';
                 $order->addedby_id = Auth::id();
                 $order->created_at = now();
                 $order->save();
@@ -473,51 +588,51 @@ class OrderController extends Controller
             $order->order_no = now()->format('ymd') . $order->id;
             $order->save();
 
-            return redirect()->route('admin.garmentsOrdersAction',['edit',$order->id]);
+            return redirect()->route('admin.ordersAction',['edit',$order->id]);
         }
 
         // LOAD ORDER
-        $order = GarmentOrder::find($id);
+        $order = Order::find($id);
         if (!$order) {
             session()->flash('error','Order Not Found');
-            return redirect()->route('admin.garmentsOrders');
+            return redirect()->route('admin.orders');
         }
 
         // PDF
         if ($action == 'pdf') {
-            $pdf = PDF::loadView(adminTheme().'garments.pdfOrder', compact('order'));
+            $pdf = PDF::loadView(adminTheme().'pdfOrder', compact('order'));
             return $pdf->stream('garment_order.pdf');
         }
 
         // VIEW
         if ($action == 'view') {
-            return view(adminTheme().'garments.orders.view', compact('order'));
+            return view(adminTheme().'orders.view', compact('order'));
         }
 
         // ADD BUYER
         if ($action == 'add-buyer') {
 
-            $buyer = Buyer::find($r->buyer_id);
+            $buyer = User::find($r->buyer_id);
 
             if ($buyer) {
                 $order->buyer_id = $buyer->id;
                 $order->save();
             }
 
-            $view = view(adminTheme().'garments.orders.includes.items', compact('order'))->render();
+            $view = view(adminTheme().'orders.includes.items', compact('order'))->render();
             return response()->json(['success'=>true,'view'=>$view]);
         }
 
         // SEARCH PRODUCT
         if ($action == 'search-item') {
 
-            $products = Product::where('type',3)
+            $products = Attribute::where('type',13)
                 ->where('status','active')
                 ->when($r->search, fn($q)=>$q->where('name','like',"%$r->search%"))
                 ->limit(20)
                 ->get();
 
-            $search = view(adminTheme().'garments.orders.includes.searchProducts', compact('products','order'))->render();
+            $search = view(adminTheme().'orders.includes.searchProducts', compact('products','order'))->render();
             return response()->json(['success'=>true,'view'=>$search]);
         }
 
@@ -525,7 +640,7 @@ class OrderController extends Controller
         if (in_array($action,['add-item','update-item','remove-item'])) {
 
             if ($action == 'add-item') {
-                $item = new GarmentOrderItem();
+                $item = new OrderItem();
                 $item->order_id = $order->id;
                 $item->addedby_id = Auth::id();
                 $item->save();
@@ -533,7 +648,7 @@ class OrderController extends Controller
 
             if ($action == 'update-item') {
 
-                $item = GarmentOrderItem::find($r->item_id);
+                $item = OrderItem::find($r->item_id);
                 if ($item) {
 
                     if ($r->name == 'product_name')
@@ -560,11 +675,11 @@ class OrderController extends Controller
             }
 
             if ($action == 'remove-item') {
-                GarmentOrderItem::where('id',$r->item_id)->delete();
+                OrderItem::where('id',$r->item_id)->delete();
             }
 
-            $products = Product::where('type',3)->where('status','active')->limit(20)->get();
-            $view = view(adminTheme().'garments.orders.includes.items', compact('products','order'))->render();
+            $products = Attribute::where('type',13)->where('status','active')->limit(20)->get();
+            $view = view(adminTheme().'orders.includes.items', compact('products','order'))->render();
             return response()->json(['success'=>true,'view'=>$view]);
         }
 
@@ -605,7 +720,7 @@ class OrderController extends Controller
             $order->save();
 
             session()->flash('success','Garment Order Updated');
-            return redirect()->route('admin.garmentsOrdersAction',['view',$order->id]);
+            return redirect()->route('admin.ordersAction',['view',$order->id]);
         }
 
         // DELETE ORDER
@@ -619,9 +734,9 @@ class OrderController extends Controller
 
         // EDIT PAGE
         $buyers = User::where('buyer',1)->get(['id','name']);
-        $products = Product::where('type',3)->where('status','active')->limit(20)->get();
+        $products = Attribute::where('type',13)->where('status','active')->limit(20)->get();
 
-        return view(adminTheme().'garments.orders.edit', compact('order','buyers','products'));
+        return view(adminTheme().'orders.edit', compact('order','buyers','products'));
     }
 
 
