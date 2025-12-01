@@ -47,7 +47,7 @@
                 font-size: 14px;
             }
           }
-   
+
 
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -86,8 +86,8 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="input-group">
-                                <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                                <input type="date" name="endDate" value="{{request()->endDate}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
+                                <input type="date" name="startDate" value="{{request()->startDate ?? $to }}" class="form-control {{$errors->has('startDate')?'error':''}}" />
+                                <input type="date" name="endDate" value="{{request()->endDate ?? $from}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -175,7 +175,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($expenses as $i=>$expense)
+                        @forelse($expenses as $i=>$expense)
                         <tr>
                             <td style="position:relative;">
                                 @can('expenses.delete')
@@ -235,7 +235,11 @@
                                 @else -- @endif
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="11" class="text-center text-muted"><em>No data found</em></td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 {{$expenses->links('pagination::bootstrap-4')}}
@@ -733,12 +737,10 @@
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="amountWriteText">
-                            <label class="form-label" style="white-space: nowrap;">Paid To : &nbsp;</label>
-                            <input type="text" class="input-underline handwritten" value="( Name of company ) {{$exp->company_name}}">
+                            <input type="text" class="input-underline handwritten" value="Paid to ( Name of company ) : {{$exp->company_name}}">
                         </div>
                         <div class="amountWriteText">
-                            <label class="form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </label>
-                            <input type="text" class="input-underline handwritten" value="( Name of receiver ) {{$exp->receiver_name}} {{$exp->receiver_mobile?'- '.$exp->receiver_mobile:''}}">
+                            <input type="text" class="input-underline handwritten" value="( Name of receiver ) : {{$exp->receiver_name}} {{$exp->receiver_mobile?'- '.$exp->receiver_mobile:''}}">
                         </div>
 
                     </div>

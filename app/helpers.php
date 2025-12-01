@@ -151,19 +151,28 @@ function priceFullFormat($amount=0){
   return $formatAmount;
 }
 
-function sendMail($toEmail,$toName,$subject,$datas,$template){
-Mail::send($template,compact('datas'), function ($message) use ($toEmail,$toName,$subject) {
-        $message->from(general()->mail_from_address, general()->mail_from_name);
-        $message->to($toEmail,$toName)
-        ->subject($subject);
-    });
-
-return true;
+function sendMail($toEmail,$toName,$subject,$datas,$template,$attachments=null){
   try {
-    Mail::send($template,compact('datas'), function ($message) use ($toEmail,$toName,$subject) {
+    Mail::send($template,compact('datas'), function ($message) use ($toEmail,$toName,$subject,$attachments) {
         $message->from(general()->mail_from_address, general()->mail_from_name);
-        $message->to($toEmail,$toName)
-        ->subject($subject);
+        $message->to($toEmail,$toName);
+        //To bb mail 
+        //$message->cc($ccRecipients);
+        //To Replay diffrent mail 
+        //$message->replyTo('replyto@example.com', 'Reply To Name');
+        
+        $message->subject($subject);
+        
+        if($attachments){
+            // Attachments
+            foreach ($attachments as $attachment) {
+                $message->attach($attachment['path'], [
+                    'as' => $attachment['name'],
+                    'mime' => $attachment['mime'],
+                ]);
+            }
+        }
+        
     });
       return true;
   } catch (Exception $ex) {
