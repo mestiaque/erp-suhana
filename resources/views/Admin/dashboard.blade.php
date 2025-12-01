@@ -675,7 +675,7 @@ h4{
 
     <div class="row">
         <div class="col-md-8">
-            <div class="card mb-30">
+            <div class="card mb-30" style="min-height: 430px;">
                 <div class="card-header">
                     <h3><i class="fa fa-line-chart"></i> Yearly Charts</h3>
                     <ul class="animated-list" aria-label="Status list">
@@ -705,32 +705,9 @@ h4{
             </div>
         </div>
         <div class="col-lg-4">
-                <div class="card mb-30">
+                <div class="card mb-30" style="min-height: 430px;">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3><i class="fa-regular fa-user"></i> Login Users</h3>
-
-                        <div class="dropdown">
-                            <button class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-horizontal-rounded"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <i class="bx bx-show"></i> View
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <i class="bx bx-edit-alt"></i> Edit
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <i class="bx bx-trash"></i> Delete
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <i class="bx bx-printer"></i> Print
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <i class="bx bx-download"></i> Download
-                                </a>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="card-body browser-used-box">
