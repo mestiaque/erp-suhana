@@ -182,7 +182,7 @@
                     </div>
                     <div class="form-group mb-2">
                         <label>Color</label>
-                        <input type="color" class="form-control form-control-color" id="colorInput" name="color" value="#000000" title="Choose your color">
+                        <input type="color" class="form-control form-control-color" style="font-size: 1.5rem" id="colorInput" name="color" value="" title="Choose your color">
                     </div>
                     <div class="form-group mb-2">
                         <label>Description</label>

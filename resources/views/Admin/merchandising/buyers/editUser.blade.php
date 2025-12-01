@@ -77,14 +77,14 @@
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" />
+                                    <label for="email">Email*</label>
+                                    <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required />
                                     @if ($errors->has('email'))
                                     <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="mobile">Mobile* </label>
+                                    <label for="mobile">Mobile </label>
                                     <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" />
                                     @if ($errors->has('mobile'))
                                     <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
@@ -94,6 +94,19 @@
                                     <div class="controls">
                                         <label for="address">Address Line</label>
                                         <input type="text" class="form-control {{$errors->has('address')?'error':''}}" name="address" placeholder="Enter Address" value="{{$user->address_line1?:old('address')}}" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-xl-12 col-lg-12 col-md-12">
+                                    <div class="controls">
+                                        <label for="country">Country</label>
+                                        <select name="country" id="" class="form-control">
+                                            <option value="">-- Select Country --</option>
+                                            @foreach (geoData(1) as $c)
+                                                <option value="{{ $c->name }}" {{ $user->country_text == $c->name ? 'selected':'' }}>{{ $c->name }}</option>
+                                            @endforeach
+                                        </select>
+
                                     </div>
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">

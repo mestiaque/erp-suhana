@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\Admin\PurchasesController;
 use App\Http\Controllers\Admin\RequisitionController;
+use App\Http\Controllers\Admin\MerchandisingController;
 
 
 // ----------------------
@@ -124,32 +125,34 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/accounts/list',[AdminController::class,'accounts'])->name('accounts');
     Route::any('/accounts/list/{action}/{id?}',[AdminController::class,'accountsAction'])->name('accountsAction');
 
+    //Merchandising
+    Route::get('/buyers',[MerchandisingController::class,'buyers'])->name('buyers');
+    Route::any('/buyers/{action}/{id?}',[MerchandisingController::class,'buyersAction'])->name('buyersAction');
+    Route::get('/samples',[MerchandisingController::class,'samples'])->name('samples');
+    Route::any('/samples/{action}/{id?}',[MerchandisingController::class,'samplesAction'])->name('samplesAction');
 
     //Buyer Order Management
-    Route::get('/buyers',[OrderController::class,'buyers'])->name('buyers');
-    Route::any('/buyers/{action}/{id?}',[OrderController::class,'buyersAction'])->name('buyersAction');
+    Route::get('/products',[OrderController::class,'products'])->name('products');
+    Route::any('/products/{action}/{id?}',[OrderController::class,'productsAction'])->name('productsAction');
 
+    Route::get('/orders',[OrderController::class,'orders'])->name('orders');
+    Route::any('/orders/{action}/{id?}',[OrderController::class,'ordersAction'])->name('ordersAction');
 
     // Units
     Route::get('/units', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('units');
     Route::any('/units/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('unitsAction');
-
     // Sizes
     Route::get('/sizes', [OrderController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'sizes')->name('sizes');
     Route::any('/sizes/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'sizes')->name('sizesAction');
-
     // Colors
     Route::get('/colors', [OrderController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'colors')->name('colors');
     Route::any('/colors/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'colors')->name('colorsAction');
-
     // Fabrics
     Route::get('/fabrics', [OrderController::class, 'manageAttribute'])->defaults('type', 13)->defaults('view', 'fabrics')->name('fabrics');
     Route::any('/fabrics/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 13)->defaults('view', 'fabrics')->name('fabricsAction');
-
     // Styles
     Route::get('/styles', [OrderController::class, 'manageAttribute'])->defaults('type', 14)->defaults('view', 'styles')->name('styles');
     Route::any('/styles/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 14)->defaults('view', 'styles')->name('stylesAction');
-
     // SKUs
     Route::get('/skus', [OrderController::class, 'manageAttribute'])->defaults('type', 15)->defaults('view', 'skus')->name('skus');
     Route::any('/skus/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 15)->defaults('view', 'skus')->name('skusAction');

@@ -26,9 +26,9 @@
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
      <!-- BEGIN: Theme CSS-->
      <link rel="stylesheet" type="text/css" href="{{asset('admin/assets/css/responsive.css')}}" />
-     
+
      <link rel="stylesheet" type="text/css" href="{{asset('admin/assets/css/custom.css')}}" />
-     
+
      <!-- END: Custom CSS-->
      <meta http-equiv='cache-control' content='no-cache'>
      <meta http-equiv='expires' content='0'>
@@ -37,11 +37,11 @@
         .select2-container--default .select2-search--inline .select2-search__field {
             width: 100% !important;
         }
-        
+
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 35px;
         }
-        
+
         .select2-container .select2-selection--single {
             height: 35px;
         }
@@ -53,27 +53,27 @@
         .checkbox {
             display: inline-block;
         }
-        
+
         .refActionBtn {
             width: 40px;
             text-align: center;
         }
-        
+
         .metisMenu .mm-collapse:not(.mm-show) {
             display: none;
         }
-        
+
         .refActionBtn span {
             padding: 8px 10px;
             display: block;
             background: #dddada;
             cursor: pointer;
         }
-        
+
         .searchRef {
             position: relative;
         }
-        
+
         .reffSearchResult {
             position: absolute;
             width: 100%;
@@ -85,7 +85,7 @@
             display: none;
             z-index: 9;
         }
-        
+
         .reffSearchResult ul li {
             list-style: none;
             padding: 5px;
@@ -96,12 +96,18 @@
         color: #fff !important;
     }
        .badge-warning
-Specificity: (0,1,0)
- {
-    color: white;
-    background-color: #d9a50c;
-}
-       
+        Specificity: (0,1,0)
+        {
+            color: white;
+            background-color: #d9a50c;
+        }
+
+        table.table a { color: #000; }
+        .badge-warning { color: #000; background-color: #d9a50c4d; }
+        .badge-success { color: #035415; background-color: #17e64642; }
+        .badge-secondary { color: #fff; background-color: #6c757d; }
+        .badge-danger { color: #fff; background-color: #dc3545; }
+
      </style>
 
      @stack('css')
@@ -111,7 +117,7 @@ Specificity: (0,1,0)
    <!-- BEGIN: Body-->
    <body>
 
-    
+
     @include('Admin.layouts.sidebar')
 
      <!-- BEGIN: Content-->
@@ -121,14 +127,14 @@ Specificity: (0,1,0)
         @include('Admin.layouts.footer')
      </div>
      <!-- END: Content-->
-     
+
      <!-- BEGIN: Vendor JS-->
      <script src="{{asset('admin/assets/js/vendors.min.js')}}"></script>
      <!-- BEGIN Vendor JS-->
-     
+
      <script src="{{asset('admin/assets/js/jvectormap-1.2.2.min.js')}}"></script>
      <script src="{{asset('admin/assets/js/jvectormap-world-mill-en.js')}}"></script>
-     
+
     <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
@@ -144,20 +150,20 @@ Specificity: (0,1,0)
      <script src="{{asset('admin/assets/js/custom.js')}}"></script>
      <!-- END: Page JS-->
 
-    
+
      <script>
       $(document).ready(function(){
 
-          
+
         $(document).on('click', '.searchRef .input-group input:not([readonly])', function() {
             $(this).siblings(".reffSearchResult").remove();
             $(this).closest('.searchRef').find(".reffSearchResult").show();
         });
-        
-        
-        
+
+
+
         $(document).on('keyup', '.searchRef .input-group input', function() {
-            
+
             var that =$(this);
             var search =$(this).val();
             var url ="";
@@ -169,7 +175,7 @@ Specificity: (0,1,0)
                   cache: false,
                   data: {'reff_search':search},
                   success : function(data){
-                      
+
                     total = data.total;
 
                     if (total == 0) {
@@ -179,34 +185,34 @@ Specificity: (0,1,0)
                     }
 
                     $('.reffSearchResult').empty().append(data.view);
-                    
+
                   },error: function () {
                       alert('error');
-        
+
                     }
                 });
             }
-            
-        });    
-        
+
+        });
+
         $(document).on('click', '.searchRef .reffSearchResult ul li .reffAdd', function() {
             var title =$(this).data('name');
             $(this).closest('.searchRef').find(".input-group input").prop('readonly', true).val(title);
             $(this).closest('.searchRef').find(".refActionBtn").empty().append('<span class="remove" style="background: #ff6a6a;color: white;"><i class="bx bx-x"></i></span>');
             $(this).closest('.searchRef').find(".reffSearchResult").hide();
         });
-        
+
         $(document).on('click', '.searchRef .refActionBtn .add', function() {
             $(this).closest('.searchRef').find(".input-group input").prop('readonly', true);
             $(this).closest('.searchRef').find(".refActionBtn").empty().append('<span class="remove" style="background: #ff6a6a;color: white;"><i class="bx bx-x"></i></span>');
             $(this).closest('.searchRef').find(".reffSearchResult").hide();
         });
-        
+
         $(document).on('click', '.searchRef .refActionBtn .remove', function() {
             $(this).closest('.searchRef').find(".input-group input").prop('readonly', false);
             $(this).closest('.searchRef').find(".refActionBtn").empty().append('<span><i class="bx bx-search"></i></span>');
         });
-        
+
         $(document).on('click', function(event) {
             if (!$(event.target).closest('.searchRef').length) {
                 $('.reffSearchResult').hide();
@@ -226,7 +232,7 @@ Specificity: (0,1,0)
                   'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
               }
             });
-          
+
             $(document).on('click','.mediaDelete',function(e){
               e.preventDefault();
               var url =$(this).attr('href');
@@ -239,20 +245,20 @@ Specificity: (0,1,0)
                   dataType: 'json',
                   beforeSend: function()
                   {
-                    
+
                   },
                   complete: function()
                   {
-                      
+
                   },
                   }).done(function (data) {
-                     
+
                      location.reload(true);
-                    
+
                   }).fail(function () {
                       alert('fail');
                   });
-                  
+
               }else{
                   return false;
               }
@@ -272,11 +278,11 @@ Specificity: (0,1,0)
                 var profiImage ='.'+$(this).data('imageshow');
                 if (input.files && input.files[0]) {
                     var reader = new FileReader();
-    
+
                     reader.onload = function (e) {
                         $(profiImage).attr('src', e.target.result);
                     };
-    
+
                     reader.readAsDataURL(input.files[0]);
                 }
             });
@@ -302,7 +308,7 @@ Specificity: (0,1,0)
                   $.get(url,function(data){
                     $('#district').empty().append(data.geoData);
                     $('#city').empty().append('<option value="">Select Thana</option>');
-                  });   
+                  });
             });
 
             $("#district").on("change", function(){
@@ -312,10 +318,10 @@ Specificity: (0,1,0)
                   }
                   var url ='{{url('geo/filter')}}' + '/'+id;
                   $.get(url,function(data){
-                    $('#city').empty().append(data.geoData);  
-                  });   
+                    $('#city').empty().append(data.geoData);
+                  });
             });
-          
+
       });
     </script>
 
@@ -330,9 +336,9 @@ Specificity: (0,1,0)
             } else {
               $(".checkCounter").text(' ');
             }
-            
+
           })
-          
+
           function updateCounter() {
             var len = $("input[name='checkid[]']:checked").length;
             if (len > 0) {
@@ -341,12 +347,12 @@ Specificity: (0,1,0)
               $(".checkCounter").text(' ');
             }
           }
-          
+
           $("input:checkbox").on("change", function() {
             updateCounter();
           });
 
-       
+
         $(document).ready(function(){
           $('#checkall').click(function() {
               var checked = $(this).prop('checked');
@@ -354,7 +360,7 @@ Specificity: (0,1,0)
               updateCounter();
             });
         });
-        
+
         ///Check Box Select With Count show
       </script>
 

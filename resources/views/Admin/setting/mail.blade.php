@@ -104,7 +104,7 @@
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label>Mail Status</label>
-                    
+                    <br>
                     <div class="checkbox">
                          <input class="inp-cbx" id="mail_status" name="mail_status" type="checkbox" {{$general->mail_status?'checked':''}} style="display: none;" />
                          <label class="cbx" for="mail_status">

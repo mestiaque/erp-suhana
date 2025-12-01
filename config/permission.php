@@ -112,6 +112,31 @@ return [
             ],
         ],
 
+        'Merchandising Management' =>[
+            'samples' => [
+                'label'       => 'Sample',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'buyers' => [
+                'label'       => 'Buyer',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+        ],
+
         'Accounts Management' =>[
             'expenses' => [
                 'label'       => 'Expenses',

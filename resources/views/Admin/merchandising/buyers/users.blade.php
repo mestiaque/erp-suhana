@@ -18,14 +18,15 @@
 @endpush
 @section('contents')
 
-@include(adminTheme().'alerts')
+
 <div class="flex-grow-1">
 <!-- Start -->
 <div class="card mb-30">
+    @include(adminTheme().'alerts')
     <div class="card-header d-flex justify-content-between align-items-center">
          <h3>Buyer List</h3>
          <div class="dropdown">
-            @can('dev.all')
+            @can('buyers.add')
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddBuyer">
                  <i class="bx bx-plus"></i> Buyer
              </a>
@@ -47,7 +48,7 @@
                </div>
                <div class="col-md-5 mb-1">
                    <div class="input-group">
-                       <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
+                       <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile, Country" class="form-control {{$errors->has('search')?'error':''}}" />
                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                    </div>
                </div>
@@ -59,15 +60,15 @@
         <form action="{{route('admin.buyers')}}">
             <div class="row">
                 <div class="col-md-4">
-                    @if(can('dev.all')  || can('dev.all'))
+                    @if(can('buyers.edit')  || can('buyers.delete'))
                     <div class="input-group mb-1">
                         <select class="form-control form-control-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
-                            @can('dev.all')
+                            @can('buyers.edit')
                             <option value="1">Active</option>
                             <option value="2">Inactive</option>
                             @endcan
-                            @can('dev.all')
+                            @can('buyers.delete')
                             <option value="5">Delete</option>
                             @endcan
                         </select>
@@ -92,7 +93,7 @@
                     <thead>
                         <tr>
                             <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
-                                 @if(can('dev.all')  || can('dev.delete'))
+                                 @if(can('buyers.edit')  || can('buyers.delete'))
                                 <div class="checkbox mr-3">
                                      <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
                                      <label class="cbx" for="checkall">
@@ -109,11 +110,12 @@
                             <th style="min-width: 70px; width: 70px;">Image</th>
                             <th style="min-width: 200px;">Name</th>
                             <th style="min-width: 150px;">Company</th>
-                            <th style="min-width: 150px;">Mobile/Email</th>
+                            <th style="min-width: 150px;">Email</th>
+                            <th style="min-width: 150px;">Country</th>
                             <th style="min-width: 200px;">Address</th>
-                            <th style="min-width: 100px;">Total Purchase</th>
+                            {{-- <th style="min-width: 100px;">Total Purchase</th>
                             <th style="min-width: 100px;">Due</th>
-                            <th style="min-width: 100px;">Paid</th>
+                            <th style="min-width: 100px;">Paid</th> --}}
                             <th style="min-width: 95px;">Join Date</th>
                             <th style="min-width: 80px;">Action</th>
                         </tr>
@@ -123,7 +125,7 @@
                         @foreach($users as $i=>$user)
                         <tr>
                             <td>
-                                @if(can('dev.all')  || can('dev.all'))
+                                @if(can('buyers.edit')  || can('buyers.delete'))
                                 <div class="checkbox">
                                     <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
                                     <label class="cbx" for="cbx_{{$user->id}}">
@@ -150,24 +152,27 @@
                                 @endif
                             </td>
 
-                            <td>{{$user->company_name}}</td>
-                            <td>{{$user->mobile?:$user->email}}</td>
-                            <td>{{$user->address_line1}}</td>
+                            <td>{{$user->company_name  ?? '--'}}</td>
+                            <td>{{$user->email ?? '--'}}</td>
+                            <td>{{$user->country_text ?? '--'}}</td>
+                            <td>{{$user->fullAddress()}}</td>
 
-                            <td>{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</td>
+                            {{-- <td>{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</td>
                             <td style="color:red;">{{priceFullFormat($user->duePurchaseAmount())}}</td>
-                            <td>{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</td>
-                            <td>{{$user->created_at->format('d M Y')}}</td>
+                            <td>{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</td> --}}
+                            <td>{{$user->created_at->format('d.m.Y')}}</td>
 
-                            <td>
-                                @can('dev.all')
+                            <td class="text-center">
+                                @if(can('buyers.edit')  || can('buyers.delete'))
+                                @can('buyers.edit')
                                 <a href="{{route('admin.buyersAction',['edit',$user->id])}}" class="btn-custom success"><i class="bx bx-edit"></i></a>
                                 @endcan
-                                @can('dev.all')
+                                @can('buyers.delete')
                                 <a href="{{route('admin.buyersAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
                                     <i class="bx bx-trash"></i>
                                 </a>
                                 @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach
@@ -194,24 +199,31 @@
        </div>
 
        <div class="modal-body">
-
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>Buyer Name*</label>
-                    <input type="text" class="form-control" name="name" placeholder="Enter Buyer Name" required>
-                </div>
-
-                <div class="col-md-6 form-group">
-                    <label>Company Name</label>
-                    <input type="text" class="form-control" name="company_name" placeholder="Enter Company Name">
-                </div>
-            </div>
-
             <div class="form-group">
-                <label>Email/Mobile*</label>
-                <input type="text" class="form-control" name="email_mobile" placeholder="Enter Email/Mobile" required>
+                <label>Buyer Name</label>
+                <input type="text" class="form-control" name="name" placeholder="Enter Buyer Name" required>
             </div>
-
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" class="form-control" name="company_name" placeholder="Enter Company Name">
+            </div>
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="mail" class="form-control" name="email" placeholder="Enter Email">
+            </div>
+            <div class="form-group">
+                <label>Mobile</label>
+                <input type="text" class="form-control" name="mobile" placeholder="Enter Mobile">
+            </div>
+            <div class="form-group">
+                <label>Country</label>
+                <select name="country" id="" class="form-control">
+                    <option value="">-- Select Country --</option>
+                    @foreach (geoData(1) as $c)
+                        <option value="{{ $c->name }}">{{ $c->name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="form-group">
                 <label>Address Line</label>
                 <input type="text" class="form-control" name="address" placeholder="Enter Address">

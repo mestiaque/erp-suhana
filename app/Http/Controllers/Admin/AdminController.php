@@ -77,7 +77,18 @@ class AdminController extends Controller
     }
 
     public function dashboard(){
+
         $reports =[
+            'total_order' => 0,
+            'total_order_confirmed' => 0,
+            'total_order_pending' => 0,
+            'total_order_cancelled' => 0,
+            'total_staff' => User::where('status',1)->where('staff',true)->count(),
+            'total_staff_present' => User::where('status',1)->where('staff',true)->count(),
+            'total_staff_absent' => 0,
+            'total_staff_worked' => 0,
+            'total_sale' => 0,
+            'total_order_amount' => 0,
             'total_expenses' => Expense::sum('amount'),
             'total_IOU' => ExpenseIou::where('status','pending')->sum('amount'),
         ];
