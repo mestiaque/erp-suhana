@@ -3408,50 +3408,55 @@ class AdminController extends Controller
 // Expensess Management Function
 
     public function expenses(Request $r){
+
+
+        $this->from = $from =$r->startDate ?? Carbon::now()->format('Y-m-d');
+        $this->to = $to =$r->endDate ?? Carbon::now()->format('Y-m-d');
+
         // Filter Action Start
-            if($r->action){
+        if($r->action){
 
-                if($r->checkid){
+            if($r->checkid){
 
-                    $datas=Expense::latest()->whereIn('id',$r->checkid)->get();
-                    foreach($datas as $data){
+                $datas=Expense::latest()->whereIn('id',$r->checkid)->get();
+                foreach($datas as $data){
 
-                        if($r->action==1){
-                          $data->status='active';
-                          $data->save();
-                        }elseif($r->action==2){
-                          $data->status='inactive';
-                          $data->save();
-                        }elseif($r->action==5){
+                    if($r->action==1){
+                        $data->status='active';
+                        $data->save();
+                    }elseif($r->action==2){
+                        $data->status='inactive';
+                        $data->save();
+                    }elseif($r->action==5){
 
-                          if($method=$data->account){
-                            $method->amount +=$data->amount;
-                            $method->save();
-                          }
-                          if($trans =$data->transection){
-                                $trans->delete();
-                          }
-
-                          $medias =Media::latest()->where('src_type',8)->where('src_id',$data->id)->get();
-                          foreach($medias as $media){
-                            if(File::exists($media->file_url)){
-                              File::delete($media->file_url);
-                            }
-                            $media->delete();
-                          }
-
-                          $data->delete();
+                        if($method=$data->account){
+                        $method->amount +=$data->amount;
+                        $method->save();
                         }
+                        if($trans =$data->transection){
+                            $trans->delete();
+                        }
+
+                        $medias =Media::latest()->where('src_type',8)->where('src_id',$data->id)->get();
+                        foreach($medias as $media){
+                        if(File::exists($media->file_url)){
+                            File::delete($media->file_url);
+                        }
+                        $media->delete();
+                        }
+
+                        $data->delete();
                     }
-
-                    Session()->flash('success','Action Successfully Completed!');
-
-                }else{
-                Session()->flash('info','Please Need To Select Minimum One Post');
                 }
 
-                return redirect()->back();
+                Session()->flash('success','Action Successfully Completed!');
+
+            }else{
+            Session()->flash('info','Please Need To Select Minimum One Post');
             }
+
+            return redirect()->back();
+        }
 
         $expenses =Expense::latest()->where('status','<>','temp')
                     ->where(function($q) use ($r) {
@@ -3468,20 +3473,7 @@ class AdminController extends Controller
                                  $q->where('category_id',$r->expense_type);
                               }
 
-                              if($r->startDate || $r->endDate)
-                                {
-                                    if($r->startDate){
-                                        $from =$r->startDate;
-                                    }else{
-                                        $from=Carbon::now()->format('Y-m-d');
-                                    }
-                                    if($r->endDate){
-                                        $to =$r->endDate;
-                                    }else{
-                                        $to=Carbon::now()->format('Y-m-d');
-                                    }
-                                    $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-                                }
+                              $q->whereDate('created_at','>=',$this->from)->whereDate('created_at','<=',$this->to);
 
                         })
                         ->paginate(25)->appends([
@@ -3511,7 +3503,7 @@ class AdminController extends Controller
         $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
-        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches'));
+        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches', 'to', 'from'));
     }
 
 
