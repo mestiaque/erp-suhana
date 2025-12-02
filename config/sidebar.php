@@ -36,13 +36,6 @@ return [
                     'permission'  => 'purchases_orders'
                 ],
                 [
-                    'title'       => 'Creditor List',
-                    'icon'        => 'fa-solid fa-arrow-right',
-                    'route'       => '/admin/suppliers',
-                    'icon_color'  => 'text-primary',
-                    'permission'  => 'creditor'
-                ],
-                [
                     'title'       => 'Goods Items',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/purchases-items',
@@ -120,6 +113,46 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'buyers'
                 ],
+                [
+                    'title'      => 'Proforma Invoice (PI)',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/proforma-invoice',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'buyers'
+                ]
+            ]
+        ],
+    ],
+    // Merchandising Management
+    [
+        'group_title' => '',
+        [
+            'title'      => 'Production',
+            'icon'       => 'fa-solid fa-layer-group',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Production Planning',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/production-planning',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'samples'
+                ],
+                [
+                    'title'      => 'Daily Production',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/daily-production',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'buyers'
+                ],
+                [
+                    'title'      => 'Production List',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/production-list',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'buyers'
+                ],
             ]
         ],
     ],
@@ -181,6 +214,13 @@ return [
                     'route'       => '/admin/accounts/list',
                     'icon_color'  => 'text-primary',
                     'permission'  => 'accounts'
+                ],
+                [
+                    'title'       => 'Creditor List',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/suppliers',
+                    'icon_color'  => 'text-primary',
+                    'permission'  => 'creditor'
                 ],
                 [
                     'title'       => 'Creditor Payment',
