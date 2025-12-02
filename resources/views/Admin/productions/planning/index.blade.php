@@ -16,12 +16,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Planning List</h3>
              <div class="dropdown">
-                @can('samples.add')
-                 <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
-                     <i class="bx bx-plus"></i> Add Planning
-                 </a>
-                 @endcan
-                 <a href="{{ route('admin.samples') }}" class="btn-custom yellow">
+                 <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
              </div>
@@ -52,11 +47,11 @@
             <div class="row mb-2">
                 <div class="col-md-12">
                     <ul class="statuslist p-0">
-                        <li><a href="{{ route('admin.samples') }}">All ({{ $totals->total }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'completed']) }}">Completed ({{ $totals->completed }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'cancel']) }}">Cancelled ({{ $totals->cancel }})</a></li>
+                        <li><a href="{{ route('admin.productionPlanning') }}">All ({{ $totals->total }})</a></li>
+                        <li><a href="{{ route('admin.productionPlanning',['status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
+                        <li><a href="{{ route('admin.productionPlanning',['status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
+                        <li><a href="{{ route('admin.productionPlanning',['status'=>'completed']) }}">Completed ({{ $totals->completed }})</a></li>
+                        <li><a href="{{ route('admin.productionPlanning',['status'=>'cancelled']) }}">Cancelled ({{ $totals->cancelled }})</a></li>
                     </ul>
                 </div>
             </div>
@@ -67,19 +62,72 @@
                     <thead>
                         <tr>
                             <th style="width: 80px">SL</th>
-                            <th style="width: ">Buyer</th>
-                            <th style="width: 150px">Style</th>
-                            <th style="width: 150px">Items</th>
+                            <th style="width: 150px">Order No</th>
+                            <th style="width: 150px">Merchant</th>
+                            <th style="min-width:200px">Buyer</th>
+                            <th style="width: 150px">Total Qty</th>
+                            <th style="width: 150px">Total Price</th>
                             <th style="width: 150px">Status</th>
                             <th style="width: 150px">Date</th>
                             <th style="width: 150px">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        
+                        @forelse($orders as $i => $order)
+                        <tr>
+                            <td>{{$orders->currentpage()==1?$i+1:$i+($orders->perpage()*($orders->currentpage() - 1))+1}}</td>
+                            <td>{{ str_pad($order->id, 10, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{$order->merchant_name}}</td>
+                            <td>
+  
+                                {{
+                                    collect([
+                                        $order->buyer_name,
+                                        $order?->buyer?->company_name,
+                                        $order?->buyer?->country
+                                    ])->filter()->implode(' | ')
+                                }}
+     
+                            </td>
+                            <td>{{ number_format($order->total_qty) }}</td>
+                            <td>{{ numberFormat($order->total_bill,2,$order->currency) }}</td>
+                            <td>
+                                @if($order->pi_status=='temp')
+                                    <span class="badge badge-secondary">Temp</span>
+                                @elseif($order->pi_status=='pending')
+                                    <span class="badge badge-warning">Pending</span>
+                                @elseif($order->pi_status=='confirmed')
+                                    <span class="badge badge-info">Confirmed</span>
+                                @elseif($order->pi_status=='completed')
+                                    <span class="badge badge-success">Completed</span>
+                                @elseif($order->pi_status=='cancel')
+                                    <span class="badge badge-danger">Cancelled</span>
+                                @endif
+                            </td>
+                            <td>
+                                {{ $order->created_at->format('d.m.Y') }}
+                            </td>
+                            <td class="text-center">
+                                @if(can('samples.view') || can('samples.view') || can('samples.view'))
+                                    @can('samples.view')
+                                    <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
+                                    @endcan
+                                    @can('samples.edit')
+                                    <a href="{{ route('admin.productionPlanningAction',['edit',$order->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
+                                    @endcan
+                                @else 
+                                -- 
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No Samples Found</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
-
+                {{ $orders->links('pagination') }}
             </div>
         </div>
     </div>
