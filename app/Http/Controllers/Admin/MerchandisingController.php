@@ -556,7 +556,10 @@ class MerchandisingController extends Controller
                         ->orWhere('buyer_name', 'LIKE', "%{$search}%")
                         ->orWhere('style', 'LIKE', "%{$search}%")
                         ->orWhere('id', 'LIKE', "%{$search}%")
-                        ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                        ->orWhere('merchant_name', 'LIKE', "%{$search}%")
+                        ->orWhere('invoice_no', 'LIKE', "%{$search}%")
+                        ->orWhere('bin_number', 'LIKE', "%{$search}%")
+                        ->orWhere('job_number', 'LIKE', "%{$search}%");
                     });
                 }
 

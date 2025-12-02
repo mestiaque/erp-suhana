@@ -36,7 +36,7 @@
                     </div>
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Order, Buyer, Style, Merchant" class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Order, Buyer, Style, Merchant, Invoice, BIN, JOB" class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -62,21 +62,27 @@
                     <thead>
                         <tr>
                             <th style="width: 80px">Order No.</th>
-                            <th style="width: 150px">Buyer</th>
-                            <th style="width: 120px">Merchent</th>
-                            <th style="width: 100px">Style</th>
-                            <th style="width: 100px">Items | Qty</th>
-                            <th style="width: 100px">Create Date</th>
-                            <th style="width: 110px">Received Date</th>
-                            <th style="width: 100px">Delivery Date</th>
-                            <th style="width: 100px">Status</th>
-                            <th style="width: 150px">Action</th>
+                            <th style="min-width: 80px">Invoice No.</th>
+                            <th style="min-width: 80px">BIN No.</th>
+                            <th style="min-width: 80px">JOB No.</th>
+                            <th style="min-width: 300px">Buyer</th>
+                            <th style="min-width: 180px">Merchent</th>
+                            <th style="min-width: 120px">Style</th>
+                            <th style="min-width: 180px">Items | Qty</th>
+                            <th style="min-width: 150px">Create Date</th>
+                            <th style="min-width: 150px">Received Date</th>
+                            <th style="min-width: 150px">Delivery Date</th>
+                            <th style="min-width: 100px">Status</th>
+                            <th style="min-width: 150px">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($samples as $i => $sample)
                         <tr>
                             <td>{{$sample->getOrderNumber()}}</td>
+                            <td>{{ $sample->invoice_no ?? '--' }}</td>
+                            <td>{{ $sample->bin_number ?? '--' }}</td>
+                            <td>{{ $sample->job_number ?? '--' }}</td>
                             <td>
                                 {{
                                     collect([
