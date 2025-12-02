@@ -124,17 +124,6 @@ return [
                     'all'    => 'All',
                 ],
             ],
-            'pi' => [
-                'label'       => 'Proforma Invoice',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
             'buyers' => [
                 'label'       => 'Buyer',
                 'permissions' => [

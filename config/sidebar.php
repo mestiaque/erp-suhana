@@ -118,7 +118,7 @@ return [
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/proforma-invoice',
                     'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'permission' => 'proforma_invoice'
                 ]
             ]
         ],
