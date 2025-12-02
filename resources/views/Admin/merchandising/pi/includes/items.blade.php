@@ -38,15 +38,15 @@
                         <input readonly type="number" class="form-control form-control-sm qty" value="{{ $item->quantity }}">
                     </td>
                     <td class="p-1">
-                        <input type="number" class="form-control form-control-sm unit-price updateItem" value="{{ $item->unit_price }}" data-name="color"
+                        <input type="number" class="form-control form-control-sm unit-price updateItemx" value="{{ $item->unit_price }}" data-name="unit_price"
                                data-url="{{ route('admin.proformaInvoiceAction',['update-item',$sample->id,'item_id'=>$item->id]) }}">
                     </td>
                     <td class="p-1">
-                        <input type="number" class="form-control form-control-sm amount updateItem" value="{{ $item->amount }}" data-name="color"
+                        <input type="number" class="form-control form-control-sm amount updateItemx" value="{{ $item->amount }}" data-name="amount"
                                data-url="{{ route('admin.proformaInvoiceAction',['update-item',$sample->id,'item_id'=>$item->id]) }}">
                     </td>
                     <td class="p-1">
-                        <input type="number" class="form-control form-control-sm discount updateItem" value="{{ $item->discount }}" data-name="color"
+                        <input type="number" class="form-control form-control-sm discount updateItemx" value="{{ $item->discount }}" data-name="color"
                                data-url="{{ route('admin.proformaInvoiceAction',['update-item',$sample->id,'item_id'=>$item->id]) }}">
                     </td>
                     <td class="p-1">
