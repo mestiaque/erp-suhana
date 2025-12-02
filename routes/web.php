@@ -8,15 +8,16 @@ use App\Http\Controllers\Auth\AuthController;
 // ----------------------
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
-
+use App\Http\Controllers\Admin\PurchasesController;
+use App\Http\Controllers\Admin\RequisitionController;
+use App\Http\Controllers\Admin\MerchandisingController;
+use App\Http\Controllers\Admin\ProductionController;
 
 // ----------------------
 // Staff Controller
 // ----------------------
 use App\Http\Controllers\Staff\StaffController;
-use App\Http\Controllers\Admin\PurchasesController;
-use App\Http\Controllers\Admin\RequisitionController;
-use App\Http\Controllers\Admin\MerchandisingController;
+
 
 
 // ----------------------
@@ -133,6 +134,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/buyers/{action}/{id?}',[MerchandisingController::class,'buyersAction'])->name('buyersAction');
     Route::get('/samples',[MerchandisingController::class,'samples'])->name('samples');
     Route::any('/samples/{action}/{id?}',[MerchandisingController::class,'samplesAction'])->name('samplesAction');
+    Route::get('/proforma-invoice',[MerchandisingController::class,'proformaInvoice'])->name('proformaInvoice');
+    Route::any('/proforma-invoice/{action}/{id?}',[MerchandisingController::class,'proformaInvoiceAction'])->name('proformaInvoiceAction');
+    
+    //Production
+    Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
+    Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
+    Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
+    Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
+    Route::get('/production-list',[ProductionController::class,'production'])->name('production');
+    Route::any('/production-list/{action}/{id?}',[ProductionController::class,'productionAction'])->name('productionAction');
 
     //Buyer Order Management
     Route::get('/products',[OrderController::class,'products'])->name('products');

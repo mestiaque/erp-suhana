@@ -146,7 +146,52 @@ return [
                     'all'    => 'All',
                 ],
             ],
-
+            'proforma_invoice' => [
+                'label'       => 'Proforma Invoice',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+        ],
+        'Production Management' =>[
+            'production_planning' => [
+                'label'       => 'Production Planning',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'daily_production' => [
+                'label'       => 'Daily Production',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'production_list' => [
+                'label'       => 'Production List',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
         ],
 
         'Accounts Management' =>[
