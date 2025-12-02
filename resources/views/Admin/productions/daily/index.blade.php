@@ -1,7 +1,7 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Production List') }}</title>
+<title>{{ websiteTitle('Daily Production') }}</title>
 @endsection
 
 @push('css')
@@ -14,9 +14,9 @@
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Production List</h3>
+             <h3>Daily Production</h3>
              <div class="dropdown">
-                 <a href="{{ route('admin.production') }}" class="btn-custom yellow">
+                 <a href="{{ route('admin.dailyProduction') }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
              </div>
@@ -26,7 +26,7 @@
             @include(adminTheme().'alerts')
 
             <!-- Search Form -->
-            <form action="{{ route('admin.production') }}">
+            <form action="{{ route('admin.dailyProduction') }}">
                 <div class="row mb-2">
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
@@ -57,34 +57,17 @@
                         <tr>
                             <th style="width: 80px">SL</th>
                             <th style="width: 150px">Order No</th>
-                            <th style="width: 150px">Style No</th>
                             <th style="width: 150px">Merchant</th>
                             <th style="min-width:200px">Buyer</th>
                             <th style="width: 150px">Total Qty</th>
-                            <th style="width: 150px">Composition</th>
-                            <th style="width: 150px">GSM</th>
-                            <th style="width: 150px">Size</th>
+                            <th style="width: 150px">Total Price</th>
+                            <th style="width: 150px">Status</th>
+                            <th style="width: 150px">Date</th>
+                            <th style="width: 150px">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         
-                        @forelse($styles as $i => $style)
-                            <tr>
-                                <td>{{$i+1}}</td>
-                                <td>{{str_pad($style->sample_id, 10, '0', STR_PAD_LEFT)}}</td>
-                                <td>{{$style->sample?->style ?? ''}}</td>
-                                <td>{{$style->sample?->merchant_name ?? ''}}</td>
-                                <td>{{$style->sample?->buyer_name ?? ''}}</td>
-                                <td>{{$style->quantity}}</td>
-                                <td>{{$style->composition}}</td>
-                                <td>{{$style->gsm}}</td>
-                                <td>{{$style->color}}</td>
-                            </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center text-muted">No Samples Found</td>
-                        </tr>
-                        @endforelse
                     </tbody>
                 </table>
 

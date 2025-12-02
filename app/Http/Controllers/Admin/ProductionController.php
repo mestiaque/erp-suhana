@@ -25,17 +25,82 @@ class ProductionController extends Controller
 {
     public function productionPlanning(Request $r)
     {
+
+        $orders =Sample::orderBy('id', 'desc')
+            ->where('status','completed')
+            ->where(function($q) use ($r) {
+
+                // SEARCH
+                if ($r->search) {
+                    $search = $r->search;
+                    $q->where(function($qq) use ($search) {
+                        $qq->where('id', 'LIKE', "%{$search}%")  // Sample ID
+                        ->orWhere('buyer_name', 'LIKE', "%{$search}%")
+                        ->orWhere('style', 'LIKE', "%{$search}%");
+                    });
+                }
+
+                // DATE RANGE
+                if ($r->startDate || $r->endDate) {
+                    $from = $r->startDate ?: now()->format('Y-m-d');
+                    $to   = $r->endDate ?: now()->format('Y-m-d');
+
+                    $q->whereDate('created_at', '>=', $from)
+                    ->whereDate('created_at', '<=', $to);
+                }
+
+                // STATUS
+                if ($r->status) {
+                    $q->where('pi_status', $r->status);
+                } else {
+                    $q->whereNotIn('pi_status',['approved','cancelled']);
+                }
+            })
+            ->paginate(25)
+            ->appends($r->all());
+
         $totals = Sample::whereNotIn('status', ['trash', 'temp'])
+            ->whereNotNull('pi_status')
             ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancel' THEN 1 END) AS cancel")
+            ->selectRaw("COUNT(CASE WHEN pi_status = 'pending' THEN 1 END) AS pending")
+            ->selectRaw("COUNT(CASE WHEN pi_status = 'confirmed' THEN 1 END) AS confirmed")
+            ->selectRaw("COUNT(CASE WHEN pi_status = 'approved' THEN 1 END) AS approved")
+            ->selectRaw("COUNT(CASE WHEN pi_status = 'cancelled' THEN 1 END) AS cancelled")
             ->first();
 
-
-        return view(adminTheme().'productions.planning.index',compact('totals'));
+        return view(adminTheme().'productions.planning.index',compact('orders','totals'));
     }
+
+    public function productionPlanningAction(Request $r, $action, $id = null){
+
+        $order = Sample::find($id);
+        if (!$order) {
+            session()->flash('error', 'Order Not Found');
+            return redirect()->route('admin.productionPlanning');
+        }
+
+        return view(adminTheme().'productions.planning.edit', compact('order'));
+    }
+
+    public function production(Request $r)
+    {
+        $styles =SampleItem::whereHas('sample',function($q){
+                        $q->latest()->where('pi_status','pending');            
+                    })
+                    ->get();
+        return view(adminTheme().'productions.productionList',compact('styles'));
+    }
+    
+    public function dailyProduction(Request $r)
+    {
+
+
+        
+        return view(adminTheme().'productions.daily.index');
+    }
+
+    
+    
 
 
 
