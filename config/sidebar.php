@@ -107,13 +107,6 @@ return [
                     'permission'  => 'samples'
                 ],
                 [
-                    'title'      => 'Proforma Invoice',
-                    'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/pi',
-                    'icon_color' => 'text-warning',
-                    'permission' => 'pi'
-                ],
-                [
                     'title'      => 'Buyer List',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/buyers',

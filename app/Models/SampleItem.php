@@ -11,15 +11,7 @@ class SampleItem extends Model
 
     protected $table = 'sample_items';
 
-    protected $fillable = [
-        'sample_id',
-        'composition',
-        'gsm',
-        'color',
-        'size',
-        'quantity',
-        'comments'
-    ];
+    protected $guarded = [];
 
     public function sample()
     {
