@@ -16,11 +16,6 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>PI List</h3>
              <div class="dropdown">
-                @can('proforma_invoice.add')
-                 <a href="{{ route('admin.proformaInvoiceAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
-                     <i class="bx bx-plus"></i> Add PI
-                 </a>
-                 @endcan
                  <a href="{{ route('admin.samples') }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
@@ -112,16 +107,13 @@
                             </td>
                             
                             <td class="text-center">
-                                @if(can('proforma_invoice.view') || can('proforma_invoice.view') || can('proforma_invoice.view'))
+                                @if(can('proforma_invoice.view') || can('proforma_invoice.edit') )
                                     @can('proforma_invoice.view')
                                     <a href="{{ route('admin.proformaInvoiceAction',['view',$sample->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
                                     @endcan
                                     @if(in_array($sample->pi_status, ['pending']))
                                         @can('proforma_invoice.edit')
                                         <a href="{{ route('admin.proformaInvoiceAction',['edit',$sample->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
-                                        @endcan
-                                        @can('proforma_invoice.delete')
-                                        <a href="{{ route('admin.proformaInvoiceAction',['delete',$sample->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
                                         @endcan
                                     @endif
                                 @else -- @endif

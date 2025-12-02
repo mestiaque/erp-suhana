@@ -542,38 +542,6 @@ class MerchandisingController extends Controller
     public function proformaInvoice(Request $r)
     {
         // -----------------------------
-        // BULK ACTION
-        // -----------------------------
-        if ($r->action && $r->checkid) {
-            $samples = Sample::whereIn('id', $r->checkid)->get();
-
-            foreach ($samples as $sample) {
-                switch ($r->action) {
-                    case 'pending':
-                        $sample->status = 'pending';
-                        break;
-                    case 'confirmed':
-                        $sample->status = 'confirmed';
-                        break;
-                    case 'completed':
-                        $sample->status = 'completed';
-                        break;
-                    case 'cancel':
-                        $sample->status = 'cancel';
-                        break;
-                    case 'delete':
-                        $sample->items()->delete();
-                        $sample->delete();
-                        continue 2; // skip save
-                }
-                $sample->save();
-            }
-
-            session()->flash('success', 'Action Completed Successfully!');
-            return redirect()->back();
-        }
-
-        // -----------------------------
         // QUERY SAMPLES
         // -----------------------------
         $samples = Sample::orderBy('id', 'desc')
@@ -622,40 +590,19 @@ class MerchandisingController extends Controller
             ->selectRaw("COUNT(CASE WHEN pi_status = 'cancelled' THEN 1 END) AS cancelled")
             ->first();
 
-        $buyers = User::latest()
-            ->where('buyer', true)
-            ->whereIn('status', [0, 1])
-            ->select(['id', 'name', 'company_name'])
-            ->get();
-
-        return view(adminTheme().'merchandising.pi.index', compact('samples', 'totals', 'buyers'));
+        return view(adminTheme().'merchandising.pi.index', compact('samples', 'totals'));
     }
 
     public function proformaInvoiceAction(Request $r, $action, $id = null)
     {
-        // CREATE SAMPLE
-        if ($action == 'create') {
-            $sample = Sample::where('status', 'temp')->where('created_by', Auth::id())->first();
-
-            if (!$sample) {
-                $sample = new Sample();
-                $sample->status = 'temp';
-                $sample->created_by = Auth::id();
-                $sample->created_at = now();
-                $sample->save();
-            }
-
-            return redirect()->route('admin.proformaInvoiceAction', ['edit', $sample->id]);
-        }
-
         // FIND SAMPLE
         $sample = Sample::find($id);
         if (!$sample) {
-            session()->flash('error', 'Sample Not Found');
+            session()->flash('error', 'PI Not Found');
             return redirect()->route('admin.proformaInvoice');
         }
 
-        if (!in_array($sample->status, ['temp', 'pending']) && $action == ['edit', 'delete', 'add-item', 'update-item', 'remove-item', 'update-head']) {
+        if (!in_array($sample->pi_status, ['pending', 'confirmed']) && $action == ['edit', 'update-item', 'update-head']) {
             session()->flash('error', 'PI is already confirmed and cannot be edited or deleted.');
             return redirect()->route('admin.proformaInvoice');
         }
@@ -669,53 +616,12 @@ class MerchandisingController extends Controller
         if (in_array($action, ['add-item', 'update-item', 'remove-item', 'update-head'])) {
 
             if ($action == 'update-head') {
-
                 $sample = Sample::find($id);
                 if (!$sample || !$r->field) return redirect()->back();
-
                 $field = $r->field;
                 $value = $r->value;
-
-                // Buyer Update
-                if ($field == 'buyer') {
-                    if ($buyer = User::find($value)) {
-                        $sample->buyer_id = $buyer->id;
-                        $sample->buyer_name = $buyer->name;
-                    }
-                }
-                if ($field == 'merchant') {
-                    if ($merchant = User::find($value)) {
-                        $sample->merchant_id = $merchant->id;
-                        $sample->merchant_name = $merchant->name;
-                    }
-                }
-
-                // Style update with unique check
-                elseif ($field == 'style') {
-                    $existsStyle = Sample::where('style', $value)->where('id', '<>', $sample->id)->exists();
-                    if ($existsStyle) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'This style already exists',
-                            'field' => 'style' // যেই input field
-                        ]);
-                    }
-                    $sample->style = $value;
-                }
-
-                // Default update for all other fields
-                else {
-                    $sample->$field = $value;
-                }
-
-                // Final single save
+                $sample->$field = $value;
                 $sample->save();
-            }
-
-            if ($action == 'add-item') {
-                $item = new SampleItem();
-                $item->sample_id = $sample->id;
-                $item->save();
             }
 
             if ($action == 'update-item') {
@@ -724,22 +630,16 @@ class MerchandisingController extends Controller
                     if ($item && $r->field) {
                         $field = $r->field;
                         $item->$field = $r->value;
+                        $item->amount = $item->unit_price*$item->quantity;
                         $item->save();
-                        if($r->field == 'quantity'){
-                            $totalQty = $sample?->items?->sum('quantity') ?? 0;
-                            $sample->update([ 'total_qty'=>$totalQty ]);
-                            return response()->json([
-                                'success' => false,
-                                'qty' => $totalQty
-                            ]);
+                        if($r->field == 'unit_price' || $r->field == 'discount'){
+                            $totalAmount = $sample?->items?->sum('amount') ?? 0;
+                            $totalDiscount = $sample?->items?->sum('discount') ?? 0;
+                            $sample->update([ 'total_bill'=> ($totalAmount-$totalDiscount) ]);
                         }
                     }
                     $item->save();
                 }
-            }
-
-            if ($action == 'remove-item') {
-                SampleItem::where('id', $r->item_id)->delete();
             }
 
             $items = $sample->items;
@@ -750,59 +650,21 @@ class MerchandisingController extends Controller
         // UPDATE SAMPLE
         if ($action == 'update') {
             $r->validate([
-                'buyer' => 'required|numeric',
-                'style' => 'required|string|max:255',
-                'type' => 'nullable|string|max:255',
-                'status' => 'required|string|max:20',
+                'pi_status' => 'required|string|max:20',
             ]);
             $buyer = User::find($r->buyer);
 
-            $existsStyle = Sample::where('style', $r->style)->where('id', '<>', $sample->id)->exists();
-
-            if ($existsStyle) {
-                session()->flash('info', 'This style already exists');
-                return redirect()->back();  // Save unnecessary
-            }
-
-            if (count($sample->items) == 0) {
-                session()->flash('info', 'No items found for this sample');
-                return redirect()->back();  // Save unnecessary
-            }
-
-            $sample->buyer_id = $buyer->id ?? $sample->buyer_id;
-            $sample->buyer_name = $buyer->name ?? $sample->buyer_name;
-
-            $sample->type = $r->type ?? $sample->type;
-            $sample->status = $r->status ?? $sample->status;
+            $sample->pi_status = $r->status ?? $sample->pi_status;
             $sample->save();
 
-            session()->flash('success', 'Sample Updated Successfully');
+            session()->flash('success', 'PI Updated Successfully');
             return redirect()->route('admin.proformaInvoiceAction', ['view', $sample->id]);
-        }
-
-        // DELETE SAMPLE
-        if ($action == 'delete') {
-            $sample->items()->delete();
-            $sample->delete();
-            session()->flash('success', 'Sample Deleted Successfully');
-            return redirect()->back();
         }
 
         // LOAD EDIT PAGE
         $items = $sample->items;
 
-        $buyers = User::latest()
-            ->where('buyer', true)
-            ->whereIn('status', [0, 1])
-            ->select(['id', 'name', 'company_name'])
-            ->get();
-        $merchandisers = User::latest()
-            ->where('merchandiser', true)
-            ->whereIn('status', [0, 1])
-            ->select(['id', 'name'])
-            ->get();
-
-        return view(adminTheme().'merchandising.pi.edit', compact('sample','items', 'buyers', 'merchandisers'));
+        return view(adminTheme().'merchandising.pi.edit', compact('sample','items'));
     }
 
 

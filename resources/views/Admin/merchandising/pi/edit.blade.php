@@ -69,13 +69,28 @@
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>PI Status</label>
-                        <select name="status" class="form-control" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
-                            <option value="temp">Temp</option>
-                            <option value="pending" {{$sample->status=='pending'?'selected':''}}  {{$sample->status=='temp'?'selected':''}}>Pending</option>
-                            <option value="confirmed" {{$sample->status=='confirmed'?'selected':''}}>Confirmed</option>
-                            <option value="approved" {{$sample->status=='approved'?'selected':''}}>Approved</option>
-                            <option value="cancel" {{$sample->status=='cancel'?'selected':''}}>Cancel</option>
+                        <select name="pi_status" class="form-control" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                            <option value="pending" {{$sample->pi_status=='pending'?'selected':''}} >Pending</option>
+                            <option value="confirmed" {{$sample->pi_status=='confirmed'?'selected':''}} {{$sample->pi_status=='pending'?'selected':''}}>Confirmed</option>
+                            <option value="approved" {{$sample->pi_status=='approved'?'selected':''}}>Approved</option>
+                            <option value="cancel" {{$sample->pi_status=='cancel'?'selected':''}}>Cancel</option>
                         </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Invoice No *</label>
+                        <input type="text" name="invoice_no" class="form-control updateHead" value="{{ $sample->invoice_no }}" placeholder="Payment Bank Details" data-name="invoice_no" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>BIN Number *</label>
+                        <input type="text" name="bin_number" class="form-control updateHead" value="{{ $sample->bin_number }}" placeholder="Payment Bank Details" data-name="bin_number" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>JOB Number *</label>
+                        <input type="text" name="job_number" class="form-control updateHead" value="{{ $sample->job_number }}" placeholder="Payment Bank Details" data-name="job_number" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label>Payment Bank Details *</label>
+                        <input type="text" name="payment_bank_details" class="form-control updateHead" value="{{ $sample->payment_bank_details }}" placeholder="Payment Bank Details" data-name="payment_bank_details" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
                     </div>
                 </div>
 
@@ -110,50 +125,34 @@
     // === Live calculation & total quantity update ===
     function updateTotalSummary() {
         let totalQty = 0;
-        $('.itemRow').each(function(){
+        let totalAmount = 0;
+        let totalDiscount = 0;
+
+        $('.itemRow').each(function() {
             let qty = parseFloat($(this).find('.qty').val()) || 0;
+            let unitPrice = parseFloat($(this).find('.unit-price').val()) || 0;
+            let discount = parseFloat($(this).find('.discount').val()) || 0;
+
+            // calculate amount = qty * unitPrice
+            let amount = qty * unitPrice;
+
+            // set amount field (readonly)
+            $(this).find('.amount').val(amount.toFixed(2));
+
+            // sum totals
             totalQty += qty;
+            totalAmount += amount;
+            totalDiscount += discount;
         });
-        console.log(totalQty);
+
+        // update totals in table footer
         $('.totalQty').text(totalQty);
+        $('.totalAmount').text(totalAmount.toFixed(2));
+        $('.totalDiscount').text(totalDiscount.toFixed(2));
     }
 
-    // -------------------------
-    // Update summernote Fields
-    // -------------------------
-    // Flag to track if toolbar was clicked
-    let toolbarClicked = false;
-
-    // Detect clicks on the Summernote toolbar
-    $(document).on('mousedown', '.note-toolbar', function() {
-        toolbarClicked = true;
-    });
-
-    $('.summernote').summernote({
-        height: 200,
-        callbacks: {
-            onBlur: function(e) {
-                // If toolbar was clicked, ignore this blur
-                if (toolbarClicked) {
-                    toolbarClicked = false; // reset for next blur
-                    return;
-                }
-
-                let textarea = $(this);
-                let url = textarea.data('url');
-                let name = textarea.data('name');
-                let value = textarea.summernote('code').trim(); // get content
-
-                $.get(url, { field: name, value: value }, function(res) {
-                    if (res.success) {
-                        console.log('Payment terms updated successfully');
-                    } else {
-                        alert(res.message);
-                    }
-                });
-            }
-        }
-    });
+    // call on page load
+    updateTotalSummary();
 
     // -------------------------
     // Update Item Fields
@@ -162,27 +161,13 @@
         let url = $(this).data('url');
         let name = $(this).data('name');
         let value = $(this).val();
-        console.log(value);
         $.get(url, {field: name, value: value}, function(res){
             if(res.success){
-                // console.log('success');
             }else{
-                    alert(res.message)
+                alert(res.message)
                 if(res.field){
                     $('input[name="'+res.field+'"]').val('');
                 }
-            }
-        });
-    });
-
-    // -------------------------
-    // Add Item
-    // -------------------------
-    $(document).on('click','.addItem', function(){
-        let url = $(this).data('url');
-        $.get(url, function(res){
-            if(res.success){
-                $('.cardItems').html(res.view);
             }
         });
     });
@@ -201,19 +186,6 @@
         });
     });
 
-    // -------------------------
-    // Remove Item
-    // -------------------------
-    $(document).on('click','.removeItem', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        $.get(url, {action:'remove-item'}, function(res){
-            if(res.success){
-                $('.cardItems').html(res.view);
-                updateTotalSummary();
-            }
-        });
-    });
 
 </script>
 @endpush

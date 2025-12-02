@@ -166,7 +166,6 @@
             let qty = parseFloat($(this).find('.qty').val()) || 0;
             totalQty += qty;
         });
-        console.log(totalQty);
         $('.totalQty').text(totalQty);
     }
 
@@ -198,7 +197,6 @@
 
                 $.get(url, { field: name, value: value }, function(res) {
                     if (res.success) {
-                        console.log('Payment terms updated successfully');
                     } else {
                         alert(res.message);
                     }
@@ -214,10 +212,8 @@
         let url = $(this).data('url');
         let name = $(this).data('name');
         let value = $(this).val();
-        console.log(value);
         $.get(url, {field: name, value: value}, function(res){
             if(res.success){
-                // console.log('success');
             }else{
                     alert(res.message)
                 if(res.field){
