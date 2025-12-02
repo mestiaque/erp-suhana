@@ -114,12 +114,20 @@ return [
                     'permission'  => 'samples'
                 ],
                 [
+                    'title'      => 'Proforma Invoice',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/pi',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'pi'
+                ],
+                [
                     'title'      => 'Buyer List',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/buyers',
                     'icon_color' => 'text-warning',
                     'permission' => 'buyers'
                 ],
+
             ]
         ],
     ],
@@ -252,6 +260,13 @@ return [
                     'permission'  => 'admin'
                 ],
                 [
+                    'title'      => 'Merchandiser List',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/merchandisers',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'merchandisers'
+                ],
+                [
                     'title'       => 'Roles Setup',
                     'icon'        => 'fa-solid fa-user-gear',
                     'route'       => '/admin/users/roles',
@@ -282,7 +297,6 @@ return [
             ]
         ],
     ],
-
 
 
     [

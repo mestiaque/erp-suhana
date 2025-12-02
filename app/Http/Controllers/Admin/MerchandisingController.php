@@ -509,7 +509,12 @@ class MerchandisingController extends Controller
             ->whereIn('status', [0, 1])
             ->select(['id', 'name', 'company_name'])
             ->get();
-        return view(adminTheme().'merchandising.samples.edit', compact('sample','items', 'buyers'));
+        $merchandisers = User::latest()
+            ->where('merchandiser', true)
+            ->whereIn('status', [0, 1])
+            ->select(['id', 'name'])
+            ->get();
+        return view(adminTheme().'merchandising.samples.edit', compact('sample','items', 'buyers', 'merchandisers'));
     }
 
 

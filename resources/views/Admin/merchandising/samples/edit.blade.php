@@ -50,8 +50,19 @@
                         </select>
                     </div>
                     <div class="col-md-3 mb-3">
+                        <label>Merchandiser *</label>
+                        <select name="merchandiser" id="" class="form-control updateHead" data-name="merchandiser" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                            <option value="">-- Select Merchandiser --</option>
+                            @foreach($merchandisers as $m)
+                                <option value="{{ $m->id }}" {{ $sample->merchandiser_id == $m->id ? 'selected':'' }}>
+                                    {{ $m->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label>Style *</label>
-                        <input type="text" name="style" value="{{ $sample->style }}" data-name="style" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                        <input type="text" placeholder="Style" name="style" value="{{ $sample->style }}" data-name="style" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>Type *</label>
@@ -61,6 +72,22 @@
                             <option value="Type 2" {{$sample->type=='Type 2'?'selected':''}}>Type 2</option>
                             <option value="Type 3" {{$sample->type=='Type 3'?'selected':''}}>Type 3</option>
                             <option value="Type 4" {{$sample->type=='Type 4'?'selected':''}}>Type 4</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Received Date *</label>
+                        <input type="date" name="received_date" value="{{ $sample->received_date }}" data-name="received_date" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Delivery Date *</label>
+                        <input type="date" name="delivery_date" value="{{ $sample->delivery_date }}" data-name="delivery_date" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Currency *</label>
+                        <select name="currency" id="" class="form-control updateHead" data-name="currency"  data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                            <option value="">-- Select Currency --</option>
+                            <option value="BDT" {{$sample->currency=='BDT'?'selected':''}}>BDT</option>
+                            <option value="USD" {{$sample->currency=='USD'?'selected':''}}>USD</option>
                         </select>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -80,6 +107,11 @@
 
                 <div class="cardItems">
                     @include(adminTheme().'merchandising.samples.includes.items')
+                </div>
+
+                <div class="mt-4">
+                    <label>Payment Terms</label>
+                    <textarea name="" id="" cols="30" rows="10" class="summernote form-control updateHead" data-name="type"  data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}"></textarea>
                 </div>
 
                 <br>

@@ -124,6 +124,17 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'pi' => [
+                'label'       => 'Proforma Invoice',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'buyers' => [
                 'label'       => 'Buyer',
                 'permissions' => [
@@ -135,6 +146,7 @@ return [
                     'all'    => 'All',
                 ],
             ],
+
         ],
 
         'Accounts Management' =>[
@@ -293,6 +305,17 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'merchandisers' => [
+                'label'       => 'Merchandisers',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'roles' => [
                 'label'       => 'Roles',
                 'permissions' => [
@@ -370,14 +393,14 @@ return [
 
         ],
 
-        'Development' =>[
-            'dev' => [
-                'label'       => 'Development',
-                'permissions' => [
-                    'all'    => 'All',
-                ],
-            ]
+        // 'Development' =>[
+        //     'dev' => [
+        //         'label'       => 'Development',
+        //         'permissions' => [
+        //             'all'    => 'All',
+        //         ],
+        //     ]
 
-        ],
+        // ],
     ],
 ];

@@ -52,6 +52,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/users/roles',[AdminController::class,'userRoles'])->name('userRoles');
     Route::any('/users/roles/{action}/{id?}',[AdminController::class,'userRoleAction'])->name('userRoleAction');
 
+    Route::get('/merchandisers',[AdminController::class,'merchandisers'])->name('merchandisers');
+    Route::any('/merchandisers/{action}/{id?}',[AdminController::class,'merchandisersAction'])->name('merchandisersAction');
+
     // Apps Setting
     Route::get('/setting/{type}',[AdminController::class,'setting'])->name('setting');
     Route::post('/setting/{type}/update',[AdminController::class,'settingUpdate'])->name('settingUpdate');
