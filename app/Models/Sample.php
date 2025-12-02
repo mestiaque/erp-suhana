@@ -11,14 +11,30 @@ class Sample extends Model
 
     protected $table = 'sample';
 
-    protected $fillable = [
-        'buyer_id',
-        'buyer_name',
-        'style',
-        'status',
-        'type',
-        'created_by'
+    protected $guarded = [];
+
+    protected $casts = [
+        'received_at'       => 'date',
+        'delivery_at'       => 'date',
+        'invoice_at'        => 'date',
+        'pi_pending_at'     => 'date',
+        'pi_confirmed_at'   => 'date',
+        'pi_approved_at'    => 'date',
+        'pi_cancelled_at'   => 'date',
+        'p_pending_at'      => 'date',
+        'p_running_at'      => 'date',
+        'p_shipping_at'     => 'date',
+        'p_cancelled_at'    => 'date',
+        'created_at'        => 'date',
+        'updated_at'        => 'date',
+        'created_date'      => 'date',
     ];
+
+    public function getOrderNumber()
+    {
+        $length = 8; // ID থেকে কত digit number তৈরি হবে
+        return str_pad($this->id, $length, '0', STR_PAD_LEFT);
+    }
 
     public function items()
     {
@@ -38,5 +54,10 @@ class Sample extends Model
     public function buyer()
     {
         return $this->belongsTo(User::class, 'buyer_id');
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(User::class, 'merchant_id');
     }
 }

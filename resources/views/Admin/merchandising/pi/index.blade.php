@@ -1,7 +1,7 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Sample List') }}</title>
+<title>{{ websiteTitle('PI List') }}</title>
 @endsection
 
 @push('css')
@@ -14,11 +14,11 @@
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Sample List</h3>
+             <h3>PI List</h3>
              <div class="dropdown">
                 @can('samples.add')
-                 <a href="{{ route('admin.samplesAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
-                     <i class="bx bx-plus"></i> Add Sample
+                 <a href="{{ route('admin.proformaInvoiceAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                     <i class="bx bx-plus"></i> Add PI
                  </a>
                  @endcan
                  <a href="{{ route('admin.samples') }}" class="btn-custom yellow">
@@ -52,12 +52,11 @@
             <div class="row mb-2">
                 <div class="col-md-12">
                     <ul class="statuslist p-0">
-                        <li><a href="{{ route('admin.samples') }}">All ({{ $totals->total }})</a></li>
-                        {{-- <li><a href="{{ route('admin.samples',['status'=>'temp']) }}">Temp ({{ $totals->temp }})</a></li> --}}
-                        <li><a href="{{ route('admin.samples',['status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'completed']) }}">Completed ({{ $totals->completed }})</a></li>
-                        <li><a href="{{ route('admin.samples',['status'=>'cancel']) }}">Cancelled ({{ $totals->cancel }})</a></li>
+                        <li><a href="{{ route('admin.proformaInvoice') }}">All ({{ $totals->total }})</a></li>
+                        <li><a href="{{ route('admin.proformaInvoice',['pi_status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
+                        <li><a href="{{ route('admin.proformaInvoice',['pi_status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
+                        <li><a href="{{ route('admin.proformaInvoice',['pi_status'=>'completed']) }}">Approved ({{ $totals->completed }})</a></li>
+                        <li><a href="{{ route('admin.proformaInvoice',['pi_status'=>'cancel']) }}">Cancelled ({{ $totals->cancel }})</a></li>
                     </ul>
                 </div>
             </div>
@@ -99,15 +98,15 @@
                             <td>{{ $sample?->received_at?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $sample?->delivery_at?->format('d.m.Y') ?? '--' }}</td>
                             <td>
-                                @if($sample->status=='temp')
+                                @if($sample->pi_status=='temp')
                                     <span class="badge badge-secondary">Temp</span>
-                                @elseif($sample->status=='pending')
+                                @elseif($sample->pi_status=='pending')
                                     <span class="badge badge-warning">Pending</span>
-                                @elseif($sample->status=='confirmed')
+                                @elseif($sample->pi_status=='confirmed')
                                     <span class="badge badge-info">Confirmed</span>
-                                @elseif($sample->status=='completed')
-                                    <span class="badge badge-success">Completed</span>
-                                @elseif($sample->status=='cancel')
+                                @elseif($sample->pi_status=='approved')
+                                    <span class="badge badge-success">Approved</span>
+                                @elseif($sample->pi_status=='canceled')
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
                             </td>
@@ -115,14 +114,14 @@
                             <td class="text-center">
                                 @if(can('samples.view') || can('samples.view') || can('samples.view'))
                                     @can('samples.view')
-                                    <a href="{{ route('admin.samplesAction',['view',$sample->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
+                                    <a href="{{ route('admin.proformaInvoiceAction',['view',$sample->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
                                     @endcan
-                                    @if(in_array($sample->status, ['temp', 'pending']))
+                                    @if(in_array($sample->pi_status, ['pending']))
                                         @can('samples.edit')
-                                        <a href="{{ route('admin.samplesAction',['edit',$sample->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
+                                        <a href="{{ route('admin.proformaInvoiceAction',['edit',$sample->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
                                         @endcan
                                         @can('samples.delete')
-                                        <a href="{{ route('admin.samplesAction',['delete',$sample->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
+                                        <a href="{{ route('admin.proformaInvoiceAction',['delete',$sample->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
                                         @endcan
                                     @endif
                                 @else -- @endif
@@ -130,7 +129,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">No Samples Found</td>
+                            <td colspan="8" class="text-center text-muted">No PI Found</td>
                         </tr>
                         @endforelse
                     </tbody>

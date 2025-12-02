@@ -124,8 +124,65 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'pi' => [
+                'label'       => 'Proforma Invoice',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'buyers' => [
                 'label'       => 'Buyer',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'proforma_invoice' => [
+                'label'       => 'Proforma Invoice',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+        ],
+        'Production Management' =>[
+            'production_planning' => [
+                'label'       => 'Production Planning',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'daily_production' => [
+                'label'       => 'Daily Production',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'production_list' => [
+                'label'       => 'Production List',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -293,6 +350,17 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'merchandisers' => [
+                'label'       => 'Merchandisers',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'roles' => [
                 'label'       => 'Roles',
                 'permissions' => [
@@ -370,14 +438,14 @@ return [
 
         ],
 
-        'Development' =>[
-            'dev' => [
-                'label'       => 'Development',
-                'permissions' => [
-                    'all'    => 'All',
-                ],
-            ]
+        // 'Development' =>[
+        //     'dev' => [
+        //         'label'       => 'Development',
+        //         'permissions' => [
+        //             'all'    => 'All',
+        //         ],
+        //     ]
 
-        ],
+        // ],
     ],
 ];

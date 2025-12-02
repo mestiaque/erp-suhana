@@ -82,5 +82,6 @@
                 <td colspan="8" style="text-align:center;color:#aaa;">No Item</td>
             </tr>
         @endif
+        <tfoot><tr> <th class="text-right" colspan="5">Total Quantity : </th> <th class="totalQty">{{ $sample->items->sum('quantity') ?? 0 }}</th> <th></th><th></th></tr></tfoot>
     </table>
 </div>

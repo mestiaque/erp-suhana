@@ -8272,244 +8272,6 @@ class AdminController extends Controller
 
     //Companies Function End
 
-
-    //Merchandisers Function Start
-
-    public function merchandisers(Request $r){
-
-      // Filter Action Start
-      if($r->action){
-        if($r->checkid){
-
-        $datas=Attribute::latest()->where('type',4)->whereIn('id',$r->checkid)->get();
-
-        foreach($datas as $data){
-
-            if($r->action==1){
-              $data->status='active';
-              $data->save();
-            }elseif($r->action==2){
-              $data->status='inactive';
-              $data->save();
-            }elseif($r->action==5){
-
-              $medias =Media::latest()->where('src_type',3)->where('src_id',$data->id)->get();
-              foreach($medias as $media){
-                if(File::exists($media->file_url)){
-                  File::delete($media->file_url);
-                }
-                $media->delete();
-              }
-
-              $data->delete();
-            }
-
-        }
-
-        Session()->flash('success','Action Successfully Completed!');
-
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-
-        return redirect()->back();
-      }
-
-      $merchandisers=Attribute::latest()->where('type',4)->where('status','<>','temp')->where('parent_id',null)
-                    ->where(function($q) use($r) {
-                          if($r->search){
-                              $q->where('name','LIKE','%'.$r->search.'%');
-                          }
-                          if($r->status){
-                            $q->where('status',$r->status);
-                          }
-                      })
-                    ->select(['id','name','slug','location','description','type','created_at','addedby_id','status','fetured'])
-                    ->paginate(25);
-
-
-      //Total Count Results
-      $totals = DB::table('attributes')
-      ->where('type',4)
-      ->selectRaw('count(*) as total')
-      ->selectRaw("count(case when status = 'active' then 1 end) as active")
-      ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
-      ->first();
-
-      return view(adminTheme().'merchandiser.merchandisersAll',compact('merchandisers','totals'));
-
-    }
-
-    public function merchandisersAction(Request $r,$action,$id=null){
-
-      //Create Merchandiser Start
-      if($action=='create'){
-        $check = $r->validate([
-            'name' => 'required|max:100',
-            'short_name' => 'required|min:3|max:100',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'description' => 'nullable|max:1000',
-        ]);
-
-        $hasName =Attribute::where('type',4)->where('slug',$r->short_name)->first();
-        if($hasName){
-            Session()->flash('error','This Merchandiser Short Name Are Already Used');
-            return redirect()->back()->withInput();
-        }
-
-        $merchandiser =Attribute::where('type',4)->where('status','temp')->where('addedby_id',Auth::id())->first();
-        if(!$merchandiser){
-          $merchandiser =new Attribute();
-        }
-
-
-        $merchandiser->name=$r->name;
-        $merchandiser->description=$r->description;
-        $merchandiser->type =4;
-        $merchandiser->status ='active';
-        $merchandiser->addedby_id =Auth::id();
-        $merchandiser->save();
-
-        ///////Image UploadStart////////////
-
-        if($r->hasFile('photo')){
-          $file =$r->photo;
-          $src  =$merchandiser->id;
-          $srcType  =3;
-          $fileUse  =1;
-          $author =Auth::id();
-          uploadFile($file,$src,$srcType,$fileUse,$author);
-        }
-        ///////Image Upload End////////////
-
-
-         $slug =strtoupper(Str::slug($r->short_name));
-         if($slug==null){
-          $merchandiser->slug=$merchandiser->id;
-         }else{
-          if(Attribute::where('type',4)->where('slug',$slug)->whereNotIn('id',[$merchandiser->id])->count() >0){
-          $merchandiser->slug=$slug.'-'.$merchandiser->id;
-          }else{
-          $merchandiser->slug=$slug;
-          }
-        }
-        $merchandiser->save();
-
-        Session()->flash('success','Your Are Successfully Added');
-        return redirect()->back();
-
-      }
-      //Create Merchandiser End
-
-      $merchandiser =Attribute::where('type',4)->find($id);
-      if(!$merchandiser){
-        Session()->flash('error','This Merchandiser Are Not Found');
-        return redirect()->route('admin.merchandisers');
-      }
-
-      //Check Authorized User
-      $allPer = empty(json_decode(Auth::user()->permission->permission, true)['galleries']['all']);
-      if($allPer && $merchandiser->addedby_id!=Auth::id()){
-        Session()->flash('error','You are unauthorized Try!!');
-        return redirect()->route('admin.merchandisers');
-      }
-
-      //Update Merchandiser Start
-      if($action=='update'){
-
-        $check = $r->validate([
-            'name' => 'required|max:191',
-            'short_name' => 'required|min:3|max:100',
-            'location' => 'nullable|max:200',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        $hasName =Attribute::where('type',4)->where('id','<>',$merchandiser->id)->where('slug',$r->short_name)->first();
-        if($hasName){
-            Session()->flash('error','This Merchandiser Short Name Are Already Used');
-            return redirect()->back()->withInput();
-        }
-
-        $merchandiser->name=$r->name;
-        $merchandiser->description=$r->description;
-        $merchandiser->location=$r->location;
-
-        ///////Image UploadStart////////////
-
-        if($r->hasFile('photo')){
-          $file =$r->photo;
-          $src  =$merchandiser->id;
-          $srcType  =3;
-          $fileUse  =1;
-          $author =Auth::id();
-          uploadFile($file,$src,$srcType,$fileUse,$author);
-        }
-        ///////Image Upload End////////////
-
-        ///////Banner Upload End////////////
-
-        if($r->hasFile('banner')){
-
-          $file =$r->banner;
-          $src  =$merchandiser->id;
-          $srcType  =3;
-          $fileUse  =2;
-          $author=Auth::id();
-          uploadFile($file,$src,$srcType,$fileUse,$author);
-
-        }
-
-        ///////Banner Upload End////////////
-
-        $slug =strtoupper(Str::slug($r->short_name));
-        if($slug==null){
-          $merchandiser->slug=$merchandiser->id;
-        }else{
-          if(Attribute::where('type',4)->where('slug',$slug)->whereNotIn('id',[$merchandiser->id])->count() >0){
-          $merchandiser->slug=$slug.'-'.$merchandiser->id;
-          }else{
-          $merchandiser->slug=$slug;
-          }
-        }
-        $merchandiser->status =$r->status?'active':'inactive';
-        $merchandiser->editedby_id =Auth::id();
-        $merchandiser->save();
-
-
-        Session()->flash('success','Your Are Successfully Update');
-        return redirect()->back();
-
-      }
-      //Update Merchandiser End
-
-      //Delete Merchandiser Start
-      if($action=='delete'){
-
-        //Merchandiser  Media all File Delete
-        $galleryMedies =Media::where('src_type',3)->where('src_id',$merchandiser->id)->get();
-
-        foreach ($galleryMedies as  $media) {
-              if(File::exists($media->file_url)){
-                  File::delete($media->file_url);
-              }
-              $media->delete();
-          }
-
-        $merchandiser->delete();
-
-        Session()->flash('success','Your Are Successfully Done');
-        return redirect()->route('admin.merchandisers');
-
-      }
-      //Delete Merchandiser End
-
-      return redirect()->back();
-
-    }
-
-    //Merchandisers Function End
-
     //engineers Function Start
 
     public function engineers(Request $r){
@@ -10300,6 +10062,242 @@ class AdminController extends Controller
 
     }
 
+    // merchandisers Management Function Start
+
+    public function merchandisers(Request $r){
+
+      //Filter Actions Start
+      if($r->action){
+        if($r->checkid){
+
+        $datas=User::latest()->whereIn('status',[0,1])->where('merchandiser',true)->whereIn('id',$r->checkid)->get();
+
+        foreach($datas as $data){
+
+            if($r->action==1){
+              $data->status=1;
+              $data->save();
+            }elseif($r->action==2){
+              $data->status=0;
+              $data->save();
+            }elseif($r->action==3){
+              $data->fetured=true;
+              $data->save();
+            }elseif($r->action==4){
+              $data->fetured=false;
+              $data->save();
+            }elseif($r->action==5){
+
+              //User Media File Delete
+              $data->merchandiser=false;
+              $data->addedby_at=null;
+              $data->permission_id=null;
+              $data->addedby_id=null;
+              $data->save();
+
+            }
+
+        }
+
+        Session()->flash('success','Action Successfully Completed!');
+
+        }else{
+          Session()->flash('info','Please Need To Select Minimum One Post');
+        }
+
+        return redirect()->back();
+      }
+
+      //Filter Action End
+
+
+      $users =User::latest()->whereIn('status',[0,1])->where('merchandiser',true)
+        ->where(function($q) use($r) {
+
+          if($r->search){
+              $q->where('name','LIKE','%'.$r->search.'%');
+              $q->orWhere('email','LIKE','%'.$r->search.'%');
+              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
+          }
+
+          if($r->role){
+             $q->where('permission_id',$r->role);
+          }
+
+          if($r->startDate || $r->endDate)
+          {
+              if($r->startDate){
+                  $from =$r->startDate;
+              }else{
+                  $from=Carbon::now()->format('Y-m-d');
+              }
+
+              if($r->endDate){
+                  $to =$r->endDate;
+              }else{
+                  $to=Carbon::now()->format('Y-m-d');
+              }
+
+              $q->whereDate('addedby_at','>=',$from)->whereDate('addedby_at','<=',$to);
+          }
+
+      })
+      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
+      ->paginate(12)->appends([
+        'search'=>$r->search,
+        'startDate'=>$r->startDate,
+        'endDate'=>$r->endDate,
+      ]);
+
+      //Total Count Results
+      $totals = DB::table('users')->whereIn('status',[0,1])->where('merchandiser',true)
+      ->selectRaw('count(*) as total')
+      ->selectRaw("count(case when status = 1 then 1 end) as active")
+      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+      ->first();
+
+      $roles =Permission::latest()->where('status','active')->get();
+
+      return view(adminTheme().'users.merchandisers.users',compact('users','totals','roles'));
+    }
+
+    public function merchandisersAction (Request $r,$action,$id=null){
+
+      //Add Admin User Start
+      if($action=='create' && $r->isMethod('post')){
+
+        if(filter_var($r->username, FILTER_VALIDATE_EMAIL)){
+          $hasUser =User::latest()->whereIn('status',[0,1])->where('email',$r->username)->first();
+        }else{
+          $hasUser =User::latest()->whereIn('status',[0,1])->where('mobile',$r->username)->first();
+        }
+
+        if(!$hasUser){
+            Session()->flash('error','This User Are Not Register');
+            return redirect()->route('admin.merchandisers');
+        }
+
+        if($hasUser->merchandiser){
+            Session()->flash('error','This User Are already Merchandisers Authorize');
+            return redirect()->route('admin.merchandisers');
+        }
+
+        $hasUser->merchandiser=true;
+        $hasUser->permission_id=1;
+        $hasUser->addedby_at=Carbon::now();
+        $hasUser->addedby_id=Auth::id();
+        $hasUser->save();
+
+        Session()->flash('success','User Are Successfully Merchandisers Authorize Done!');
+        return redirect()->route('admin.merchandisersAction',['edit',$hasUser->id]);
+
+      }
+      //Add Admin User End
+
+
+      $user=User::whereIn('status',[0,1])->where('merchandiser',true)->find($id);
+
+      if(!$user){
+        Session()->flash('error','This Merchandisers User Are Not Found');
+        return redirect()->route('admin.merchandisers');
+      }
+
+        //Update User Profile Start
+        if($action=='update' && $r->isMethod('post')){
+
+            $check = $r->validate([
+                 'name' => 'required|max:100|unique:users,name,'.$user->id,
+                 'email' => 'nuallable|max:100|unique:users,email,'.$user->id,
+                 'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
+                 'gender' => 'nullable|max:10',
+                 'address' => 'nullable|max:191',
+                 'division' => 'nullable|numeric',
+                 'district' => 'nullable|max:191',
+                 'city' => 'nullable|max:191',
+                 'postal_code' => 'nullable|max:20',
+                 'role' => 'nullable|numeric',
+                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+             ]);
+
+           $user->name =$r->name;
+           $user->mobile =$r->mobile;
+           $user->email =$r->email;
+           $user->gender =$r->gender;
+           $user->address_line1 =$r->address;
+           $user->division =$r->division;
+           $user->district =$r->district;
+           $user->city =$r->city;
+           $user->postal_code =$r->postal_code;
+           $user->permission_id =$r->role;
+
+           ///////Image UploadStart////////////
+           if($r->hasFile('image')){
+             $file =$r->image;
+             $src  =$user->id;
+             $srcType  =6;
+             $fileUse  =1;
+             $author=Auth::id();
+             uploadFile($file,$src,$srcType,$fileUse,$author);
+           }
+           ///////Image Upload End////////////
+
+           $user->status=$r->status?true:false;
+           $user->save();
+
+           Session()->flash('success','Your Updated Are Successfully Done!');
+           return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
+        }
+        //Update User Profile End
+
+        //Update User Password Start
+        if($action=='change-password' && $r->isMethod('post')){
+
+          $validator = Validator::make($r->all(), [
+              'old_password' => 'required|string|min:8',
+              'password' => 'required|string|min:8|confirmed|different:old_password',
+          ]);
+
+          if($validator->fails()){
+              return redirect()->route('admin.merchandisersAction',['edit',$user->id])->withErrors($validator)->withInput();
+          }
+
+          if(Hash::check($r->old_password, $user->password)){
+            $user->password_show=$r->password;
+            $user->password=Hash::make($r->password);
+            $user->update();
+
+            Session()->flash('success','Your Are Successfully Done');
+            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
+          }else{
+            Session()->flash('error','Current Password Are Not Match');
+            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
+          }
+        }
+        //Update User Password End
+
+        //Delete User End
+        if($action=='delete'){
+          $user->merchandiser=false;
+          $user->addedby_at=null;
+          $user->permission_id=null;
+          $user->addedby_id=null;
+          $user->save();
+
+          Session()->flash('success','Merchandisers User Are Removed Successfully Done');
+          return redirect()->route('admin.merchandisers');
+        }
+        //Delete User End
+        $roles =Permission::latest()->where('status','active')->get();
+
+        if($action == 'view'){
+            return view(adminTheme().'users.merchandisers.viewUser',compact('user','roles', 'action'));
+        }
+
+        return view(adminTheme().'users.merchandisers.editUser',compact('user','roles'));
+
+    }
+
     // User Management Function Start
 
     public function usersAdmin(Request $r){
@@ -10580,7 +10578,11 @@ class AdminController extends Controller
 
       //Filter Action End
 
-      $users =User::latest()->whereIn('status',[0,1])
+      $users =User::latest()->whereIn('status',[0,1])    
+      ->whereNot(function($query) {
+            $query->where('buyer', true)
+                    ->where('merchandiser', true);
+            })
       ->where(function($q) use($r) {
 
           if($r->search){

@@ -50,17 +50,79 @@
                         </select>
                     </div>
                     <div class="col-md-3 mb-3">
+                        <label>Merchandiser *</label>
+                        <select name="merchant" id="" class="form-control updateHead" data-name="merchant" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                            <option value="">-- Select Merchandiser --</option>
+                            @foreach($merchandisers as $m)
+                                <option value="{{ $m->id }}" {{ $sample->merchant_id == $m->id ? 'selected':'' }}>
+                                    {{ $m->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
                         <label>Style *</label>
-                        <input type="text" name="style" value="{{ $sample->style }}" data-name="style" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                        <input type="text" placeholder="Style" name="style" value="{{ $sample->style }}" data-name="style" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>Type *</label>
-                        <select name="type" id="" class="form-control updateHead" data-name="type"  data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                        <select name="type" class="form-control updateHead" data-name="type"
+                            data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+
                             <option value="">-- Select Type --</option>
-                            <option value="Type 1" {{$sample->type=='Type 1'?'selected':''}}>Type 1</option>
-                            <option value="Type 2" {{$sample->type=='Type 2'?'selected':''}}>Type 2</option>
-                            <option value="Type 3" {{$sample->type=='Type 3'?'selected':''}}>Type 3</option>
-                            <option value="Type 4" {{$sample->type=='Type 4'?'selected':''}}>Type 4</option>
+
+                            <!-- Development Samples -->
+                            <option value="Proto Sample" {{ $sample->type=='Proto Sample'?'selected':'' }}>Proto Sample</option>
+                            <option value="Mock-up Sample" {{ $sample->type=='Mock-up Sample'?'selected':'' }}>Mock-up Sample</option>
+                            <option value="Fit Sample" {{ $sample->type=='Fit Sample'?'selected':'' }}>Fit Sample</option>
+                            <option value="Size Set Sample" {{ $sample->type=='Size Set Sample'?'selected':'' }}>Size Set Sample</option>
+                            <option value="Photo Sample" {{ $sample->type=='Photo Sample'?'selected':'' }}>Photo Sample</option>
+                            <option value="Sealing Sample" {{ $sample->type=='Sealing Sample'?'selected':'' }}>Sealing Sample</option>
+                            <option value="Pre-Production Sample" {{ $sample->type=='Pre-Production Sample'?'selected':'' }}>Pre-Production Sample</option>
+
+                            <!-- Buyer Approval Samples -->
+                            <option value="Counter Sample" {{ $sample->type=='Counter Sample'?'selected':'' }}>Counter Sample</option>
+                            <option value="Salesman Sample" {{ $sample->type=='Salesman Sample'?'selected':'' }}>Salesman Sample (SMS)</option>
+                            <option value="Red Seal Sample" {{ $sample->type=='Red Seal Sample'?'selected':'' }}>Red Seal Sample</option>
+                            <option value="Gold Seal Sample" {{ $sample->type=='Gold Seal Sample'?'selected':'' }}>Gold Seal Sample</option>
+
+                            <!-- Production Samples -->
+                            <option value="PPS Sample" {{ $sample->type=='PPS Sample'?'selected':'' }}>PPS Sample (Pre-Production Sample)</option>
+                            <option value="TOP Sample" {{ $sample->type=='TOP Sample'?'selected':'' }}>TOP Sample (Top of Production)</option>
+                            <option value="Pilot Sample" {{ $sample->type=='Pilot Sample'?'selected':'' }}>Pilot Sample</option>
+                            <option value="Bulk Sample" {{ $sample->type=='Bulk Sample'?'selected':'' }}>Bulk Sample</option>
+
+                            <!-- Testing & Quality Samples -->
+                            <option value="Wash Sample" {{ $sample->type=='Wash Sample'?'selected':'' }}>Wash Sample</option>
+                            <option value="Lab Dip" {{ $sample->type=='Lab Dip'?'selected':'' }}>Lab Dip</option>
+                            <option value="Handloom Sample" {{ $sample->type=='Handloom Sample'?'selected':'' }}>Handloom Sample</option>
+                            <option value="Shrinkage Test Sample" {{ $sample->type=='Shrinkage Test Sample'?'selected':'' }}>Shrinkage Test Sample</option>
+                            <option value="Print/Embroidery Sample" {{ $sample->type=='Print/Embroidery Sample'?'selected':'' }}>Print/Embroidery Sample</option>
+
+                            <!-- Other -->
+                            <option value="Fit Confirmation Sample" {{ $sample->type=='Fit Confirmation Sample'?'selected':'' }}>Fit Confirmation Sample</option>
+                            <option value="Fabric Approval Sample" {{ $sample->type=='Fabric Approval Sample'?'selected':'' }}>Fabric Approval Sample</option>
+                            <option value="Trims Approval Sample" {{ $sample->type=='Trims Approval Sample'?'selected':'' }}>Trims Approval Sample</option>
+                            <option value="Measurement Sample" {{ $sample->type=='Measurement Sample'?'selected':'' }}>Measurement Sample</option>
+                            <option value="Final Approval Sample" {{ $sample->type=='Final Approval Sample'?'selected':'' }}>Final Approval Sample</option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Received Date *</label>
+                        <input type="date" name="received_at" value="{{ $sample?->received_at?->format('Y-m-d') }}" data-name="received_at" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Delivery Date *</label>
+                        <input type="date" name="delivery_at" value="{{ $sample?->delivery_at?->format('Y-m-d') }}" data-name="delivery_at" class="form-control updateHead" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Currency *</label>
+                        <select name="currency" id="" class="form-control updateHead" data-name="currency"  data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}" required>
+                            <option value="">-- Select Currency --</option>
+                            <option value="BDT" {{$sample->currency=='BDT'?'selected':''}}>BDT</option>
+                            <option value="USD" {{$sample->currency=='USD'?'selected':''}}>USD</option>
                         </select>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -82,6 +144,11 @@
                     @include(adminTheme().'merchandising.samples.includes.items')
                 </div>
 
+                <div class="mt-4">
+                    <label>Payment Terms</label>
+                    <textarea name="payment_terms" id="" cols="30" rows="10" class="summernote form-control updateHead" data-name="payment_terms" data-url="{{ route('admin.samplesAction',['update-head',$sample->id]) }}">{{ $sample->payment_terms }}</textarea>
+                </div>
+
                 <br>
                 <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Sample</button>
             </form>
@@ -99,8 +166,46 @@
             let qty = parseFloat($(this).find('.qty').val()) || 0;
             totalQty += qty;
         });
+        console.log(totalQty);
         $('.totalQty').text(totalQty);
     }
+
+    // -------------------------
+    // Update summernote Fields
+    // -------------------------
+    // Flag to track if toolbar was clicked
+    let toolbarClicked = false;
+
+    // Detect clicks on the Summernote toolbar
+    $(document).on('mousedown', '.note-toolbar', function() {
+        toolbarClicked = true;
+    });
+
+    $('.summernote').summernote({
+        height: 200,
+        callbacks: {
+            onBlur: function(e) {
+                // If toolbar was clicked, ignore this blur
+                if (toolbarClicked) {
+                    toolbarClicked = false; // reset for next blur
+                    return;
+                }
+
+                let textarea = $(this);
+                let url = textarea.data('url');
+                let name = textarea.data('name');
+                let value = textarea.summernote('code').trim(); // get content
+
+                $.get(url, { field: name, value: value }, function(res) {
+                    if (res.success) {
+                        console.log('Payment terms updated successfully');
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            }
+        }
+    });
 
     // -------------------------
     // Update Item Fields
@@ -109,6 +214,7 @@
         let url = $(this).data('url');
         let name = $(this).data('name');
         let value = $(this).val();
+        console.log(value);
         $.get(url, {field: name, value: value}, function(res){
             if(res.success){
                 // console.log('success');
@@ -141,8 +247,8 @@
         let name = $(this).data('name');
         let value = $(this).val();
         $.get(url, {field: name, value: value}, function(res){
+            updateTotalSummary();
             if(res.success){
-                updateTotalSummary();
             }
         });
     });
