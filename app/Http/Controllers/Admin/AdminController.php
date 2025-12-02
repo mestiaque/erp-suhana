@@ -10578,7 +10578,11 @@ class AdminController extends Controller
 
       //Filter Action End
 
-      $users =User::latest()->whereIn('status',[0,1])
+      $users =User::latest()->whereIn('status',[0,1])    
+      ->whereNot(function($query) {
+            $query->where('buyer', true)
+                    ->where('merchandiser', true);
+            })
       ->where(function($q) use($r) {
 
           if($r->search){
