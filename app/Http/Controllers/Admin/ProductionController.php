@@ -75,16 +75,25 @@ class ProductionController extends Controller
     public function productionPlanningAction(Request $r, $action, $id = null){
 
         if($action=='create'){
-            $product =ProductionPlanning::where()->first();
+            $plan =ProductionPlanning::where('status','temp')->where('addedby_id',Auth::id())->first();
+            if(!$plan){
+                $plan =new ProductionPlanning();
+                $plan->status='temp';
+                $plan->addedby_id=Auth::id();
+                
+            }
+            $plan->created_at=Carbon::now();
+            $plan->save();
+            return redirect()->route('admin.productionPlanningAction',['edit',$plan->id]);
         }
 
-        $order = Sample::find($id);
-        if (!$order) {
-            session()->flash('error', 'Order Not Found');
+        $plan = ProductionPlanning::find($id);
+        if (!$plan) {
+            session()->flash('error', 'Plan Not Found');
             return redirect()->route('admin.productionPlanning');
         }
 
-        return view(adminTheme().'productions.planning.edit', compact('order'));
+        return view(adminTheme().'productions.planning.edit', compact('plan'));
     }
 
     public function production(Request $r)
