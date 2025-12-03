@@ -73,25 +73,20 @@
                      */
 
                     if ($permission !== '') {
-
-                        // permission দেওয়া আছে → শুধু permission allow হলে show
                         $show = hasChildPermission($permission) || $hasVisibleChild;
-
                     } else {
-
                         if ($level == 0) {
-                            // (PARENT) → সবসময় show
-                            $show = true;
-
+                            // (PARENT) → শুধুমাত্র show হবে যদি child visible থাকে
+                            $show = $hasVisibleChild;
                         } elseif ($level == 1) {
                             // (CHILD) → permission='' হলে দেখাবে শুধুমাত্র যখন তার কোন visible child আছে
                             $show = $hasVisibleChild;
-
                         } else {
                             // (GRANDCHILD / level>=2) → permission='' হলেও show হবে (NEW RULE)
                             $show = true;
                         }
                     }
+
 
 
                     // --------------------------------------
@@ -161,24 +156,38 @@
             {{-- গ্রুপ অনুযায়ী মেনু রেন্ডার --}}
             @foreach(config('sidebar') as $group)
 
-                {{-- যদি group title থাকে তাহলে দেখায় --}}
-                @if(isset($group['group_title']) && $group['group_title'])
-                    <li class="nav-item-title">{{ $group['group_title'] }}</li>
+                @php
+                    // check if any parent in this group will be visible
+                    $hasVisibleParent = false;
+                    foreach($group as $key => $menu) {
+                        if($key === 'group_title') continue;
+                        $result = renderMenu($menu, 0);
+                        if($result['show']) {
+                            $hasVisibleParent = true;
+                            break;
+                        }
+                    }
+                @endphp
+
+                {{-- যদি কোনো parent visible থাকে --}}
+                @if($hasVisibleParent)
+
+                    {{-- group title দেখানো --}}
+                    @if(isset($group['group_title']) && $group['group_title'])
+                        <li class="nav-item-title">{{ $group['group_title'] }}</li>
+                    @endif
+
+                    {{-- visible parent গুলো render করা --}}
+                    @foreach($group as $key => $menu)
+                        @if($key === 'group_title') @continue @endif
+                        @php $result = renderMenu($menu, 0); @endphp
+                        {!! $result['html'] !!}
+                    @endforeach
+
                 @endif
 
-                {{-- গ্রুপের প্রতিটি মেনু আইটেম লুপ করা --}}
-                @foreach($group as $key => $menu)
-
-                    {{-- যদি এটি group_title কীগুলি হয়ে যায়, সেগুলো স্কিপ করো --}}
-                    @if($key === 'group_title') @continue @endif
-
-                    {{-- মেনু রেন্ডার (root level এ render করার সময় level হবে 0 → তাই (PARENT) হিসেবে দেখাবে) --}}
-                    @php $result = renderMenu($menu, 0); @endphp
-
-                    {{-- রেন্ডার করা HTML প্রিন্ট --}}
-                    {!! $result['html'] !!}
-                @endforeach
             @endforeach
+
 
         </ul>
     </div>

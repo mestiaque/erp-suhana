@@ -157,16 +157,16 @@ return [
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/yarn-booking',
                             'icon_color'  => 'text-warning',
-                            'permission'  => '',
-                            // 'permission'  => 'yarn_booking'
+                            // 'permission'  => '',
+                            'permission'  => 'yarn_booking'
                         ],
                         [
                             'title'       => 'knitting',
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/knitting-booking',
                             'icon_color'  => 'text-warning',
-                            'permission'  => '',
-                            // 'permission'  => 'knitting_booking'
+                            // 'permission'  => '',
+                            'permission'  => 'knitting_booking'
                         ],
                         [
                             'title'       => 'Dying',
