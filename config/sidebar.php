@@ -106,12 +106,19 @@ return [
                     'icon_color'  => 'text-warning',
                     'permission'  => 'samples'
                 ],
+                // [
+                //     'title'      => 'Buyer List',
+                //     'icon'       => 'fa-solid fa-arrow-right',
+                //     'route'      => '/admin/buyers',
+                //     'icon_color' => 'text-warning',
+                //     'permission' => 'buyers'
+                // ],
                 [
-                    'title'      => 'Buyer List',
+                    'title'      => 'Order Details',
                     'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/buyers',
+                    'route'      => '/admin/order-details',
                     'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'permission' => 'order_details'
                 ],
                 [
                     'title'      => 'Proforma Invoice (PI)',
@@ -429,20 +436,7 @@ return [
                 ['title' => 'Line List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/lines', 'icon_color' => 'text-warning', 'permission' => 'dev'],
             ]
         ],
-        [
-            'title'      => 'Master Data',
-            'icon'       => 'fa-solid fa-palette',
-            'icon_color' => 'text-primary',
-            'permission' => '',
-            'children'   => [
-                ['title' => 'Unit List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/units', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Size List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/sizes', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Color List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/colors', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Fabric List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/fabrics', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Style List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/styles', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Sku List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/skus', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-            ]
-        ],
+
     ],
 
     // App Settings
