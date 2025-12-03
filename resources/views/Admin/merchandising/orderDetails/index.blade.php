@@ -78,8 +78,8 @@
                             <th style="min-width: 250px">Composition</th>
                             <th style="min-width: 200px">Fabrication</th>
                             <th style="min-width: 100px">GSM</th>
+                            <th style="min-width: 100px">Color</th>
                             <th style="min-width: 100px">Total Qty</th>
-                            <th style="min-width: 100px">Total Bill</th>
                             <th style="min-width: 180px">Remarks</th>
                             <th style="min-width: 120px">Create Date</th>
                             <th style="min-width: 100px">Status</th>
@@ -100,8 +100,8 @@
                             <td>{{ $order->composition ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
                             <td>{{ $order->gsm ?? '--' }}</td>
+                            <td>{{ $order->color_name ?? '--' }}</td>
                             <td>{{ $order->total_qty ?? '--' }}</td>
-                            <td>{{ $order->total_bill ?? '--' }}</td>
                             <td>{{ $order->remarks ?? '--' }}</td>
                             <td>{{ $order->created_at->format('d.m.Y') }}</td>
                             <td>
@@ -154,6 +154,7 @@
 
 </div>
 @endsection
+
     @foreach($orderDetails as $order)
         <div class="modal fade" id="viewModal_{{ $order->id }}" tabindex="-1">
             <div class="modal-dialog ">
@@ -229,6 +230,10 @@
                             <span class="text-secondary fw-semibold">GSM</span>
                             <div class="fw-normal">{{ $order->gsm ?? '--' }}</div>
                         </div>
+                        <div class="col-md-6">
+                            <span class="text-secondary fw-semibold">Color</span>
+                            <div class="fw-normal">{{ $order->color_name ?? '--' }}</div>
+                        </div>
 
                         <!-- Order Summary -->
                         <div class="col-12 mt-2">
@@ -238,11 +243,6 @@
                         <div class="col-md-6">
                             <span class="text-secondary fw-semibold">Total Qty</span>
                             <div class="fw-normal">{{ $order->total_qty ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Total Bill</span>
-                            <div class="fw-normal">{{ $order->total_bill ?? '--' }}</div>
                         </div>
 
                         <!-- Additional Info -->
