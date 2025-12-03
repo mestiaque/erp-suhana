@@ -13,8 +13,8 @@
             <th class="px-2 pb-1" style="width: 150px;">Comments</th>
         </tr>
 
-        @if($sample->items->count() > 0)
-            @foreach($sample->items as $i => $item)
+        @if($order->items->count() > 0)
+            @foreach($order->items as $i => $item)
                 <tr class="itemRow" data-item="{{ $item->id }}">
                     <td class="p-1 text-start" style="vertical-align: bottom; text-align: center;">{{ $i+1 }}</td>
 
@@ -39,15 +39,15 @@
                     </td>
                     <td class="p-1">
                         <input type="number" class="form-control form-control-sm unit-price updateItem" value="{{ $item->unit_price }}" data-name="unit_price"
-                               data-url="{{ route('admin.proformaInvoiceAction',['update-item',$sample->id,'item_id'=>$item->id]) }}">
+                               data-url="{{ route('admin.proformaInvoiceAction',['update-item',$order->id,'item_id'=>$item->id]) }}">
                     </td>
                     <td class="p-1">
                         <input type="number" readonly class="form-control form-control-sm amount" value="{{ $item->amount }}" data-name="amount"
-                               data-url="{{ route('admin.proformaInvoiceAction',['update-item',$sample->id,'item_id'=>$item->id]) }}">
+                               data-url="{{ route('admin.proformaInvoiceAction',['update-item',$order->id,'item_id'=>$item->id]) }}">
                     </td>
                     <td class="p-1">
                         <input type="number" class="form-control form-control-sm discount updateItem" value="{{ $item->discount }}" data-name="discount"
-                               data-url="{{ route('admin.proformaInvoiceAction',['update-item',$sample->id,'item_id'=>$item->id]) }}">
+                               data-url="{{ route('admin.proformaInvoiceAction',['update-item',$order->id,'item_id'=>$item->id]) }}">
                     </td>
                     <td class="p-1">
                         <input readonly type="text" class="form-control form-control-sm" value="{{ $item->comments }}">
@@ -62,10 +62,10 @@
         <tfoot>
             <tr> 
                 <th class="text-right" colspan="5">Total Quantity : </th> 
-                <th class="totalQty">{{ $sample->items->sum('quantity') ?? 0 }}</th> 
+                <th class="totalQty">{{ $order->items->sum('quantity') ?? 0 }}</th> 
                 <th></th>
-                <th class="totalAmount">{{ $sample->items->sum('amount') ?? 0 }}</th>
-                <th class="totalDiscount">{{ $sample->items->sum('discount') ?? 0 }}</th>
+                <th class="totalAmount">{{ $order->items->sum('amount') ?? 0 }}</th>
+                <th class="totalDiscount">{{ $order->items->sum('discount') ?? 0 }}</th>
                 <th></th>
             </tr>
         </tfoot>

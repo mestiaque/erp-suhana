@@ -16,6 +16,13 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Planning List</h3>
              <div class="dropdown">
+            
+                @can('samples.add')
+                 <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                     <i class="bx bx-plus"></i> Add Planning
+                 </a>
+                @endcan
+
                  <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>

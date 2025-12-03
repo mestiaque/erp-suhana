@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\SampleItem;
+use App\Models\ProductionPlanning;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -73,6 +74,10 @@ class ProductionController extends Controller
 
     public function productionPlanningAction(Request $r, $action, $id = null){
 
+        if($action=='create'){
+            $product =ProductionPlanning::where()->first();
+        }
+
         $order = Sample::find($id);
         if (!$order) {
             session()->flash('error', 'Order Not Found');
@@ -97,6 +102,29 @@ class ProductionController extends Controller
 
         
         return view(adminTheme().'productions.daily.index');
+    }
+
+    public function yarnBooking(Request $r)
+    {
+
+
+        
+        return view(adminTheme().'productions.yarn-booking.index');
+    }
+
+    public function knittingBooking(Request $r)
+    {
+
+
+        
+        return view(adminTheme().'productions.knitting-booking.index');
+    }
+
+    public function dyingBooking(Request $r)
+    {
+
+
+        return view(adminTheme().'productions.dying-booking.index');
     }
 
     

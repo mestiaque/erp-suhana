@@ -142,6 +142,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     //Production
     Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
+    
+    Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');
+    Route::get('/procurement/knitting-booking',[ProductionController::class,'knittingBooking'])->name('knittingBooking');
+    Route::get('/procurement/dying-booking',[ProductionController::class,'dyingBooking'])->name('dyingBooking');
+
     Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
     Route::get('/production-list',[ProductionController::class,'production'])->name('production');

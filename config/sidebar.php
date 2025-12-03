@@ -134,24 +134,46 @@ return [
     [
         'group_title' => '',
         [
-            'title'      => 'Production',
+            'title'      => 'Production Planning',
             'icon'       => 'fa-solid fa-layer-group',
             'icon_color' => 'text-primary',
             'permission' => '',
             'children'   => [
                 [
-                    'title'       => 'Production Planning',
+                    'title'       => 'Planning',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/production-planning',
                     'icon_color'  => 'text-warning',
                     'permission'  => 'samples'
                 ],
                 [
-                    'title'      => 'Daily Production',
-                    'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/daily-production',
-                    'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'title'       => 'Procurement',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'samples',
+                    'children'    => [
+                        [
+                            'title'       => 'Yarn',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/yarn-booking',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'samples'
+                        ],
+                        [
+                            'title'       => 'knitting',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/knitting-booking',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'samples'
+                        ],
+                        [
+                            'title'       => 'Dying',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/dying-booking',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'samples'
+                        ],
+                    ]
                 ],
                 [
                     'title'      => 'Production List',
@@ -160,6 +182,14 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'buyers'
                 ],
+                [
+                    'title'      => 'Daily Production',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/daily-production',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'buyers'
+                ],
+                
             ]
         ],
     ],

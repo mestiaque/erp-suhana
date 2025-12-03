@@ -9,7 +9,7 @@ use App\Models\Order;
 use App\Models\Sample;
 use App\Models\Product;
 use App\Models\Attribute;
-use App\Models\OrderItem;
+use App\Models\ProformaInvoice;
 use App\Models\SampleItem;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
@@ -822,17 +822,32 @@ class MerchandisingController extends Controller
 
     public function proformaInvoiceAction(Request $r, $action, $id = null)
     {
+
+        // CREATE SAMPLE
+        if($action == 'create'){
+            $order = ProformaInvoice::where('status', 'temp')->where('addedby_id', Auth::id())->first();
+            if (!$order) {
+                $order = new ProformaInvoice();
+                $order->status = 'temp';
+                $order->addedby_id = Auth::id();
+            }
+            $order->created_at = now();     
+            $order->save();
+            return redirect()->route('admin.proformaInvoiceAction', ['edit', $order->id]);
+        }
+
+
         // FIND SAMPLE
-        $sample = Sample::find($id);
-        if (!$sample) {
+        $order = ProformaInvoice::find($id);
+        if (!$order) {
             session()->flash('error', 'PI Not Found');
             return redirect()->route('admin.proformaInvoice');
         }
 
-        if (!in_array($sample->pi_status, ['pending', 'confirmed']) && $action == ['edit', 'update-item', 'update-head']) {
-            session()->flash('error', 'PI is already confirmed and cannot be edited or deleted.');
-            return redirect()->route('admin.proformaInvoice');
-        }
+        // if (!in_array($order->pi_status, ['pending', 'confirmed']) && $action == ['edit', 'update-item', 'update-head']) {
+        //     session()->flash('error', 'PI is already confirmed and cannot be edited or deleted.');
+        //     return redirect()->route('admin.proformaInvoice');
+        // }
 
         // VIEW
         if ($action == 'view') {
@@ -889,9 +904,9 @@ class MerchandisingController extends Controller
         }
 
         // LOAD EDIT PAGE
-        $items = $sample->items;
+        $items = $order->items;
 
-        return view(adminTheme().'merchandising.pi.edit', compact('sample','items'));
+        return view(adminTheme().'merchandising.pi.edit', compact('order','items'));
     }
 
 

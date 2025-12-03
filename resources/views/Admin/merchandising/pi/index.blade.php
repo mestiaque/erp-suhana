@@ -16,6 +16,11 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>PI List</h3>
              <div class="dropdown">
+                @can('proforma_invoice.add')
+                 <a href="{{ route('admin.proformaInvoiceAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                     <i class="bx bx-plus"></i> Add PI
+                 </a>
+                 @endcan
                  <a href="{{ route('admin.samples') }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
