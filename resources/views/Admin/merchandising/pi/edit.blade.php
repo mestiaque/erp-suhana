@@ -29,68 +29,38 @@
 
     <div class="card mb-30">
         {{-- <div class="card-header">
-            <h3>Sample #<span class="text-primary">{{ $sample->id }}</span></h3>
+            <h3>Sample #<span class="text-primary">{{ $order->id }}</span></h3>
         </div> --}}
 
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-            <form action="{{ route('admin.proformaInvoiceAction', ['update', $sample->id]) }}" method="POST">
+            <form action="{{ route('admin.proformaInvoiceAction', ['update', $order->id]) }}" method="POST">
                 @csrf
                 <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label>Buyer</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample->buyer_name }}{{ $sample->buyer->company_name ?? '' ? ' - ' . $sample->buyer->company_name : '' }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Merchandiser</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample->merchant_name }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Style</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample->style }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Type</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample->type }}">
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label>Received Date *</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample?->received_at?->format('Y-m-d') }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Delivery Date *</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample?->delivery_at?->format('Y-m-d') }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Currency *</label>
-                        <input type="text" readonly class="form-control" value="{{ $sample->currency }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>PI Status</label>
-                        <select name="pi_status" class="form-control" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
-                            <option value="pending" {{$sample->pi_status=='pending'?'selected':''}} >Pending</option>
-                            <option value="confirmed" {{$sample->pi_status=='confirmed'?'selected':''}} {{$sample->pi_status=='pending'?'selected':''}}>Confirmed</option>
-                            <option value="approved" {{$sample->pi_status=='approved'?'selected':''}}>Approved</option>
-                            <option value="cancel" {{$sample->pi_status=='cancel'?'selected':''}}>Cancel</option>
+                    <div class="col-md-4 mb-3">
+                        <label>PO Number</label>
+                        <select class="form-control updateHead2" po_number>
+                            <option value=""> Select Number</option>
+                            <option value="02154"> 01251</option>
                         </select>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Invoice No *</label>
-                        <input type="text" name="invoice_no" class="form-control updateHead" value="{{ $sample->invoice_no }}" placeholder="Payment Bank Details" data-name="invoice_no" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                    <div class="col-md-4 mb-3">
+                        <label>Status</label>
+                        <select name="pi_status" class="form-control" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$order->id]) }}" required>
+                            <option value="pending" {{$order->pi_status=='pending'?'selected':''}} >Pending</option>
+                            <option value="confirmed" {{$order->pi_status=='confirmed'?'selected':''}} {{$order->pi_status=='pending'?'selected':''}}>Confirmed</option>
+                            <option value="approved" {{$order->pi_status=='approved'?'selected':''}}>Approved</option>
+                            <option value="cancel" {{$order->pi_status=='cancel'?'selected':''}}>Cancel</option>
+                        </select>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label>BIN Number *</label>
-                        <input type="text" name="bin_number" class="form-control updateHead" value="{{ $sample->bin_number }}" placeholder="Payment Bank Details" data-name="bin_number" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>JOB Number *</label>
-                        <input type="text" name="job_number" class="form-control updateHead" value="{{ $sample->job_number }}" placeholder="Payment Bank Details" data-name="job_number" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                    <div class="col-md-4 mb-3">
+                        <label>Created By*</label>
+                        <input type="text"  readonly="" class="form-control" value="{{ $order->user?->name?? '' }}" placeholder="Created By">
                     </div>
                     <div class="col-md-12 mb-3">
                         <label>Payment Bank Details *</label>
-                        <input type="text" name="payment_bank_details" class="form-control updateHead" value="{{ $sample->payment_bank_details }}" placeholder="Payment Bank Details" data-name="payment_bank_details" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$sample->id]) }}" required>
+                        <input type="text" name="payment_bank_details" class="form-control updateHead" value="{{ $order->payment_bank_details }}" placeholder="Payment Bank Details" data-name="payment_bank_details" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$order->id]) }}" required>
                     </div>
                 </div>
 
@@ -104,8 +74,8 @@
                 <div style="" class="mt-4">
                     <h5 style=""><u>Payment Terms:</u></h5>
                     <div style="border: 1px solid #80808045; padding: 1rem 2rem;">
-                        @if($sample->payment_terms)
-                        {!! $sample->payment_terms !!}
+                        @if($order->payment_terms)
+                        {!! $order->payment_terms !!}
                         @else
                         <p class="m-0 w-100 text-center"><i>No terms found</i></p>
                         @endif

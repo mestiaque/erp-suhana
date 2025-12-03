@@ -86,7 +86,9 @@
                 {{-- Parent with Children --}}
                 @php
                     $visibleChildren = [];
+                    $visibleSubChildren = [];
                     $parentActive = false;
+                    $parentSubActive = false;
 
                     foreach ($menu['children'] as $child) {
                         $childPermission = $child['permission'] ?? '';
@@ -100,6 +102,23 @@
                                 $prefix  = $pattern . '/*';
                                 if (request()->is($pattern) || request()->is($prefix)) {
                                     $parentActive = true;
+                                }
+                            }
+                            if(isset($child['children'])){
+                                foreach($child['children'] as $child){
+                                    $childPermission = $child['permission'] ?? '';
+                                    $route = $child['route'] ?? '';
+                                    
+                                    if ($childPermission === '' || hasChildPermission($childPermission)) {
+                                        $visibleSubChildren[] = $child;
+                                        if (!empty($route)) {
+                                            $pattern = trim($route, '/');
+                                            $prefix  = $pattern . '/*';
+                                            if (request()->is($pattern) || request()->is($prefix)) {
+                                                $parentSubActive = true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -124,11 +143,32 @@
                                     $childActive = !empty($route) && (request()->is($pattern) || request()->is($prefix));
                                 @endphp
 
-                                <li class="nav-item {{ $childActive ? 'mm-active' : '' }}">
-                                    <a href="{{ !empty($child['route']) ? url($child['route']) : 'javascript:void(0)' }}" class="nav-link">
+                                <li class="nav-item {{ $parentSubActive ? 'mm-active' : '' }}">
+
+                                    <a href="{{ !empty($child['route']) ? url($child['route']) : 'javascript:void(0)' }}" class="{{ isset($child['children']) ? 'collapsed-nav-link' : '' }} nav-link">
                                         <span class="icon"><i class="{{ $child['icon'] }}"></i></span>
                                         <span class="menu-title">{{ $child['title'] }}</span>
                                     </a>
+                                    @if(isset($child['children']))
+                                    <ul class="sidemenu-nav-third-level mm-collapse {{ $parentSubActive ? 'mm-show' : '' }}">
+                                        @foreach($visibleSubChildren as $child)
+                                            @php
+                                                $route = $child['route'] ?? '';
+                                                $pattern = trim($route, '/');
+                                                $prefix  = $pattern . '/*';
+                                                $childSubActive = !empty($route) && (request()->is($pattern) || request()->is($prefix));
+                                            @endphp
+                                        
+                                            <li class="nav-item {{ $childSubActive ? 'mm-active' : '' }}">
+                                                <a href="{{ !empty($child['route']) ? url($child['route']) : 'javascript:void(0)' }}" class="nav-link">
+                                                    <span class="icon"><i class="{{ $child['icon'] }}"></i></span>
+                                                    <span class="menu-title">{{ $child['title'] }}</span>
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                        
+                                    </ul>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>
