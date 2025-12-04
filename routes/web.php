@@ -161,6 +161,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
     //end buyer order
 
+    // Floor Route
+    Route::get('/hr/floor-lines',[AdminController::class,'floorLines'])->name('floorLines');
+    Route::any('/hr/floor-lines/{action}/{id?}',[AdminController::class,'floorLinesAction'])->name('floorLinesAction');
+    // Floor Route End
+    
     // Branch Route
     Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
     Route::any('/hr/branchs/{action}/{id?}',[AdminController::class,'branchsAction'])->name('branchsAction');

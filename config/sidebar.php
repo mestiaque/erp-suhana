@@ -365,6 +365,13 @@ return [
                     'icon_color'  => 'text-info',
                     'permission'  => 'designations'
                 ],
+                [
+                    'title'       => 'Floor/Lines',
+                    'icon'        => 'fa-solid fa-building',
+                    'route'       => '/admin/hr/floor-lines',
+                    'icon_color'  => 'text-info',
+                    'permission'  => 'designations'
+                ],
             ]
         ],
     ],
