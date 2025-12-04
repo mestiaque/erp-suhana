@@ -12,6 +12,7 @@ use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\SampleItem;
 use App\Models\ProductionPlanning;
+use App\Models\ProductionSewing;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -106,7 +107,7 @@ class ProductionController extends Controller
                 'shippment_end',
             ];
 
-            if (in_array($r->dataName, $fields)) {
+            if (in_array($r->dataName, $fields)){
                 $plan->{$r->dataName} = $r->dataValue; // Dynamic property
                 $plan->save();
             }
@@ -114,7 +115,54 @@ class ProductionController extends Controller
             return response()->json(['success'=>true,'view'=>'']);
         }
 
+        if($action=='update'){
 
+
+            $plan->style_no      = $r->style_no;
+            $plan->extra_time    = $r->extra_time;
+            $plan->sewing_end    = $r->sewing_end;
+            $plan->working_hours = 10;
+            $plan->status = 'pending';
+            $plan->save();
+
+            $newFloors = $r->floor ?? [];
+            $existingFloors = ProductionSewing::where('planning_id', $plan->id)
+                                ->pluck('line_name')
+                                ->toArray();
+
+            $toDelete = array_diff($existingFloors, $newFloors);
+
+            if (!empty($toDelete)) {
+                ProductionSewing::where('planning_id', $plan->id)
+                    ->whereIn('line_name', $toDelete)
+                    ->delete();
+            }
+
+            foreach ($newFloors as $floorSlug) {
+                $floorLine = Attribute::where('type', 4)
+                                ->where('slug', $floorSlug)
+                                ->first();
+                if($floorLine){
+                    $line = ProductionSewing::where('planning_id', $plan->id)
+                            ->where('line_name', $floorLine->slug)
+                            ->first();
+                    if (!$line) {
+                        $line = new ProductionSewing();
+                        $line->planning_id = $plan->id;
+                        $line->floor_name  = $floorLine->name;
+                        $line->line_name   = $floorLine->slug;
+                    }
+                    $line->style_no      = $plan->style_no;
+                    $line->capacity_hour = $floorLine->capacity;
+                    $line->save();
+                }
+            }
+
+            session()->flash('success','Purchase Receive Updated');
+            return redirect()->route('admin.productionPlanningAction',['view',$plan->id]);
+        }
+
+        // return $plan->sewingLines;
 
         return view(adminTheme().'productions.planning.edit', compact('plan'));
     }

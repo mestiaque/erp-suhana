@@ -24,5 +24,10 @@ class ProductionPlanning extends Model
         return $this->belongsTo(User::class, 'addedby_id');
     }
 
+    public function sewingLines()
+    {
+        return $this->hasMany(ProductionSewing::class, 'planning_id');
+    }
+
     
 }

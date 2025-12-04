@@ -86,7 +86,7 @@
                                         <tr>
                                             <th style="padding:5px;">Ending Date</th>
                                             <td style="padding:1px;">
-                                                <input type="datetime-local" readonly="" class="form-control form-control-sm updateDate" value="{{$plan->sewing_end?Carbon\Carbon::parse($plan->sewing_end)->format('Y-m-d\TH:i'):''}}" data-name="sewing_end">
+                                                <input type="datetime-local" readonly="" class="form-control form-control-sm updateDate sewingEndDate" name="sewing_end" value="{{$plan->sewing_end?Carbon\Carbon::parse($plan->sewing_end)->format('Y-m-d\TH:i'):''}}" data-name="sewing_end">
                                             </td>
                                         </tr>
                                     </table>
@@ -111,7 +111,7 @@
                                         <tr>
                                             <th style="padding:5px;">Ending Date</th>
                                             <td style="padding:1px;">
-                                                <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->packing_end?Carbon\Carbon::parse($plan->packing_end)->format('Y-m-d\TH:i'):''}}" data-name="packing_end">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate"  value="{{$plan->packing_end?Carbon\Carbon::parse($plan->packing_end)->format('Y-m-d\TH:i'):''}}" data-name="packing_end">
                                             </td>
                                         </tr>
                                     </table>
@@ -162,7 +162,7 @@
                                         </tr>
                                         <tr>
                                             <td style="padding:5px;">
-                                                <select class="form-control form-control-sm mb-2 styleSelect">
+                                                <select class="form-control form-control-sm mb-2 styleSelect" name="style_no" >
                                                     <option value="">Select</option>
                                                     @foreach(App\Models\OrderDetails::orderBy('id', 'desc')->where('status','pending')->get() as $style)
                                                     <option value="{{$style->style_no}}" data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
@@ -182,15 +182,20 @@
                                                             ->where('status', 'active')
                                                             ->get()
                                                             ->groupBy('name');
-                                                        @endphp
 
+                                                        $selectedLines = $plan->sewingLines;
+                                                        
+                                                        @endphp
+                                                        {{$selectedLines}}
                                                         @foreach($attributes as $name => $items)
                                                             <b>{{ $name }}</b>
                                                             <br>
 
                                                             @foreach($items as $line)
                                                                 <label class="lineCheck">
-                                                                    <input type="checkbox" name="floor[]" value="{{ $line->slug }}">
+                                                                    <input type="checkbox" name="floor[]" value="{{ $line->id }}"
+                                                                        
+                                                                    >
                                                                     Line - <b>{{ $line->slug }} / </b> C/H: {{ $line->capacity }}
                                                                 </label>
                                                             @endforeach
@@ -210,19 +215,22 @@
                                                 </p>
                                             </td>
                                             <td>
-                                                <label>Lose Time (In Minite)</label>
-                                                <input type="text" class="form-control form-control-sm extraTime" placeholder="Lose Hour (In Minite)">
+                                                <div class="form-group mb-3">
+                                                    <label>Lose Time (In Minite)</label>
+                                                    <input type="text" class="form-control form-control-sm extraTime" name="extra_time" placeholder="Lose Hour (In Minite)">
+                                                </div>
+                                                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Plan</button>
                                             </td>
                                         </tr>
                                     </table>
+
+                                    
                                 </div>
                             </div>
                         </div>
                     </div>
                   
                 </div>
-
-                <!-- <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Sample</button> -->
             </form>
         </div>
     </div>
@@ -343,6 +351,15 @@
             }
 
             $(".EndOfDate").text(formatDate(end));
+
+            $(".sewingEndDate").val(
+                end.getFullYear() + "-" +
+                String(end.getMonth() + 1).padStart(2, '0') + "-" +
+                String(end.getDate()).padStart(2, '0') + "T" +
+                String(end.getHours()).padStart(2, '0') + ":" +
+                String(end.getMinutes()).padStart(2, '0')
+            );
+
         }
 
         // Helper function to format date
