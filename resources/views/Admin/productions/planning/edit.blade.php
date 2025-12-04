@@ -15,6 +15,14 @@
     .itemSearch {height:200px;overflow:auto;position:absolute;width:100%;background:white;border:1px solid #dfdfdf;border-top:0;display:none;}
     .table-striped tr th{padding:3px;}
     .table-striped tr td{padding:3px;}
+    .lineCheck {
+        border: 1px solid #bebebe;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin: 0;
+        cursor: pointer;
+        margin: 3px 1px;
+    }
 </style>
 @endpush
 
@@ -24,142 +32,51 @@
         <h1>Edit Planning</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
-            <li class="item"><a href="{{ route('admin.samples') }}">Planning</a></li>
+            <li class="item"><a href="{{ route('admin.productionPlanning') }}">Planning</a></li>
             <li class="item">Edit Planning</li>
         </ol>
     </div>
 
     <div class="card mb-30">
-        {{-- <div class="card-header">
-            <h3>Sample #<span class="text-primary">{{ $order->id }}</span></h3>
-        </div> --}}
-
+        <div class="card-header d-flex justify-content-between align-items-center">
+             <h3>Production Planning</h3>
+             <div class="dropdown">
+                @if($plan->status!='temp')
+                @can('samples.add')
+                 <a href="{{ route('admin.productionPlanningAction',['view',$plan->id]) }}" class="btn-custom primary" style="padding:5px 15px;">
+                    View
+                 </a>
+                @endcan
+                @endif
+                 <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
+                     <i class="bx bx-rotate-left"></i>
+                 </a>
+             </div>
+        </div>
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-            <form action="{{ route('admin.samplesAction', ['update', $order->id]) }}" method="POST">
+            <form action="{{ route('admin.productionPlanningAction', ['update', $plan->id]) }}" method="POST">
                 @csrf
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="card shadow-sm mb-3 flex-fill">
-                            <div class="card-body">
-                                <ul class="list-group list-group-flush text-start mb-0">
-                                    <li class="list-group-item py-1"><strong>Order No:</strong> {{ str_pad($order->id, 10, '0', STR_PAD_LEFT) }}</li>
-                                    <li class="list-group-item py-1"><strong>Marchent:</strong> {{$order->merchant_name}}</li>
-                                    <li class="list-group-item py-1"><strong>Buyer:</strong> {{$order->buyer_name}}</li>
-                                    <li class="list-group-item py-1"><strong>Invoice No:</strong> </li>
-                                    <li class="list-group-item py-1"><strong>LC:</strong> </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="card shadow-sm mb-3 flex-fill">
-                            <div class="card-body">
-                                <ul class="list-group list-group-flush text-start mb-0">
-                                    <li class="list-group-item py-1"><strong>Order Date:</strong> {{ $order->created_at->format('d.m.Y') }}</li>
-                                    <li class="list-group-item py-1"><strong>Status:</strong> 
-                                        @if($order->pi_status=='temp')
-                                            <span class="badge badge-secondary">Temp</span>
-                                        @elseif($order->pi_status=='pending')
-                                            <span class="badge badge-warning">Pending</span>
-                                        @elseif($order->pi_status=='confirmed')
-                                            <span class="badge badge-info">Confirmed</span>
-                                        @elseif($order->pi_status=='completed')
-                                            <span class="badge badge-success">Completed</span>
-                                        @elseif($order->pi_status=='cancel')
-                                            <span class="badge badge-danger">Cancelled</span>
-                                        @endif
-                                    </li>
-                                    <li class="list-group-item py-1"><strong>Total Qty:</strong> {{number_format($order->total_qty)}}</li>
-                                    <li class="list-group-item py-1"><strong>Total Price:</strong> {{ numberFormat($order->total_bill,2,$order->currency) }}</li>
-                                    <li class="list-group-item py-1"><strong>BIN Number:</strong> </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <div class="card shadow-sm mb-3 flex-fill">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th width="50">#</th>
-                                                <th>Composition</th>
-                                                <th>GSM</th>
-                                                <th>Color</th>
-                                                <th>Size</th>
-                                                <th>Quantity</th>
-                                                <th>Comments</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            @forelse($order->items as $item)
-                                            <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $item->composition }}</td>
-                                                <td>{{ $item->gsm }}</td>
-                                                <td>{{ $item->color }}</td>
-                                                <td>{{ $item->size }}</td>
-                                                <td>{{ $item->quantity }}</td>
-                                                <td>{{ $item->comments }}</td>
-                                            </tr>
-                                            @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center text-muted">No items found</td>
-                                            </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <div class="card shadow-sm mb-3 flex-fill">
                             <div class="card-header">
-                                <h3>Plan Input</h3>
+                                <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">1.Cutting Section</span></h3>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <tr>
-                                            <th style="padding:5px;">Production Start</th>
+                                            <th style="padding:5px;">Starting Date</th>
                                             <td style="padding:1px;">
-                                                <input type="date" class="form-control form-control-sm" name="production_date">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->cutting_start?Carbon\Carbon::parse($plan->cutting_start)->format('Y-m-d\TH:i'):''}}" data-name="cutting_start">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th style="padding:5px;">Production Day</th>
+                                            <th style="padding:5px;">Ending Date</th>
                                             <td style="padding:1px;">
-                                                <input type="number" class="form-control form-control-sm" name="product_day" placeholder="Enter Day">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th style="padding:5px;">Cutting</th>
-                                            <td style="padding:1px;">
-                                                <input type="text" class="form-control form-control-sm" placeholder="Enter ">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th style="padding:5px;">Sewing</th>
-                                            <td style="padding:1px;">
-                                                <input type="text" class="form-control form-control-sm" placeholder="Enter ">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th style="padding:5px;">Dyeing</th>
-                                            <td style="padding:1px;">
-                                                <input type="text" class="form-control form-control-sm" placeholder="Enter ">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th style="padding:5px;">Finishing / Pressing</th>
-                                            <td style="padding:1px;">
-                                                <input type="text" class="form-control form-control-sm" placeholder="Enter ">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->cutting_end?Carbon\Carbon::parse($plan->cutting_end)->format('Y-m-d\TH:i'):''}}" data-name="cutting_end">
                                             </td>
                                         </tr>
                                     </table>
@@ -170,26 +87,163 @@
                     <div class="col-md-6 mb-3">
                         <div class="card shadow-sm mb-3 flex-fill">
                             <div class="card-header">
-                                <h3>Plan Output </h3>
+                                <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">2.Sewing Section</span></h3>
                             </div>
                             <div class="card-body">
-                                Pending..
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="padding:5px;">Starting Date</th>
+                                            <td style="padding:1px;">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate sewingStarDate" value="{{$plan->sewing_start?Carbon\Carbon::parse($plan->sewing_start)->format('Y-m-d\TH:i'):''}}" data-name="sewing_start">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="padding:5px;">Ending Date</th>
+                                            <td style="padding:1px;">
+                                                <input type="datetime-local" readonly="" class="form-control form-control-sm updateDate sewingEndDate" name="sewing_end" value="{{$plan->sewing_end?Carbon\Carbon::parse($plan->sewing_end)->format('Y-m-d\TH:i'):''}}" data-name="sewing_end">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- <div class="col-md-3 mb-3">
-                        <label>Status</label>
-                        <select name="status" class="form-control" data-url="{{ route('admin.samplesAction',['update-head',$order->id]) }}" required>
-                            <option value="temp">Temp</option>
-                            <option value="pending" {{$order->status=='pending'?'selected':''}}  {{$order->status=='temp'?'selected':''}}>Pending</option>
-                            <option value="confirmed" {{$order->status=='confirmed'?'selected':''}}>Confirmed</option>
-                            <option value="completed" {{$order->status=='completed'?'selected':''}}>Completed</option>
-                            <option value="cancel" {{$order->status=='cancel'?'selected':''}}>Cancel</option>
-                        </select>
-                    </div> -->
-                </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm mb-3 flex-fill">
+                            <div class="card-header">
+                                <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">3.Packing Section</span></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="padding:5px;">Starting Date</th>
+                                            <td style="padding:1px;">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->packing_start?Carbon\Carbon::parse($plan->packing_start)->format('Y-m-d\TH:i'):''}}" data-name="packing_start">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="padding:5px;">Ending Date</th>
+                                            <td style="padding:1px;">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate"  value="{{$plan->packing_end?Carbon\Carbon::parse($plan->packing_end)->format('Y-m-d\TH:i'):''}}" data-name="packing_end">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm mb-3 flex-fill">
+                            <div class="card-header">
+                                <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">4.Shipment Section</span></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="padding:5px;">Starting Date</th>
+                                            <td style="padding:1px;">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->shippment_start?Carbon\Carbon::parse($plan->shippment_start)->format('Y-m-d\TH:i'):''}}" data-name="shippment_start">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="padding:5px;">Ending Date</th>
+                                            <td style="padding:1px;">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->shippment_end?Carbon\Carbon::parse($plan->shippment_end)->format('Y-m-d\TH:i'):''}}" data-name="shippment_end">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <div class="card shadow-sm mb-3 flex-fill">
+                            <div class="card-header">
+                                <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">5. Sewing Production Planning </span></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="padding:5px;min-width:250px;width:250px;">Style No</th>
+                                            <th style="padding:5px;min-width:400px;">Floor/Line</th>
+                                            <th style="padding:5px;min-width:250px;width:250px;">Output </th>
+                                            <th style="padding:5px;min-width:250px;width:250px;">
+                                                Setup
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:5px;">
+                                                <select class="form-control form-control-sm mb-2 styleSelect" name="style_no" >
+                                                    <option value="">Select</option>
+                                                    @foreach(App\Models\OrderDetails::orderBy('id', 'desc')->where('status','<>','temp')->get() as $style)
+                                                    <option value="{{$style->style_no}}" {{$style->style_no==$plan->style_no?'selected':''}} data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
+                                                    @endforeach
+                                                </select>
+                                                <p>
+                                                    <input type="hidden" value="" name="style_qty" value="{{$plan->style_qty}}" class="style_qty"> 
+                                                    Order Qty :<b class="styleQty">{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
+                                                    Buyer :<b class="styleBuyer">{{$plan->style?->buyer_name}}</b> <br>
+                                                    Merchandiser :<b class="styleMerchant">{{$plan->style?->merchant_name}}</b> <br>
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        @php
+                                                        $attributes = App\Models\Attribute::where('type', 4)
+                                                            ->where('status', 'active')
+                                                            ->get()
+                                                            ->groupBy('name');
 
-                <!-- <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Sample</button> -->
+                                                        $selectedLines = $plan->sewingLines->pluck('line_name')->toArray();
+                                                        
+                                                        @endphp
+                                                        @foreach($attributes as $name => $items)
+                                                            <b>{{ $name }}</b>
+                                                            <br>
+
+                                                            @foreach($items as $line)
+                                                                <label class="lineCheck">
+                                                                    <input type="checkbox" name="floor[]" value="{{ $line->slug }}"
+                                                                    @if(in_array($line->slug, $selectedLines)) checked @endif
+                                                                    >
+                                                                    Line - <b>{{ $line->slug }} / </b> C/H: {{ $line->capacity }}
+                                                                </label>
+                                                            @endforeach
+
+                                                            <hr>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    P. Start:<b class="startDate"></b> <br>
+                                                    Total Hours:<b class="totalTime"></b> <br>
+                                                    Hourly Target :<b class="hourTarget"></b> <br>
+                                                    Per Day/Hours :<b class="totalHour" data-hour="10">10h</b> <br>
+                                                    P. End:<b class="EndOfDate"></b> <br>
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <div class="form-group mb-3">
+                                                    <label>Lose Time (In Minite)</label>
+                                                    <input type="text" class="form-control form-control-sm extraTime" name="extra_time" value="{{$plan->extra_time}}" placeholder="Lose Hour (In Minite)">
+                                                </div>
+                                                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Plan</button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  
+                </div>
             </form>
         </div>
     </div>
@@ -198,73 +252,150 @@
 
 @push('js')
 <script>
-    // === Live calculation & total quantity update ===
-    function updateTotalSummary() {
-        let totalQty = 0;
-        $('.itemRow').each(function(){
-            let qty = parseFloat($(this).find('.qty').val()) || 0;
-            totalQty += qty;
-        });
-        $('.totalQty').text(totalQty);
-    }
+    $(document).ready(function () {
+        calculateProduction();
+        $('.updateDate').change(function(){
+            var url ="{{ route('admin.productionPlanningAction', ['date-update', $plan->id]) }}";
+            var dataName =$(this).data('name');
+            var dataValue =$(this).val();
 
-    // -------------------------
-    // Update Item Fields
-    // -------------------------
-    $(document).on('change','.updateHead', function(){
-        let url = $(this).data('url');
-        let name = $(this).data('name');
-        let value = $(this).val();
-        $.get(url, {field: name, value: value}, function(res){
-            if(res.success){
-                // console.log('success');
-            }else{
-                    alert(res.message)
-                if(res.field){
-                    $('input[name="'+res.field+'"]').val('');
+            $.ajax({
+                url: url,
+                data: {'dataName': dataName,'dataValue':dataValue},
+                dataType: 'json',
+                success: function(res){
+                    //success
+                },
+                error: function(){
+                    alert('Error updating item.');
+                }
+            });
+
+        });
+
+
+        // On select style
+        $(document).on("change", ".styleSelect", function () {
+            if (!$(".sewingStarDate").val()) {
+                alert("Please select Start Date & Time first.");
+                $(this).val("");
+                return;
+            }
+
+            let qty = Number($(this).find(":selected").data("qty"));
+            let buyer = $(this).find(":selected").data("buyer");
+            let merch = $(this).find(":selected").data("merchandiser");
+            $('.style_qty').val(qty);
+            $(".styleQty").text(qty.toLocaleString() + " pcs");
+            $(".styleBuyer").text(buyer);
+            $(".styleMerchant").text(merch);
+
+            calculateProduction();
+        });
+
+        $(document).on("change", "input[name='floor[]']", calculateProduction);
+        $(document).on("input", ".extraTime", calculateProduction);
+        $(document).on("change", ".sewingStarDate", calculateProduction);
+
+        function calculateProduction() {
+
+            let startDate = $(".sewingStarDate").val();
+            let qty = Number($(".styleSelect option:selected").data("qty"));
+            if (!startDate || !qty) return;
+
+            let start = new Date(startDate);
+
+            $(".startDate").text(formatDate(start));
+
+            // Calculate total capacity
+            let totalCapacity = 0;
+            $("input[name='floor[]']:checked").each(function () {
+                let cap = Number($(this).closest(".lineCheck").text().match(/C\/H:\s*(\d+)/)[1]);
+                totalCapacity += cap;
+            });
+
+            if (totalCapacity === 0) return;
+
+            $(".hourTarget").text(totalCapacity + " pcs");
+
+            // Total minutes needed
+            let totalMinutes = Math.round((qty / totalCapacity) * 60);
+
+            // Add lose time
+            let loseTime = Number($(".extraTime").val()) || 0;
+            totalMinutes += loseTime;
+
+            // Set daily working limits
+            const workStart1 = 10;      // 10:00
+            const workEnd1   = 13;      // 1:00 PM
+            const workStart2 = 14;      // 2:00 PM
+            const workEnd2   = 21;      // 9:00 PM
+            const dailyWorkMinutes = (3 * 60) + (7 * 60); // 600 minutes
+
+            $(".totalHour").text("10h");
+            $(".totalTime").text(Math.floor(totalMinutes / 60) + "h - " + (totalMinutes % 60) + "m");
+
+            // Calculate END DATE + TIME
+            let end = new Date(start);
+
+            while (totalMinutes > 0) {
+                let hour = end.getHours();
+
+                if (hour >= workStart1 && hour < workEnd1) {
+                    end.setMinutes(end.getMinutes() + 1);
+                    totalMinutes--;
+                }
+                else if (hour >= workStart2 && hour < workEnd2) {
+                    end.setMinutes(end.getMinutes() + 1);
+                    totalMinutes--;
+                }
+                else {
+                    // Move to next working slot
+                    if (hour < workStart1) {
+                        end.setHours(workStart1, 0, 0);
+                    } else if (hour < workStart2) {
+                        end.setHours(workStart2, 0, 0);
+                    } else {
+                        // End of day → go next day 10AM
+                        end.setDate(end.getDate() + 1);
+                        end.setHours(workStart1, 0, 0);
+                    }
                 }
             }
-        });
-    });
 
-    // -------------------------
-    // Add Item
-    // -------------------------
-    $(document).on('click','.addItem', function(){
-        let url = $(this).data('url');
-        $.get(url, function(res){
-            if(res.success){
-                $('.cardItems').html(res.view);
-            }
-        });
-    });
+            $(".EndOfDate").text(formatDate(end));
 
-    // -------------------------
-    // Update Item Fields
-    // -------------------------
-    $(document).on('change','.updateItem', function(){
-        let url = $(this).data('url');
-        let name = $(this).data('name');
-        let value = $(this).val();
-        $.get(url, {field: name, value: value}, function(res){
-            if(res.success){
-                updateTotalSummary();
-            }
-        });
-    });
+            $(".sewingEndDate").val(
+                end.getFullYear() + "-" +
+                String(end.getMonth() + 1).padStart(2, '0') + "-" +
+                String(end.getDate()).padStart(2, '0') + "T" +
+                String(end.getHours()).padStart(2, '0') + ":" +
+                String(end.getMinutes()).padStart(2, '0')
+            );
 
-    // -------------------------
-    // Remove Item
-    // -------------------------
-    $(document).on('click','.removeItem', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        $.get(url, {action:'remove-item'}, function(res){
-            if(res.success){
-                $('.cardItems').html(res.view);
-                updateTotalSummary();
-            }
-        });
+        }
+
+        // Helper function to format date
+        function formatDate(d) {
+            let day = String(d.getDate()).padStart(2, '0');
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let year = d.getFullYear();
+
+            let hours = d.getHours();
+            let minutes = String(d.getMinutes()).padStart(2, '0');
+
+            // Convert to AM/PM
+            let ampm = hours >= 12 ? "PM" : "AM";
+            let hour12 = hours % 12;
+            if (hour12 === 0) hour12 = 12;
+
+            hour12 = String(hour12).padStart(2, '0');
+
+            // final format: 05/12/2025, 10.00 AM
+            return `${day}/${month}/${year}, ${hour12}.${minutes} ${ampm}`;
+        }
+
+
     });
 
 </script>

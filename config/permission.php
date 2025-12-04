@@ -124,8 +124,19 @@ return [
                     'all'    => 'All',
                 ],
             ],
-            'buyers' => [
-                'label'       => 'Buyer',
+            // 'buyers' => [
+            //     'label'       => 'Buyer',
+            //     'permissions' => [
+            //         'list'   => 'List',
+            //         'add'    => 'Create',
+            //         'edit'   => 'Edit',
+            //         'view'   => 'View',
+            //         'delete' => 'Delete',
+            //         'all'    => 'All',
+            //     ],
+            // ],
+            'order_details' => [
+                'label'       => 'Order Details',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',

@@ -134,12 +134,19 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/buyers/{action}/{id?}',[MerchandisingController::class,'buyersAction'])->name('buyersAction');
     Route::get('/samples',[MerchandisingController::class,'samples'])->name('samples');
     Route::any('/samples/{action}/{id?}',[MerchandisingController::class,'samplesAction'])->name('samplesAction');
+    Route::get('/order-details',[MerchandisingController::class,'orderDetails'])->name('orderDetails');
+    Route::any('/order-details/{action}/{id?}',[MerchandisingController::class,'orderDetailsAction'])->name('orderDetailsAction');
     Route::get('/proforma-invoice',[MerchandisingController::class,'proformaInvoice'])->name('proformaInvoice');
     Route::any('/proforma-invoice/{action}/{id?}',[MerchandisingController::class,'proformaInvoiceAction'])->name('proformaInvoiceAction');
-    
+
     //Production
     Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
+    
+    Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');
+    Route::get('/procurement/knitting-booking',[ProductionController::class,'knittingBooking'])->name('knittingBooking');
+    Route::get('/procurement/dying-booking',[ProductionController::class,'dyingBooking'])->name('dyingBooking');
+
     Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
     Route::get('/production-list',[ProductionController::class,'production'])->name('production');
@@ -152,27 +159,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/orders',[OrderController::class,'orders'])->name('orders');
     Route::any('/orders/{action}/{id?}',[OrderController::class,'ordersAction'])->name('ordersAction');
 
-    // Units
-    Route::get('/units', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('units');
-    Route::any('/units/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 6)->defaults('view', 'units')->name('unitsAction');
-    // Sizes
-    Route::get('/sizes', [OrderController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'sizes')->name('sizes');
-    Route::any('/sizes/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'sizes')->name('sizesAction');
-    // Colors
-    Route::get('/colors', [OrderController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'colors')->name('colors');
-    Route::any('/colors/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'colors')->name('colorsAction');
-    // Fabrics
-    Route::get('/fabrics', [OrderController::class, 'manageAttribute'])->defaults('type', 13)->defaults('view', 'fabrics')->name('fabrics');
-    Route::any('/fabrics/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 13)->defaults('view', 'fabrics')->name('fabricsAction');
-    // Styles
-    Route::get('/styles', [OrderController::class, 'manageAttribute'])->defaults('type', 14)->defaults('view', 'styles')->name('styles');
-    Route::any('/styles/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 14)->defaults('view', 'styles')->name('stylesAction');
-    // SKUs
-    Route::get('/skus', [OrderController::class, 'manageAttribute'])->defaults('type', 15)->defaults('view', 'skus')->name('skus');
-    Route::any('/skus/{action}/{id?}', [OrderController::class, 'manageAttribute'])->defaults('type', 15)->defaults('view', 'skus')->name('skusAction');
-
     //end buyer order
 
+    // Floor Route
+    Route::get('/hr/floor-lines',[AdminController::class,'floorLines'])->name('floorLines');
+    Route::any('/hr/floor-lines/{action}/{id?}',[AdminController::class,'floorLinesAction'])->name('floorLinesAction');
+    // Floor Route End
+    
     // Branch Route
     Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
     Route::any('/hr/branchs/{action}/{id?}',[AdminController::class,'branchsAction'])->name('branchsAction');

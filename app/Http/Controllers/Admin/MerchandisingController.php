@@ -9,12 +9,14 @@ use App\Models\Order;
 use App\Models\Sample;
 use App\Models\Product;
 use App\Models\Attribute;
-use App\Models\OrderItem;
 use App\Models\SampleItem;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
+use App\Models\OrderDetails;
 use Illuminate\Http\Request;
+use App\Models\ProformaInvoice;
 use Illuminate\Support\Facades\DB;
+use App\Models\ProformaInvoiceItem;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -118,7 +120,6 @@ class MerchandisingController extends Controller
     {
         // Add New Buyer Start
         if ($action == 'create' && $r->isMethod('post')) {
-
             $check = $r->validate([
                 'name'         => 'required|max:100',
                 'company_name' => 'nullable|max:100',
@@ -132,6 +133,15 @@ class MerchandisingController extends Controller
                 $user->buyer = true;
                 $user->customer = false;
                 $user->save();
+                if($r->has('api')){
+                    return response()->json([
+                        'success' => true,
+                        'msg' => "User found! Now marked as Buyer",
+                        'buyer_created' => true,
+                        'id' => $user->id,
+                        'name' => $user->name,
+                    ]);
+                }
                 Session()->flash('success', 'User found! Now marked as Buyer.');
             } else {
 
@@ -149,7 +159,15 @@ class MerchandisingController extends Controller
                 $user->buyer = true;
                 $user->customer = false;
                 $user->save();
-
+                if($r->has('api')){
+                    return response()->json([
+                        'success' => true,
+                        'msg' => "Buyer registered successfully",
+                        'buyer_created' => true,
+                        'id' => $user->id,
+                        'name' => $user->name,
+                    ]);
+                }
                 Session()->flash('success', 'Buyer registered successfully!');
             }
 
@@ -539,45 +557,13 @@ class MerchandisingController extends Controller
         return view(adminTheme().'merchandising.samples.edit', compact('sample','items', 'buyers', 'merchandisers'));
     }
 
-    public function proformaInvoice(Request $r)
+    public function orderDetails(Request $r)
     {
-        // -----------------------------
-        // BULK ACTION
-        // -----------------------------
-        if ($r->action && $r->checkid) {
-            $samples = Sample::whereIn('id', $r->checkid)->get();
-
-            foreach ($samples as $sample) {
-                switch ($r->action) {
-                    case 'pending':
-                        $sample->status = 'pending';
-                        break;
-                    case 'confirmed':
-                        $sample->status = 'confirmed';
-                        break;
-                    case 'completed':
-                        $sample->status = 'completed';
-                        break;
-                    case 'cancel':
-                        $sample->status = 'cancel';
-                        break;
-                    case 'delete':
-                        $sample->items()->delete();
-                        $sample->delete();
-                        continue 2; // skip save
-                }
-                $sample->save();
-            }
-
-            session()->flash('success', 'Action Completed Successfully!');
-            return redirect()->back();
-        }
-
         // -----------------------------
         // QUERY SAMPLES
         // -----------------------------
-        $samples = Sample::orderBy('id', 'desc')
-            ->whereIn('status', ['confirmed', 'completed'])
+        $orderDetails = OrderDetails::orderBy('id', 'desc')
+            ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
 
                 // SEARCH
@@ -586,8 +572,14 @@ class MerchandisingController extends Controller
                     $q->where(function($qq) use ($search) {
                         $qq->where('id', 'LIKE', "%{$search}%")  // Sample ID
                         ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                        ->orWhere('style', 'LIKE', "%{$search}%")
+                        ->orWhere('style_no', 'LIKE', "%{$search}%")
                         ->orWhere('id', 'LIKE', "%{$search}%")
+                        ->orWhere('company_name', 'LIKE', "%{$search}%")
+                        ->orWhere('invoice_no', 'LIKE', "%{$search}%")
+                        ->orWhere('order_no', 'LIKE', "%{$search}%")
+                        ->orWhere('composition', 'LIKE', "%{$search}%")
+                        ->orWhere('fabrication', 'LIKE', "%{$search}%")
+                        ->orWhere('gsm', 'LIKE', "%{$search}%")
                         ->orWhere('merchant_name', 'LIKE', "%{$search}%");
                     });
                 }
@@ -599,6 +591,14 @@ class MerchandisingController extends Controller
 
                     $q->whereDate('created_at', '>=', $from)
                     ->whereDate('created_at', '<=', $to);
+                }
+
+                if ($r->shipmnetStartDate || $r->shipmnetEndDate) {
+                    $sfrom = $r->shipmnetStartDate ?: now()->format('Y-m-d');
+                    $sto   = $r->shipmnetEndDate ?: now()->format('Y-m-d');
+
+                    $q->whereDate('shipment_date', '>=', $sfrom)
+                    ->whereDate('shipment_date', '<=', $sto);
                 }
 
                 // STATUS
@@ -614,64 +614,58 @@ class MerchandisingController extends Controller
         // -----------------------------
         // TOTAL COUNTS
         // -----------------------------
-        $totals = Sample::whereIn('status', ['confirmed','completed'])
+        $totals = OrderDetails::whereNotIn('status', ['trash', 'temp'])
             ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'approved' THEN 1 END) AS approved")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'cancelled' THEN 1 END) AS cancelled")
+            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
+            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
+            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
+            ->selectRaw("COUNT(CASE WHEN status = 'canceled' THEN 1 END) AS canceled")
             ->first();
 
-        $buyers = User::latest()
-            ->where('buyer', true)
-            ->whereIn('status', [0, 1])
-            ->select(['id', 'name', 'company_name'])
-            ->get();
-
-        return view(adminTheme().'merchandising.pi.index', compact('samples', 'totals', 'buyers'));
+        return view(adminTheme().'merchandising.orderDetails.index', compact('orderDetails', 'totals'));
     }
 
-    public function proformaInvoiceAction(Request $r, $action, $id = null)
+    public function orderDetailsAction(Request $r, $action, $id = null)
     {
         // CREATE SAMPLE
         if ($action == 'create') {
-            $sample = Sample::where('status', 'temp')->where('created_by', Auth::id())->first();
+            $orderDetails = OrderDetails::where('status', 'temp')->where('addedby_id', Auth::id())->first();
 
-            if (!$sample) {
-                $sample = new Sample();
-                $sample->status = 'temp';
-                $sample->created_by = Auth::id();
-                $sample->created_at = now();
-                $sample->save();
+            if (!$orderDetails) {
+                $orderDetails = new OrderDetails();
+                $orderDetails->status = 'temp';
+                $orderDetails->addedby_id = Auth::id();
+                $orderDetails->created_at = now();
+                $orderDetails->save();
             }
 
-            return redirect()->route('admin.proformaInvoiceAction', ['edit', $sample->id]);
+            return redirect()->route('admin.orderDetailsAction', ['edit', $orderDetails->id]);
         }
 
         // FIND SAMPLE
-        $sample = Sample::find($id);
-        if (!$sample) {
-            session()->flash('error', 'Sample Not Found');
-            return redirect()->route('admin.proformaInvoice');
+        $orderDetails = OrderDetails::find($id);
+        if (!$orderDetails) {
+            session()->flash('error', 'Order Details Not Found');
+            return redirect()->route('admin.orderDetails');
         }
 
-        if (!in_array($sample->status, ['temp', 'pending']) && $action == ['edit', 'delete', 'add-item', 'update-item', 'remove-item', 'update-head']) {
-            session()->flash('error', 'PI is already confirmed and cannot be edited or deleted.');
-            return redirect()->route('admin.proformaInvoice');
+        if (!in_array($orderDetails->status, ['temp', 'pending']) && $action == ['edit', 'delete', 'update-head']) {
+            session()->flash('error', 'Order Details is already confirmed and cannot be edited or deleted.');
+            return redirect()->route('admin.orderDetails');
         }
 
         // VIEW
         if ($action == 'view') {
-            return view(adminTheme().'merchandising.pi.view', compact('sample'));
+            return view(adminTheme().'merchandising.orderDetails.view', compact('orderDetails'));
         }
 
         // ITEM CRUD (Add/Update/Remove)
-        if (in_array($action, ['add-item', 'update-item', 'remove-item', 'update-head'])) {
+        if (in_array($action, ['update-head'])) {
 
             if ($action == 'update-head') {
 
-                $sample = Sample::find($id);
-                if (!$sample || !$r->field) return redirect()->back();
+                $orderDetails = OrderDetails::find($id);
+                if (!$orderDetails || !$r->field) return redirect()->back();
 
                 $field = $r->field;
                 $value = $r->value;
@@ -679,117 +673,82 @@ class MerchandisingController extends Controller
                 // Buyer Update
                 if ($field == 'buyer') {
                     if ($buyer = User::find($value)) {
-                        $sample->buyer_id = $buyer->id;
-                        $sample->buyer_name = $buyer->name;
+                        $orderDetails->buyer_id = $buyer->id;
+                        $orderDetails->buyer_name = $buyer->name;
                     }
                 }
-                if ($field == 'merchant') {
+                // Merchant Update
+                elseif ($field == 'merchant') {
                     if ($merchant = User::find($value)) {
-                        $sample->merchant_id = $merchant->id;
-                        $sample->merchant_name = $merchant->name;
+                        $orderDetails->merchant_id = $merchant->id;
+                        $orderDetails->merchant_name = $merchant->name;
                     }
                 }
+                // Style (unique check)
+                elseif ($field == 'style_no') {
+                    $existsStyle = OrderDetails::where('style_no', $value)
+                                ->where('id', '!=', $orderDetails->id)
+                                ->exists();
 
-                // Style update with unique check
-                elseif ($field == 'style') {
-                    $existsStyle = Sample::where('style', $value)->where('id', '<>', $sample->id)->exists();
                     if ($existsStyle) {
                         return response()->json([
                             'success' => false,
                             'message' => 'This style already exists',
-                            'field' => 'style' // যেই input field
+                            'field' => 'style'
                         ]);
                     }
-                    $sample->style = $value;
+                    $orderDetails->style_no = $value;
                 }
-
-                // Default update for all other fields
+                // Other fields
                 else {
-                    $sample->$field = $value;
+                    $orderDetails->$field = $value;
                 }
 
-                // Final single save
-                $sample->save();
+                $orderDetails->save();
             }
 
-            if ($action == 'add-item') {
-                $item = new SampleItem();
-                $item->sample_id = $sample->id;
-                $item->save();
-            }
-
-            if ($action == 'update-item') {
-                $item = SampleItem::find($r->item_id);
-                if ($item) {
-                    if ($item && $r->field) {
-                        $field = $r->field;
-                        $item->$field = $r->value;
-                        $item->save();
-                        if($r->field == 'quantity'){
-                            $totalQty = $sample?->items?->sum('quantity') ?? 0;
-                            $sample->update([ 'total_qty'=>$totalQty ]);
-                            return response()->json([
-                                'success' => false,
-                                'qty' => $totalQty
-                            ]);
-                        }
-                    }
-                    $item->save();
-                }
-            }
-
-            if ($action == 'remove-item') {
-                SampleItem::where('id', $r->item_id)->delete();
-            }
-
-            $items = $sample->items;
-            $view = view(adminTheme().'merchandising.pi.includes.items', compact('sample','items'))->render();
-            return response()->json(['success' => true, 'view' => $view]);
+            return response()->json(['success' => true]);
         }
+
 
         // UPDATE SAMPLE
         if ($action == 'update') {
             $r->validate([
-                'buyer' => 'required|numeric',
-                'style' => 'required|string|max:255',
-                'type' => 'nullable|string|max:255',
+                'buyer' => 'required',
+                'merchant' => 'required',
+                'style_no' => 'required|string|max:255',
                 'status' => 'required|string|max:20',
             ]);
             $buyer = User::find($r->buyer);
+            $merchant = User::find($r->merchant);
 
-            $existsStyle = Sample::where('style', $r->style)->where('id', '<>', $sample->id)->exists();
+            $existsStyle = OrderDetails::where('style_no', $r->style_no)->where('id', '<>', $orderDetails->id)->exists();
 
             if ($existsStyle) {
                 session()->flash('info', 'This style already exists');
                 return redirect()->back();  // Save unnecessary
             }
 
-            if (count($sample->items) == 0) {
-                session()->flash('info', 'No items found for this sample');
-                return redirect()->back();  // Save unnecessary
-            }
+            $orderDetails->buyer_id      = $buyer->id ?? $orderDetails->buyer_id;
+            $orderDetails->buyer_name    = $buyer->name ?? $orderDetails->buyer_name;
+            $orderDetails->merchant_id   = $merchant->id ?? $orderDetails->merchant_id;
+            $orderDetails->merchant_name = $merchant->name ?? $orderDetails->merchant_name;
+            $orderDetails->status        = $r->status ?? $orderDetails->status;
+            $orderDetails->save();
 
-            $sample->buyer_id = $buyer->id ?? $sample->buyer_id;
-            $sample->buyer_name = $buyer->name ?? $sample->buyer_name;
-
-            $sample->type = $r->type ?? $sample->type;
-            $sample->status = $r->status ?? $sample->status;
-            $sample->save();
-
-            session()->flash('success', 'Sample Updated Successfully');
-            return redirect()->route('admin.proformaInvoiceAction', ['view', $sample->id]);
+            session()->flash('success', 'Order Details Updated Successfully');
+            return redirect()->route('admin.orderDetails');
         }
 
         // DELETE SAMPLE
         if ($action == 'delete') {
-            $sample->items()->delete();
-            $sample->delete();
-            session()->flash('success', 'Sample Deleted Successfully');
+            $orderDetails->delete();
+            session()->flash('success', 'Order Details Deleted Successfully');
             return redirect()->back();
         }
 
         // LOAD EDIT PAGE
-        $items = $sample->items;
+        $items = $orderDetails->items;
 
         $buyers = User::latest()
             ->where('buyer', true)
@@ -802,7 +761,252 @@ class MerchandisingController extends Controller
             ->select(['id', 'name'])
             ->get();
 
-        return view(adminTheme().'merchandising.pi.edit', compact('sample','items', 'buyers', 'merchandisers'));
+        return view(adminTheme().'merchandising.orderDetails.edit', compact('orderDetails','items', 'buyers', 'merchandisers'));
+    }
+
+    public function proformaInvoice(Request $r)
+    {
+        // -----------------------------
+        // QUERY PROFORMA INVOICES
+        // -----------------------------
+        $pis = ProformaInvoice::with(['buyer', 'merchant', 'user', 'items'])
+            ->orderBy('id', 'desc')
+            ->where('status', '<>', 'temp')
+            ->when($r->search, function ($q) use ($r) {
+                $search = $r->search;
+                $q->where(function ($qq) use ($search) {
+                    $qq->where('order_no', 'LIKE', "%{$search}%")
+                        ->orWhere('remarks', 'LIKE', "%{$search}%")
+                        ->orWhere('buyer_name', 'LIKE', "%{$search}%")
+                        ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                });
+            })
+            ->when($r->startDate || $r->endDate, function ($q) use ($r) {
+                $from = $r->startDate ?: now()->format('Y-m-d');
+                $to   = $r->endDate ?: now()->format('Y-m-d');
+                $q->whereBetween('created_at', [$from, $to]);
+            })
+            ->when($r->status, function ($q) use ($r) {
+                $q->where('status', $r->status);
+            })
+            ->paginate(25)
+            ->appends($r->all());
+
+        // -----------------------------
+        // TOTAL COUNTS
+        // -----------------------------
+        $totals = ProformaInvoice::selectRaw("COUNT(*) AS total")
+            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
+            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
+            ->selectRaw("COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved")
+            ->selectRaw("COUNT(CASE WHEN status = 'cancel' THEN 1 END) AS cancel")
+            ->first();
+
+        return view(
+            adminTheme().'merchandising.pi.index',
+            compact('pis', 'totals')
+        );
+    }
+
+
+    public function proformaInvoiceAction(Request $r, $action, $id = null)
+    {
+        // -------------------------------
+        // CREATE SAMPLE PI
+        // -------------------------------
+        if ($action == 'create') {
+            $pi = ProformaInvoice::where('status', 'temp')->where('addedby_id', Auth::id())->first();
+            if (!$pi) {
+                $pi = new ProformaInvoice();
+                $pi->status = 'temp';
+                $pi->addedby_id = Auth::id();
+            }
+            $pi->created_at = now();
+            $pi->save();
+            return redirect()->route('admin.proformaInvoiceAction', ['edit', $pi->id]);
+        }
+
+        // -------------------------------
+        // FIND PI
+        // -------------------------------
+        $pi = ProformaInvoice::with('items')->find($id);
+        if (!$pi) {
+            session()->flash('error', 'Proforma Invoice Not Found');
+            return redirect()->route('admin.proformaInvoice');
+        }
+
+        // -------------------------------
+        // VIEW PI
+        // -------------------------------
+        if ($action == 'view') {
+            return view(adminTheme().'merchandising.pi.view', compact('pi'));
+        }
+        
+        if ($action == 'invoice') {
+            return view(adminTheme().'merchandising.pi.piInvoice', compact('pi'));
+        }
+
+        // -------------------------------
+        // PO SELECT via AJAX
+        // -------------------------------
+        if ($action == 'po-select') {
+            $orders = OrderDetails::where('order_no', $r->order_no)->get()->makeHidden(['id']);
+            $orders = $orders->map(function ($o) {
+                unset($o->id);
+                return $o;
+            });
+
+            if (count($orders) < 1) {
+                return response()->json([
+                    'success' => false,
+                    'html' => '<tr><td colspan="10" class="text-center">Order not found</td></tr>'
+                ]);
+            }
+
+            // Render items partial
+            $html = view(adminTheme().'merchandising.pi.includes.items', [
+                'order' => $orders->first(),
+                'items' => $orders
+            ])->render();
+
+            return response()->json(['success' => true, 'html' => $html, 'order' => $orders->first()]);
+        }
+
+        // -------------------------------
+        // UPDATE PI
+        // -------------------------------
+        if ($action == 'update') {
+
+            /* ---------------------------
+                VALIDATION
+            --------------------------- */
+            $r->validate([
+                'order_no' => 'required|string',
+                'status' => 'required|string',
+                'remarks' => 'nullable|string',
+
+                'items' => 'required|array',
+                'items.*.unit_price' => 'required|numeric|min:0',
+                'items.*.total_price' => 'required|numeric|min:0',
+                'items.*.commission' => 'nullable|numeric|min:0',
+                'items.*.total_commission' => 'required|numeric|min:0',
+                'items.*.color_qty' => 'required|numeric|min:0',
+                'items.*.commission_type' => 'required|string',
+            ],[
+                'order_no.required' => 'Order number is required',
+                'items.*.unit_price.required' => 'Unit price is required',
+                'items.*.color_qty.required' => 'Color quantity is required',
+                'items.*.commission_type.required' => 'Commission type must be selected',
+            ]);
+
+
+            /* ---------------------------
+                FETCH ORDER INFO
+            --------------------------- */
+            $order = OrderDetails::firstWhere('order_no', $r->order_no);
+
+            if (!$order) {
+                return back()->with('error', 'Order not found for this Order No.');
+            }
+
+
+            /* ---------------------------
+                CALCULATE TOTALS
+            --------------------------- */
+            $total_qty = collect($r->items)->sum('color_qty');
+            $total_bill = collect($r->items)->sum('total_price');
+            $total_commission = collect($r->items)->sum('total_commission');
+
+
+            /* ---------------------------
+                UPDATE MAIN PI
+            --------------------------- */
+            $pi->order_no = $r->order_no;
+            $pi->buyer_id = $order->buyer_id;
+            $pi->buyer_name = $order->buyer_name;
+            $pi->merchant_name = $order->merchant_name;
+            $pi->merchant_id = $order->merchant_id;
+            $pi->remarks = $r->remarks;
+            $pi->status = $r->status;
+            $pi->editedby_id = auth()->id();
+
+            $pi->total_qty = $total_qty;
+            $pi->total_bill = $total_bill;
+            $pi->total_commission = $total_commission;
+
+            $pi->save();
+
+
+            /* ---------------------------
+                ITEMS UPDATE / CREATE
+            --------------------------- */
+            if ($r->has('items')) {
+                foreach ($r->items as $itemData) {
+                    // Update existing item
+                    if (!empty($itemData['id']) && ($itemData['method'] ?? '') == 'update') {
+
+                        $item = ProformaInvoiceItem::find($itemData['id']);
+
+                        if ($item) {
+                            $item->update([
+                                'unit_price' => $itemData['unit_price'],
+                                'total_price' => $itemData['total_price'],
+                                'commission_type' => $itemData['commission_type'],
+                                'commission' => $itemData['commission'],
+                                'total_commission' => $itemData['total_commission'],
+                                'color_qty' => $itemData['color_qty'],
+                                'shipment_date' => $itemData['shipment_date'],
+                                'editedby_id' => auth()->id(),
+                            ]);
+                            orderDetails::firstWhere('style_no', $item->style_no)->update(['total_bill'=> ($item->total_price - $item->total_commission) ]);
+                        }
+
+                    } else {
+                        // Create new item
+                        ProformaInvoiceItem::create([
+                            'proforma_invoice_id' => $pi->id,
+                            'composition' => $itemData['composition'],
+                            'fabrication' => $itemData['fabrication'],
+                            'gsm' => $itemData['gsm'] ?? null,
+                            'style_no' => $itemData['style_no'],
+                            'color_name' => $itemData['color_name'],
+                            'color_qty' => $itemData['color_qty'],
+                            'unit_price' => $itemData['unit_price'],
+                            'total_price' => $itemData['total_price'],
+                            'commission_type' => $itemData['commission_type'],
+                            'commission' => $itemData['commission'],
+                            'total_commission' => $itemData['total_commission'],
+                            'shipment_date' => $itemData['shipment_date'],
+                            'addedby_id' => auth()->id(),
+                        ]);
+                        orderDetails::firstWhere('style_no', $itemData['style_no'])->update(['total_bill'=> ( $itemData['total_price'] - $itemData['total_commission']) ]);
+                    }
+                }
+            }
+
+
+            /* ---------------------------
+                SUCCESS
+            --------------------------- */
+            session()->flash('success', 'Proforma Invoice Updated Successfully');
+            return redirect()->route('admin.proformaInvoiceAction', ['view', $pi->id]);
+        }
+
+        if($action=='delete'){
+            $pi->items()->delete();
+            $pi->delete();
+            Session()->flash('success','Proforma Invoice Deleted Successfully');
+            return redirect()->back();
+        }
+
+
+        // -------------------------------
+        // LOAD EDIT PAGE
+        // -------------------------------
+        $orders = OrderDetails::where('status', 'confirmed')->get()->unique('order_no');
+        $items = $pi->items;
+
+        return view(adminTheme().'merchandising.pi.edit', compact('pi', 'items', 'orders'));
     }
 
 

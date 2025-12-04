@@ -106,12 +106,19 @@ return [
                     'icon_color'  => 'text-warning',
                     'permission'  => 'samples'
                 ],
+                // [
+                //     'title'      => 'Buyer List',
+                //     'icon'       => 'fa-solid fa-arrow-right',
+                //     'route'      => '/admin/buyers',
+                //     'icon_color' => 'text-warning',
+                //     'permission' => 'buyers'
+                // ],
                 [
-                    'title'      => 'Buyer List',
+                    'title'      => 'Order Details',
                     'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/buyers',
+                    'route'      => '/admin/order-details',
                     'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'permission' => 'order_details'
                 ],
                 [
                     'title'      => 'Proforma Invoice (PI)',
@@ -127,24 +134,48 @@ return [
     [
         'group_title' => '',
         [
-            'title'      => 'Production',
+            'title'      => 'Production Planning',
             'icon'       => 'fa-solid fa-layer-group',
             'icon_color' => 'text-primary',
             'permission' => '',
             'children'   => [
                 [
-                    'title'       => 'Production Planning',
+                    'title'       => 'Planning',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/production-planning',
                     'icon_color'  => 'text-warning',
                     'permission'  => 'samples'
                 ],
                 [
-                    'title'      => 'Daily Production',
-                    'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/daily-production',
-                    'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'title'       => 'Procurement',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => '',
+                    'children'    => [
+                        [
+                            'title'       => 'Yarn',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/yarn-booking',
+                            'icon_color'  => 'text-warning',
+                            // 'permission'  => '',
+                            'permission'  => 'yarn_booking'
+                        ],
+                        [
+                            'title'       => 'knitting',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/knitting-booking',
+                            'icon_color'  => 'text-warning',
+                            // 'permission'  => '',
+                            'permission'  => 'knitting_booking'
+                        ],
+                        [
+                            'title'       => 'Dying',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/dying-booking',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'dying_booking'
+                        ],
+                    ]
                 ],
                 [
                     'title'      => 'Production List',
@@ -153,6 +184,14 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'buyers'
                 ],
+                [
+                    'title'      => 'Daily Production',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/daily-production',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'buyers'
+                ],
+
             ]
         ],
     ],
@@ -326,6 +365,13 @@ return [
                     'icon_color'  => 'text-info',
                     'permission'  => 'designations'
                 ],
+                [
+                    'title'       => 'Floor/Lines',
+                    'icon'        => 'fa-solid fa-building',
+                    'route'       => '/admin/hr/floor-lines',
+                    'icon_color'  => 'text-info',
+                    'permission'  => 'designations'
+                ],
             ]
         ],
     ],
@@ -429,20 +475,7 @@ return [
                 ['title' => 'Line List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/lines', 'icon_color' => 'text-warning', 'permission' => 'dev'],
             ]
         ],
-        [
-            'title'      => 'Master Data',
-            'icon'       => 'fa-solid fa-palette',
-            'icon_color' => 'text-primary',
-            'permission' => '',
-            'children'   => [
-                ['title' => 'Unit List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/units', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Size List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/sizes', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Color List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/colors', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Fabric List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/fabrics', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Style List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/styles', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-                ['title' => 'Sku List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/skus', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-            ]
-        ],
+
     ],
 
     // App Settings
