@@ -15,6 +15,7 @@ class ProformaInvoice extends Model
 
     protected $casts = [
         'created_date' => 'date',
+        'updated_at' => 'date',
     ];
 
     // Relationships
@@ -39,5 +40,5 @@ class ProformaInvoice extends Model
         return $this->hasMany(ProformaInvoiceItem::class, 'proforma_invoice_id');
     }
 
-    
+
 }

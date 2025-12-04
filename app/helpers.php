@@ -156,13 +156,13 @@ function sendMail($toEmail,$toName,$subject,$datas,$template,$attachments=null){
     Mail::send($template,compact('datas'), function ($message) use ($toEmail,$toName,$subject,$attachments) {
         $message->from(general()->mail_from_address, general()->mail_from_name);
         $message->to($toEmail,$toName);
-        //To bb mail 
+        //To bb mail
         //$message->cc($ccRecipients);
-        //To Replay diffrent mail 
+        //To Replay diffrent mail
         //$message->replyTo('replyto@example.com', 'Reply To Name');
-        
+
         $message->subject($subject);
-        
+
         if($attachments){
             // Attachments
             foreach ($attachments as $attachment) {
@@ -172,7 +172,7 @@ function sendMail($toEmail,$toName,$subject,$datas,$template,$attachments=null){
                 ]);
             }
         }
-        
+
     });
       return true;
   } catch (Exception $ex) {
@@ -301,25 +301,6 @@ if (!function_exists('hasParentPermission')) {
         return isset($permissions[$parent]) && in_array($permissions[$parent], ['on', '1', true]);
     }
 }
-
-// if (!function_exists('hasChildPermission')) {
-//     function hasChildPermission(string $parent, string $child): bool
-//     {
-//         if (!Auth::check()) return false;
-
-//         $roles = Auth::user()->permission;
-//         if (!$roles) return false;
-
-//         $permissions = json_decode($roles->permission, true);
-//         // dd($permissions, $parent);
-//         // Parent must exist first
-//         if (!isset($permissions[$parent])) return false;
-
-//         // Check if child exists and is 'on', '1' or true
-//         return isset($permissions[$parent][$child]) && in_array($permissions[$parent][$child], ['on', '1', true]);
-//     }
-// }
-
 
 if (!function_exists('hasChildPermission')) {
     function hasChildPermission(string $module, string $permissionKey = null): bool
