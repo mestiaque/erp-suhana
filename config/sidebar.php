@@ -180,14 +180,14 @@ return [
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/production-list',
                     'icon_color' => 'text-warning',
-                    'permission' => 'samples'
+                    'permission' => 'buyers'
                 ],
                 [
                     'title'      => 'Daily Production',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/daily-production',
                     'icon_color' => 'text-warning',
-                    'permission' => 'samples'
+                    'permission' => 'buyers'
                 ],
                 
             ]
