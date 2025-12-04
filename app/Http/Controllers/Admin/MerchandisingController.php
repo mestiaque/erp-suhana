@@ -848,7 +848,7 @@ class MerchandisingController extends Controller
 
         // VIEW
         if ($action == 'view') {
-            return view(adminTheme().'merchandising.pi.view', compact('sample'));
+            return view(adminTheme().'merchandising.pi.view', compact('order'));
         }
 
         // ITEM CRUD (Add/Update/Remove)
@@ -891,13 +891,12 @@ class MerchandisingController extends Controller
             $r->validate([
                 'pi_status' => 'required|string|max:20',
             ]);
-            $buyer = User::find($r->buyer);
 
-            $sample->pi_status = $r->status ?? $sample->pi_status;
-            $sample->save();
+            $order->status = $r->status ?? $order->pi_status;
+            $order->save();
 
             session()->flash('success', 'PI Updated Successfully');
-            return redirect()->route('admin.proformaInvoiceAction', ['view', $sample->id]);
+            return redirect()->route('admin.proformaInvoiceAction', ['view', $order->id]);
         }
 
         // LOAD EDIT PAGE

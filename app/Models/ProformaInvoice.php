@@ -36,7 +36,7 @@ class ProformaInvoice extends Model
 
     public function items()
     {
-        return $this->hasMany(PurchaseOrderItem::class, 'order_id');
+        return $this->hasMany(ProformaInvoiceItem::class, 'proforma_invoice_id');
     }
 
     

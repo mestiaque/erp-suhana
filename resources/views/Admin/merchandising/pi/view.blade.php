@@ -24,15 +24,15 @@
             <div class="row">
                 <div class="col-md-4">
                     <table class="table table-bordered table-striped">
-                        <tr><th>Order No :</th><td>{{ $sample?->getOrderNumber() ?? '--' }}</td></tr>
-                        <tr><th style="width:10rem">Style :</th><td>{{ $sample->style ?? '--' }}</td></tr>
-                        <tr><th>Type :</th><td>{{ $sample->type ?? '--' }}</td></tr>
-                        <tr style="width:10rem"><th>Merchent Name :</th><td>{{ $sample?->merchant_name ?? '--' }}</td></tr>
+                        <tr><th>Order No :</th><td>{{ $order->id }}</td></tr>
+                        <tr><th style="width:10rem">Style :</th><td>{{ $order->style ?? '--' }}</td></tr>
+                        <tr><th>Type :</th><td>{{ $order->type ?? '--' }}</td></tr>
+                        <tr style="width:10rem"><th>Merchent Name :</th><td>{{ $order?->merchant_name ?? '--' }}</td></tr>
                         <tr>
                             <th>Status :</th>
                             <td>
                                 @php
-                                    $status = $sample->status ?? '--';
+                                    $status = $order->status ?? '--';
 
                                     $badge = [
                                         'temp'      => 'badge badge-secondary',
@@ -54,20 +54,20 @@
                 </div>
                 <div class="col-md-4">
                     <table class="table table-bordered table-striped">
-                        <tr><th>Created By :</th><td>{{ $sample?->createdUser?->name ?? '--' }}</td></tr>
-                        <tr><th>Created Date :</th><td>{{ $sample->created_at->format('d.m.Y')  ?? '--' }}</td></tr>
-                        <tr><th>Received Date :</th><td>{{ $sample?->received_at?->format('d.m.Y') ?? '--' }}</td></tr>
-                        <tr><th>Delivery Date :</th><td>{{  $sample?->delivery_at?->format('d.m.Y')  ?? '--' }}</td></tr>
-                        <tr><th>Currency :</th><td>{{  $sample?->currency  ?? '--' }}</td></tr>
+                        <tr><th>Created By :</th><td>{{ $order?->createdUser?->name ?? '--' }}</td></tr>
+                        <tr><th>Created Date :</th><td>{{ $order->created_at->format('d.m.Y')  ?? '--' }}</td></tr>
+                        <tr><th>Received Date :</th><td>{{ $order?->received_at?->format('d.m.Y') ?? '--' }}</td></tr>
+                        <tr><th>Delivery Date :</th><td>{{  $order?->delivery_at?->format('d.m.Y')  ?? '--' }}</td></tr>
+                        <tr><th>Currency :</th><td>{{  $order?->currency  ?? '--' }}</td></tr>
                     </table>
                 </div>
                 <div class="col-md-4">
                     <table class="table table-bordered table-striped">
-                        <tr style="width:10rem"><th>Buyer Name :</th><td>{{ $sample?->style }}</td></tr>
-                        <tr><th>Buyer Country :</th><td>{{ $sample?->buyer?->country ?? '--' }}</td></tr>
-                        <tr><th>Buyer Email :</th><td>{{  $sample?->buyer?->email  ?? '--' }}</td></tr>
-                        <tr><th>Buyer Mobile :</th><td>{{  $sample?->buyer?->mobile  ?? '--' }}</td></tr>
-                        <tr><th>Buyer Address :</th><td>{{  $sample?->buyer?->address_line1  ?? '--' }}</td></tr>
+                        <tr style="width:10rem"><th>Buyer Name :</th><td>{{ $order?->style }}</td></tr>
+                        <tr><th>Buyer Country :</th><td>{{ $order?->buyer?->country ?? '--' }}</td></tr>
+                        <tr><th>Buyer Email :</th><td>{{  $order?->buyer?->email  ?? '--' }}</td></tr>
+                        <tr><th>Buyer Mobile :</th><td>{{  $order?->buyer?->mobile  ?? '--' }}</td></tr>
+                        <tr><th>Buyer Address :</th><td>{{  $order?->buyer?->address_line1  ?? '--' }}</td></tr>
                     </table>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     </thead>
 
                     <tbody>
-                        @forelse ($sample->items as $item)
+                        @forelse ($order->items as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->composition }}</td>
@@ -108,8 +108,8 @@
             <div style="" class="mt-4">
                 <h5 style=""><u>Payment Terms:</u></h5>
                 <div style="border: 1px solid #80808045; padding: 1rem 2rem;">
-                    @if($sample->payment_terms)
-                    {!! $sample->payment_terms !!}
+                    @if($order->payment_terms)
+                    {!! $order->payment_terms !!}
                     @else
                     <p class="m-0 w-100 text-center"><i>No terms found</i></p>
                     @endif
