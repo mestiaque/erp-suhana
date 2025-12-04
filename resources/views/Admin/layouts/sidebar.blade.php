@@ -1,6 +1,6 @@
 <div class="sidemenu-area">
     <div class="sidemenu-header">
-        <a href="" class="navbar-brand d-flex align-items-center">
+        <a href="{{route('admin.dashboard')}}" class="navbar-brand d-flex align-items-center">
             <!-- সাইটের লোগো দেখানোর জন্য -->
             <img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height: 50px;" />
         </a>
