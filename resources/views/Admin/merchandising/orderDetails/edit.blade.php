@@ -88,7 +88,7 @@
                             <!-- Order No -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Order No</label>
-                        <input type="text" class="form-control updateHead" name="order_no"
+                        <input type="text" class="form-control updateHead" name="order_no" placeholder="Order Number"
                                value="{{ $orderDetails->order_no }}"
                                data-name="order_no"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
@@ -97,7 +97,7 @@
                     <!-- Invoice No -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Invoice No</label>
-                        <input type="text" class="form-control updateHead" name="invoice_no"
+                        <input type="text" class="form-control updateHead" name="invoice_no" placeholder="Invoice  Number"
                                value="{{ $orderDetails->invoice_no }}"
                                data-name="invoice_no"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
@@ -106,7 +106,7 @@
                     <!-- Company Name -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Company Name</label>
-                        <input type="text" class="form-control updateHead" name="company_name"
+                        <input type="text" class="form-control updateHead" name="company_name" placeholder="Company Name"
                                value="{{ $orderDetails->company_name }}"
                                data-name="company_name"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
@@ -124,7 +124,7 @@
                     <!-- Fabrication -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Fabrication</label>
-                        <input type="text" class="form-control updateHead" name="fabrication"
+                        <input type="text" class="form-control updateHead" name="fabrication" placeholder="Fabrication"
                                value="{{ $orderDetails->fabrication }}"
                                data-name="fabrication"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
@@ -133,7 +133,7 @@
                     <!-- Composition -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Composition</label>
-                        <input type="text" class="form-control updateHead" name="composition"
+                        <input type="text" class="form-control updateHead" name="composition" placeholder="Composition"
                                value="{{ $orderDetails->composition }}"
                                data-name="composition"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
@@ -142,9 +142,18 @@
                     <!-- GSM -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">GSM</label>
-                        <input type="text" class="form-control updateHead" name="gsm"
+                        <input type="text" class="form-control updateHead" name="gsm" placeholder="GSM"
                                value="{{ $orderDetails->gsm }}"
                                data-name="gsm"
+                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                    </div>
+
+                        <!-- Total Bill -->
+                    <div class="col-md-4 mb-3">
+                        <label class="font-weight-semibold">Color Name</label>
+                        <input type="text" class="form-control updateHead" name="color_name" placeholder="Color Name"
+                               value="{{ $orderDetails->color_name }}"
+                               data-name="color_name"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
@@ -157,19 +166,10 @@
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
-                    <!-- Total Bill -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Total Bill</label>
-                        <input type="number" class="form-control updateHead" name="total_bill"
-                               value="{{ $orderDetails->total_bill }}"
-                               data-name="total_bill"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
-
                             <!-- Remarks -->
                     <div class="col-md-8 mb-3">
                         <label class="font-weight-semibold">Remarks</label>
-                        <textarea class="form-control updateHead" name="remarks" rows="1"
+                        <textarea class="form-control updateHead" name="remarks" rows="1" placeholder="Remarks"
                                   data-name="remarks"
                                   data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">{{ $orderDetails->remarks }}</textarea>
                     </div>

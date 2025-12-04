@@ -150,28 +150,30 @@ return [
                     'title'       => 'Procurement',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'icon_color'  => 'text-warning',
-                    'permission'  => 'samples',
+                    'permission'  => '',
                     'children'    => [
                         [
                             'title'       => 'Yarn',
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/yarn-booking',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'samples'
+                            // 'permission'  => '',
+                            'permission'  => 'yarn_booking'
                         ],
                         [
                             'title'       => 'knitting',
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/knitting-booking',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'samples'
+                            // 'permission'  => '',
+                            'permission'  => 'knitting_booking'
                         ],
                         [
                             'title'       => 'Dying',
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/dying-booking',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'samples'
+                            'permission'  => 'dying_booking'
                         ],
                     ]
                 ],
@@ -189,7 +191,7 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'buyers'
                 ],
-                
+
             ]
         ],
     ],
@@ -360,6 +362,13 @@ return [
                     'title'       => 'Designation',
                     'icon'        => 'fa-solid fa-id-card-clip',
                     'route'       => '/admin/hr/designations',
+                    'icon_color'  => 'text-info',
+                    'permission'  => 'designations'
+                ],
+                [
+                    'title'       => 'Floor/Lines',
+                    'icon'        => 'fa-solid fa-building',
+                    'route'       => '/admin/hr/floor-lines',
                     'icon_color'  => 'text-info',
                     'permission'  => 'designations'
                 ],

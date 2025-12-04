@@ -15,6 +15,8 @@ class ProformaInvoiceItem extends Model
 
     protected $casts = [
         'created_date' => 'date',
+        'shipment_date' => 'date',
+        'updated_at' => 'date',
     ];
 
     // Relationships
@@ -24,5 +26,5 @@ class ProformaInvoiceItem extends Model
         return $this->belongsTo(User::class, 'addedby_id');
     }
 
-    
+
 }

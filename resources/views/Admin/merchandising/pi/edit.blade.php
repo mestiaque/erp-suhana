@@ -1,7 +1,7 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('PI Edit') }}</title>
+<title>{{ websiteTitle('Proforma Invoice Edit') }}</title>
 @endsection
 
 @push('css')
@@ -19,71 +19,73 @@
 @section('contents')
 <div class="flex-grow-1">
     <div class="breadcrumb-area">
-        <h1>Edit PI</h1>
+        <h1>Edit Proforma Invoice</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
             <li class="item"><a href="{{ route('admin.proformaInvoice') }}">Proforma Invoices</a></li>
-            <li class="item">Edit PI</li>
+            <li class="item">Edit Proforma Invoice</li>
         </ol>
     </div>
 
     <div class="card mb-30">
-        {{-- <div class="card-header">
-            <h3>Sample #<span class="text-primary">{{ $order->id }}</span></h3>
-        </div> --}}
-
         <div class="card-body">
             @include(adminTheme().'alerts')
-
-            <form action="{{ route('admin.proformaInvoiceAction', ['update', $order->id]) }}" method="POST">
+            <form action="{{ route('admin.proformaInvoiceAction', ['update', $pi->id]) }}" method="POST">
                 @csrf
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label>PO Number</label>
-                        <select class="form-control updateHead2" po_number>
-                            <option value=""> Select Number</option>
-                            <option value="02154"> 01251</option>
-                        </select>
+                        <label>Order Number</label>
+                        @if(is_null($pi->order_no))
+                            <select class="form-control" name="order_no" id="order_no_select" data-url="{{ route('admin.proformaInvoiceAction', ['po-select', $pi->id]) }}">
+                                <option value="">-- Select Order Number --</option>
+                                @foreach ($orders as $order)
+                                    <option value="{{ $order->order_no }}" {{ $pi->order_no == $order->order_no ? 'selected' : '' }}>
+                                        {{ $order->order_no }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @else
+                            <div type="text" value="" class="form-control " readonly>{{ $pi->order_no }}</div>
+                            <input type="hidden" hidden value="{{ $pi->order_no }}" name="order_no" class="form-control d-none" readonly>
+                        @endif
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label>Status</label>
-                        <select name="pi_status" class="form-control" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$order->id]) }}" required>
-                            <option value="pending" {{$order->pi_status=='pending'?'selected':''}} >Pending</option>
-                            <option value="confirmed" {{$order->pi_status=='confirmed'?'selected':''}} {{$order->pi_status=='pending'?'selected':''}}>Confirmed</option>
-                            <option value="approved" {{$order->pi_status=='approved'?'selected':''}}>Approved</option>
-                            <option value="cancel" {{$order->pi_status=='cancel'?'selected':''}}>Cancel</option>
-                        </select>
+                        <label>Buyer Name</label>
+                        <input type="text" readonly class="form-control buyer_name" value="{{ $pi->buyer?->name ?? '' }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Merchant Name</label>
+                        <input type="text" readonly class="form-control merchant_name" value="{{ $pi->merchant?->name ?? '' }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Remarks</label>
+                        {{-- <input type="text" name="remarks" class="form-control remarks" value="{{ $pi->remarks ?? '' }}"> --}}
+                        <textarea name="remarks" class="form-control remarks" rows="1" placeholder="Remarks">{{ $pi->remarks ?? '' }}</textarea>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label>Created By*</label>
-                        <input type="text"  readonly="" class="form-control" value="{{ $order->user?->name?? '' }}" placeholder="Created By">
+                        <input type="text" readonly class="form-control" value="{{ $pi->user?->name ?? '' }}">
                     </div>
-                    <div class="col-md-12 mb-3">
-                        <label>Payment Bank Details *</label>
-                        <input type="text" name="payment_bank_details" class="form-control updateHead" value="{{ $order->payment_bank_details }}" placeholder="Payment Bank Details" data-name="payment_bank_details" data-url="{{ route('admin.proformaInvoiceAction',['update-head',$order->id]) }}" required>
+                    <div class="col-md-4 mb-3">
+                        <label>Status</label>
+                        <select name="status" class="form-control" required>
+                            <option value="pending" {{ $pi->status=='pending'?'selected':'' }}>Pending</option>
+                            <option value="confirmed" {{ $pi->status=='confirmed'?'selected':'' }}>Confirmed</option>
+                            <option value="approved" {{ $pi->status=='approved'?'selected':'' }}>Approved</option>
+                            <option value="cancel" {{ $pi->status=='cancel'?'selected':'' }}>Cancel</option>
+                        </select>
                     </div>
                 </div>
 
                 <br>
-                <h5><b>PI Items</b></h5>
-
+                <h5><b>Proforma Invoice Items</b></h5>
                 <div class="cardItems">
-                    @include(adminTheme().'merchandising.pi.includes.items')
-                </div>
-
-                <div style="" class="mt-4">
-                    <h5 style=""><u>Payment Terms:</u></h5>
-                    <div style="border: 1px solid #80808045; padding: 1rem 2rem;">
-                        @if($order->payment_terms)
-                        {!! $order->payment_terms !!}
-                        @else
-                        <p class="m-0 w-100 text-center"><i>No terms found</i></p>
-                        @endif
-                    </div>
+                    @include(adminTheme().'merchandising.pi.includes.items', ['items' => $pi->items ?? []])
                 </div>
 
                 <br>
-                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update PI</button>
+                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Proforma Invoice</button>
             </form>
         </div>
     </div>
@@ -92,70 +94,79 @@
 
 @push('js')
 <script>
-    // === Live calculation & total quantity update ===
-    function updateTotalSummary() {
-        let totalQty = 0;
-        let totalAmount = 0;
-        let totalDiscount = 0;
+$(document).ready(function() {
 
-        $('.itemRow').each(function() {
-            let qty = parseFloat($(this).find('.qty').val()) || 0;
-            let unitPrice = parseFloat($(this).find('.unit-price').val()) || 0;
-            let discount = parseFloat($(this).find('.discount').val()) || 0;
+    // === Update single row calculation ===
+    function updateItemRow(row) {
+        let qty = parseFloat(row.find('.qty').val()) || 0;
+        let unitPrice = parseFloat(row.find('input[name*="[unit_price]"]').val()) || 0;
+        let commission = parseFloat(row.find('input[name*="[commission]"]').val()) || 0;
+        let commissionType = row.find('.commission_type').val();
 
-            // calculate amount = qty * unitPrice
-            let amount = qty * unitPrice;
+        // Total Price
+        let totalPrice = qty * unitPrice;
+        row.find('input[name*="[total_price]"]').val(totalPrice.toFixed(2));
 
-            // set amount field (readonly)
-            $(this).find('.amount').val(amount.toFixed(2));
-
-            // sum totals
-            totalQty += qty;
-            totalAmount += amount;
-            totalDiscount += discount;
-        });
-
-        // update totals in table footer
-        $('.totalQty').text(totalQty);
-        $('.totalAmount').text(totalAmount.toFixed(2));
-        $('.totalDiscount').text(totalDiscount.toFixed(2));
+        // Total Commission
+        let totalCommission = 0;
+        if (commissionType === 'percentage') {
+            totalCommission = totalPrice * (commission / 100);
+        } else if (commissionType === 'per_pcs') {
+            totalCommission = qty * commission;
+        }
+        row.find('input[name*="[total_commission]"]').val(totalCommission.toFixed(2));
     }
 
-    // call on page load
-    updateTotalSummary();
+    // === Update all rows and summary ===
+    function updateAllItems() {
+        let totalQty = 0;
+        let totalAmount = 0;
+        let totalCommission = 0;
 
-    // -------------------------
-    // Update Item Fields
-    // -------------------------
-    $(document).on('change','.updateHead', function(){
+        $('.itemRow').each(function() {
+            let row = $(this);
+            updateItemRow(row);
+
+            totalQty += parseFloat(row.find('.qty').val()) || 0;
+            totalAmount += parseFloat(row.find('input[name*="[total_price]"]').val()) || 0;
+            totalCommission += parseFloat(row.find('input[name*="[total_commission]"]').val()) || 0;
+        });
+
+        $('.totalQty').text(totalQty);
+        $('.totalAmount').text(totalAmount.toFixed(2));
+        $('.totalCommission').text(totalCommission.toFixed(2));
+    }
+
+    // === Initial calculation on page load ===
+    updateAllItems();
+
+    // === Trigger recalculation when any relevant input changes ===
+    $(document).on('input change', '.updateItem, .commission_type, .qty', function() {
+        updateAllItems();
+    });
+
+    // === Load items when PO changes ===
+    $(document).on('change', '#order_no_select', function() {
+        let order_no = $(this).val();
+        if (!order_no) return;
+
         let url = $(this).data('url');
-        let name = $(this).data('name');
-        let value = $(this).val();
-        $.get(url, {field: name, value: value}, function(res){
-            if(res.success){
-            }else{
-                alert(res.message)
-                if(res.field){
-                    $('input[name="'+res.field+'"]').val('');
-                }
+
+        $.get(url, { order_no: order_no }, function(res) {
+            if (res.success) {
+                $('.buyer_name').val(res.order.buyer_name)
+                $('.merchant_name').val(res.order.merchant_name)
+                $('.cardItems').html(res.html);
+                updateAllItems();
+            } else {
+                alert('Order not found');
+                $('.cardItems').html('<tr><td colspan="13" class="text-center">No Items</td></tr>');
             }
         });
     });
 
-    // -------------------------
-    // Update Item Fields
-    // -------------------------
-    $(document).on('change','.updateItem', function(){
-        let url = $(this).data('url');
-        let name = $(this).data('name');
-        let value = $(this).val();
-        $.get(url, {field: name, value: value}, function(res){
-            updateTotalSummary();
-            if(res.success){
-            }
-        });
-    });
-
-
+});
 </script>
+
+
 @endpush

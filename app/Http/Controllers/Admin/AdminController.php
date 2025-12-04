@@ -6103,7 +6103,7 @@ class AdminController extends Controller
 
     }
 
-    //Department Function
+    //Branch Function
 
     public function branchs(Request $r){
 
@@ -6224,12 +6224,12 @@ class AdminController extends Controller
         return redirect()->route('admin.branchs');
       }
 
-      //Check Authorized User
-    //   $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
-    //   if($allPer && $store->addedby_id!=Auth::id()){
-    //     Session()->flash('error','You are unauthorized Try!!');
-    //     return redirect()->route('admin.branchs');
-    //   }
+        //Check Authorized User
+        //   $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
+        //   if($allPer && $store->addedby_id!=Auth::id()){
+        //     Session()->flash('error','You are unauthorized Try!!');
+        //     return redirect()->route('admin.branchs');
+        //   }
 
       // Update Department Action Start
       if($action=='update'){
@@ -6737,6 +6737,153 @@ class AdminController extends Controller
     }
 
     //Designation Function End
+
+    //Branch Function
+
+    public function floorLines(Request $r){
+
+      // Filter Action Start
+      if($r->action){
+        if($r->checkid){
+            $datas=Attribute::latest()->where('type',4)->whereIn('id',$r->checkid)->get();
+            foreach($datas as $data){
+                if($r->action==1){
+                $data->status='active';
+                $data->save();
+                }elseif($r->action==2){
+                $data->status='inactive';
+                $data->save();
+                }elseif($r->action==5){
+                $data->delete();
+                }
+            }
+            Session()->flash('success','Action Successfully Completed!');
+
+        }else{
+          Session()->flash('info','Please Need To Select Minimum One Post');
+        }
+
+        return redirect()->back();
+      }
+
+      //Filter Action End
+
+      $lines=Attribute::where('type',4)->where('status','<>','temp')
+        ->where(function($q) use ($r) {
+
+          if($r->search){
+              $q->where('name','LIKE','%'.$r->search.'%');
+          }
+
+          if($r->status){
+             $q->where('status',$r->status);
+          }
+
+      })
+      ->orderBy('slug')
+      ->select(['id','name','slug','type','description','capacity','created_at','addedby_id','status'])
+      ->paginate(25)->appends([
+        'search'=>$r->search,
+        'status'=>$r->status,
+      ]);
+
+      //Total Count Results
+      $total = DB::table('attributes')->where('status','<>','temp')
+      ->where('type',4)
+      ->selectRaw('count(*) as total')
+      ->selectRaw("count(case when status = 'active' then 1 end) as active")
+      ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+      ->first();
+
+      return view(adminTheme().'floor-lines.index',compact('lines','total'));
+
+    }
+
+    public function floorLinesAction(Request $r,$action,$id=null){
+      // Add Department Action Start
+      if($action=='create'){
+
+        $check = $r->validate([
+            'floor' => 'required|max:100',
+            'line' => 'required|max:100',
+            'capacity' => 'nullable|numeric',
+        ]);
+
+        $line =Attribute::where('type',4)->where('slug',$r->line)->first();
+        if($line){
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+        }
+        $line =new Attribute();
+        $line->name=$r->floor;
+        $line->slug=$r->line;
+        $line->capacity=$r->capacity?:0;
+        $line->type =4;
+        $line->status ='active';
+        $line->addedby_id =Auth::id();
+        $line->save();
+
+        Session()->flash('success','Your Are Successfully Added');
+        return redirect()->back();
+
+      }
+
+      // Add Department Action End
+
+
+      $line =Attribute::where('type',4)->find($id);
+      if(!$line){
+        Session()->flash('error','This Branch Are Not Found');
+        return redirect()->route('admin.branchs');
+      }
+
+      // Update Department Action Start
+      if($action=='update'){
+
+        $check = $r->validate([
+            'floor' => 'required|max:100',
+            'line' => 'required|max:100',
+            'created_at' => 'required|date',
+            'capacity' => 'nullable|numeric',
+        ]);
+        $hasLine =Attribute::where('type',4)->where('id','<>',$line->id)->where('slug',$r->line)->first();
+        if($hasLine){
+            Session()->flash('error','Floor name already have');
+            return redirect()->back();
+        }
+        $line->name=$r->floor;
+        $line->slug=$r->line;
+        $line->capacity=$r->capacity?:0;
+
+        $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+        if(!$line->created_at->isSameDay($createDate)){
+        $line->created_at =$createDate;
+        }
+        $line->status =$r->status?'active':'inactive';
+        $line->fetured =$r->fetured?1:0;
+        $line->editedby_id =Auth::id();
+        $line->save();
+
+        Session()->flash('success','Your Are Successfully Updated');
+        return redirect()->back();
+
+      }
+
+      // Update Department Action End
+
+
+      // Delete Department Action Start
+      if($action=='delete'){
+        $line->delete();
+
+        Session()->flash('success','Your Are Successfully Deleted');
+        return redirect()->route('admin.floorLines');
+
+      }
+      // Delete Department Action End
+      return redirect()->back();
+
+    }
 
 
     //Companies Function
