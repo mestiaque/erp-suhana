@@ -954,6 +954,7 @@ class MerchandisingController extends Controller
                                 'shipment_date' => $itemData['shipment_date'],
                                 'editedby_id' => auth()->id(),
                             ]);
+                            orderDetails::firstWhere('style_no', $item->style_no)->update(['total_bill'=> ($item->total_price - $item->total_commission) ]);
                         }
 
                     } else {
@@ -974,6 +975,7 @@ class MerchandisingController extends Controller
                             'shipment_date' => $itemData['shipment_date'],
                             'addedby_id' => auth()->id(),
                         ]);
+                        orderDetails::firstWhere('style_no', $itemData['style_no'])->update(['total_bill'=> ( $itemData['total_price'] - $itemData['total_commission']) ]);
                     }
                 }
             }
