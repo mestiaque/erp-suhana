@@ -179,7 +179,7 @@
                                             <td style="padding:5px;">
                                                 <select class="form-control form-control-sm mb-2 styleSelect" name="style_no" >
                                                     <option value="">Select</option>
-                                                    @foreach(App\Models\OrderDetails::orderBy('id', 'desc')->where('status','pending')->get() as $style)
+                                                    @foreach(App\Models\OrderDetails::orderBy('id', 'desc')->where('status','<>','temp')->get() as $style)
                                                     <option value="{{$style->style_no}}" {{$style->style_no==$plan->style_no?'selected':''}} data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
                                                     @endforeach
                                                 </select>

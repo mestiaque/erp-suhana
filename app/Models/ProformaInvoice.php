@@ -29,6 +29,11 @@ class ProformaInvoice extends Model
     {
         return $this->belongsTo(User::class, 'buyer_id');
     }
+    
+    public function order()
+    {
+        return $this->belongsTo(OrderDetail::class,'order_no','order_no');
+    }
 
     public function merchant()
     {

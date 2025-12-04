@@ -173,7 +173,7 @@ class ProductionController extends Controller
             $plan->save();
 
             session()->flash('success','Purchase Receive Updated');
-            return redirect()->route('admin.productionPlanningAction',['view',$plan->id]);
+            return redirect()->route('admin.productionPlanningAction',['invoice',$plan->id]);
         }
 
         // return $plan->sewingLines;

@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @extends(adminTheme().'layouts.app')
 
 @section('title')
@@ -84,10 +70,8 @@
                                 <th>Total Bill</th>
                                 <th>Total Commission</th>
                                 <th>Status</th>
-                                <th>Remarks</th>
-                                <th>Added By</th>
                                 <th>Created Date</th>
-                                <th width="140">Action</th>
+                                <th width="200">Action</th>
                             </tr>
                         </thead>
 
@@ -118,10 +102,6 @@
                                     </span>
                                 </td>
 
-                                <td>{{ $pi->remarks ?? '--' }}</td>
-
-                                <td>{{ $pi->user?->name ?? '--' }}</td>
-
                                 <td>{{ $pi->created_at->format('d.m.Y') }}</td>
 
                                 <td class="text-center">
@@ -129,6 +109,9 @@
                                         @can('proforma_invoice.view')
                                         <a href="{{ route('admin.proformaInvoiceAction',['view',$pi->id]) }}" class="btn-custom yellow">
                                             <i class="fa fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('admin.proformaInvoiceAction',['invoice',$pi->id]) }}" class="btn-custom info" style="background: #F44336;color: white">
+                                            <i class="fa fa-file"></i>
                                         </a>
                                         @endcan
 
@@ -149,7 +132,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted">No Proforma Invoice Found</td>
+                                <td colspan="12" class="text-center text-muted">No Proforma Invoice Found</td>
                             </tr>
                             @endforelse
                         </tbody>

@@ -50,7 +50,7 @@
                     </td>
 
                     <td class="p-1">
-                        <input type="number" class="form-control form-control-sm updateItem" name="items[{{ $i }}][unit_price]" value="{{ $item->unit_price }}">
+                        <input type="number" step="any" class="form-control form-control-sm updateItem" name="items[{{ $i }}][unit_price]" value="{{ $item->unit_price }}">
                     </td>
 
                     <td class="p-1">
@@ -65,7 +65,7 @@
                     </td>
 
                     <td class="p-1">
-                        <input type="number" class="form-control form-control-sm updateItem" name="items[{{ $i }}][commission]" value="{{ $item->commission }}">
+                        <input type="number" step="any" class="form-control form-control-sm updateItem" name="items[{{ $i }}][commission]" value="{{ $item->commission }}">
                     </td>
 
                     <td class="p-1">

@@ -841,6 +841,10 @@ class MerchandisingController extends Controller
         if ($action == 'view') {
             return view(adminTheme().'merchandising.pi.view', compact('pi'));
         }
+        
+        if ($action == 'invoice') {
+            return view(adminTheme().'merchandising.pi.piInvoice', compact('pi'));
+        }
 
         // -------------------------------
         // PO SELECT via AJAX
