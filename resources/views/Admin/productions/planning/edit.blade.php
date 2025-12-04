@@ -32,12 +32,27 @@
         <h1>Edit Planning</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
-            <li class="item"><a href="{{ route('admin.samples') }}">Planning</a></li>
+            <li class="item"><a href="{{ route('admin.productionPlanning') }}">Planning</a></li>
             <li class="item">Edit Planning</li>
         </ol>
     </div>
 
     <div class="card mb-30">
+        <div class="card-header d-flex justify-content-between align-items-center">
+             <h3>Production Planning</h3>
+             <div class="dropdown">
+                @if($plan->status!='temp')
+                @can('samples.add')
+                 <a href="{{ route('admin.productionPlanningAction',['view',$plan->id]) }}" class="btn-custom primary" style="padding:5px 15px;">
+                    View
+                 </a>
+                @endcan
+                @endif
+                 <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
+                     <i class="bx bx-rotate-left"></i>
+                 </a>
+             </div>
+        </div>
         <div class="card-body">
             @include(adminTheme().'alerts')
 
@@ -80,7 +95,7 @@
                                         <tr>
                                             <th style="padding:5px;">Starting Date</th>
                                             <td style="padding:1px;">
-                                                <input type="datetime-local" class="form-control form-control-sm updateDate sewingStarDate" value="{{$plan->cutting_end?Carbon\Carbon::parse($plan->cutting_end)->format('Y-m-d\TH:i'):''}}" data-name="sewing_start">
+                                                <input type="datetime-local" class="form-control form-control-sm updateDate sewingStarDate" value="{{$plan->sewing_start?Carbon\Carbon::parse($plan->sewing_start)->format('Y-m-d\TH:i'):''}}" data-name="sewing_start">
                                             </td>
                                         </tr>
                                         <tr>
@@ -165,13 +180,14 @@
                                                 <select class="form-control form-control-sm mb-2 styleSelect" name="style_no" >
                                                     <option value="">Select</option>
                                                     @foreach(App\Models\OrderDetails::orderBy('id', 'desc')->where('status','pending')->get() as $style)
-                                                    <option value="{{$style->style_no}}" data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
+                                                    <option value="{{$style->style_no}}" {{$style->style_no==$plan->style_no?'selected':''}} data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
                                                     @endforeach
                                                 </select>
                                                 <p>
-                                                    Order Qty :<b class="styleQty"></b> <br>
-                                                    Buyer :<b class="styleBuyer"></b> <br>
-                                                    Merchandiser :<b class="styleMerchant"></b> <br>
+                                                    <input type="hidden" value="" name="style_qty" value="{{$plan->style_qty}}" class="style_qty"> 
+                                                    Order Qty :<b class="styleQty">{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
+                                                    Buyer :<b class="styleBuyer">{{$plan->style?->buyer_name}}</b> <br>
+                                                    Merchandiser :<b class="styleMerchant">{{$plan->style?->merchant_name}}</b> <br>
                                                 </p>
                                             </td>
                                             <td>
@@ -183,18 +199,17 @@
                                                             ->get()
                                                             ->groupBy('name');
 
-                                                        $selectedLines = $plan->sewingLines;
+                                                        $selectedLines = $plan->sewingLines->pluck('line_name')->toArray();
                                                         
                                                         @endphp
-                                                        {{$selectedLines}}
                                                         @foreach($attributes as $name => $items)
                                                             <b>{{ $name }}</b>
                                                             <br>
 
                                                             @foreach($items as $line)
                                                                 <label class="lineCheck">
-                                                                    <input type="checkbox" name="floor[]" value="{{ $line->id }}"
-                                                                        
+                                                                    <input type="checkbox" name="floor[]" value="{{ $line->slug }}"
+                                                                    @if(in_array($line->slug, $selectedLines)) checked @endif
                                                                     >
                                                                     Line - <b>{{ $line->slug }} / </b> C/H: {{ $line->capacity }}
                                                                 </label>
@@ -217,14 +232,12 @@
                                             <td>
                                                 <div class="form-group mb-3">
                                                     <label>Lose Time (In Minite)</label>
-                                                    <input type="text" class="form-control form-control-sm extraTime" name="extra_time" placeholder="Lose Hour (In Minite)">
+                                                    <input type="text" class="form-control form-control-sm extraTime" name="extra_time" value="{{$plan->extra_time}}" placeholder="Lose Hour (In Minite)">
                                                 </div>
                                                 <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Plan</button>
                                             </td>
                                         </tr>
                                     </table>
-
-                                    
                                 </div>
                             </div>
                         </div>
@@ -240,7 +253,7 @@
 @push('js')
 <script>
     $(document).ready(function () {
-        
+        calculateProduction();
         $('.updateDate').change(function(){
             var url ="{{ route('admin.productionPlanningAction', ['date-update', $plan->id]) }}";
             var dataName =$(this).data('name');
@@ -272,7 +285,7 @@
             let qty = Number($(this).find(":selected").data("qty"));
             let buyer = $(this).find(":selected").data("buyer");
             let merch = $(this).find(":selected").data("merchandiser");
-
+            $('.style_qty').val(qty);
             $(".styleQty").text(qty.toLocaleString() + " pcs");
             $(".styleBuyer").text(buyer);
             $(".styleMerchant").text(merch);

@@ -28,17 +28,19 @@ class ProductionController extends Controller
     public function productionPlanning(Request $r)
     {
 
-        $orders =Sample::orderBy('id', 'desc')
-            ->where('status','completed')
+        $orders =ProductionPlanning::latest()
+            ->where('status','<>','temp')
             ->where(function($q) use ($r) {
 
                 // SEARCH
                 if ($r->search) {
                     $search = $r->search;
                     $q->where(function($qq) use ($search) {
-                        $qq->where('id', 'LIKE', "%{$search}%")  // Sample ID
-                        ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                        ->orWhere('style', 'LIKE', "%{$search}%");
+                        $qq->where('style_no', 'LIKE', "%{$search}%")
+                        ->orWhereHas('style',function($qqq) use ($search) {
+                            $qqq->orWhere('buyer_name', 'LIKE', "%{$search}%")
+                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                        });
                     });
                 }
 
@@ -54,20 +56,17 @@ class ProductionController extends Controller
                 // STATUS
                 if ($r->status) {
                     $q->where('pi_status', $r->status);
-                } else {
-                    $q->whereNotIn('pi_status',['approved','cancelled']);
                 }
             })
             ->paginate(25)
             ->appends($r->all());
 
-        $totals = Sample::whereNotIn('status', ['trash', 'temp'])
-            ->whereNotNull('pi_status')
+        $totals = ProductionPlanning::whereNotIn('status', ['trash', 'temp'])
             ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'approved' THEN 1 END) AS approved")
-            ->selectRaw("COUNT(CASE WHEN pi_status = 'cancelled' THEN 1 END) AS cancelled")
+            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
+            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
+            ->selectRaw("COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved")
+            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
             ->first();
 
         return view(adminTheme().'productions.planning.index',compact('orders','totals'));
@@ -92,6 +91,12 @@ class ProductionController extends Controller
         if(!$plan){
             session()->flash('error', 'Plan Not Found');
             return redirect()->route('admin.productionPlanning');
+        }
+
+        if($action=='view'){
+
+
+            return view(adminTheme().'productions.planning.view',compact('plan'));
         }
 
         if($action=='date-update'){
@@ -119,21 +124,20 @@ class ProductionController extends Controller
 
 
             $plan->style_no      = $r->style_no;
-            $plan->extra_time    = $r->extra_time;
+            $plan->style_qty     = $r->style_qty?:0;
+            $plan->extra_time    = $r->extra_time?:0;
             $plan->sewing_end    = $r->sewing_end;
             $plan->working_hours = 10;
             $plan->status = 'pending';
             $plan->save();
 
             $newFloors = $r->floor ?? [];
-            $existingFloors = ProductionSewing::where('planning_id', $plan->id)
-                                ->pluck('line_name')
+            $existingFloors = $plan->sewingLines()->pluck('line_name')
                                 ->toArray();
 
             $toDelete = array_diff($existingFloors, $newFloors);
-
             if (!empty($toDelete)) {
-                ProductionSewing::where('planning_id', $plan->id)
+                    $plan->sewingLines()
                     ->whereIn('line_name', $toDelete)
                     ->delete();
             }
@@ -143,7 +147,7 @@ class ProductionController extends Controller
                                 ->where('slug', $floorSlug)
                                 ->first();
                 if($floorLine){
-                    $line = ProductionSewing::where('planning_id', $plan->id)
+                    $line = $plan->sewingLines()
                             ->where('line_name', $floorLine->slug)
                             ->first();
                     if (!$line) {
@@ -158,6 +162,16 @@ class ProductionController extends Controller
                 }
             }
 
+            $plan->total_hourly_capacity = $plan->sewingLines()->sum('capacity_hour');
+            
+            $totalMinutes = $this->calculateWorkingMinutes($plan->sewing_start, $plan->sewing_end);
+            // add lose time
+            $totalMinutes += intval($plan->extra_time);
+            $hours = floor($totalMinutes / 60);
+            $minutes = $totalMinutes % 60;
+            $plan->total_working_time = "{$hours}h - {$minutes}m";
+            $plan->save();
+
             session()->flash('success','Purchase Receive Updated');
             return redirect()->route('admin.productionPlanningAction',['view',$plan->id]);
         }
@@ -165,6 +179,45 @@ class ProductionController extends Controller
         // return $plan->sewingLines;
 
         return view(adminTheme().'productions.planning.edit', compact('plan'));
+    }
+
+    function calculateWorkingMinutes($start, $end){
+        $start = Carbon::parse($start);
+        $end   = Carbon::parse($end);
+
+        $totalMinutes = 0;
+        // working slots
+        $slot1Start = 10;
+        $slot1End   = 13;
+        $slot2Start = 14;
+        $slot2End   = 21;
+
+        while ($start < $end) {
+
+            $hour = $start->hour;
+
+            if ($hour >= $slot1Start && $hour < $slot1End) {
+                $start->addMinute();
+                $totalMinutes++;
+            }
+            elseif ($hour >= $slot2Start && $hour < $slot2End) {
+                $start->addMinute();
+                $totalMinutes++;
+            }
+            else {
+                // Jump into next valid working slot
+                if ($hour < $slot1Start) {
+                    $start->setTime($slot1Start, 0);
+                }
+                else if ($hour < $slot2Start) {
+                    $start->setTime($slot2Start, 0);
+                }
+                else {
+                    $start->addDay()->setTime($slot1Start, 0);
+                }
+            }
+        }
+        return $totalMinutes;
     }
 
     public function production(Request $r)
