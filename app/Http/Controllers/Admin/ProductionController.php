@@ -172,8 +172,8 @@ class ProductionController extends Controller
             $plan->total_working_time = "{$hours}h - {$minutes}m";
             $plan->save();
 
-            session()->flash('success','Purchase Receive Updated');
-            return redirect()->route('admin.productionPlanningAction',['invoice',$plan->id]);
+            session()->flash('success','Production Planning Updated');
+            return redirect()->route('admin.productionPlanningAction',['view',$plan->id]);
         }
 
         // return $plan->sewingLines;
