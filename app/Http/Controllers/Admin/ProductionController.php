@@ -88,10 +88,33 @@ class ProductionController extends Controller
         }
 
         $plan = ProductionPlanning::find($id);
-        if (!$plan) {
+        if(!$plan){
             session()->flash('error', 'Plan Not Found');
             return redirect()->route('admin.productionPlanning');
         }
+
+        if($action=='date-update'){
+
+            $fields = [
+                'cutting_start',
+                'cutting_end',
+                'sewing_start',
+                'sewing_end',
+                'packing_start',
+                'packing_end',
+                'shippment_start',
+                'shippment_end',
+            ];
+
+            if (in_array($r->dataName, $fields)) {
+                $plan->{$r->dataName} = $r->dataValue; // Dynamic property
+                $plan->save();
+            }
+
+            return response()->json(['success'=>true,'view'=>'']);
+        }
+
+
 
         return view(adminTheme().'productions.planning.edit', compact('plan'));
     }
