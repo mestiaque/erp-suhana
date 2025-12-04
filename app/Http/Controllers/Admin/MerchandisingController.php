@@ -989,7 +989,7 @@ class MerchandisingController extends Controller
                 SUCCESS
             --------------------------- */
             session()->flash('success', 'Proforma Invoice Updated Successfully');
-            return redirect()->route('admin.proformaInvoiceAction', ['view', $pi->id]);
+            return redirect()->route('admin.proformaInvoiceAction', ['invoice', $pi->id]);
         }
 
         if($action=='delete'){
