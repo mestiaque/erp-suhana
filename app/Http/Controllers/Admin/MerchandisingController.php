@@ -768,10 +768,9 @@ class MerchandisingController extends Controller
         // -----------------------------
         // QUERY SAMPLES
         // -----------------------------
-        $samples = Sample::orderBy('id', 'desc')
-            ->whereIn('status', ['confirmed', 'completed'])
+        $samples = Sample::latest()
+            ->where('status','<>','temp')
             ->where(function($q) use ($r) {
-
                 // SEARCH
                 if ($r->search) {
                     $search = $r->search;
@@ -799,8 +798,6 @@ class MerchandisingController extends Controller
                 // STATUS
                 if ($r->status) {
                     $q->where('status', $r->status);
-                } else {
-                    $q->where('status', '<>', 'trash');
                 }
             })
             ->paginate(25)

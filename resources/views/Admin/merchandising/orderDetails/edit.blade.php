@@ -112,14 +112,7 @@
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
-                            <!-- Shipment Date -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Shipment Date</label>
-                        <input type="date" class="form-control updateHead" name="shipment_date"
-                               value="{{ $orderDetails->shipment_date?->format('Y-m-d') }}"
-                               data-name="shipment_date"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                     
 
                     <!-- Fabrication -->
                     <div class="col-md-4 mb-3">
@@ -156,13 +149,20 @@
                                data-name="total_qty"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
-
-                    <!-- Total Bill -->
+                           <!-- Shipment Date -->
                     <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Total Bill</label>
-                        <input type="number" class="form-control updateHead" name="total_bill"
-                               value="{{ $orderDetails->total_bill }}"
-                               data-name="total_bill"
+                        <label class="font-weight-semibold">Shipment Date</label>
+                        <input type="date" class="form-control updateHead" name="shipment_date"
+                               value="{{ $orderDetails->shipment_date?->format('Y-m-d') }}"
+                               data-name="shipment_date"
+                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                    </div>
+                    <!-- Color name -->
+                    <div class="col-md-4 mb-3">
+                        <label class="font-weight-semibold">Color Name</label>
+                        <input type="text" class="form-control updateHead" name="color_name"
+                               value="{{ $orderDetails->color_name }}"
+                               data-name="color_name"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
