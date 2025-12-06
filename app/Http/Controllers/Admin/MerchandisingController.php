@@ -21,13 +21,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
 class MerchandisingController extends Controller
 {
     public function buyers(Request $r)
     {
-          // Filter Actions Start
+                // Filter Actions Start
         if ($r->action) {
             if ($r->checkid) {
 
@@ -68,7 +69,7 @@ class MerchandisingController extends Controller
 
             return redirect()->back();
         }
-          // Filter Actions End
+                // Filter Actions End
 
 
         $users = User::latest()
@@ -104,7 +105,7 @@ class MerchandisingController extends Controller
                 'endDate'   => $r->endDate,
             ]);
 
-          // Total Count Results
+                // Total Count Results
         $total = DB::table('users')
             ->where('buyer', true)
             ->whereIn('status', [0, 1])
@@ -118,7 +119,7 @@ class MerchandisingController extends Controller
 
     public function buyersAction(Request $r, $action, $id = null)
     {
-          // Add New Buyer Start
+                // Add New Buyer Start
         if ($action == 'create' && $r->isMethod('post')) {
             $check = $r->validate([
                 'name'         => 'required|max:100',
@@ -173,7 +174,7 @@ class MerchandisingController extends Controller
 
             return redirect()->route('admin.buyersAction', ['view', $user->id]);
         }
-          // Add New Buyer End
+                // Add New Buyer End
 
 
         $user = User::where('buyer', true)
@@ -186,7 +187,7 @@ class MerchandisingController extends Controller
         }
 
 
-          // View Buyer
+                // View Buyer
         if ($action == 'view') {
 
             $orders = $user->orders()->whereIn('status', ['approved'])
@@ -214,7 +215,7 @@ class MerchandisingController extends Controller
         }
 
 
-          // Update Buyer
+                // Update Buyer
         if ($action == 'update' && $r->isMethod('post')) {
 
             $check = $r->validate([
@@ -245,7 +246,7 @@ class MerchandisingController extends Controller
 
 
 
-              // Image Upload
+                    // Image Upload
             if ($r->hasFile('image')) {
                 $file = $r->image;
                 uploadFile($file, $user->id, 6, 1, Auth::id());  // src_type=7 for buyer
@@ -259,7 +260,7 @@ class MerchandisingController extends Controller
         }
 
 
-          // Delete Buyer
+                // Delete Buyer
         if ($action == 'delete') {
 
             $userFiles = Media::latest()
@@ -281,9 +282,9 @@ class MerchandisingController extends Controller
         }
 
 
-          // Buyer Payment (optional, like supplier)
+                // Buyer Payment (optional, like supplier)
         if ($action == 'payment') {
-              // If want payment module here, I will generate similar code like supplier.
+                    // If want payment module here, I will generate similar code like supplier.
         }
 
 
@@ -293,9 +294,9 @@ class MerchandisingController extends Controller
 
     public function samples(Request $r)
     {
-          // -----------------------------
-          // BULK ACTION
-          // -----------------------------
+                // -----------------------------
+                // BULK ACTION
+                // -----------------------------
         if ($r->action && $r->checkid) {
             $samples = Sample::whereIn('id', $r->checkid)->get();
 
@@ -325,14 +326,14 @@ class MerchandisingController extends Controller
             return redirect()->back();
         }
 
-          // -----------------------------
-          // QUERY SAMPLES
-          // -----------------------------
+                // -----------------------------
+                // QUERY SAMPLES
+                // -----------------------------
         $samples = Sample::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
 
-                  // SEARCH
+                        // SEARCH
                 if ($r->search) {
                     $search = $r->search;
                     $q->where(function($qq) use ($search) {
@@ -344,7 +345,7 @@ class MerchandisingController extends Controller
                     });
                 }
 
-                  // DATE RANGE
+                        // DATE RANGE
                 if ($r->startDate || $r->endDate) {
                     $from = $r->startDate ?: now()->format('Y-m-d');
                     $to   = $r->endDate ?: now()->format('Y-m-d');
@@ -353,7 +354,7 @@ class MerchandisingController extends Controller
                     ->whereDate('created_at', '<=', $to);
                 }
 
-                  // STATUS
+                        // STATUS
                 if ($r->status) {
                     $q->where('status', $r->status);
                 } else {
@@ -363,9 +364,9 @@ class MerchandisingController extends Controller
             ->paginate(25)
             ->appends($r->all());
 
-          // -----------------------------
-          // TOTAL COUNTS
-          // -----------------------------
+                // -----------------------------
+                // TOTAL COUNTS
+                // -----------------------------
         $totals = Sample::whereNotIn('status', ['trash', 'temp'])
             ->selectRaw("COUNT(*) AS total")
             ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
@@ -385,7 +386,7 @@ class MerchandisingController extends Controller
 
     public function samplesAction(Request $r, $action, $id = null)
     {
-          // CREATE SAMPLE
+                // CREATE SAMPLE
         if ($action == 'create') {
             $sample = Sample::where('status', 'temp')->where('created_by', Auth::id())->first();
 
@@ -400,7 +401,7 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.samplesAction', ['edit', $sample->id]);
         }
 
-          // FIND SAMPLE
+                // FIND SAMPLE
         $sample = Sample::find($id);
         if (!$sample) {
             session()->flash('error', 'Sample Not Found');
@@ -412,12 +413,12 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.samples');
         }
 
-          // VIEW
+                // VIEW
         if ($action == 'view') {
             return view(adminTheme().'merchandising.samples.view', compact('sample'));
         }
 
-          // ITEM CRUD (Add/Update/Remove)
+                // ITEM CRUD (Add/Update/Remove)
         if (in_array($action, ['add-item', 'update-item', 'remove-item', 'update-head'])) {
 
             if ($action == 'update-head') {
@@ -428,7 +429,7 @@ class MerchandisingController extends Controller
                 $field = $r->field;
                 $value = $r->value;
 
-                  // Buyer Update
+                        // Buyer Update
                 if ($field == 'buyer') {
                     if ($buyer = User::find($value)) {
                         $sample->buyer_id   = $buyer->id;
@@ -442,7 +443,7 @@ class MerchandisingController extends Controller
                     }
                 }
 
-                  // Style update with unique check
+                        // Style update with unique check
                 elseif ($field == 'style') {
                     $existsStyle = Sample::where('style', $value)->where('id', '<>', $sample->id)->exists();
                     if ($existsStyle) {
@@ -455,12 +456,12 @@ class MerchandisingController extends Controller
                     $sample->style = $value;
                 }
 
-                  // Default update for all other fields
+                        // Default update for all other fields
                 else {
                     $sample->$field = $value;
                 }
 
-                  // Final single save
+                        // Final single save
                 $sample->save();
             }
 
@@ -499,7 +500,7 @@ class MerchandisingController extends Controller
             return response()->json(['success' => true, 'view' => $view]);
         }
 
-          // UPDATE SAMPLE
+                // UPDATE SAMPLE
         if ($action == 'update') {
             $r->validate([
                 'buyer'  => 'required|numeric',
@@ -532,7 +533,7 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.samplesAction', ['view', $sample->id]);
         }
 
-          // DELETE SAMPLE
+                // DELETE SAMPLE
         if ($action == 'delete') {
             $sample->items()->delete();
             $sample->delete();
@@ -540,7 +541,7 @@ class MerchandisingController extends Controller
             return redirect()->back();
         }
 
-          // LOAD EDIT PAGE
+                // LOAD EDIT PAGE
         $items = $sample->items;
 
         $buyers = User::latest()
@@ -559,14 +560,14 @@ class MerchandisingController extends Controller
 
     public function orderDetails(Request $r)
     {
-          // -----------------------------
-          // QUERY SAMPLES
-          // -----------------------------
+                // -----------------------------
+                // QUERY SAMPLES
+                // -----------------------------
         $orderDetails = OrderDetails::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
 
-                  // SEARCH
+                        // SEARCH
                 if ($r->search) {
                     $search = $r->search;
                     $q->where(function($qq) use ($search) {
@@ -584,7 +585,7 @@ class MerchandisingController extends Controller
                     });
                 }
 
-                  // DATE RANGE
+                        // DATE RANGE
                 if ($r->startDate || $r->endDate) {
                     $from = $r->startDate ?: now()->format('Y-m-d');
                     $to   = $r->endDate ?: now()->format('Y-m-d');
@@ -601,7 +602,7 @@ class MerchandisingController extends Controller
                     ->whereDate('shipment_date', '<=', $sto);
                 }
 
-                  // STATUS
+                        // STATUS
                 if ($r->status) {
                     $q->where('status', $r->status);
                 } else {
@@ -611,9 +612,9 @@ class MerchandisingController extends Controller
             ->paginate(25)
             ->appends($r->all());
 
-          // -----------------------------
-          // TOTAL COUNTS
-          // -----------------------------
+                // -----------------------------
+                // TOTAL COUNTS
+                // -----------------------------
         $totals = OrderDetails::whereNotIn('status', ['trash', 'temp'])
             ->selectRaw("COUNT(*) AS total")
             ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
@@ -627,7 +628,7 @@ class MerchandisingController extends Controller
 
     public function orderDetailsAction(Request $r, $action, $id = null)
     {
-          // CREATE SAMPLE
+                // CREATE SAMPLE
         if ($action == 'create') {
             $orderDetails = OrderDetails::where('status', 'temp')->where('addedby_id', Auth::id())->first();
 
@@ -642,7 +643,7 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.orderDetailsAction', ['edit', $orderDetails->id]);
         }
 
-          // FIND SAMPLE
+                // FIND SAMPLE
         $orderDetails = OrderDetails::find($id);
         if (!$orderDetails) {
             session()->flash('error', 'Order Details Not Found');
@@ -654,12 +655,12 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.orderDetails');
         }
 
-          // VIEW
+                // VIEW
         if ($action == 'view') {
             return view(adminTheme().'merchandising.orderDetails.view', compact('orderDetails'));
         }
 
-          // ITEM CRUD (Add/Update/Remove)
+                // ITEM CRUD (Add/Update/Remove)
         if (in_array($action, ['update-head'])) {
 
             if ($action == 'update-head') {
@@ -670,21 +671,21 @@ class MerchandisingController extends Controller
                 $field = $r->field;
                 $value = $r->value;
 
-                  // Buyer Update
+                        // Buyer Update
                 if ($field == 'buyer') {
                     if ($buyer = User::find($value)) {
                         $orderDetails->buyer_id   = $buyer->id;
                         $orderDetails->buyer_name = $buyer->name;
                     }
                 }
-                  // Merchant Update
+                        // Merchant Update
                 elseif ($field == 'merchant') {
                     if ($merchant = User::find($value)) {
                         $orderDetails->merchant_id   = $merchant->id;
                         $orderDetails->merchant_name = $merchant->name;
                     }
                 }
-                  // Style (unique check)
+                        // Style (unique check)
                 elseif ($field == 'style_no') {
                     $existsStyle = OrderDetails::where('style_no', $value)
                                 ->where('id', '!=', $orderDetails->id)
@@ -699,7 +700,7 @@ class MerchandisingController extends Controller
                     }
                     $orderDetails->style_no = $value;
                 }
-                  // Other fields
+                        // Other fields
                 else {
                     $orderDetails->$field = $value;
                 }
@@ -711,7 +712,7 @@ class MerchandisingController extends Controller
         }
 
 
-          // UPDATE SAMPLE
+                // UPDATE SAMPLE
         if ($action == 'update') {
             $r->validate([
                 'buyer'    => 'required',
@@ -740,14 +741,14 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.orderDetails');
         }
 
-          // DELETE SAMPLE
+                // DELETE SAMPLE
         if ($action == 'delete') {
             $orderDetails->delete();
             session()->flash('success', 'Order Details Deleted Successfully');
             return redirect()->back();
         }
 
-          // LOAD EDIT PAGE
+                // LOAD EDIT PAGE
         $items = $orderDetails->items;
 
         $buyers = User::latest()
@@ -766,9 +767,9 @@ class MerchandisingController extends Controller
 
     public function proformaInvoice(Request $r)
     {
-          // -----------------------------
-          // QUERY PROFORMA INVOICES
-          // -----------------------------
+                // -----------------------------
+                // QUERY PROFORMA INVOICES
+                // -----------------------------
         $pis = ProformaInvoice::with(['buyer', 'merchant', 'user', 'items'])
             ->orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
@@ -792,9 +793,9 @@ class MerchandisingController extends Controller
             ->paginate(25)
             ->appends($r->all());
 
-          // -----------------------------
-          // TOTAL COUNTS
-          // -----------------------------
+                // -----------------------------
+                // TOTAL COUNTS
+                // -----------------------------
         $totals = ProformaInvoice::selectRaw("COUNT(*) AS total")
             ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
             ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
@@ -811,9 +812,9 @@ class MerchandisingController extends Controller
 
     public function proformaInvoiceAction(Request $r, $action, $id = null)
     {
-          // -------------------------------
-          // CREATE SAMPLE PI
-          // -------------------------------
+                // -------------------------------
+                // CREATE SAMPLE PI
+                // -------------------------------
         if ($action == 'create') {
             $pi = ProformaInvoice::where('status', 'temp')->where('addedby_id', Auth::id())->first();
             if (!$pi) {
@@ -826,29 +827,29 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.proformaInvoiceAction', ['edit', $pi->id]);
         }
 
-          // -------------------------------
-          // FIND PI
-          // -------------------------------
+                // -------------------------------
+                // FIND PI
+                // -------------------------------
         $pi = ProformaInvoice::with('items')->find($id);
         if (!$pi) {
             session()->flash('error', 'Proforma Invoice Not Found');
             return redirect()->route('admin.proformaInvoice');
         }
 
-          // -------------------------------
-          // VIEW PI
-          // -------------------------------
+                // -------------------------------
+                // VIEW PI
+                // -------------------------------
         if ($action == 'view') {
             return view(adminTheme().'merchandising.pi.view', compact('pi'));
         }
-        
+
         if ($action == 'invoice') {
             return view(adminTheme().'merchandising.pi.piInvoice', compact('pi'));
         }
 
-          // -------------------------------
-          // PO SELECT via AJAX
-          // -------------------------------
+                // -------------------------------
+                // PO SELECT via AJAX
+                // -------------------------------
         if ($action == 'po-select') {
             $orders = OrderDetails::where('order_no', $r->order_no)->get()->makeHidden(['id']);
             $orders = $orders->map(function ($o) {
@@ -863,7 +864,7 @@ class MerchandisingController extends Controller
                 ]);
             }
 
-              // Render items partial
+                    // Render items partial
             $html = view(adminTheme().'merchandising.pi.includes.items', [
                 'order' => $orders->first(),
                 'items' => $orders
@@ -872,12 +873,12 @@ class MerchandisingController extends Controller
             return response()->json(['success' => true, 'html' => $html, 'order' => $orders->first()]);
         }
 
-          // -------------------------------
-          // UPDATE PI
-          // -------------------------------
+                // -------------------------------
+                // UPDATE PI
+                // -------------------------------
         if ($action == 'update') {
 
-              /* ---------------------------
+                    /* ---------------------------
                 VALIDATION
             --------------------------- */
             $r->validate([
@@ -900,7 +901,7 @@ class MerchandisingController extends Controller
             ]);
 
 
-              /* ---------------------------
+                    /* ---------------------------
                 FETCH ORDER INFO
             --------------------------- */
             $order = OrderDetails::firstWhere('order_no', $r->order_no);
@@ -910,7 +911,7 @@ class MerchandisingController extends Controller
             }
 
 
-              /* ---------------------------
+                    /* ---------------------------
                 CALCULATE TOTALS
             --------------------------- */
             $total_qty        = collect($r->items)->sum('color_qty');
@@ -918,7 +919,7 @@ class MerchandisingController extends Controller
             $total_commission = collect($r->items)->sum('total_commission');
 
 
-              /* ---------------------------
+                    /* ---------------------------
                 UPDATE MAIN PI
             --------------------------- */
             $pi->order_no      = $r->order_no;
@@ -929,6 +930,11 @@ class MerchandisingController extends Controller
             $pi->remarks       = $r->remarks;
             $pi->status        = $r->status;
             $pi->editedby_id   = auth()->id();
+            $pi->pi_no         = $r->pi_no ?? $pi->pi_no;
+            $pi->created_at    = $r->created_at ?? $pi->created_at;
+            $pi->order_date    = $r->order_date ?? $pi->order_date;
+            $pi->advising_bank    = $r->advising_bank ?? $pi->advising_bank;
+            $pi->payment_terms    = $r->payment_terms ?? $pi->payment_terms;
 
             $pi->total_qty        = $total_qty;
             $pi->total_bill       = $total_bill;
@@ -937,12 +943,12 @@ class MerchandisingController extends Controller
             $pi->save();
 
 
-              /* ---------------------------
+                    /* ---------------------------
                 ITEMS UPDATE / CREATE
             --------------------------- */
             if ($r->has('items')) {
                 foreach ($r->items as $itemData) {
-                      // Update existing item
+                            // Update existing item
                     if (!empty($itemData['id']) && ($itemData['method'] ?? '') == 'update') {
 
                         $item = ProformaInvoiceItem::find($itemData['id']);
@@ -962,22 +968,22 @@ class MerchandisingController extends Controller
                         }
 
                     } else {
-                          // Create new item
+                                // Create new item
                         ProformaInvoiceItem::create([
                             'proforma_invoice_id' => $pi->id,
-                            'composition'      => $itemData['composition'],
-                            'fabrication'      => $itemData['fabrication'],
-                            'gsm'              => $itemData['gsm'] ?? null,
-                            'style_no'         => $itemData['style_no'],
-                            'color_name'       => $itemData['color_name'],
-                            'color_qty'        => $itemData['color_qty'],
-                            'unit_price'       => $itemData['unit_price'],
-                            'total_price'      => $itemData['total_price'],
-                            'commission_type'  => $itemData['commission_type'],
-                            'commission'       => $itemData['commission'],
-                            'total_commission' => $itemData['total_commission'],
-                            'shipment_date'    => $itemData['shipment_date'],
-                            'addedby_id'       => auth()->id(),
+                            'composition'         => $itemData['composition'],
+                            'fabrication'         => $itemData['fabrication'],
+                            'gsm'                 => $itemData['gsm'] ?? null,
+                            'style_no'            => $itemData['style_no'],
+                            'color_name'          => $itemData['color_name'],
+                            'color_qty'           => $itemData['color_qty'],
+                            'unit_price'          => $itemData['unit_price'],
+                            'total_price'         => $itemData['total_price'],
+                            'commission_type'     => $itemData['commission_type'],
+                            'commission'          => $itemData['commission'],
+                            'total_commission'    => $itemData['total_commission'],
+                            'shipment_date'       => $itemData['shipment_date'],
+                            'addedby_id'          => auth()->id(),
                         ]);
                         orderDetails::firstWhere('style_no', $itemData['style_no'])->update(['total_bill'=> ( $itemData['total_price'] - $itemData['total_commission']) ]);
                     }
@@ -985,7 +991,7 @@ class MerchandisingController extends Controller
             }
 
 
-              /* ---------------------------
+                    /* ---------------------------
                 SUCCESS
             --------------------------- */
             session()->flash('success', 'Proforma Invoice Updated Successfully');
@@ -1000,9 +1006,9 @@ class MerchandisingController extends Controller
         }
 
 
-          // -------------------------------
-          // LOAD EDIT PAGE
-          // -------------------------------
+                // -------------------------------
+                // LOAD EDIT PAGE
+                // -------------------------------
         $orders = OrderDetails::where('status', 'confirmed')->get()->unique('order_no');
         $items  = $pi->items;
 

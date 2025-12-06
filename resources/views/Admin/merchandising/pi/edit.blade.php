@@ -51,11 +51,23 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <label>Buyer Name</label>
-                        <input type="text" readonly class="form-control buyer_name" value="{{ $pi->buyer?->name ?? '' }}">
+                        <input type="text" readonly class="form-control buyer_name" placeholder="--" value="{{ $pi->buyer?->name ?? '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label>Merchant Name</label>
-                        <input type="text" readonly class="form-control merchant_name" value="{{ $pi->merchant?->name ?? '' }}">
+                        <input type="text" readonly class="form-control merchant_name"  placeholder="--" value="{{ $pi->merchant?->name ?? '' }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Proforma Invoice No</label>
+                        <input type="text" class="form-control " value="{{ $pi->pi_no ?? '' }}" placeholder="Proforma Invoice No" name="pi_no" >
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Proforma Invoice Date</label>
+                        <input type="date" class="form-control " value="{{ $pi->created_at->format('Y-m-d') ?? '' }}" placeholder="Proforma Invoice No" name="created_at">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Order Date</label>
+                        <input type="date" class="form-control " value="{{ $pi->order_date->format('Y-m-d') ?? '' }}" placeholder="Proforma Invoice No" name="order_date">
                     </div>
 
                     <div class="col-md-4 mb-3">
@@ -67,6 +79,7 @@
                         <label>Created By*</label>
                         <input type="text" readonly class="form-control" value="{{ $pi->user?->name ?? '' }}">
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label>Status</label>
                         <select name="status" class="form-control" required>
@@ -76,12 +89,23 @@
                             <option value="cancel" {{ $pi->status=='cancel'?'selected':'' }}>Cancel</option>
                         </select>
                     </div>
+                    <div class="col-md-12 mb-3">
+                        <label>Advising Bank</label>
+                        <textarea name="advising_bank" class="form-control advising_bank" rows="1" placeholder="Advising Bank">{{ $pi->advising_bank ?? '' }}</textarea>
+
+
+                    </div>
                 </div>
 
                 <br>
                 <h5><b>Proforma Invoice Items</b></h5>
                 <div class="cardItems">
                     @include(adminTheme().'merchandising.pi.includes.items', ['items' => $pi->items ?? []])
+                </div>
+
+                <div>
+                    <label for="">Payment Terms</label>
+                    <textarea name="payment_terms" class="form-control summernote" cols="30" rows="10" placeholder="Payment Terms">{!! $pi->payment_terms !!}</textarea>
                 </div>
 
                 <br>

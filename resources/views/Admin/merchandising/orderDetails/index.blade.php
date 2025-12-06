@@ -68,42 +68,57 @@
                     <thead>
                         <tr>
                             <th style="width: 80px">SL</th>
-                            <th style="min-width: 150px">Style</th>
-                            <th style="min-width: 200px">Buyer</th>
-                            <th style="min-width: 200px">Merchent</th>
-                            <th style="min-width: 100px">Order No</th>
-                            <th style="min-width: 120px">Invoice No</th>
-                            <th style="min-width: 250px">Company Name</th>
+                            <th style="min-width: 200px">Buyer Name</th>
+                            <th style="min-width: 200px">Brand / Customer</th>
+                            <th style="min-width: 120px">Order PO No</th>
+                            <th style="min-width: 120px">Order Qty</th>
+                            <th style="min-width: 150px">Color Name</th>
                             <th style="min-width: 150px">Shipment Date</th>
-                            <th style="min-width: 250px">Composition</th>
+                            <th style="min-width: 200px">Composition</th>
                             <th style="min-width: 200px">Fabrication</th>
                             <th style="min-width: 100px">GSM</th>
-                            <th style="min-width: 100px">Color</th>
-                            <th style="min-width: 100px">Total Qty</th>
-                            <th style="min-width: 180px">Remarks</th>
-                            <th style="min-width: 120px">Create Date</th>
-                            <th style="min-width: 100px">Status</th>
+                            <th style="min-width: 150px">Remarks</th>
+                            <th style="min-width: 120px">Status</th>
                             <th style="min-width: 150px">Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @forelse($orderDetails as $i => $order)
                         <tr>
                             <td>{{$orderDetails->currentpage()==1?$i+1:$i+($orderDetails->perpage()*($orderDetails->currentpage() - 1))+1}}</td>
-                            <td>{{ $order->style_no ?? '--' }}</td>
-                            <td>{{ $order->buyer_name }}</td>
-                            <td>{{ $order->merchant_name ?? '--' }}</td>
-                            <td>{{ $order->order_no ?? '--' }}</td>
-                            <td>{{ $order->invoice_no ?? '--' }}</td>
+
+                            <!-- Buyer Name -->
+                            <td>{{ $order->buyer_name ?? '--' }}</td>
+
+                            <!-- Brand / Customer -->
                             <td>{{ $order->company_name ?? '--' }}</td>
-                            <td>{{ $order->shipment_date->format('d.m.Y') }}</td>
-                            <td>{{ $order->composition ?? '--' }}</td>
-                            <td>{{ $order->fabrication ?? '--' }}</td>
-                            <td>{{ $order->gsm ?? '--' }}</td>
-                            <td>{{ $order->color_name ?? '--' }}</td>
+
+                            <!-- Order PO No -->
+                            <td>{{ $order->order_no ?? '--' }}</td>
+
+                            <!-- Order Qty -->
                             <td>{{ $order->total_qty ?? '--' }}</td>
+
+                            <!-- Color Name -->
+                            <td>{{ $order->color_name ?? '--' }}</td>
+
+                            <!-- Shipment Date -->
+                            <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
+
+                            <!-- Composition -->
+                            <td>{{ $order->composition ?? '--' }}</td>
+
+                            <!-- Fabrication -->
+                            <td>{{ $order->fabrication ?? '--' }}</td>
+
+                            <!-- GSM -->
+                            <td>{{ $order->gsm ?? '--' }}</td>
+
+                            <!-- Remarks -->
                             <td>{{ $order->remarks ?? '--' }}</td>
-                            <td>{{ $order->created_at->format('d.m.Y') }}</td>
+
+                            <!-- Status -->
                             <td>
                                 @if($order->status=='temp')
                                     <span class="badge badge-secondary">Temp</span>
@@ -118,27 +133,36 @@
                                 @endif
                             </td>
 
+                            <!-- Actions -->
                             <td class="text-center">
-                                @if(can('order_details.view') || can('order_details.view') || can('order_details.view'))
-                                    @can('order_details.view')
-                                    <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $order->id }}">
-                                        <i class="fa fa-eye"></i>
+                                @can('order_details.view')
+                                <a href="javascript:void(0)" class="btn-custom yellow mr-1"
+                                data-toggle="modal" data-target="#viewModal_{{ $order->id }}">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                @endcan
+
+                                @if(in_array($order->status, ['confirmed','pending']))
+                                    @can('order_details.edit')
+                                    <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}"
+                                    class="btn-custom success mr-1">
+                                    <i class="bx bx-edit"></i>
                                     </a>
                                     @endcan
-                                    @if(in_array($order->status, ['confirmed', 'pending']))
-                                        @can('order_details.edit')
-                                        <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
-                                        @endcan
-                                        @can('order_details.delete')
-                                        <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
-                                        @endcan
-                                    @endif
-                                @else -- @endif
+
+                                    @can('order_details.delete')
+                                    <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}"
+                                    onclick="return confirm('Are You Sure To Delete?')"
+                                    class="btn-custom danger">
+                                    <i class="bx bx-trash"></i>
+                                    </a>
+                                    @endcan
+                                @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="17" class="text-center text-muted">No order details Found</td>
+                            <td colspan="14" class="text-center text-muted">No order details found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -146,6 +170,7 @@
 
                 {{ $orderDetails->links('pagination') }}
             </div>
+
         </div>
     </div>
 
@@ -155,138 +180,132 @@
 </div>
 @endsection
 
-    @foreach($orderDetails as $order)
-        <div class="modal fade" id="viewModal_{{ $order->id }}" tabindex="-1">
-            <div class="modal-dialog ">
-                <div class="modal-content">
+@foreach($orderDetails as $order)
+<div class="modal fade" id="viewModal_{{ $order->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-                    <div class="modal-header text-white py-2">
-                        <h5 class="modal-title">Order Details ({{ $order->order_no }})</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span>&times;</span>
-                        </button>
+            <div class="modal-header text-white py-2">
+                <h5 class="modal-title">Order Details ({{ $order->order_no }})</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row g-3">
+
+                    <!-- BASIC INFO -->
+                    <div class="col-12">
+                        <h6 class="fw-bold text-primary border-start border-3 ps-2">Order Information</h6>
                     </div>
 
-                    <div class="modal-body">
-
-                    <div class="row g-3">
-
-                        <!-- Basic Info -->
-                        <div class="col-12">
-                            <h6 class="fw-bold text-primary border-start border-3 ps-2">Basic Information</h6>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Buyer</span>
-                            <div class="fw-normal">{{ $order->buyer_name }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Merchandiser</span>
-                            <div class="fw-normal">{{ $order->merchant_name ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Style</span>
-                            <div class="fw-normal">{{ $order->style ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Order No</span>
-                            <div class="fw-normal">{{ $order->order_no ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Invoice No</span>
-                            <div class="fw-normal">{{ $order->invoice_no ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Company Name</span>
-                            <div class="fw-normal">{{ $order->company_name ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Shipment Date</span>
-                            <div class="fw-normal">{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</div>
-                        </div>
-
-                        <!-- Fabric Info -->
-                        <div class="col-12 mt-2">
-                            <h6 class="fw-bold text-primary border-start border-3 ps-2">Fabric Details</h6>
-                        </div>
-
-                        <div class="col-md-12">
-                            <span class="text-secondary fw-semibold">Composition</span>
-                            <div class="fw-normal">{{ $order->composition ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <span class="text-secondary fw-semibold">Fabrication</span>
-                            <div class="fw-normal">{{ $order->fabrication ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">GSM</span>
-                            <div class="fw-normal">{{ $order->gsm ?? '--' }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Color</span>
-                            <div class="fw-normal">{{ $order->color_name ?? '--' }}</div>
-                        </div>
-
-                        <!-- Order Summary -->
-                        <div class="col-12 mt-2">
-                            <h6 class="fw-bold text-primary border-start border-3 ps-2">Order Summary</h6>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Total Qty</span>
-                            <div class="fw-normal">{{ $order->total_qty ?? '--' }}</div>
-                        </div>
-
-                        <!-- Additional Info -->
-                        <div class="col-12 mt-2">
-                            <h6 class="fw-bold text-primary border-start border-3 ps-2">Additional Information</h6>
-                        </div>
-
-                        <div class="col-md-12">
-                            <span class="text-secondary fw-semibold">Remarks</span>
-                            <div class="fw-normal">{{ $order->remarks ?? '--' }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Create Date</span>
-                            <div class="fw-normal">{{ $order->created_at->format('d.m.Y') }}</div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <span class="text-secondary fw-semibold">Status</span>
-                            <div>
-                                <span class="badge
-                                    @if($order->status=='temp') bg-secondary
-                                    @elseif($order->status=='pending') bg-warning text-dark
-                                    @elseif($order->status=='confirmed') bg-info text-dark
-                                    @elseif($order->status=='completed') bg-success
-                                    @elseif($order->status=='cancelled') bg-danger
-                                    @endif">
-                                    {{ ucfirst($order->status) }}
-                                </span>
-                            </div>
-                        </div>
-
+                    <!-- Buyer Name -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Buyer Name</span>
+                        <div>{{ $order->buyer_name ?? '--' }}</div>
                     </div>
 
+                    <!-- Brand / Customer -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Brand / Customer</span>
+                        <div>{{ $order->company_name ?? '--' }}</div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                    <!-- Order PO No -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Order PO No</span>
+                        <div>{{ $order->order_no ?? '--' }}</div>
+                    </div>
+
+                    <!-- Order Qty -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Order Qty</span>
+                        <div>{{ $order->total_qty ?? '--' }}</div>
+                    </div>
+
+                    <!-- Color Name -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Color Name</span>
+                        <div>{{ $order->color_name ?? '--' }}</div>
+                    </div>
+
+                    <!-- Shipment Date -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Shipment Date</span>
+                        <div>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</div>
+                    </div>
+
+                    <!-- FABRIC SECTION -->
+                    <div class="col-12 mt-2">
+                        <h6 class="fw-bold text-primary border-start border-3 ps-2">Fabric Details</h6>
+                    </div>
+
+                    <!-- Composition -->
+                    <div class="col-md-12">
+                        <span class="text-secondary fw-semibold">Composition</span>
+                        <div>{{ $order->composition ?? '--' }}</div>
+                    </div>
+
+                    <!-- Fabrication -->
+                    <div class="col-md-12">
+                        <span class="text-secondary fw-semibold">Fabrication</span>
+                        <div>{{ $order->fabrication ?? '--' }}</div>
+                    </div>
+
+                    <!-- GSM -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">GSM</span>
+                        <div>{{ $order->gsm ?? '--' }}</div>
+                    </div>
+
+                    <!-- REMARKS -->
+                    <div class="col-12 mt-2">
+                        <h6 class="fw-bold text-primary border-start border-3 ps-2">Additional Information</h6>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="col-md-12">
+                        <span class="text-secondary fw-semibold">Remarks</span>
+                        <div>{{ $order->remarks ?? '--' }}</div>
+                    </div>
+
+                    <!-- Created Date -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Created Date</span>
+                        <div>{{ $order->created_at->format('d.m.Y') }}</div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Status</span>
+                        <div>
+                            <span class="badge
+                                @if($order->status=='temp') bg-secondary
+                                @elseif($order->status=='pending') bg-warning text-dark
+                                @elseif($order->status=='confirmed') bg-info text-dark
+                                @elseif($order->status=='completed') bg-success
+                                @elseif($order->status=='canceled') bg-danger
+                                @endif">
+                                {{ ucfirst($order->status) }}
+                            </span>
+                        </div>
                     </div>
 
                 </div>
+
             </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+            </div>
+
         </div>
-    @endforeach
+    </div>
+</div>
+@endforeach
+
 
 @push('js')
 @endpush

@@ -107,9 +107,9 @@
                                 <td class="text-center">
                                     @if(can('proforma_invoice.view') || can('proforma_invoice.view') || can('proforma_invoice.view'))
                                         @can('proforma_invoice.view')
-                                        <a href="{{ route('admin.proformaInvoiceAction',['view',$pi->id]) }}" class="btn-custom yellow">
+                                        {{-- <a href="{{ route('admin.proformaInvoiceAction',['view',$pi->id]) }}" class="btn-custom yellow">
                                             <i class="fa fa-eye"></i>
-                                        </a>
+                                        </a> --}}
                                         <a href="{{ route('admin.proformaInvoiceAction',['invoice',$pi->id]) }}" class="btn-custom info" style="background: #F44336;color: white">
                                             <i class="fa fa-file"></i>
                                         </a>
