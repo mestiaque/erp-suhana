@@ -158,7 +158,7 @@ return [
                             'route'       => '/admin/procurement/yarn-booking',
                             'icon_color'  => 'text-warning',
                             // 'permission'  => '',
-                            'permission'  => 'yarn_booking'
+                            'permission'  => ''
                         ],
                         [
                             'title'       => 'knitting',
@@ -166,7 +166,7 @@ return [
                             'route'       => '/admin/procurement/knitting-booking',
                             'icon_color'  => 'text-warning',
                             // 'permission'  => '',
-                            'permission'  => 'knitting_booking'
+                            'permission'  => ''
                         ],
                         [
                             'title'       => 'Dying',
