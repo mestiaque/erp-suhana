@@ -192,6 +192,39 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'yarn_booking' => [
+                'label'       => 'Yarn (Procurement)',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'knitting_booking' => [
+                'label'       => 'Knitting (Procurement)',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'dying_booking' => [
+                'label'       => 'Dying (Procurement)',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
         ],
 
         'Accounts Management' =>[
@@ -260,6 +293,7 @@ return [
                     'edit'   => 'Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
+                    'approve' => 'Approved/Reject',
                     'all'    => 'All',
                 ],
             ],

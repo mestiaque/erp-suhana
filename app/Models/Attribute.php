@@ -9,6 +9,8 @@ class Attribute extends Model
 {
 
     use ActivityLoggable;
+
+    protected $guarded = [];
     //Models Information Data
     /********
      * type ==0 : Category
