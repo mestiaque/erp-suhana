@@ -293,7 +293,6 @@ return [
                     'edit'   => 'Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
-                    'approve' => 'Approved/Reject',
                     'all'    => 'All',
                 ],
             ],
@@ -320,12 +319,13 @@ return [
                 ],
             ],
             'deposits' => [
-                'label'       => 'Deposits',
+                'label'       => 'Fund Received',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'delete' => 'Delete',
+                    'approve' => 'Approve',
                     'all'    => 'All',
                 ],
             ],

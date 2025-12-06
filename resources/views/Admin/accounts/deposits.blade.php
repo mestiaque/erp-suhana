@@ -98,6 +98,7 @@
                             </th>
                             <th style="min-width: 200px;">Fund Received </th>
                             <th style="min-width: 300px;">Balance - Description</th>
+                            <th style="min-width: 300px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,12 +127,6 @@
                                     <i class="bx bx-analyse"></i>
                                 </span>
                                 @endif
-                                @can('deposits.edit')
-                                <br><br>
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDeposit_{{$transection->id}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                @endcan
                             </td>
                             <td>
                                 <b>Date:</b> {{$transection->created_at->format('d-m-Y')}}<br>
@@ -149,14 +144,42 @@
                                 @if($transection->billing_reason)
                                 <b>Bank Name:</b> {{$transection->billing_reason}} <br>
                                 @endif
-                                
+
                             </td>
                             <td>
-                                <b>Previus:</b> <span style="color: #FF9800;"> {{numberFormat($transection->balance - $transection->amount,2)}} </span>
+                                @php
+                                    $previousBalance = 0;
+                                    if($transection->status == 'success') {
+                                        $previousBalance = $transection->balance - $transection->amount;
+                                    } else {
+                                        // pending বা unapproved deposit → account balance দেখাও
+                                        $previousBalance = $transection->account ? $transection->account->amount : 0;
+                                    }
+                                @endphp
+                                <b>Previous:</b> <span style="color: #FF9800;">{{ numberFormat($previousBalance, 2) }}</span>
                                 <br> <b>Add Balance:</b> <span style="color: #009688;font-weight: bold;"> {{numberFormat($transection->amount,2)}} </span>
                                 <br> <b>After Balance:</b> <span>{{numberFormat($transection->balance,2)}} </span>
                                 <br>
                                 <b>Perticulars:</b> <span>{!!$transection->billing_note!!}</span>
+                            </td>
+                            <td class="text-center">
+                                @if(can('deposits.edit') || can('deposits.approve'))
+                                    @can('deposits.edit')
+                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDeposit_{{$transection->id}}" class="btn-custom success">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @can('deposits.approve')
+                                        @if($transection->status == 'pending')
+                                            {{-- Approve Button --}}
+                                            <a href="{{ route('admin.depositsAction', ['approve', $transection->id]) }}"
+                                            class="btn-custom yellow"
+                                            onclick="return confirm('Mark as Approved?');">
+                                                <i class="bx bx-check-circle"></i> {{-- relative icon --}}
+                                            </a>
+                                        @endif
+                                    @endcan
+                                @else -- @endif
                             </td>
                         </tr>
                         @endforeach
