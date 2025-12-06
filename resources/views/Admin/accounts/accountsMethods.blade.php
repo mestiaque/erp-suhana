@@ -39,14 +39,54 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            {{-- <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
+                                 @if(can('accounts.edit'))
+                                <div class="checkbox mr-3">
+                                     <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
+                                     <label class="cbx" for="checkall">
+                                         <span>
+                                             <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                 <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                             </svg>
+                                         </span>
+                                         All <span class="checkCounter"></span>
+                                     </label>
+                                 </div>
+                                 @else All @endif
+                            </th> --}}
                             <th style="min-width: 250px;">Account</th>
                             <th style="min-width: 300px;">Description</th>
-                            <th style="min-width: 150px;width:150px;">Action</th>
+                            <th style="min-width: 200px;width:200px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($accounts as $i=>$method)
                         <tr>
+                            {{-- <td style=" position: relative;">
+                                @if(can('accounts.edit'))
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx_{{$method->id}}" type="checkbox" name="checkid[]" value="{{$method->id}}" style="display: none;" />
+                                    <label class="cbx" for="cbx_{{$method->id}}">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                @endif
+                                    <span style="margin:0 5px;">{{$accounts->currentpage()==1?$i+1:$i+($accounts->perpage()*($accounts->currentpage() - 1))+1}}</span>
+                                @if($method->status)
+                                    <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
+                                        <i class="bx bx-check-circle"></i>
+                                    </span>
+                                @else
+                                    <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
+                                        <i class="bx bx-analyse"></i>
+                                    </span>
+                                @endif
+                            </td> --}}
                             <td>
                                 <b>Title:</b><span> {{$method->name}}</span><br>
                                 <b>Owner:</b><span> {{$method->user?$method->user->name:'No Owner'}}</span><br>
@@ -66,22 +106,69 @@
                                 <!--<b>Balane:</b> USD {{priceFormat($method->usd_amount)}} <br>-->
                                 <span>{!!$method->description!!}</span>
                             </td>
-                            <td class="center">
+                            <td class="text-center">
 
-                                @can('accounts.add')
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#EditType_{{$method->id}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
+                                {{-- If user has ANY action permission --}}
+                                @if( can('accounts.add') || can('accounts.edit') || can('accounts.view') || can('accounts.approve') )
+
+                                    {{-- Edit --}}
+                                    @can('accounts.edit')
+                                    <a href="javascript:void(0)"
+                                    data-toggle="modal"
+                                    data-target="#EditType_{{$method->id}}"
+                                    class="btn-custom success">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    @endcan
+
+                                    {{-- View --}}
+                                    @can('accounts.view')
+                                    <a href="{{route('admin.accountsAction', ['view', $method->id])}}"
+                                    class="btn-custom yellow">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                    @endcan
+
+
+                                    {{-- --------------------------
+                                        APPROVE / UNAPPROVE BUTTONS
+                                    -------------------------- --}}
+
+                                    @can('accounts.approve')
+
+                                        @if($method->status == 'active')
+                                            {{-- Unapprove Button --}}
+                                            <a href="{{ route('admin.accountsAction', ['unapprove', $method->id]) }}"
+                                            class="btn-custom primary" style="color:#e1000a"
+                                            onclick="return confirm('Mark as Unapproved?');">
+                                                <i class="bx bx-x-circle"></i>   {{-- relative icon --}}
+                                            </a>
+                                        @else
+                                            {{-- Approve Button --}}
+                                            <a href="{{ route('admin.accountsAction', ['approve', $method->id]) }}"
+                                            class="btn-custom primary "  style="color:#00ff38"
+                                            onclick="return confirm('Mark as Approved?');">
+                                                <i class="bx bx-check-circle"></i> {{-- relative icon --}}
+                                            </a>
+                                        @endif
+
+                                    @endcan
+
+                                @endif
+
+
+
+                                {{-- Delete --}}
+                                @can('accounts.delete')
+                                <a href="{{route('admin.accountsAction', ['delete', $method->id])}}"
+                                class="btn-custom danger"
+                                onclick="return confirm('Are You Want To Delete?')">
+                                    <i class="bx bx-trash"></i>
                                 </a>
                                 @endcan
-                                @can('accounts.add')
-                                <a href="{{route('admin.accountsAction',['view',$method->id])}}"  class="btn-custom yellow">
-                                    <i class="bx bx-show"></i>
-                                </a>
-                                @endcan
-                                @can('accounts.add')
-                                <a href="{{route('admin.accountsAction',['delete',$method->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
-                                @endcan
+
                             </td>
+
                         </tr>
                         @endforeach
                     </tbody>
@@ -89,8 +176,6 @@
                 {{$accounts->links('pagination::bootstrap-4')}}
             </div>
         </form>
-
-
     </div>
 </div>
 </div>
@@ -191,7 +276,7 @@
              	</div>
              	<div class="row">
                  	<div class="col-md-6 form-group">
-                 	    <label for="name">Status</label><br>
+                 	    {{-- <label for="name">Status</label><br>
                  	    <div class="checkbox">
                              <input class="inp-cbx" id="status_{{$dpm->id}}" type="checkbox" name="status" style="display: none;" {{$dpm->status=='active'?'checked':''}} />
                              <label class="cbx" for="status_{{$dpm->id}}">
@@ -202,7 +287,7 @@
                                  </span>
                                  Active
                              </label>
-                         </div>
+                         </div> --}}
                  	</div>
                     <div class="col-md-6 form-group">
                         <label for="name">Publish Date*</label>

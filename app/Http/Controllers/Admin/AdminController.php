@@ -5176,7 +5176,7 @@ class AdminController extends Controller
             $method->name=$r->name;
             $method->description=$r->description;
             $method->type =10;
-            $method->status ='active';
+            $method->status ='inactive';
             $method->addedby_id =$r->account_owner?:Auth::id();
             $method->save();
 
@@ -5256,6 +5256,20 @@ class AdminController extends Controller
         return redirect()->route('admin.accounts');
       }
       // Delete Department Action End
+
+    if($action == 'unapprove'){
+        $method->update([ 'status' => 'inactive' ]);
+        Session()->flash('success','Account has been marked as UNAPPROVED.');
+        return redirect()->back();
+    }
+
+    if($action == 'approve'){
+        $method->update([ 'status' => 'active' ]);
+        Session()->flash('success','Account has been marked as APPROVED.');
+        return redirect()->back();
+    }
+
+
 
 
 
@@ -10556,7 +10570,7 @@ class AdminController extends Controller
 
       //Filter Action End
 
-      $users =User::latest()->whereIn('status',[0,1])->where('buyer', false)->where('merchandiser', false)    
+      $users =User::latest()->whereIn('status',[0,1])->where('buyer', false)->where('merchandiser', false)
 
       ->where(function($q) use($r) {
 
