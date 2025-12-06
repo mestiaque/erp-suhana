@@ -180,14 +180,14 @@ return [
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/production-list',
                     'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'permission' => 'production_list'
                 ],
                 [
                     'title'      => 'Daily Production',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/daily-production',
                     'icon_color' => 'text-warning',
-                    'permission' => 'buyers'
+                    'permission' => 'daily_production'
                 ],
 
             ]
@@ -375,106 +375,6 @@ return [
     ],
 
 
-    // [
-    //     'group_title' => 'PRODUCTION WORKFLOW',
-    //     [
-    //         'title'      => 'Order Management',
-    //         'icon'       => 'fa-solid fa-shopping-cart',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Buyer List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/buyers', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Order Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/create', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Order Status', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/status', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Order History', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/history', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Order Approval', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/orders/approval', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Merchandising',
-    //         'icon'       => 'fa-solid fa-tags',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Product Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/products', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'BOM (Bill of Materials)', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/bom', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Costing & Quotation', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/costing', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Sample Approval', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/samples/approval', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Fabric & Trim Requirement', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/fabrics/requirement', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Planning',
-    //         'icon'       => 'fa-solid fa-calendar',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Production Plan', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/production', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Cutting Plan', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/cutting', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Line Assignment', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/line-assignment', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Capacity Planning', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/planning/capacity', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Cutting',
-    //         'icon'       => 'fa-solid fa-cut',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Cutting Plan', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/plan', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Cut Panel / Bundle Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/panel', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Cutting Output', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/output', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Fabric Consumption Report', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/cutting/report', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Sewing / Production',
-    //         'icon'       => 'fa-solid fa-industry',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Line / Operator Assignment', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/line-assignment', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Daily Target vs Output', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/daily-target', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Defect Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/defect-entry', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Rework Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/rework-entry', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Bundle / Cartoon Tracking', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/production/bundle-tracking', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Finishing & Packing',
-    //         'icon'       => 'fa-solid fa-archive',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Quality Check (QC)', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/qc', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Ironing / Pressing', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/ironing', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Packing Entry', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/packing', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Shipment Ready Status', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/finishing/shipment', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Shipping',
-    //         'icon'       => 'fa-solid fa-ship',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Shipment Schedule', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/shipping/schedule', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Shipment Tracking', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/shipping/tracking', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Invoice / Packing List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/shipping/invoice', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-    //     [
-    //         'title'      => 'Machines / Lines',
-    //         'icon'       => 'fa-solid fa-cogs',
-    //         'icon_color' => 'text-primary',
-    //         'permission' => '',
-    //         'children'   => [
-    //             ['title' => 'Machine List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/machines', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //             ['title' => 'Line List', 'icon' => 'fa-solid fa-arrow-right', 'route' => '/admin/lines', 'icon_color' => 'text-warning', 'permission' => 'dev'],
-    //         ]
-    //     ],
-
-    // ],
 
     // App Settings
     [

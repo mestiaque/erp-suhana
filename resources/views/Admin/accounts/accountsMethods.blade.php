@@ -109,7 +109,7 @@
                             <td class="text-center">
 
                                 {{-- If user has ANY action permission --}}
-                                @if( can('accounts.add') || can('accounts.edit') || can('accounts.view') || can('accounts.approve') )
+                                @if( can('accounts.add') || can('accounts.edit') || can('accounts.view') )
 
                                     {{-- Edit --}}
                                     @can('accounts.edit')
@@ -129,32 +129,7 @@
                                     </a>
                                     @endcan
 
-
-                                    {{-- --------------------------
-                                        APPROVE / UNAPPROVE BUTTONS
-                                    -------------------------- --}}
-
-                                    @can('accounts.approve')
-
-                                        @if($method->status == 'active')
-                                            {{-- Unapprove Button --}}
-                                            <a href="{{ route('admin.accountsAction', ['unapprove', $method->id]) }}"
-                                            class="btn-custom primary" style="color:#e1000a"
-                                            onclick="return confirm('Mark as Unapproved?');">
-                                                <i class="bx bx-x-circle"></i>   {{-- relative icon --}}
-                                            </a>
-                                        @else
-                                            {{-- Approve Button --}}
-                                            <a href="{{ route('admin.accountsAction', ['approve', $method->id]) }}"
-                                            class="btn-custom primary "  style="color:#00ff38"
-                                            onclick="return confirm('Mark as Approved?');">
-                                                <i class="bx bx-check-circle"></i> {{-- relative icon --}}
-                                            </a>
-                                        @endif
-
-                                    @endcan
-
-                                @endif
+                                @else -- @endif
 
 
 
@@ -276,7 +251,7 @@
              	</div>
              	<div class="row">
                  	<div class="col-md-6 form-group">
-                 	    {{-- <label for="name">Status</label><br>
+                 	    <label for="name">Status</label><br>
                  	    <div class="checkbox">
                              <input class="inp-cbx" id="status_{{$dpm->id}}" type="checkbox" name="status" style="display: none;" {{$dpm->status=='active'?'checked':''}} />
                              <label class="cbx" for="status_{{$dpm->id}}">
@@ -287,7 +262,7 @@
                                  </span>
                                  Active
                              </label>
-                         </div> --}}
+                         </div>
                  	</div>
                     <div class="col-md-6 form-group">
                         <label for="name">Publish Date*</label>
