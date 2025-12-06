@@ -43,7 +43,7 @@
                     </div>
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Buyer, Style" class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Style No, Buyer, Merchandiser" class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -68,51 +68,52 @@
                 <table class="table table-striped table-borderd">
                     <thead>
                         <tr>
-                            <th style="width: 80px">SL</th>
-                            <th style="width: 150px">Order No</th>
-                            <th style="width: 150px">Merchant</th>
-                            <th style="min-width:200px">Buyer</th>
-                            <th style="width: 150px">Total Qty</th>
-                            <th style="width: 150px">Total Price</th>
-                            <th style="width: 150px">Status</th>
-                            <th style="width: 150px">Date</th>
-                            <th style="width: 150px">Action</th>
+                            <th style="width: 150px">Style No</th>
+                            <th style="width: 150px">Merchant/Buyer</th>
+                            <th style="min-width:200px">Cutting</th>
+                            <th style="min-width:200px">Swetting</th>
+                            <th style="width: 150px">Total Hours</th>
+                            <th style="width: 200px">Packing</th>
+                            <th style="width: 200px">Shippinment</th>
+                            <th style="width: 200px">Plan By/Date</th>
+                            <th style="width: 150px">Action/Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($orders as $i => $order)
                         <tr>
-                            <td>{{$orders->currentpage()==1?$i+1:$i+($orders->perpage()*($orders->currentpage() - 1))+1}}</td>
-                            <td>{{ str_pad($order->id, 10, '0', STR_PAD_LEFT) }}</td>
-                            <td>{{$order->merchant_name}}</td>
                             <td>
-  
-                                {{
-                                    collect([
-                                        $order->buyer_name,
-                                        $order?->buyer?->company_name,
-                                        $order?->buyer?->country
-                                    ])->filter()->implode(' | ')
-                                }}
-     
-                            </td>
-                            <td>{{ number_format($order->total_qty) }}</td>
-                            <td>{{ numberFormat($order->total_bill,2,$order->currency) }}</td>
-                            <td>
-                                @if($order->pi_status=='temp')
-                                    <span class="badge badge-secondary">Temp</span>
-                                @elseif($order->pi_status=='pending')
-                                    <span class="badge badge-warning">Pending</span>
-                                @elseif($order->pi_status=='confirmed')
-                                    <span class="badge badge-info">Confirmed</span>
-                                @elseif($order->pi_status=='completed')
-                                    <span class="badge badge-success">Completed</span>
-                                @elseif($order->pi_status=='cancel')
-                                    <span class="badge badge-danger">Cancelled</span>
-                                @endif
+                                <b>No:</b> {{ $order->style_no}}
+                                <br> <b>Qty:</b> {{number_format($order->style_qty)}} pcs
                             </td>
                             <td>
-                                {{ $order->created_at->format('d.m.Y') }}
+                                <b>M:</b> {{$order->style?->merchant_name}}
+                                <br><b>B:</b> {{$order->style?->buyer_name}}
+
+                            </td>
+                            <td>
+                                <b>S:</b> {{$order->cutting_start?Carbon\Carbon::parse($order->cutting_start)->format('d.m.Y h:i A'):''}}
+                                <br><b>E:</b> {{$order->cutting_end?Carbon\Carbon::parse($order->cutting_end)->format('d.m.Y h:i A'):''}}
+                            </td>
+                            <td>
+                                <b>S:</b> {{$order->sewing_start?Carbon\Carbon::parse($order->sewing_start)->format('d.m.Y h:i A'):''}}
+                                <br><b>E:</b> {{$order->sewing_end?Carbon\Carbon::parse($order->sewing_end)->format('d.m.Y h:i A'):''}}
+                            </td>
+                            <td>
+                                <b>Total:</b> {{$order->total_working_time}}
+                                <br><b>H/T:</b> {{$order->total_hourly_capacity}} pcs
+                            </td>
+                            <td>
+                                <b>S:</b> {{$order->packing_start?Carbon\Carbon::parse($order->packing_start)->format('d.m.Y h:i A'):''}}
+                                <br><b>E:</b> {{$order->packing_end?Carbon\Carbon::parse($order->packing_end)->format('d.m.Y h:i A'):''}}
+                            </td>
+                            <td>
+                                <b>S:</b> {{$order->shippment_start?Carbon\Carbon::parse($order->shippment_start)->format('d.m.Y h:i A'):''}}
+                                <br><b>E:</b> {{$order->shippment_end?Carbon\Carbon::parse($order->shippment_end)->format('d.m.Y h:i A'):''}}
+                            </td>
+                            <td>
+                                <b>By:</b> {{ $order->user?->name }}
+                                <br><b>Date:</b> {{ $order->created_at->format('d.m.Y') }}
                             </td>
                             <td class="text-center">
                                 @if(can('samples.view') || can('samples.view') || can('samples.view'))
@@ -124,6 +125,16 @@
                                     @endcan
                                 @else 
                                 -- 
+                                @endif
+                                <br>
+                                @if($order->status=='pending')
+                                    <span class="badge badge-warning">Pending</span>
+                                @elseif($order->status=='confirmed')
+                                    <span class="badge badge-info">Confirmed</span>
+                                @elseif($order->status=='completed')
+                                    <span class="badge badge-success">Completed</span>
+                                @elseif($order->status=='cancel')
+                                    <span class="badge badge-danger">Cancelled</span>
                                 @endif
                             </td>
                         </tr>

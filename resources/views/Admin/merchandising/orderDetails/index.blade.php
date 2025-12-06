@@ -68,11 +68,11 @@
                     <thead>
                         <tr>
                             <th style="width: 80px">SL</th>
+                            <th style="min-width: 150px">Style</th>
                             <th style="min-width: 200px">Buyer</th>
                             <th style="min-width: 200px">Merchent</th>
-                            <th style="min-width: 150px">Style</th>
                             <th style="min-width: 100px">Order No</th>
-                            <th style="min-width: 100px">Invoice No</th>
+                            <th style="min-width: 120px">Invoice No</th>
                             <th style="min-width: 250px">Company Name</th>
                             <th style="min-width: 150px">Shipment Date</th>
                             <th style="min-width: 250px">Composition</th>
@@ -90,9 +90,9 @@
                         @forelse($orderDetails as $i => $order)
                         <tr>
                             <td>{{$orderDetails->currentpage()==1?$i+1:$i+($orderDetails->perpage()*($orderDetails->currentpage() - 1))+1}}</td>
+                            <td>{{ $order->style_no ?? '--' }}</td>
                             <td>{{ $order->buyer_name }}</td>
                             <td>{{ $order->merchant_name ?? '--' }}</td>
-                            <td>{{ $order->style_no ?? '--' }}</td>
                             <td>{{ $order->order_no ?? '--' }}</td>
                             <td>{{ $order->invoice_no ?? '--' }}</td>
                             <td>{{ $order->company_name ?? '--' }}</td>

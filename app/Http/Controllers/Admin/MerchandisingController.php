@@ -841,6 +841,10 @@ class MerchandisingController extends Controller
         if ($action == 'view') {
             return view(adminTheme().'merchandising.pi.view', compact('pi'));
         }
+        
+        if ($action == 'invoice') {
+            return view(adminTheme().'merchandising.pi.piInvoice', compact('pi'));
+        }
 
           // -------------------------------
           // PO SELECT via AJAX
@@ -985,7 +989,7 @@ class MerchandisingController extends Controller
                 SUCCESS
             --------------------------- */
             session()->flash('success', 'Proforma Invoice Updated Successfully');
-            return redirect()->route('admin.proformaInvoiceAction', ['view', $pi->id]);
+            return redirect()->route('admin.proformaInvoiceAction', ['invoice', $pi->id]);
         }
 
         if($action=='delete'){
