@@ -109,7 +109,7 @@
                             <td class="text-center">
 
                                 {{-- If user has ANY action permission --}}
-                                @if( can('accounts.add') || can('accounts.edit') || can('accounts.show') || can('accounts.approve') )
+                                @if( can('accounts.add') || can('accounts.edit') || can('accounts.view') || can('accounts.approve') )
 
                                     {{-- Edit --}}
                                     @can('accounts.edit')
