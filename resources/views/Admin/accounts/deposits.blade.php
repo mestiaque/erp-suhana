@@ -98,7 +98,7 @@
                             </th>
                             <th style="min-width: 200px;">Fund Received </th>
                             <th style="min-width: 300px;">Balance - Description</th>
-                            <th style="min-width: 300px;">Action</th>
+                            <th style="min-width: 200px; width:200px" class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,7 +175,7 @@
                                             <a href="{{ route('admin.depositsAction', ['approve', $transection->id]) }}"
                                             class="btn-custom yellow"
                                             onclick="return confirm('Mark as Approved?');">
-                                                <i class="bx bx-check-circle"></i> {{-- relative icon --}}
+                                                <i class="bx bx-check-circle"></i> Approve {{-- relative icon --}}
                                             </a>
                                         @endif
                                     @endcan
