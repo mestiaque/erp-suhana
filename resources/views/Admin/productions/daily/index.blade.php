@@ -6,7 +6,11 @@
 
 @push('css')
 <style type="text/css">
-
+/* Optional: highlight editable cells on focus */
+.data-row:focus {
+    outline: 1px solid #4CAF50;
+    background-color: #f0fff0;
+}
 </style>
 @endpush
 
@@ -43,34 +47,69 @@
                 </div>
             </form>
 
-            <!-- Status Filter -->
-            <div class="row mb-2">
-                <div class="col-md-12">
+            <!-- Production Table -->
+            <div class="">
+                <div class="table-responsive data-table">
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead class="deliRport">
+                            <tr>
+                                <th style="min-width: 130px;">Line</th>
+                                <th style="min-width: 125px;">Style</th>
+                                <th>Target</th>
+                                    @for($h = 8; $h <= 19; $h++)
+                                        @php
+                                            $start = ($h > 12) ? $h - 12 : $h;
+                                            $endHour = $h + 1;
+                                            $end = ($endHour > 12) ? $endHour - 12 : $endHour;
+                                            $startPeriod = $h < 12 ? 'AM' : 'PM';
+                                            $endPeriod = $endHour < 12 ? 'AM' : 'PM';
+                                        @endphp
+                                        <th>{{ $start }}-{{ $end }} <span>{{ $endPeriod }}</span></th>
+                                    @endfor
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($swings as $swing)
+                                <tr>
+                                    <td class="line-label">
+                                        <img src="{{ asset('admin/assets/img/erpline.webp') }}" alt="">
+                                        {{ $swing->floor_name }} - {{ $swing->line_name }}
+                                    </td>
+                                    <td>
+                                        @foreach($swing->planning as $plan)
+                                            {{ $plan->style_no }}<br>
+                                        @endforeach
+                                    </td>
+                                    <td>{{ $swing->capacity_hour }}</td>
 
+                                    @php
+                                        $rowTotal = 0;
+                                    @endphp
+
+                                    @for($h = 8; $h <= 19; $h++)
+                                        @if($swing->isBreakHour($h))
+                                            <td style="color: #e1000a;background: #f9ecef;">Break</td>
+                                        @else
+                                            @php
+                                                $hourValue = $swing->getProductionHour($h);
+                                                $rowTotal += $hourValue; // add to total
+                                            @endphp
+                                            <td contenteditable="true" class="data-row"
+                                                data-line="{{ $swing->line_name }}"
+                                                data-plan-id="{{ $swing->id }}"
+                                                data-hour="{{ $h }}">
+                                                {{ $hourValue }}
+                                            </td>
+                                        @endif
+                                    @endfor
+
+                                    <td class="total-column">{{ $rowTotal ?? 0 }}</td> <!-- show total -->
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <!-- Samples Table -->
-            <div class="table-responsive">
-                <table class="table table-striped table-borderd">
-                    <thead>
-                        <tr>
-                            <th style="width: 80px">SL</th>
-                            <th style="width: 150px">Order No</th>
-                            <th style="width: 150px">Merchant</th>
-                            <th style="min-width:200px">Buyer</th>
-                            <th style="width: 150px">Total Qty</th>
-                            <th style="width: 150px">Total Price</th>
-                            <th style="width: 150px">Status</th>
-                            <th style="width: 150px">Date</th>
-                            <th style="width: 150px">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                    </tbody>
-                </table>
-
             </div>
         </div>
     </div>
@@ -78,4 +117,68 @@
 @endsection
 
 @push('js')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+
+        // ===== Total Update Function =====
+        function updateTotal(row){
+            let total = 0;
+
+            row.find('.data-row').each(function(){
+                let val = parseInt($(this).text().trim());
+                if(!isNaN(val)) {
+                    total += val;
+                }
+            });
+
+            row.find('.total-column').text(total);
+        }
+
+        // ===== Editable Cell Event =====
+        $(document).on('blur', '.data-row', function() {
+
+            let cell  = $(this);
+            let row   = cell.closest('tr');
+            let planId = cell.data('plan-id');
+            let line  = cell.data('line');
+            let hour  = cell.data('hour');
+            let value = cell.text().trim();
+
+            let date = new Date().toISOString().slice(0, 10); // <-- Today's Date
+
+            if (value === "" || isNaN(value)) {
+                cell.text('0');
+                value = 0;
+            }
+
+            updateTotal(row);
+
+            $.ajax({
+                url: '{{ route("admin.dailyProductionAction", ["action" => "update"]) }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    plan_id: planId,
+                    line: line,
+                    hour: hour,
+                    value: value,
+                    date: date
+                },
+                success: function(res) {
+                    if(res.success){
+                        cell.css({"background":"#d4edda"});
+                        setTimeout(() => cell.css("background",""), 300);
+                    }
+                }
+            });
+        });
+
+
+    });
+</script>
 @endpush
+
+@include(adminTheme().'productions.daily.css')
+
+
