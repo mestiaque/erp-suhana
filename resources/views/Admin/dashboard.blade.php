@@ -757,7 +757,6 @@ h4{
             function badgeClass($value, $target){
                 if($target==0) return 'value-tag low-performance';
                 $percentage = ($value/$target)*100;
-
                 if($percentage >= 100) return 'value-tag high-performance';
                 elseif($percentage >= 95) return 'value-tag medium-performance';
                 else return 'value-tag low-performance';
