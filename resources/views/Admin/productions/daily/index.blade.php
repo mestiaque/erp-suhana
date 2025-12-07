@@ -85,8 +85,8 @@
                         @php
                             $style_no = $swing->planning->style_no;
                             $unique_styles[] = $style_no;
-                            $unique_buyers[] = $swing->planning->style->buyer_name;
-                            $unique_orders[] = $swing->planning->style->order_no;
+                            $unique_buyers[] = $swing?->planning?->style?->buyer_name;
+                            $unique_orders[] = $swing?->planning?->style?->order_no;
 
                             $today_date = request('startDate') ?? date('Y-m-d');
                             $today_total = 0;
@@ -110,8 +110,8 @@
                         <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}">
                             <td class="line-label" style="white-space: nowrap;">{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
                             <td style="white-space: nowrap;">{{ $style_no }}</td>
-                            <td style="white-space: nowrap;">{{ $swing->planning->style->order_no }}</td>
-                            <td style="white-space: nowrap;">{{ $swing->planning->style->buyer_name }}</td>
+                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
+                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
                             <td class="target">{{ $swing->capacity_hour }}</td>
 
                             @for($h=8;$h<=19;$h++)
