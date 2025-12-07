@@ -287,13 +287,15 @@ $(document).ready(function(){
 
         updateRow(row);
 
-        $.post('{{ route("admin.dailyProductionAction", ["action"=>"update"]) }}', {
-            _token: '{{ csrf_token() }}',
-            plan_id: plan,
-            hour: hour,
-            date: date,
-            value: value
-        });
+        if (!isNaN(value) && value !== '') {
+            $.post('{{ route("admin.dailyProductionAction", ["action"=>"update"]) }}', {
+                _token: '{{ csrf_token() }}',
+                plan_id: plan,
+                hour: hour,
+                date: date,
+                value: value
+            });
+        }
     });
 
     $('.data-row').on('focus', function(){
