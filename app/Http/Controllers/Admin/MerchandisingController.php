@@ -1009,7 +1009,11 @@ class MerchandisingController extends Controller
                 // -------------------------------
                 // LOAD EDIT PAGE
                 // -------------------------------
-        $orders = OrderDetails::where('status', 'confirmed')->get()->unique('order_no');
+        $piOrder = ProformaInvoice::pluck('order_no')->toArray();
+        $orders = OrderDetails::where('status', 'confirmed')
+                    ->whereNotIn('order_no', $piOrder)
+                    ->get()
+            ->unique('order_no');
         $items  = $pi->items;
 
         return view(adminTheme().'merchandising.pi.edit', compact('pi', 'items', 'orders'));

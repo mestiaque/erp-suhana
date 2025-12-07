@@ -38,11 +38,15 @@
                         @if(is_null($pi->order_no))
                             <select class="form-control" name="order_no" id="order_no_select" data-url="{{ route('admin.proformaInvoiceAction', ['po-select', $pi->id]) }}">
                                 <option value="">-- Select Order Number --</option>
-                                @foreach ($orders as $order)
+                                @if(count($orders) > 0)
+                                    @foreach ($orders as $order)
                                     <option value="{{ $order->order_no }}" {{ $pi->order_no == $order->order_no ? 'selected' : '' }}>
                                         {{ $order->order_no }}
                                     </option>
-                                @endforeach
+                                    @endforeach
+                                @else
+                                    <option class="text-c" value="" disabled>No order found</option>
+                                @endif
                             </select>
                         @else
                             <div type="text" value="" class="form-control " readonly>{{ $pi->order_no }}</div>
@@ -67,7 +71,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <label>Order Date</label>
-                        <input type="date" class="form-control " value="{{ $pi->order_date->format('Y-m-d') ?? '' }}" placeholder="Proforma Invoice No" name="order_date">
+                        <input type="date" class="form-control " value="{{ $pi?->order_date?->format('Y-m-d') ?? '' }}" placeholder="Proforma Invoice No" name="order_date">
                     </div>
 
                     <div class="col-md-4 mb-3">

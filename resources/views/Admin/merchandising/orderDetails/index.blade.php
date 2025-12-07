@@ -70,6 +70,7 @@
                             <th style="width: 80px">SL</th>
                             <th style="min-width: 200px">Buyer Name</th>
                             <th style="min-width: 200px">Brand / Customer</th>
+                            <th style="min-width: 200px">Style No</th>
                             <th style="min-width: 120px">Order PO No</th>
                             <th style="min-width: 120px">Order Qty</th>
                             <th style="min-width: 150px">Color Name</th>
@@ -93,6 +94,8 @@
 
                             <!-- Brand / Customer -->
                             <td>{{ $order->company_name ?? '--' }}</td>
+
+                            <td>{{ $order->style_no ?? '--' }}</td>
 
                             <!-- Order PO No -->
                             <td>{{ $order->order_no ?? '--' }}</td>
@@ -211,6 +214,11 @@
                     <div class="col-md-6">
                         <span class="text-secondary fw-semibold">Brand / Customer</span>
                         <div>{{ $order->company_name ?? '--' }}</div>
+                    </div>
+                    <!-- Brand / Customer -->
+                    <div class="col-md-6">
+                        <span class="text-secondary fw-semibold">Style No</span>
+                        <div>{{ $order->style_no ?? '--' }}</div>
                     </div>
 
                     <!-- Order PO No -->

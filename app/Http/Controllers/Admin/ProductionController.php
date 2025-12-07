@@ -184,7 +184,7 @@ class ProductionController extends Controller
             ->map(fn($val) => trim($val)) // removes extra spaces
             ->toArray();
 
-        $styles = OrderDetails::where('status', '<>', 'temp')
+        $styles = OrderDetails::where('status', 'confirmed')
             ->whereNotIn('style_no', $productionStyleNos)
             ->orderBy('id', 'desc')
             ->get();
@@ -303,6 +303,9 @@ class ProductionController extends Controller
                     $q->whereDate('created_at', '>=', $from)
                     ->whereDate('created_at', '<=', $to);
                 });
+            })
+            ->whereHas('planning', function ($q) {
+                $q->where('status', 'confirmed');
             })
             ->get();
         return view(adminTheme().'productions.daily.index', compact('swings'));

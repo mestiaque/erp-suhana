@@ -753,7 +753,11 @@ h4{
 
 
         @php
-            $swings = App\Models\ProductionSewing::with(['planning', 'planning.style', 'outputs'])->get();
+            $swings = App\Models\ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+                            ->whereHas('planning', function ($q) {
+                                $q->where('status', 'confirmed');
+                            })
+                            ->get();
             function badgeClass($value, $target){
                 if($target==0) return 'value-tag low-performance';
                 $percentage = ($value/$target)*100;
