@@ -14,6 +14,7 @@ use App\Models\SampleItem;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use App\Models\OrderDetails;
+use App\Models\SewingOutput;
 use Illuminate\Http\Request;
 use App\Models\ProductionSewing;
 use App\Models\ProductionPlanning;
@@ -280,35 +281,65 @@ class ProductionController extends Controller
 
     public function dailyProduction(Request $r)
     {
-        $swings = ProductionSewing::with('planning')->get();
+        $search = $r->search;
+        $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+            ->when($search, function ($q) use ($search) {
+                $q->where('floor_name', 'LIKE', "%{$search}%")
+                ->orWhere('line_name', 'LIKE', "%{$search}%")
+                ->orWhereHas('planning', function ($q) use ($search) {
+                    $q->where('style_no', 'LIKE', "%{$search}%");
+                })
+                ->orWhereHas('planning.style', function ($q) use ($search) {
+                    $q->where('order_no', 'LIKE', "%{$search}%")
+                        ->orWhere('buyer_name', 'LIKE', "%{$search}%");
+                });
+            })
+            ->when($r->startDate || $r->endDate, function ($q) use ($r) {
+                $from = $r->startDate ?: now()->format('Y-m-d');
+                $to   = $r->endDate ?: now()->format('Y-m-d');
+
+                // Apply date filter on outputs
+                $q->whereHas('outputs', function ($q) use ($from, $to) {
+                    $q->whereDate('created_at', '>=', $from)
+                    ->whereDate('created_at', '<=', $to);
+                });
+            })
+            ->get();
         return view(adminTheme().'productions.daily.index', compact('swings'));
     }
 
-    public function dailyProductionAction(Request $r, $action, $id = null)
+
+    public function dailyProductionAction(Request $r, $action)
     {
         if ($action == "update") {
-            $plan = ProductionSewing::find($r->plan_id);
+            $swing = ProductionSewing::findOrFail($r->plan_id);
+            SewingOutput::updateOrCreate(
+                [
+                    "planning_id"   => $swing->planning->id,
+                    "sewing_id"     => $swing->id,
+                    'floor_name'    => $swing->floor_name,
+                    'line_name'     => $swing->line_name,
+                    'style_no'      => $swing->style_no,
+                    'capacity_hour' => $swing->capacity_hour,
+                    'addedby_id'    => auth()->id(),
+                    'sewing_id'     => $r->plan_id,
+                    'date'          => $r->date,
+                    'hour'          => $r->hour,
+                ],
+                [
+                    'production' => $r->value,
+                    'editedby_id' => auth()->id(),
+                ]
+            );
 
-            if (!$plan) {
-                return response()->json(['error' => 'Planning not found'], 404);
-            }
-            $date = $r->date;  // example: 2025-12-06
-            $hour = $r->hour;  // example: hour_8
-            $value = $r->value;
-            // Load existing JSON
-            $data = $plan->production ? json_decode($plan->production, true) : [];
-            // Insert new value
-            $data[$date][$hour] = $value;
-            // Save back
-            $plan->production = json_encode($data);
-            $plan->save();
             return response()->json(['success' => true]);
         }
 
-        // Default: view daily production table
-        $swings = ProductionSewing::with('planning')->get();
+        $swings = ProductionSewing::with('planning')->with('outputs')->get();
+
         return view(adminTheme().'productions.daily.index', compact('swings'));
     }
+
 
     public function yarnBooking(Request $r)
     {
@@ -325,10 +356,5 @@ class ProductionController extends Controller
         return view(adminTheme().'productions.dying-booking.index');
     }
 
-
-
-
-
-
-
 }
+

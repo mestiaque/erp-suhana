@@ -26,7 +26,7 @@ class ProductionSewing extends Model
 
 
     public function planning() {
-        return $this->hasMany(ProductionPlanning::class, 'style_no', 'style_no');
+        return $this->belongsTo(ProductionPlanning::class, 'style_no', 'style_no');
     }
 
     // Example helper
@@ -35,12 +35,19 @@ class ProductionSewing extends Model
         return in_array($hour, $breakHours);
     }
 
-    public function getProductionHour($hour)
+    public function outputs()
     {
-        $date = date('Y-m-d'); // Today
-        $data = $this->production ? json_decode($this->production, true) : [];
+        return $this->hasMany(SewingOutput::class, 'sewing_id');
+    }
 
-        return isset($data[$date][$hour]) ? $data[$date][$hour] : 0;
+    public function getProductionHour($hour, $date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        return $this->outputs()
+            ->where('hour', $hour)
+            ->where('date', $date)
+            ->value('production') ?? 0;
     }
 
 
