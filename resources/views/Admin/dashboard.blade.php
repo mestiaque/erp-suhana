@@ -757,11 +757,12 @@ h4{
             function badgeClass($value, $target){
                 if($target==0) return 'value-tag low-performance';
                 $percentage = ($value/$target)*100;
+
                 if($percentage >= 100) return 'value-tag high-performance';
                 elseif($percentage >= 95) return 'value-tag medium-performance';
                 else return 'value-tag low-performance';
             }
-            @endphp
+        @endphp
         <div class="">
             <div class="table-responsive data-table">
                 <table class="table table-bordered table-striped mb-0">
@@ -807,8 +808,8 @@ h4{
                         @php
                             $style_no = $swing->planning->style_no;
                             $unique_styles[] = $style_no;
-                            $unique_buyers[] = $swing->planning->style->buyer_name;
-                            $unique_orders[] = $swing->planning->style->order_no;
+                            $unique_buyers[] = $swing?->planning?->style?->buyer_name;
+                            $unique_orders[] = $swing?->planning?->style?->order_no;
 
                             $today_total = 0;
                             $hour_values = [];
@@ -844,8 +845,8 @@ h4{
                         <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}">
                             <td class="line-label" style="white-space: nowrap;">{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
                             <td style="white-space: nowrap;">{{ $style_no }}</td>
-                            <td style="white-space: nowrap;">{{ $swing->planning->style->order_no }}</td>
-                            <td style="white-space: nowrap;">{{ $swing->planning->style->buyer_name }}</td>
+                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
+                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
                             <td class="target">{{ $swing->capacity_hour }}</td>
 
                             @for($h=8;$h<=19;$h++)
@@ -857,7 +858,7 @@ h4{
                                         data-hour="{{ $h }}"
                                         data-terget="{{ $swing->capacity_hour }}"
                                         data-date="{{ $today_date }}">
-                                        <span class="{{ badgeClass($hour_values[$h], $swing->capacity_hour) }}">{{ $hour_values[$h] }}</span>
+                                        <span class="{{ badgeClass( intval($hour_values[$h]), intval($swing->capacity_hour)) }}">{{ $hour_values[$h] }}</span>
                                     </td>
                                 @endif
                             @endfor
@@ -937,7 +938,7 @@ h4{
                     tag.addClass("medium-performance");
                 }
                 else {
-                    tag.addClass("high-performance");
+                    tag.addClass("low-performance");
                 }
             }
         });
