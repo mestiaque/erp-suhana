@@ -206,7 +206,7 @@ h4{
             color: #e74c3c;
         }
 
-      
+
         .production-table h2 {
             color: #2c3e50;
             margin-bottom: 20px;
@@ -434,15 +434,15 @@ h4{
             .header h1 {
                 font-size: 1.8em;
             }
-            
+
             .metrics {
                 grid-template-columns: 1fr;
             }
-            
+
             table {
                 font-size: 0.85em;
             }
-            
+
             th, td {
                 padding: 10px 5px;
             }
@@ -738,7 +738,7 @@ h4{
                                     @empty
 
                                     @endforelse
-                                        
+
                                 </tbody>
                             </table>
                         </div>
@@ -751,182 +751,168 @@ h4{
 
     <div>
 
-  
-  <div class="">
-        <div class="table-responsive data-table">
-            <table class="table table-bordered table-striped mb-0">
-                <thead class="deliRport">
-                    <tr>
-                        <th style="min-width: 130px;">Line</th>
-                        <th style="min-width: 125px;">Style</th>
-                        <th>Target</th>
-                        <th>8-9 <span>AM</span></th>
-                        <th>9-10 <span>AM</span></th>
-                        <th>10-11 <span>AM</span></th>
-                        <th>11-12 <span>AM</span></th>
-                        <th>12-01 <span>PM</span></th>
-                        <th>01-02 <span>PM</span></th>
-                        <th>02-03 <span>PM</span></th>
-                        <th>03-04 <span>PM</span></th>
-                        <th>04-05 <span>PM</span></th>
-                        <th>05-06 <span>PM</span></th>
-                        <th>06-07 <span>PM</span></th>
-                        <th>07-08 <span>PM</span></th>
-                        <th rowspan="2">Total</th>
-                    </tr>
-               
-                </thead>
-                <tbody>
-                    <!-- Row 1: SONAR -->
-                    <tr>
-                        <td class="line-label">
-                            <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
-                            Flor 01 - Line 01
-                        </td>
-                        <td>11262A T/S</td>
-                        <td>150</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">140</td>
-                        <td class="data-row">111</td>
-                        <td class="data-row">160</td>
-                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">180</td>
-                        <td class="data-row">90</td>
-                        <td class="data-row">200</td>
-                        <td class="data-row">210</td>
-                        <td class="data-row">130</td>
-                        <td class="total-column">2000</td>
-                    </tr>
 
-                    <!-- Row 2: HAVE -->
-                    <tr>
-                        <td class="line-label">
-                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
-                            Flor 01 - Line 02
-                        </td>
-                        <td>46 T/S</td>
-                        <td>160</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">160</td>
-                        <td class="data-row">70</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">190</td>
-                        <td class="data-row"style="color: #e1000a;background: #f9ecef;">Breack</td>
-                        <td class="data-row">140</td>
-                        <td class="data-row">210</td>
-                        <td class="data-row">220</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">170</td>
-                        <td class="data-row">134</td>
-                        <td class="total-column">1800</td>
-                    </tr>
+        @php
+            $swings = App\Models\ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+                            ->whereHas('planning', function ($q) {
+                                $q->where('status', 'confirmed');
+                            })
+                            ->get();
+            function badgeClass($value, $target){
+                if($target==0) return 'value-tag low-performance';
+                $percentage = ($value/$target)*100;
+                if($percentage >= 100) return 'value-tag high-performance';
+                elseif($percentage >= 95) return 'value-tag medium-performance';
+                else return 'value-tag low-performance';
+            }
+        @endphp
+        <div class="">
+            <div class="table-responsive data-table">
+                <table class="table table-bordered table-striped mb-0">
+                    <thead class="deliRport">
+                        <tr>
+                            <th style="width:10rem">Line</th>
+                            <th style="width:10rem">Style</th>
+                            <th style="width:10rem">Order</th>
+                            <th style="width:10rem">Buyer</th>
+                            <th style="width:10rem">Target</th>
+                            @for($h = 8; $h <= 19; $h++)
+                                @php
+                                    $start = ($h > 12) ? $h - 12 : $h;
+                                    $endHour = $h + 1;
+                                    $end = ($endHour > 12) ? $endHour - 12 : $endHour;
+                                    $endPeriod = $endHour < 12 ? 'AM' : 'PM';
+                                @endphp
+                                <th style="width:20rem; white-space: nowrap;">{{ $start }}-{{ $end }} <span>{{ $endPeriod }}</span></th>
+                            @endfor
+                            <th style="width:10rem; white-space: nowrap;">Today Total</th>
+                            <th style="width:10rem; white-space: nowrap;">Previous</th>
+                            <th style="width:10rem; white-space: nowrap;">Grand Total</th>
+                            <th style="width:10rem; white-space: nowrap;">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                    <!-- Row 3: SENSOR -->
-                    <tr>
-                        <td class="line-label">
-                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
-                            Flor 01 - Line 03
-                        </td>
-                        <td>T/S</td>
-                        <td>140</td>
-                        <td class="data-row">80</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">160</td>
-                        <td class="data-row">110</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">170</td>
-                        <td class="data-row">100</td>
-                        <td class="data-row">140</td>
-                        <td class="total-column">730</td>
-                    </tr>
+                    @php
+                        $sum_target = 0;
+                        $sum_today = 0;
+                        $sum_previous = 0;
+                        $sum_grand = 0;
+                        $unique_orders = [];
+                        $unique_buyers = [];
+                        $unique_styles = [];
+                        $hourly_sums = [];
+                        for($h=8;$h<=19;$h++) $hourly_sums[$h] = 0;
+                        $styleBalances = [];
+                        $today_date = request('startDate') ?? date('Y-m-d');
+                    @endphp
 
-                    <!-- Row 4: SENSOR (continued) -->
-                    <tr>
-                        <td class="line-label">
-                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
-                            Flor 02 - Line 01
-                        </td>
-                        <td>23+26F</td>
-                        <td>150</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">140</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
-                        <td class="data-row">120</td>
-                        <td class="data-row">180</td>
-                        <td class="data-row">190</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">111</td>
-                        <td class="total-column">1300</td>
-                    </tr>
+                    @forelse($swings as $swing)
+                        @php
+                            $style_no = $swing->planning->style_no;
+                            $unique_styles[] = $style_no;
+                            $unique_buyers[] = $swing?->planning?->style?->buyer_name;
+                            $unique_orders[] = $swing?->planning?->style?->order_no;
 
-                    <!-- Row 5: HAQUE -->
-                    <tr>
-                        <td class="line-label">
-                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
-                            Flor 02 - Line 02
-                        </td>
-                        <td>S. PANT 48 T/S</td>
-                        <td>160</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">200</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">240</td>
-                        <td class="data-row">90</td>
-                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
-                        <td class="data-row">280</td>
-                        <td class="data-row">200</td>
-                        <td class="data-row">80</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">180</td>
-                        <td class="data-row">130</td>
-                        <td class="total-column">2000</td>
-                    </tr>
+                            $today_total = 0;
+                            $hour_values = [];
+                            for($h=8;$h<=19;$h++){
+                                if(!$swing->isBreakHour($h)){
+                                    $val = $swing->getProductionHour($h,$today_date);
+                                    $today_total += $val;
+                                    $hour_values[$h] = $val;
+                                    $hourly_sums[$h] += $val;
+                                } else {
+                                    $hour_values[$h] = null; // Break
+                                }
+                            }
 
-                    <!-- Row 6: S+M/30M -->
-                    <tr>
-                        <td class="line-label">
-                             <img src="{{asset('admin/assets/img/erpline.webp')}}" alt="">
-                            Flor 02 - Line 03
-                        </td>
-                        <td>72013 T/S</td>
-                        <td>160</td>
-                        <td class="data-row">90</td>
-                        <td class="data-row">160</td>
-                        <td class="data-row">170</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">190</td>
-                        <td class="data-row" style="color: #e1000a;background: #f9ecef;">Breack</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">160</td>
-                        <td class="data-row">150</td>
-                        <td class="data-row">130</td>
-                        <td class="data-row">99</td>
-                        <td class="data-row">160</td>
-                        <td class="total-column">1650</td>
-                    </tr>
+                            $previous_total = $swing->outputs()->where('date','<',$today_date)->sum('production');
+                            $grand_total = $today_total + $previous_total;
+                            $style_qty = $swing->planning->sum('style_qty');
+                            $balance = $style_qty - $grand_total;
 
-                </tbody>
-            </table>
+                            $sum_target += $swing->capacity_hour;
+                            $sum_today += $today_total;
+                            $sum_previous += $previous_total;
+                            $sum_grand += $grand_total;
+
+                            if(!isset($styleBalances[$style_no])){
+                                $styleBalances[$style_no] = ['style_qty'=>$style_qty, 'grand'=>$grand_total];
+                            } else {
+                                $styleBalances[$style_no]['grand'] += $grand_total;
+                            }
+
+                        @endphp
+
+                        <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}">
+                            <td class="line-label" style="white-space: nowrap;">{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
+                            <td style="white-space: nowrap;">{{ $style_no }}</td>
+                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
+                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
+                            <td class="target">{{ $swing->capacity_hour }}</td>
+
+                            @for($h=8;$h<=19;$h++)
+                                @if($swing->isBreakHour($h))
+                                    <td class="text-danger" style="background:#f9ecef">Break</td>
+                                @else
+                                    <td contenteditable="false" class="data-row"
+                                        data-plan="{{ $swing->id }}"
+                                        data-hour="{{ $h }}"
+                                        data-terget="{{ $swing->capacity_hour }}"
+                                        data-date="{{ $today_date }}">
+                                        <span class="{{ badgeClass( intval($hour_values[$h]), intval($swing->capacity_hour)) }}">{{ $hour_values[$h] }}</span>
+                                    </td>
+                                @endif
+                            @endfor
+
+                            <td class="today badge-cell total-column" data-target="{{ $swing->capacity_hour }}">{{ $today_total }}</td>
+                            <td class="previous total-column">{{ $previous_total }}</td>
+                            <td class="grand total-column">{{ $grand_total }}</td>
+                            <td class="balance total-column" style="color: #ff0000b5">{{ $balance }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="21" class="text-center text-muted"><i>No data found.</i></td></tr>
+                    @endforelse
+
+                    @php
+                        $sum_balance = 0;
+                        foreach($styleBalances as $style){
+                            $sum_balance += $style['style_qty'] - $style['grand'];
+                        }
+                    @endphp
+
+                    @if(count($swings) > 0)
+                    <!-- SUMMARY ROW -->
+                    <tr style="font-weight:bold;background:#eef3ff">
+                        <td colspan="" style="white-space: nowrap;">Lines: {{ count($swings) }}</td>
+                        <td colspan="" style="white-space: nowrap;">Style: {{ count(array_unique($unique_styles)) }}</td>
+                        <td style="white-space: nowrap;">Orders: {{ count(array_unique($unique_orders)) }}</td>
+                        <td style="white-space: nowrap;">Buyers: {{ count(array_unique($unique_buyers)) }}</td>
+                        <td>{{ $sum_target }}</td>
+                        @for($h=8;$h<=19;$h++)
+                            <td style="background:#f2f5fbcf !important">{{ $hourly_sums[$h] }}</td>
+                        @endfor
+                        <td>{{ $sum_today }}</td>
+                        <td>{{ $sum_previous }}</td>
+                        <td>{{ $sum_grand }}</td>
+                        <td style="color:#ff0000c5">{{ $sum_balance }}</td>
+                    </tr>
+                    @endif
+
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-      
-    </div>
 
 
     </div>
 
 
 </div>
+
+
+
 @endsection
 
 @push('js')
@@ -950,12 +936,12 @@ h4{
 
                 if (percent <= 80) {
                     tag.addClass("low-performance");
-                } 
+                }
                 else if (percent <= 90) {
                     tag.addClass("medium-performance");
-                } 
+                }
                 else {
-                    tag.addClass("high-performance");
+                    tag.addClass("low-performance");
                 }
             }
         });

@@ -16,6 +16,8 @@ class ProformaInvoice extends Model
     protected $casts = [
         'created_date' => 'date',
         'updated_at' => 'date',
+        'order_date' => 'date',
+
     ];
 
     // Relationships
@@ -29,7 +31,7 @@ class ProformaInvoice extends Model
     {
         return $this->belongsTo(User::class, 'buyer_id');
     }
-    
+
     public function order()
     {
         return $this->belongsTo(OrderDetail::class,'order_no','order_no');

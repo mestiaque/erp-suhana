@@ -24,5 +24,31 @@ class ProductionSewing extends Model
         return $this->belongsTo(User::class, 'addedby_id');
     }
 
-    
+
+    public function planning() {
+        return $this->belongsTo(ProductionPlanning::class, 'style_no', 'style_no');
+    }
+
+    // Example helper
+    public function isBreakHour($hour) {
+        $breakHours = [13]; // Example: 1 PM is break
+        return in_array($hour, $breakHours);
+    }
+
+    public function outputs()
+    {
+        return $this->hasMany(SewingOutput::class, 'sewing_id');
+    }
+
+    public function getProductionHour($hour, $date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        return $this->outputs()
+            ->where('hour', $hour)
+            ->where('date', $date)
+            ->value('production') ?? 0;
+    }
+
+
 }
