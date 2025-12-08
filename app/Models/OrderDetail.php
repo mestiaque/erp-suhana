@@ -34,5 +34,16 @@ class OrderDetail extends Model
         return $this->belongsTo(User::class, 'merchant_id');
     }
 
-    
+    public function items()
+    {
+        return $this->hasMany(OrderDetailItem::class, 'order_detail_id');
+    }
+
+    public function getItems()
+    {
+        return OrderDetailItem::where('order_detail_id', $this->id)->get();
+    }
+
+
+
 }

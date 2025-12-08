@@ -106,13 +106,6 @@ return [
                     'icon_color'  => 'text-warning',
                     'permission'  => 'samples'
                 ],
-                // [
-                //     'title'      => 'Buyer List',
-                //     'icon'       => 'fa-solid fa-arrow-right',
-                //     'route'      => '/admin/buyers',
-                //     'icon_color' => 'text-warning',
-                //     'permission' => 'buyers'
-                // ],
                 [
                     'title'      => 'Order Details',
                     'icon'       => 'fa-solid fa-arrow-right',
@@ -126,7 +119,36 @@ return [
                     'route'      => '/admin/proforma-invoice',
                     'icon_color' => 'text-warning',
                     'permission' => 'proforma_invoice'
-                ]
+                ],
+                [
+                    'title'       => 'Reference Data',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => '',
+                    'children'    => [
+                        [
+                            'title'       => 'Fabrications',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/fabrications',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'fabrications'
+                        ],
+                        [
+                            'title'       => 'Compositions',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/compositions',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'compositions'
+                        ],
+                        [
+                            'title'      => 'Buyer List',
+                            'icon'       => 'fa-solid fa-arrow-right',
+                            'route'      => '/admin/buyers',
+                            'icon_color' => 'text-warning',
+                            'permission' => 'buyers'
+                        ],
+                    ]
+                ],
             ]
         ],
     ],

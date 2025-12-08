@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\SampleItem;
+use App\Models\OrderDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use App\Models\OrderDetails;
@@ -184,7 +185,7 @@ class ProductionController extends Controller
             ->map(fn($val) => trim($val)) // removes extra spaces
             ->toArray();
 
-        $styles = OrderDetails::where('status', 'confirmed')
+        $styles = OrderDetail::where('status', 'confirmed')
             ->whereNotIn('style_no', $productionStyleNos)
             ->orderBy('id', 'desc')
             ->get();

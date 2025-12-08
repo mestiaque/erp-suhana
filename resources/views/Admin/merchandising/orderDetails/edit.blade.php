@@ -1,18 +1,20 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Order Details Edit') }}</title>
+<title>{{ websiteTitle('Edit Order Details') }}</title>
 @endsection
 
 @push('css')
 <style>
-    .search-result-box{position:absolute;z-index:9;width:100%;background:#fff;border:1px solid #ddd;display:none;}
-    .search-result-box li{padding:6px 10px;cursor:pointer;}
-    .searchlist ul {list-style:none;margin:0;padding:0;}
-    .searchlist ul li{border-top:1px solid #dbd6d6;padding:5px 10px;cursor:pointer;}
-    .searchlist ul li:hover{background:#f2f2f2;}
-    .searchGrid {position:relative;}
-    .itemSearch {height:200px;overflow:auto;position:absolute;width:100%;background:white;border:1px solid #dfdfdf;border-top:0;display:none;}
+
+    .section-title{
+        background:#f4f4f4;
+        padding:8px 12px;
+        font-weight:600;
+        margin-bottom:10px;
+        border-left:4px solid #007bff;
+        border-radius:4px;
+    }
 </style>
 @endpush
 
@@ -23,286 +25,395 @@
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
             <li class="item"><a href="{{ route('admin.orderDetails') }}">Order Details</a></li>
-            <li class="item">Edit Order Details</li>
+            <li class="item">Edit</li>
         </ol>
     </div>
 
     <div class="card mb-30">
         <div class="card-body">
             @include(adminTheme().'alerts')
+            @php
+                $fabrications = App\Models\Attribute::where('type', 11)->where('status', 'active')->pluck('name');
+                $compositions = App\Models\Attribute::where('type', 12)->where('status', 'active')->pluck('name');
+            @endphp
 
-
-
-
-
-            <form action="{{ route('admin.orderDetailsAction', ['update', $orderDetails->id]) }}" method="POST">
+            <form action="{{ route('admin.orderDetailsAction',['update',$orderDetails->id]) }}" method="POST">
                 @csrf
+
                 <div class="row">
 
-                    <!-- 1. Buyer Name -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Buyer *</label>
-                        <div class="input-group">
-                            <select name="buyer" id="buyerSelect" class="form-control updateHead"
-                                    data-name="buyer"
-                                    data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
-                                    required>
-                                <option value="">-- Select Buyer --</option>
-                                @foreach($buyers as $s)
-                                    <option value="{{ $s->id }}" {{ $orderDetails->buyer_id == $s->id ? 'selected':'' }}>
-                                        {{ $s->name }} {{ $s->company_name?'- '.$s->company_name:'' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="input-group-append">
-                                <button class="btn-custom primary h-100 px-3" type="button" id="openAddBuyer">
-                                    <i class="bx bx-plus"></i>
-                                </button>
+                    <!-- LEFT SIDE -->
+                    <div class="col-md-6">
+
+                        <div class="section-title">Order Main Information</div>
+
+                        <div class="row">
+
+                            <!-- Buyer -->
+                            <div class="col-md-6 mb-3">
+                                <label>Buyer *</label>
+                                <div class="input-group">
+                                    <select name="buyer" id="buyerSelect" class="form-control updateHead"
+                                        data-name="buyer"
+                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
+                                        required>
+                                        <option value="">-- Select Buyer --</option>
+                                        @foreach($buyers as $s)
+                                            <option value="{{ $s->id }}" {{ $orderDetails->buyer_id == $s->id ? 'selected':'' }}>
+                                                {{ $s->name }} {{ $s->company_name?'- '.$s->company_name:'' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" id="openAddBuyer" class="btn btn-primary px-3">
+                                            <i class="bx bx-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- Brand -->
+                            <div class="col-md-6 mb-3">
+                                <label>Brand / Customer *</label>
+                                <input type="text" name="company_name" class="form-control updateHead"
+                                       value="{{ $orderDetails->company_name }}"
+                                       data-name="company_name" placeholder="Brand / Customer"
+                                       data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
+                                       required>
+                            </div>
+
+                            <!-- Merchandiser -->
+                            <div class="col-md-6 mb-3">
+                                <label>Merchandiser *</label>
+                                <select name="merchant" class="form-control updateHead"
+                                        data-name="merchant"
+                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
+                                        required>
+                                    <option value="">-- Select Merchandiser --</option>
+                                    @foreach($merchandisers as $m)
+                                        <option value="{{ $m->id }}" {{ $orderDetails->merchant_id==$m->id?'selected':'' }}>
+                                            {{ $m->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Style -->
+                            <div class="col-md-6 mb-3">
+                                <label>Style *</label>
+                                <input type="text" name="style_no" class="form-control updateHead"
+                                       value="{{ $orderDetails->style_no }}"
+                                       data-name="style_no" placeholder="Style"
+                                       required
+                                       data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            </div>
+
+                            <!-- Order No -->
+                            <div class="col-md-6 mb-3">
+                                <label>Order/PO No *</label>
+                                <input type="text" name="order_no" class="form-control updateHead"
+                                       value="{{ $orderDetails->order_no }}"
+                                       data-name="order_no" placeholder="Order/PO No"
+                                       required
+                                       data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            </div>
+
+                            <!-- Order Qty -->
+                            <div class="col-md-6 mb-3">
+                                <label>Order Qty *</label>
+                                <input type="number" name="total_qty" class="form-control updateHead"
+                                       value="{{ $orderDetails->total_qty }}"
+                                       data-name="total_qty" placeholder="Order Quantity"
+                                       required
+                                       data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            </div>
+
+                            <!-- Dates / Fields -->
+                            <div class="col-md-6 mb-3">
+                                <label>Shipment Date *</label>
+                                <input type="date" name="shipment_date" class="form-control updateHead"
+                                       value="{{ $orderDetails->shipment_date ? \Carbon\Carbon::parse($orderDetails->shipment_date)->format('Y-m-d') : '' }}"
+                                       data-name="shipment_date"
+                                       required
+                                       data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Composition *</label>
+                                <select name="composition" class="form-control updateHead"
+                                        data-name="composition"
+                                        required
+                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                                    <option value="">-- Select Composition --</option>
+                                    @foreach($compositions as $comp)
+                                        <option value="{{ $comp }}" {{ $orderDetails->composition == $comp ? 'selected' : '' }}>
+                                            {{ $comp }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Fabrication *</label>
+                                <select name="fabrication" class="form-control updateHead"
+                                        data-name="fabrication"
+                                        required
+                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                                    <option value="">-- Select fabrication --</option>
+                                    @foreach($fabrications as $comp)
+                                        <option value="{{ $comp }}" {{ $orderDetails->fabrication == $comp ? 'selected' : '' }}>
+                                            {{ $comp }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- GSM -->
+                            <div class="col-md-6 mb-3">
+                                <label>GSM *</label>
+                                <input type="text" name="gsm" class="form-control updateHead"
+                                       value="{{ $orderDetails->gsm }}"
+                                       data-name="gsm" placeholder="GSM"
+                                       required
+                                       data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6 mb-3">
+                                <label>Status *</label>
+                                <select name="status" class="form-control updateHead"
+                                        data-name="status"
+                                        required
+                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                                    <option value="pending" {{ $orderDetails->status=="pending"?'selected':'' }}>Pending</option>
+                                    <option value="confirmed" {{ $orderDetails->status=="confirmed"?'selected':'' }}>Confirmed</option>
+                                    <option value="completed" {{ $orderDetails->status=="completed"?'selected':'' }}>Completed</option>
+                                    <option value="cancelled" {{ $orderDetails->status=="cancelled"?'selected':'' }}>Cancelled</option>
+                                </select>
+                            </div>
+
+                                                        <!-- Remarks -->
+                            <div class="col-md-6 mb-3">
+                                <label>Remarks</label>
+                                <textarea name="remarks" rows="1" class="form-control updateHead"
+                                          data-name="remarks" placeholder="Remarks"
+                                          data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">{{ $orderDetails->remarks }}</textarea>
+                            </div>
+
+
                         </div>
+                        <br>
+                        <button type="submit" class="btn btn-success ">
+                            <i class="bx bx-check"></i> Save Updated Order
+                        </button>
                     </div>
 
-                    <!-- 2. Brand / Customer -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Brand / Customer *</label>
-                        <input type="text" class="form-control updateHead" name="company_name"
-                            value="{{ $orderDetails->company_name }}"
-                            placeholder="Brand / Customer"
-                            data-name="company_name" required
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                    <!-- RIGHT SIDE: COLORS -->
+                    <div class="col-md-6">
 
-                    <!-- Merchandiser (Extra Field but kept) -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Merchandiser *</label>
-                        <select name="merchant" class="form-control updateHead"
-                                data-name="merchant" required
-                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
-                                required>
-                            <option value="">-- Select Merchandiser --</option>
-                            @foreach($merchandisers as $m)
-                                <option value="{{ $m->id }}" {{ $orderDetails->merchant_id == $m->id ? 'selected':'' }}>
-                                    {{ $m->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <div class="section-title" style="margin-bottom: 9px !important;">Color & Quantity</div>
 
 
-                    <!-- Style -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Style *</label>
-                        <input type="text" class="form-control updateHead" name="style_no"
-                               value="{{ $orderDetails->style_no }}"
-                               placeholder="Style"
-                               data-name="style_no" required
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
-                               required>
-                    </div>
+                        <div id="colorQtyArea">
+                                    <div class="color-row d-flex align-items-center" style="margin-bottom: 12px !important;">
 
-                    <!-- 3. Order PO No -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Order PO No *</label>
-                        <input type="text" class="form-control updateHead" name="order_no"
-                            value="{{ $orderDetails->order_no }}"
-                            placeholder="Order PO No"
-                            data-name="order_no" required
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                                        <input type="text" value="Composition*" class="form-control mr-2 p-0" style="height: 20px; border:none; color:#2a2a2a">
+                                        <input type="text" value="Color Name*" class="form-control mr-2 p-0" style="height: 20px; border:none; color:#2a2a2a">
+                                        <input type="text" value="Color Qty*" class="form-control mr-2 p-0" style="height: 20px; border:none; color:#2a2a2a">
+                                    </div>
+                                @if($orderDetails->items && $orderDetails->items->count())
+                                    @foreach($orderDetails->items as $item)
+                                        <div class="color-row mb-2 d-flex align-items-center">
 
-                    <!-- 4. Order Qty -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Order Qty *</label>
-                        <input type="number" class="form-control updateHead" name="total_qty"
-                            value="{{ $orderDetails->total_qty }}"
-                            data-name="total_qty" required
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                                            <select name="compositions[{{$item->id}}]" class="form-control mr-2 updateItem color-composition"
+                                                    data-name="composition"
+                                                    data-url="{{ route('admin.orderDetailsAction',['update-item',$item->id]) }}">
+                                                <option value="">-- Select Composition --</option>
+                                                @foreach($compositions as $comp)
+                                                    <option value="{{ $comp }}"
+                                                        {{ $item->composition ? ($item->composition == $comp ? 'selected' : '') : ($orderDetails->composition == $comp ? 'selected' : '') }}>
+                                                        {{ $comp }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
 
-                    <!-- 5. Color Name -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Color Name *</label>
-                        <input type="text" class="form-control updateHead" name="color_name"
-                            value="{{ $orderDetails->color_name }}"
-                            placeholder="Color Name"
-                            data-name="color_name" required
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
 
-                    <!-- 7. Shipment Date -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Shipment Date *</label>
-                        <input type="date" class="form-control updateHead" name="shipment_date"
-                            value="{{ $orderDetails->shipment_date?Carbon\Carbon::parse($orderDetails->shipment_date)->format('Y-m-d'):'' }}"
-                            data-name="shipment_date" required
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                                            <input type="text" name="colors[{{$item->id}}]" class="form-control mr-2 updateItem" data-name="color_name" data-url="{{route('admin.orderDetailsAction',['update-item',$item->id]) }}"
+                                                value="{{ $item->color_name }}" placeholder="Color" required>
 
-                    <!-- 8. Composition -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Composition *</label>
-                        <input type="text" class="form-control updateHead" name="composition"
-                            value="{{ $orderDetails->composition }}" required
-                            data-name="composition" placeholder="Composition "
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                                            <input type="number" name="qtys[{{$item->id}}]" class="form-control mr-2 updateItem" data-name="qty" data-url="{{ route('admin.orderDetailsAction',['update-item',$item->id]) }}"
+                                                value="{{ $item->qty }}" placeholder="Qty" required>
 
-                    <!-- 9. Fabrication -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Fabrication *</label>
-                        <input type="text" class="form-control updateHead" name="fabrication"
-                            value="{{ $orderDetails->fabrication }}" required
-                            data-name="fabrication" placeholder="Fabrication"
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                                            <button type="button" class="btn-custom danger removeRow" data-url="{{ route('admin.orderDetailsAction',['remove-item',$item->id]) }}">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                @else
 
-                    <!-- 🔟 GSM -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">GSM *</label>
-                        <input type="text" class="form-control updateHead" name="gsm"
-                            value="{{ $orderDetails->gsm }}"
-                            placeholder="GSM" required
-                            data-name="gsm"
-                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
+                                @endif
 
-                    <!-- 11. Remarks -->
-                    <div class="col-md-8 mb-3">
-                        <label class="font-weight-semibold">Remarks</label>
-                        <textarea class="form-control updateHead" name="remarks" rows="1"
-                                data-name="remarks"placeholder="Remarks"
-                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">{{ $orderDetails->remarks }}</textarea>
-                    </div>
+                        </div>
 
-                    <!-- 12. Status -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Status *</label>
-                        <select class="form-control updateHead" name="status"
-                                data-name="status" required
-                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                            <option value="pending" {{ $orderDetails->status=='pending'?'selected':'' }}>Pending</option>
-                            <option value="confirmed" {{ $orderDetails->status=='confirmed'?'selected':'' }}>Confirmed</option>
-                            <option value="completed" {{ $orderDetails->status=='completed'?'selected':'' }}>Completed</option>
-                            <option value="cancelled" {{ $orderDetails->status=='cancelled'?'selected':'' }}>Cancelled</option>
-                        </select>
+                        <div class="w-100 text-right">
+                            <a type="button" id="addColorRow" class="btn-custom btn-sm" data-url="{{ route('admin.orderDetailsAction',['add-item',$orderDetails->id]) }}">
+                                <i class="bx bx-plus"></i>
+                            </a>
+                        </div>
+
                     </div>
 
                 </div>
 
-                <br>
-                <button type="submit" class="btn btn-success">
-                    <i class="bx bx-check"></i> Update Order Details
-                </button>
+
+
             </form>
 
-
-
-
         </div>
     </div>
 
-    <!-- Add Buyer Modal -->
-    <div class="modal fade text-left" id="AddBuyer" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form id="addBuyerForm" action="{{route('admin.buyersAction','create')}}" method="post">
-                    @csrf
-                    <div class="modal-header">
-                        <h4 class="modal-title">Add Buyer</h4>
-                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Buyer Name *</label>
-                            <input type="text" class="form-control" name="name" placeholder="Enter Buyer Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Company Name</label>
-                            <input type="text" class="form-control" name="company_name" placeholder="Enter Company Name">
-                        </div>
-                        <div class="form-group">
-                            <label>Email *</label>
-                            <input type="email" class="form-control" name="email" placeholder="Enter Email" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Mobile</label>
-                            <input type="text" class="form-control" name="mobile" placeholder="Enter Mobile">
-                        </div>
-                        <div class="form-group">
-                            <label>Country</label>
-                            <select name="country" class="form-control">
-                                <option value="">-- Select Country --</option>
-                                @foreach (geoData(1) as $c)
-                                    <option value="{{ $c->name }}">{{ $c->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Address Line</label>
-                            <input type="text" class="form-control" name="address" placeholder="Enter Address">
-                            <input type="hidden" class="form-control" name="api" value="1" placeholder="Enter Address">
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Buyer</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Buyer Modal -->
+     @include(adminTheme().'merchandising.orderDetails.add-buyer')
 
 </div>
 @endsection
 
+
 @push('js')
 <script>
 
-    // Open modal when + icon is clicked
-    $('#openAddBuyer').on('click', function () {
-        $('#AddBuyer').modal('show');
-    });
+// ADD COLOR ROW
+// $("#addColorRow").click(function () {
+//     let url = $(this).data('url');
+//     $.get(url, function(res){
+//         if(res.success){
+//             let removeUrl = `/admin/order-details/remove-item/${res.id}`;
+//             let updateUrl = `/admin/order-details/update-item/${res.id}`;
+//             let row = `
+//                 <div class="color-row mb-2 d-flex align-items-center">
+//                     <input type="text" name="colors[${res.id}]" class="form-control mr-2 updateItem" placeholder="Color" data-name="color_name" data-url="${updateUrl}">
+//                     <input type="number" name="qtys[${res.id}]" class="form-control mr-2 updateItem" placeholder="Qty"  data-name="qty" data-url="${updateUrl}">
+//                     <button type="button" class="btn-custom danger removeRow" data-url="${removeUrl}">
+//                         <i class="bx bx-trash"></i>
+//                     </button>
+//                 </div>
+//             `;
+//             $("#colorQtyArea").append(row);
+//         }
+//     });
+// });
 
-    // Submit Add Buyer form via AJAX
-    $('#addBuyerForm').on('submit', function(e) {
-        e.preventDefault();
-        let form = $(this);
-        $.ajax({
-            url: form.attr('action'),
-            type: form.attr('method'),
-            data: form.serialize(),
-            success: function(response) {
-                if(response.id && response.name) {
-                    let newOption = new Option(response.name, response.id, true, true);
-                    $('#buyerSelect').append(newOption).trigger('change');
-                    $('#AddBuyer').modal('hide');
-                    form[0].reset();
-                } else {
-                    console.log('111111');
-                }
-            },
-            error: function() {
-                console.log('22222');
-            }
-        });
-    });
 
-    $(document).on('change','.updateHead', function(){
-        let url = $(this).data('url');
-        let name = $(this).data('name');
-        let value = $(this).val();
-        $.get(url, {field: name, value: value}, function(res){
-            if(res.success){
-            }else{
-                    alert(res.message)
-                if(res.field){
-                    $('input[name="'+res.field+'"]').val('');
-                }
-            }
-        });
+$("#addColorRow").click(function () {
+    let url = $(this).data('url');
+    let mainComposition = "{{ $orderDetails->composition }}"; // main order composition
+    $.get(url, function(res){
+        if(res.success){
+            let removeUrl = `/admin/order-details/remove-item/${res.id}`;
+            let updateUrl = `/admin/order-details/update-item/${res.id}`;
+            let compOptions = `
+                <option value="">-- Select Composition --</option>
+                @foreach($compositions as $comp)
+                    <option value="{{ $comp }}" ${mainComposition == "{{ $comp }}" ? 'selected' : ''}>{{ $comp }}</option>
+                @endforeach
+            `;
+            let row = `
+                <div class="color-row mb-2 d-flex align-items-center">
+                    <select name="compositions[${res.id}]" class="form-control mr-2 updateItem color-composition" data-name="composition" data-url="${updateUrl}">
+                        ${compOptions}
+                    </select>
+                    <input type="text" name="colors[${res.id}]" class="form-control mr-2 updateItem" placeholder="Color" data-name="color_name" data-url="${updateUrl}" required>
+                    <input type="number" name="qtys[${res.id}]" class="form-control mr-2 updateItem" placeholder="Qty" data-name="qty" data-url="${updateUrl}" required>
+                    <button type="button" class="btn-custom danger removeRow" data-url="${removeUrl}">
+                        <i class="bx bx-trash"></i>
+                    </button>
+                </div>
+            `;
+            $("#colorQtyArea").append(row);
+        }
     });
+});
+
+
+// REMOVE ROW
+$(document).on('click', '.removeRow', function () {
+    let button = $(this); // store reference
+    let url = button.data('url');
+    $.get(url, function(res){
+        if(res.success){
+            button.closest('.color-row').remove();
+        }
+    });
+});
+
+
+// Update header fields via AJAX
+$(document).on('change','.updateHead', function(){
+    let url = $(this).data('url');
+    $.get(url, {
+        field: $(this).data('name'),
+        value: $(this).val()
+    });
+});
+
+// $(document).on('change','.updateItem', function(){
+//     let url = $(this).data('url');
+//     console.log(url);
+
+//     $.get(url, {
+//         field: $(this).data('name'),
+//         value: $(this).val()
+//     });
+// });
+
+
+$(document).on('change','.updateItem', function(){
+    let url = $(this).data('url');
+    $.get(url, {
+        field: $(this).data('name'),
+        value: $(this).val()
+    });
+});
+
+// Open Add Buyer Modal
+$('#openAddBuyer').click(function(){
+    $('#AddBuyer').modal('show');
+});
+
+// Submit Add Buyer form via AJAX
+$('#addBuyerForm').on('submit', function(e) {
+    e.preventDefault();
+    let form = $(this);
+    $.ajax({
+        url: form.attr('action'),
+        type: form.attr('method'),
+        data: form.serialize(),
+        success: function(response) {
+            if(response.id && response.name) {
+                let newOption = new Option(response.name, response.id, true, true);
+                $('#buyerSelect').append(newOption).trigger('change');
+                $('#AddBuyer').modal('hide');
+                form[0].reset();
+            } else {
+                console.log('111111');
+            }
+        },
+        error: function() {
+            console.log('22222');
+        }
+    });
+});
+
+// When main composition changes
+$('select[name="composition"]').on('change', function(){
+    let mainComp = $(this).val();
+
+    // Update all color row compositions
+    $('.color-composition').each(function(){
+        $(this).val(mainComp).trigger('change'); // updates value & triggers AJAX
+    });
+});
+
 
 </script>
 @endpush
