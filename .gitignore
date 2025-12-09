@@ -27,6 +27,5 @@ bootstrap/cache/*.php
 /storage/framework/views/*
 /storage/framework/sessions/*
 /storage/framework/cache/*
-*.php
 
 
