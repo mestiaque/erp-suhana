@@ -4443,6 +4443,7 @@ class AdminController extends Controller
                             }
 
                         })
+                        ->orderBy('id', 'desc')
                         ->paginate(10);
         $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name'])->get();
         $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->select(['id','name'])->get();
@@ -4451,71 +4452,82 @@ class AdminController extends Controller
 
     public function depositsAction(Request $r,$action,$id=null){
         //Add Service  Start
-        if($action=='create'){
+        if($action == 'create') {
 
             $check = $r->validate([
                 'account' => 'required|numeric',
-                // 'payment' => 'required|numeric',
                 'amount' => 'required|numeric',
                 'received_method' => 'nullable|max:100',
                 'received_from' => 'nullable|max:100',
                 'created_at' => 'nullable|date',
-                'attachment' => 'nullable||file|max:25600',
+                'attachment' => 'nullable|file|max:25600',
             ]);
 
-            $account =Attribute::where('type',10)->where('status','active')->find($r->account);
-            if(!$account){
-                Session()->flash('error','Account method Are Not found');
+            $account = Attribute::where('type', 10)->where('status', 'active')->find($r->account);
+            if (!$account) {
+                Session()->flash('error','Account method not found');
                 return redirect()->back();
             }
 
-            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
+            $createDate = $r->created_at
+                ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s'))
+                : Carbon::now();
 
-            $deposit =new Transaction();
-            $deposit->type=1;
-            // $deposit->src_id=$r->payment;
-            $deposit->payment_method=$r->received_method;
-            $deposit->billing_name=$r->received_from;
-            $deposit->account_id=$account->id;
-            $deposit->payment_method_id=$r->payment;
-            $deposit->amount=$r->amount;
-            $deposit->billing_note=$r->description;
-            $deposit->billing_reason=$r->bank_name;
-            $deposit->status ='success';
-            $deposit->addedby_id =Auth::id();
+            $deposit = new Transaction();
+            $deposit->type = 1;
+            $deposit->payment_method = $r->received_method;
+            $deposit->billing_name = $r->received_from;
+            $deposit->account_id = $account->id;
+            $deposit->payment_method_id = $r->payment;
+            $deposit->amount = $r->amount;
+            $deposit->billing_note = $r->description;
+            $deposit->billing_reason = $r->bank_name;
+            $deposit->status = 'pending'; // <-- status pending on creation
+            $deposit->addedby_id = Auth::id();
             $deposit->created_at = $createDate;
             $deposit->save();
 
-            $account->amount +=$deposit->amount;
-            $account->save();
-
-            $deposit->balance =$account->amount;
-            $deposit->transection_id =$deposit->created_at->format('ymd').$deposit->id;
+            $deposit->balance = 0; // account not updated yet
+            $deposit->transection_id = $deposit->created_at->format('ymd') . $deposit->id;
             $deposit->save();
 
-
-
-            ///////Image Upload End////////////
-            if($r->hasFile('attachment')){
-              $file =$r->attachment;
-              $src  =$deposit->id;
-              $srcType  =9;
-              $fileUse  =1;
-              uploadFile($file,$src,$srcType,$fileUse);
+            // Image upload
+            if ($r->hasFile('attachment')) {
+                $file = $r->attachment;
+                $src = $deposit->id;
+                $srcType = 9;
+                $fileUse = 1;
+                uploadFile($file, $src, $srcType, $fileUse);
             }
-            ///////Image Upload End////////////
 
-            Session()->flash('success','Your Are Successfully Added');
+            Session()->flash('success','Deposit successfully created and pending approval');
             return redirect()->back();
-
         }
-        //Add Service  End
 
-        $deposit =Transaction::where('type',1)->find($id);
-        if(!$deposit){
-            Session()->flash('error','This Deposit Are Not Found');
+        // Approve deposit
+        $deposit = Transaction::where('type', 1)->find($id);
+        if (!$deposit) {
+            Session()->flash('error','This deposit not found');
             return redirect()->route('admin.deposits');
         }
+
+        if ($action == 'approve') {
+            $deposit->status = 'success';
+            $deposit->save();
+
+            $account = Attribute::find($deposit->account_id);
+            if ($account) {
+                $account->amount += $deposit->amount; // Add amount to account
+                $account->save();
+
+                $deposit->balance = $account->amount;
+                $deposit->save();
+            }
+
+            Session()->flash('success','Deposit approved and account updated successfully');
+            return redirect()->back();
+        }
+
 
 
         if($action=='update'){
@@ -5256,8 +5268,6 @@ class AdminController extends Controller
         return redirect()->route('admin.accounts');
       }
       // Delete Department Action End
-
-
 
       $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
 
@@ -10556,7 +10566,7 @@ class AdminController extends Controller
 
       //Filter Action End
 
-      $users =User::latest()->whereIn('status',[0,1])->where('buyer', false)->where('merchandiser', false)    
+      $users =User::latest()->whereIn('status',[0,1])->where('buyer', false)->where('merchandiser', false)
 
       ->where(function($q) use($r) {
 

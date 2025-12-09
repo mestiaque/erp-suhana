@@ -31,11 +31,15 @@
         <div class="card-body">
             @include(adminTheme().'alerts')
 
+
+
+
+
             <form action="{{ route('admin.orderDetailsAction', ['update', $orderDetails->id]) }}" method="POST">
                 @csrf
                 <div class="row">
 
-                    <!-- Buyer -->
+                    <!-- 1. Buyer Name -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Buyer *</label>
                         <div class="input-group">
@@ -58,11 +62,21 @@
                         </div>
                     </div>
 
-                    <!-- Merchandiser -->
+                    <!-- 2. Brand / Customer -->
+                    <div class="col-md-4 mb-3">
+                        <label class="font-weight-semibold">Brand / Customer *</label>
+                        <input type="text" class="form-control updateHead" name="company_name"
+                            value="{{ $orderDetails->company_name }}"
+                            placeholder="Brand / Customer"
+                            data-name="company_name" required
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                    </div>
+
+                    <!-- Merchandiser (Extra Field but kept) -->
                     <div class="col-md-4 mb-3">
                         <label class="font-weight-semibold">Merchandiser *</label>
                         <select name="merchant" class="form-control updateHead"
-                                data-name="merchant"
+                                data-name="merchant" required
                                 data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
                                 required>
                             <option value="">-- Select Merchandiser --</option>
@@ -73,14 +87,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <!-- Company Name -->
-                    <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Brand/Company Name</label>
-                        <input type="text" class="form-control updateHead" name="company_name" placeholder="Company Name"
-                               value="{{ $orderDetails->company_name }}"
-                               data-name="company_name"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
 
 
                     <!-- Style -->
@@ -89,110 +95,109 @@
                         <input type="text" class="form-control updateHead" name="style_no"
                                value="{{ $orderDetails->style_no }}"
                                placeholder="Style"
-                               data-name="style_no"
+                               data-name="style_no" required
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
                                required>
                     </div>
+
+                    <!-- 3. Order PO No -->
                     <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Color Name</label>
-                        <input type="text" class="form-control updateHead" name="color_name" placeholder="Color Name"
-                               value="{{ $orderDetails->color_name }}"
-                               data-name="color_name"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                        <label class="font-weight-semibold">Order PO No *</label>
+                        <input type="text" class="form-control updateHead" name="order_no"
+                            value="{{ $orderDetails->order_no }}"
+                            placeholder="Order PO No"
+                            data-name="order_no" required
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
-                        <!-- Total Quantity -->
+                    <!-- 4. Order Qty -->
                     <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Total Qty</label>
+                        <label class="font-weight-semibold">Order Qty *</label>
                         <input type="number" class="form-control updateHead" name="total_qty"
-                               value="{{ $orderDetails->total_qty }}"
-                               data-name="total_qty"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            value="{{ $orderDetails->total_qty }}"
+                            data-name="total_qty" required
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
-                            <!-- Order No -->
+                    <!-- 5. Color Name -->
                     <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Order No</label>
-                        <input type="text" class="form-control updateHead" name="order_no" placeholder="Order Number"
-                               value="{{ $orderDetails->order_no }}"
-                               data-name="order_no"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                        <label class="font-weight-semibold">Color Name *</label>
+                        <input type="text" class="form-control updateHead" name="color_name"
+                            value="{{ $orderDetails->color_name }}"
+                            placeholder="Color Name"
+                            data-name="color_name" required
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
-                    <!-- Invoice No -->
-                    <!-- <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Invoice No</label>
-                        <input type="text" class="form-control updateHead" name="invoice_no" placeholder="Invoice  Number"
-                               value="{{ $orderDetails->invoice_no }}"
-                               data-name="invoice_no"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div> -->
-
-                    
-                     
-
-                    <!-- Fabrication -->
+                    <!-- 7. Shipment Date -->
                     <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Fabrication</label>
-                        <input type="text" class="form-control updateHead" name="fabrication" placeholder="Fabrication"
-                               value="{{ $orderDetails->fabrication }}"
-                               data-name="fabrication"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
-
-                    <!-- Composition -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Composition</label>
-                        <input type="text" class="form-control updateHead" name="composition" placeholder="Composition"
-                               value="{{ $orderDetails->composition }}"
-                               data-name="composition"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
-
-                    <!-- GSM -->
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">GSM</label>
-                        <input type="text" class="form-control updateHead" name="gsm" placeholder="GSM"
-                               value="{{ $orderDetails->gsm }}"
-                               data-name="gsm"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="font-weight-semibold">Shipment Date</label>
+                        <label class="font-weight-semibold">Shipment Date *</label>
                         <input type="date" class="form-control updateHead" name="shipment_date"
-                               value="{{ $orderDetails->shipment_date?Carbon\Carbon::parse($orderDetails->shipment_date)->format('Y-m-d'):'' }}"
-                               data-name="shipment_date"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                            value="{{ $orderDetails->shipment_date?Carbon\Carbon::parse($orderDetails->shipment_date)->format('Y-m-d'):'' }}"
+                            data-name="shipment_date" required
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                     </div>
 
-                        <!-- Total Bill -->
-                    
+                    <!-- 8. Composition -->
+                    <div class="col-md-3 mb-3">
+                        <label class="font-weight-semibold">Composition *</label>
+                        <input type="text" class="form-control updateHead" name="composition"
+                            value="{{ $orderDetails->composition }}" required
+                            data-name="composition" placeholder="Composition "
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                    </div>
 
-                            <!-- Remarks -->
+                    <!-- 9. Fabrication -->
+                    <div class="col-md-3 mb-3">
+                        <label class="font-weight-semibold">Fabrication *</label>
+                        <input type="text" class="form-control updateHead" name="fabrication"
+                            value="{{ $orderDetails->fabrication }}" required
+                            data-name="fabrication" placeholder="Fabrication"
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                    </div>
+
+                    <!-- 🔟 GSM -->
+                    <div class="col-md-3 mb-3">
+                        <label class="font-weight-semibold">GSM *</label>
+                        <input type="text" class="form-control updateHead" name="gsm"
+                            value="{{ $orderDetails->gsm }}"
+                            placeholder="GSM" required
+                            data-name="gsm"
+                            data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
+                    </div>
+
+                    <!-- 11. Remarks -->
                     <div class="col-md-8 mb-3">
                         <label class="font-weight-semibold">Remarks</label>
-                        <textarea class="form-control updateHead" name="remarks" rows="1" placeholder="Remarks"
-                                  data-name="remarks"
-                                  data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">{{ $orderDetails->remarks }}</textarea>
+                        <textarea class="form-control updateHead" name="remarks" rows="1"
+                                data-name="remarks"placeholder="Remarks"
+                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">{{ $orderDetails->remarks }}</textarea>
                     </div>
 
-                    <!-- Status -->
+                    <!-- 12. Status -->
                     <div class="col-md-4 mb-3">
-                        <label class="font-weight-semibold">Status</label>
+                        <label class="font-weight-semibold">Status *</label>
                         <select class="form-control updateHead" name="status"
-                                data-name="status"
+                                data-name="status" required
                                 data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
                             <option value="pending" {{ $orderDetails->status=='pending'?'selected':'' }}>Pending</option>
                             <option value="confirmed" {{ $orderDetails->status=='confirmed'?'selected':'' }}>Confirmed</option>
                             <option value="completed" {{ $orderDetails->status=='completed'?'selected':'' }}>Completed</option>
-                            <option value="cancelled" {{ $orderDetails->status=='cancelled'?'selected':'' }}>Cancel</option>
+                            <option value="cancelled" {{ $orderDetails->status=='cancelled'?'selected':'' }}>Cancelled</option>
                         </select>
                     </div>
 
                 </div>
+
                 <br>
-                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Order Details</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="bx bx-check"></i> Update Order Details
+                </button>
             </form>
+
+
+
+
         </div>
     </div>
 

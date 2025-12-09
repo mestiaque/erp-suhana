@@ -11,11 +11,13 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\SampleItem;
-use App\Models\ProductionPlanning;
-use App\Models\ProductionSewing;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
+use App\Models\OrderDetails;
+use App\Models\SewingOutput;
 use Illuminate\Http\Request;
+use App\Models\ProductionSewing;
+use App\Models\ProductionPlanning;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -80,7 +82,7 @@ class ProductionController extends Controller
                 $plan =new ProductionPlanning();
                 $plan->status='temp';
                 $plan->addedby_id=Auth::id();
-                
+
             }
             $plan->created_at=Carbon::now();
             $plan->save();
@@ -128,7 +130,7 @@ class ProductionController extends Controller
             $plan->extra_time    = $r->extra_time?:0;
             $plan->sewing_end    = $r->sewing_end;
             $plan->working_hours = 10;
-            $plan->status = 'pending';
+            $plan->status = 'confirmed';
             $plan->save();
 
             $newFloors = $r->floor ?? [];
@@ -163,7 +165,7 @@ class ProductionController extends Controller
             }
 
             $plan->total_hourly_capacity = $plan->sewingLines()->sum('capacity_hour');
-            
+
             $totalMinutes = $this->calculateWorkingMinutes($plan->sewing_start, $plan->sewing_end);
             // add lose time
             $totalMinutes += intval($plan->extra_time);
@@ -177,8 +179,18 @@ class ProductionController extends Controller
         }
 
         // return $plan->sewingLines;
+        $productionStyleNos = ProductionPlanning::pluck('style_no')
+            ->filter() // removes null values
+            ->map(fn($val) => trim($val)) // removes extra spaces
+            ->toArray();
 
-        return view(adminTheme().'productions.planning.edit', compact('plan'));
+        $styles = OrderDetails::where('status', 'confirmed')
+            ->whereNotIn('style_no', $productionStyleNos)
+            ->orderBy('id', 'desc')
+            ->get();
+
+
+        return view(adminTheme().'productions.planning.edit', compact('plan', 'styles'));
     }
 
     function calculateWorkingMinutes($start, $end){
@@ -222,48 +234,130 @@ class ProductionController extends Controller
 
     public function production(Request $r)
     {
-        $styles =SampleItem::whereHas('sample',function($q){
-                        $q->latest()->where('pi_status','pending');            
+        $orders =ProductionPlanning::latest()
+                    ->whereNotIN('status',['temp', 'pending'])
+                    ->where(function($q) use ($r) {
+
+                        // SEARCH
+                        if ($r->search) {
+                            $search = $r->search;
+                            $q->where(function($qq) use ($search) {
+                                $qq->where('style_no', 'LIKE', "%{$search}%")
+                                ->orWhereHas('style',function($qqq) use ($search) {
+                                    $qqq->orWhere('buyer_name', 'LIKE', "%{$search}%")
+                                    ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                                });
+                            });
+                        }
+
+                        // DATE RANGE
+                        if ($r->startDate || $r->endDate) {
+                            $from = $r->startDate ?: now()->format('Y-m-d');
+                            $to   = $r->endDate ?: now()->format('Y-m-d');
+
+                            $q->whereDate('created_at', '>=', $from)
+                            ->whereDate('created_at', '<=', $to);
+                        }
+
+                        // STATUS
+                        if ($r->status) {
+                            $q->where('pi_status', $r->status);
+                        }
                     })
-                    ->get();
-        return view(adminTheme().'productions.productionList',compact('styles'));
+                    ->paginate(25)
+                    ->appends($r->all());
+
+        $totals = ProductionPlanning::whereNotIn('status', ['trash', 'temp'])
+            ->selectRaw("COUNT(*) AS total")
+            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
+            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
+            ->selectRaw("COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved")
+            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
+            ->first();
+
+        // return view(adminTheme().'productions.planning.index',compact('orders','totals'));
+        return view(adminTheme().'productions.productionList',compact('orders','totals'));
     }
-    
+
     public function dailyProduction(Request $r)
     {
+        $search = $r->search;
+        $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+            ->when($search, function ($q) use ($search) {
+                $q->where('floor_name', 'LIKE', "%{$search}%")
+                ->orWhere('line_name', 'LIKE', "%{$search}%")
+                ->orWhereHas('planning', function ($q) use ($search) {
+                    $q->where('style_no', 'LIKE', "%{$search}%");
+                })
+                ->orWhereHas('planning.style', function ($q) use ($search) {
+                    $q->where('order_no', 'LIKE', "%{$search}%")
+                        ->orWhere('buyer_name', 'LIKE', "%{$search}%");
+                });
+            })
+            ->when($r->startDate || $r->endDate, function ($q) use ($r) {
+                $from = $r->startDate ?: now()->format('Y-m-d');
+                $to   = $r->endDate ?: now()->format('Y-m-d');
 
-
-        
-        return view(adminTheme().'productions.daily.index');
+                // Apply date filter on outputs
+                $q->whereHas('outputs', function ($q) use ($from, $to) {
+                    $q->whereDate('created_at', '>=', $from)
+                    ->whereDate('created_at', '<=', $to);
+                });
+            })
+            ->whereHas('planning', function ($q) {
+                $q->where('status', 'confirmed');
+            })
+            ->get();
+        return view(adminTheme().'productions.daily.index', compact('swings'));
     }
+
+
+    public function dailyProductionAction(Request $r, $action)
+    {
+        if ($action == "update") {
+            $swing = ProductionSewing::findOrFail($r->plan_id);
+            SewingOutput::updateOrCreate(
+                [
+                    "planning_id"   => $swing->planning->id,
+                    "sewing_id"     => $swing->id,
+                    'floor_name'    => $swing->floor_name,
+                    'line_name'     => $swing->line_name,
+                    'style_no'      => $swing->style_no,
+                    'capacity_hour' => $swing->capacity_hour,
+                    'addedby_id'    => auth()->id(),
+                    'sewing_id'     => $r->plan_id,
+                    'date'          => $r->date,
+                    'hour'          => $r->hour,
+                ],
+                [
+                    'production' => $r->value,
+                    'editedby_id' => auth()->id(),
+                ]
+            );
+
+            return response()->json(['success' => true]);
+        }
+
+        $swings = ProductionSewing::with('planning')->with('outputs')->get();
+
+        return view(adminTheme().'productions.daily.index', compact('swings'));
+    }
+
 
     public function yarnBooking(Request $r)
     {
-
-
-        
         return view(adminTheme().'productions.yarn-booking.index');
     }
 
     public function knittingBooking(Request $r)
     {
-
-
-        
         return view(adminTheme().'productions.knitting-booking.index');
     }
 
     public function dyingBooking(Request $r)
     {
-
-
         return view(adminTheme().'productions.dying-booking.index');
     }
 
-    
-    
-
-
-
-
 }
+

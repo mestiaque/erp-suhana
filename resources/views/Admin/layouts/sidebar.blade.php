@@ -72,20 +72,54 @@
                      *  - CHILD/GRANDCHILD → permission না থাকলে show হবে না যদি কোনো visible child না থাকে
                      */
 
+                    // if ($permission !== '') {
+                    //     $show = hasChildPermission($permission) || $hasVisibleChild;
+                    // } else {
+                    //     if ($level == 0) {
+                    //         // (PARENT) → শুধুমাত্র show হবে যদি child visible থাকে
+                    //         $show = $hasVisibleChild;
+                    //     } elseif ($level == 1) {
+                    //         // (CHILD) → permission='' হলে দেখাবে শুধুমাত্র যখন তার কোন visible child আছে
+                    //         $show = $hasVisibleChild;
+                    //     } else {
+                    //         // (GRANDCHILD / level>=2) → permission='' হলেও show হবে (NEW RULE)
+                    //         $show = true;
+                    //     }
+                    // }
+
                     if ($permission !== '') {
-                        $show = hasChildPermission($permission) || $hasVisibleChild;
+
+                        // If permission IS defined → MUST CHECK PERMISSION
+                        $show = hasChildPermission($permission);
+
                     } else {
+
+                        // NO PERMISSION SET
                         if ($level == 0) {
-                            // (PARENT) → শুধুমাত্র show হবে যদি child visible থাকে
-                            $show = $hasVisibleChild;
+
+                            // PARENT LEVEL
+
+                            if (isset($menu['children'])) {
+                                // Parent WITH children → show only if any child is visible
+                                $show = $hasVisibleChild;
+                            } else {
+                                // Single parent menu → always show
+                                $show = true;
+                            }
+
                         } elseif ($level == 1) {
-                            // (CHILD) → permission='' হলে দেখাবে শুধুমাত্র যখন তার কোন visible child আছে
+
+                            // CHILD LEVEL (must have children to show)
                             $show = $hasVisibleChild;
+
                         } else {
-                            // (GRANDCHILD / level>=2) → permission='' হলেও show হবে (NEW RULE)
+
+                            // GRANDCHILD (level >= 2) always show if no permission
                             $show = true;
                         }
                     }
+
+
 
 
 

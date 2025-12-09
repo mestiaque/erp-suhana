@@ -112,7 +112,7 @@
                             <p>
                                 {{general()->address_one}}
                                 <br>
-                                <b>Mobile:</b> {{general()->mobile}} <b>Email:</b> {{general()->email}} 
+                                <b>Mobile:</b> {{general()->mobile}} <b>Email:</b> {{general()->email}}
                             </p>
                             <h4 style="margin:0;font-family: itially;font-style: italic;text-decoration: underline;">Proforma Invoice</h4>
                         </div>
@@ -160,7 +160,7 @@
                                         <tr>
                                             <td style="min-width:175px;width: 175px;">Proforma Invoice No</td>
                                             <td style="width: 30px;text-align: center;">:</td>
-                                            <td style="min-width:200px;">{{$pi->order?->company_name}}</td>
+                                            <td style="min-width:200px;">{{$pi->pi_no ?? ''}}</td>
                                         </tr>
                                         <tr>
                                             <td>Proforma Invoice Date</td>
@@ -183,8 +183,7 @@
                                     Advising Bank
                                 </div>
                                 <p style="padding: 5px;margin: 0;font-weight: bold;">
-                                    Bank Detail: Uttara Bank PLC. Uttara Branch, Uttara Model Town, Dhaka, Bangladesh<br>
-                                    Account Name: ANR Fashion LTD. Account No: SWIFT: UTBLBDDH465
+                                    {{ $pi->advising_bank}}
                                 </p>
                             </div>
                         </div>
@@ -242,20 +241,13 @@
 
                     <div>
                         <h3> Payment Terms </h2>
-                        <ul>
-                            <li>
-                                Payment must be made through Bank Transfer / LC / TT / Cash (as applicable).
-                            </li>
-                            <li>
-                                Advance payment of ___% must be made at the time of confirming PI.
-                            </li>
-                            <li>
-                                Remaining balance must be settled before shipment or against agreed payment method.
-                            </li>
-                            <li>
-                                All bank charges inside buyer’s country shall be borne by buyer and outside buyer’s country by seller.
-                            </li>
-                        </ul>
+                        <div style=" padding: 1rem 2rem;">
+                            @if($pi->payment_terms)
+                            {!! $pi->payment_terms !!}
+                            @else
+                            <p class="m-0 w-100 text-center"><i>No terms found</i></p>
+                            @endif
+                        </div>
                     </div>
                 </div>
            </div>
