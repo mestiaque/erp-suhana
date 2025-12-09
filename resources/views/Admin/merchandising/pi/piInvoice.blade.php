@@ -7,7 +7,6 @@
 @section('contents')
 
 <div class="flex-grow-1">
-
     <!-- Breadcrumb -->
     <div class="breadcrumb-area">
         <h1>Proforma Invoice</h1>
@@ -38,10 +37,12 @@
                         max-width: 1400px;
                         margin: 0 auto;
                         background: white;
-                        padding: 40px 50px;
+                        padding: 5px 30px;
                         box-shadow: 0 0 10px rgba(0,0,0,0.1);
                         position: relative;
                         overflow: hidden;
+                        font-family: "Calibri", "Segoe UI", sans-serif;
+                        font-size: 12px;
                     }
                     .invoice-box {
                         background: white;
@@ -82,7 +83,7 @@
 
                     .invoice-table th {
                         background: #f6f6f6;
-                        font-size: 13px;
+                        /* font-size: 13px; */
                         color:black;
                     }
 
@@ -97,6 +98,19 @@
                         font-size: 15px;
                         font-weight: bold;
                     }
+                    .company-title{
+                        font-weight: bolder;
+                        color: blue;
+                        font-family: none;
+                        font-size: 3rem;
+                        display: flex;
+                        text-align: center;
+                        width: 100%;
+                        justify-content: center;
+                    }
+                    table th, td{
+                        padding: 2px !important;
+                    }
                     @media print {
                         .invoice-box {
                             box-shadow: none;
@@ -108,83 +122,62 @@
 
                     <div class="invoice-header">
                         <div style="text-align:center;">
-                            <h2>{{general()->title}}</h2>
-                            <p>
-                                {{general()->address_one}}
-                                <br>
-                                <b>Mobile:</b> {{general()->mobile}} <b>Email:</b> {{general()->email}}
+                            <h2 style="" class="company-title">
+                                <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 60px; margin-right: 1rem;">
+                                   {{general()->title}}
+                            </h2>
+                            <p style="color: coral;margin-top: -1.3rem;    margin-bottom: 5px;">(100%Export Oriented Garments Manufacturing Factory)</p>
+                            <p style="margin-top: -10px; margin-bottom:2px">
+                                {!!general()->address_one!!}
                             </p>
-                            <h4 style="margin:0;font-family: itially;font-style: italic;text-decoration: underline;">Proforma Invoice</h4>
+                            <p style="margin-top: -10px; margin-bottom:2px">
+                                <span style="color: #0000ff8c">
+                                    <b>Phone:</b> {{general()->mobile}}
+                                    <b>Email:</b> {{general()->email}}
+                                </span>
+                            </p>
+                            <hr style="border-bottom: 1px solid #2125298c;margin: 1px;">
+                            <h6 style="margin:2px;margin-top:5px;"><b>PROFORMA INVOICE</b> </h6>
                         </div>
                     </div>
-
                     <div>
-                        <div class="row" style="margin: 0;border: 1px solid gray;">
-                            <div class="col-6" style="padding:5px;">
-                                <table class="table tableInfo">
-                                        <tr>
-                                            <td style="min-width:160px;width: 160px;">Customer Name:</td>
-                                            <td style="width: 30px;text-align: center;">:</td>
-                                            <td style="min-width:200px;">{{$pi->order?->company_name}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Buyer</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td>{{ $pi->buyer?->name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Order No</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td>{{$pi->order_no}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Booking No</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Purchse Order No</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Name of Orderer</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td>{{ $pi->merchant?->name ?? '' }}</td>
-                                        </tr>
-                                </table>
+                        <div class="row" style="margin:0px">
+                            <div class="col-8" style="padding:0px;">
+                                Proforma Invoice no. {{ $pi->pi_no}}
+                                <div style="margin-top: 2rem;">
+                                    Beneficiary :
+                                    <br><b>{{general()->title}}</b>
+                                    <br>
+                                        @php
+                                            $words = preg_split('/\s+/', strip_tags(general()->address_one));
+                                            $chunks = array_chunk($words, 4);
+                                        @endphp
+
+                                        @foreach($chunks as $line)
+                                            {{ implode(' ', $line) }} <br>
+                                        @endforeach
+                                </div>
+                                <div  style="margin-top: 2rem;">
+                                    <b>Buyer : {{$pi->buyer->name}}</b>
+                                    <br>
+                                        @php
+                                            $words = preg_split('/\s+/', strip_tags($pi->buyer->address_line1));
+                                            $chunks = array_chunk($words, 4);
+                                        @endphp
+
+                                        @foreach($chunks as $line)
+                                            {{ implode(' ', $line) }} <br>
+                                        @endforeach
+                                </div>
                             </div>
-                            <div class="col-6" style="padding:0px;border-left:1px solid gray;">
+                            <div class="col-4" style="">
                                 <div class="padding:5px;">
-                                    <table class="table tableInfo">
-                                        <tr>
-                                            <td style="min-width:175px;width: 175px;">Proforma Invoice No</td>
-                                            <td style="width: 30px;text-align: center;">:</td>
-                                            <td style="min-width:200px;">{{$pi->pi_no ?? ''}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Proforma Invoice Date</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td>{{ $pi->created_at->format('Y-m-d')}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>BIN Number</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td>005225121-1021</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Job Number</td>
-                                            <td style="text-align: center;">:</td>
-                                            <td>FPL-02561255</td>
-                                        </tr>
-                                    </table>
+                                    Date : {{ $pi->created_at->format('d.m.Y') }}
+                                    <div  style="margin-top: 1.2rem;">
+                                        {!! nl2br(e($pi->advising_bank)) !!}
+                                    </div>
+
                                 </div>
-                                <div style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center;font-size: 16px;font-weight: bold;">
-                                    Advising Bank
-                                </div>
-                                <p style="padding: 5px;margin: 0;font-weight: bold;">
-                                    {{ $pi->advising_bank}}
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -192,63 +185,134 @@
                         <div class="table-responsive">
                             <table class="table table-bordered invoice-table">
                                 <thead>
-                                <tr>
-                                    <th>S/L</th>
-                                    <th>Style</th>
-                                    <th>Composition</th>
-                                    <th>Fabrication</th>
-                                    <th>GSM</th>
-                                    <th>Color</th>
-                                    <th>Qty</th>
-                                    <th>Unit Price</th>
-                                    <th>Total Price</th>
-                                    <th>Commission</th>
-                                </tr>
+                                    <tr>
+                                        <th>SL NO.</th>
+                                        <th>STYLE</th>
+                                        <th>Size Range</th>
+                                        <th>Item Description</th>
+                                        <th>Fabric / Composition</th>
+                                        <th>Quantity (Pc)</th>
+                                        <th>Unit Price</th>
+                                        <th>Total Amount</th>
+                                        <th>Shipment Date</th>
+                                        <th>Remarks</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
+
+                                @php
+                                    $prevShipmentDate = null;
+                                    $rowspanTracker = [];
+                                @endphp
+
                                 @forelse($pi->items as $i=>$item)
+
+                                    @php
+                                        // Format shipment date
+                                        $shipmentDate = $item->orderDetails->shipment_date
+                                            ? \Carbon\Carbon::parse($item->orderDetails->shipment_date)->format('d.m.Y')
+                                            : 'N/A';
+
+                                        // Count how many consecutive rows have same shipment date (for rowspan)
+                                        if(!isset($rowspanTracker[$shipmentDate])) {
+                                            $rowspanTracker[$shipmentDate] = $pi->items
+                                                ->slice($i) // remaining items
+                                                ->takeWhile(fn($it) =>
+                                                    $it->orderDetails->shipment_date
+                                                        ? \Carbon\Carbon::parse($it->orderDetails->shipment_date)->format('d.m.Y') == $shipmentDate
+                                                        : $shipmentDate == 'N/A'
+                                                )
+                                                ->count();
+                                        }
+
+                                        $rowspan = $rowspanTracker[$shipmentDate];
+                                    @endphp
+
                                     <tr>
-                                        <td>{{$i+1}}</td>
+                                        <td>{{ $i+1 }}</td>
                                         <td>{{ $item->style_no }}</td>
-                                        <td>{{ $item->composition }}</td>
-                                        <td>{{ $item->fabrication }}</td>
-                                        <td>{{ $item->gsm }}</td>
-                                        <td>{{ $item->color_name }}</td>
-                                        <td>{{ number_format($item->color_qty) }}</td>
-                                        <td>{{ number_format($item->unit_price,2) }}</td>
-                                        <td>{{ number_format($item->total_price,2) }}</td>
-                                        <td>{{ number_format($item->total_commission,2) }}</td>
+                                        <td>{{ $item->size ?? '' }}</td>
+                                        <td>{{ $item->description ?? '' }}</td>
+                                        <td>
+                                            {{ $item->fabrication }},
+                                            {{ $item->gsm }} gsm
+                                        </td>
+                                        <td>{{ number_format($item->order_qty) }}</td>
+                                        <td>{{ number_format($item->unit_price, 2) }}</td>
+                                        <td>{{ number_format($item->total_price, 2) }}</td>
+                                        @if($prevShipmentDate !== $shipmentDate)
+                                            <td rowspan="{{ $rowspan }}">{{ $shipmentDate }}</td>
+                                        @endif
+                                        <td>{{$pi->remarks}}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="12" class="text-center text-muted">No items found</td>
+                                        <td colspan="10" class="text-center text-muted">No items found</td>
                                     </tr>
                                 @endforelse
                                 </tbody>
 
-                                <tfoot>
-                                <tr>
-                                    <th colspan="6" class="text-right">Total</th>
-                                    <th>{{ number_format($pi->items->sum('color_qty')) }}</th>
-                                    <th></th>
-                                    <th>{{ number_format($pi->items->sum('total_price'),2) }}</th>
-                                    <th>{{ number_format($pi->items->sum('total_commission'),2) }}</th>
-                                </tr>
+                                <tfoot style="font-weight: 600;">
+                                    <tr>
+                                        <td colspan="5" class="text-center">Total</td>
+                                        <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
+                                        <td></td>
+                                        <td>{{ number_format($pi->items->sum('total_price'),2) }}</td>
+                                        <td colspan=""></td>
+                                        <td colspan=""></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="10" class="text-center">
+                                            <input type="hidden" name="total_amount_input" id="total_amount_input" value="{{ $pi->items->sum('total_price') }}">
+                                            In Words - Total Amount (Tk) : <span id="total_amount_word"></span>
+                                        </td>
+                                    </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
 
-                    <div>
-                        <h3> Payment Terms </h2>
-                        <div style=" padding: 1rem 2rem;">
-                            @if($pi->payment_terms)
-                            {!! $pi->payment_terms !!}
-                            @else
-                            <p class="m-0 w-100 text-center"><i>No terms found</i></p>
+                    <div class="row m-0 p-0">
+                        <div class="col-10 pl-0">
+                            @if($pi->terms)
+                                <div style="margin-top: 1rem">
+                                    <h6 style="font-size: 13px;">TERMS & CONDITIONS</h2>
+                                    <div style="">
+                                        @php
+                                            $terms = json_decode($pi->terms ?? '{}', true);
+                                        @endphp
+
+                                        <table>
+                                            @foreach ($terms as $key=>$term)
+                                            <tr>
+                                                <td style="vertical-align: top; width:20%">{{ $key }}</td>
+                                                <td style="vertical-align: top;text-align: center; width:2%">:</td>
+                                                <td style="vertical-align: top;  width:68%">{{ $term }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </table>
+                                    </div>
+                                </div>
                             @endif
                         </div>
+                        <div class="col-2 pl-5">
+                            BIN : 004569897-0103 <br>
+                            ERC : 260326211263822 <br>
+                            IRC : 260326120696022 <br>
+                            REX : BDREX03324
+                        </div>
                     </div>
+
+                    <div style="margin-top: 3.5rem">
+                        @if(general()->signature())
+                        <p style="margin-bottom: 5px">For  {{general()->title}}</p>
+                        @else
+                        <p style="margin-bottom: 5rem">For  {{general()->title}}</p>
+                        @endif
+                        <img src="{{asset(general()->signature())}}" alt="Sign" style="max-width: 12.5rem">
+                        <p>Authorized signature</p>
+                    </div>
+
                 </div>
            </div>
         </div>
@@ -258,3 +322,13 @@
 </div>
 
 @endsection
+
+@push('js')
+<script src="{{asset('admin/assets/js/inword.js')}}"></script>
+<script>
+    var amount = Number($('#total_amount_input').val());
+    var words = toWords(amount);
+    $('#total_amount_word').html(words + ' Taka Only');
+
+</script>
+@endpush

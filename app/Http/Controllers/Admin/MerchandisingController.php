@@ -978,6 +978,7 @@ class MerchandisingController extends Controller
                 // FIND PI
                 // -------------------------------
         $pi = ProformaInvoice::with('items')->find($id);
+
         if (!$pi) {
             session()->flash('error', 'Proforma Invoice Not Found');
             return redirect()->route('admin.proformaInvoice');
@@ -1025,8 +1026,8 @@ class MerchandisingController extends Controller
                 // -------------------------------
         if ($action == 'update') {
 
-                    /* ---------------------------
-                VALIDATION
+            /* ---------------------------
+            VALIDATION
             --------------------------- */
             $r->validate([
                 'order_no' => 'required|string',
@@ -1036,20 +1037,15 @@ class MerchandisingController extends Controller
                 'items'                    => 'required|array',
                 'items.*.unit_price'       => 'required|numeric|min:0',
                 'items.*.total_price'      => 'required|numeric|min:0',
-                'items.*.commission'       => 'nullable|numeric|min:0',
-                'items.*.total_commission' => 'required|numeric|min:0',
-                'items.*.color_qty'        => 'required|numeric|min:0',
-                'items.*.commission_type'  => 'required|string',
+                'items.*.order_qty'        => 'required|numeric|min:0',
             ],[
                 'order_no.required'                => 'Order number is required',
                 'items.*.unit_price.required'      => 'Unit price is required',
-                'items.*.color_qty.required'       => 'Color quantity is required',
-                'items.*.commission_type.required' => 'Commission type must be selected',
+                'items.*.order_qty.required'       => 'Color quantity is required',
             ]);
 
-
-                    /* ---------------------------
-                FETCH ORDER INFO
+            /* ---------------------------
+            FETCH ORDER INFO
             --------------------------- */
             $order = OrderDetail::firstWhere('order_no', $r->order_no);
 
@@ -1057,17 +1053,24 @@ class MerchandisingController extends Controller
                 return back()->with('error', 'Order not found for this Order No.');
             }
 
-
-                    /* ---------------------------
-                CALCULATE TOTALS
+            /* ---------------------------
+            CALCULATE TOTALS
             --------------------------- */
-            $total_qty        = collect($r->items)->sum('color_qty');
-            $total_bill       = collect($r->items)->sum('total_price');
-            $total_commission = collect($r->items)->sum('total_commission');
+            $total_qty  = collect($r->items)->sum('order_qty');
+            $total_bill = collect($r->items)->sum('total_price');
 
+            /* ---------------------------
+            FILTER CHECKED TERMS
+            --------------------------- */
+            $terms = $r->input('terms', []);
 
-                    /* ---------------------------
-                UPDATE MAIN PI
+            $checkedTerms = collect($terms)
+                ->filter(fn($term) => isset($term['checked']) && $term['checked'] === 'on')
+                ->mapWithKeys(fn($term) => [$term['key'] => $term['value']])
+                ->toArray();
+
+            /* ---------------------------
+            UPDATE MAIN PI
             --------------------------- */
             $pi->order_no      = $r->order_no;
             $pi->buyer_id      = $order->buyer_id;
@@ -1080,70 +1083,60 @@ class MerchandisingController extends Controller
             $pi->pi_no         = $r->pi_no ?? $pi->pi_no;
             $pi->created_at    = $r->created_at ?? $pi->created_at;
             $pi->order_date    = $r->order_date ?? $pi->order_date;
-            $pi->advising_bank    = $r->advising_bank ?? $pi->advising_bank;
-            $pi->payment_terms    = $r->payment_terms ?? $pi->payment_terms;
+            $pi->advising_bank = $r->advising_bank ?? $pi->advising_bank;
+            $pi->terms         = json_encode($checkedTerms);
 
-            $pi->total_qty        = $total_qty;
-            $pi->total_bill       = $total_bill;
-            $pi->total_commission = $total_commission;
+            $pi->total_qty  = $total_qty;
+            $pi->total_bill = $total_bill;
 
             $pi->save();
 
-
-                    /* ---------------------------
-                ITEMS UPDATE / CREATE
+            /* ---------------------------
+            ITEMS UPDATE / CREATE
             --------------------------- */
             if ($r->has('items')) {
                 foreach ($r->items as $itemData) {
-                            // Update existing item
+                    // Update existing item
                     if (!empty($itemData['id']) && ($itemData['method'] ?? '') == 'update') {
-
                         $item = ProformaInvoiceItem::find($itemData['id']);
-
                         if ($item) {
                             $item->update([
-                                'unit_price'       => $itemData['unit_price'],
-                                'total_price'      => $itemData['total_price'],
-                                'commission_type'  => $itemData['commission_type'],
-                                'commission'       => $itemData['commission'],
-                                'total_commission' => $itemData['total_commission'],
-                                'color_qty'        => $itemData['color_qty'],
-                                'shipment_date'    => $itemData['shipment_date'],
-                                'editedby_id'      => auth()->id(),
+                                'unit_price'   => $itemData['unit_price'],
+                                'total_price'  => $itemData['total_price'],
+                                'order_qty'    => $itemData['order_qty'],
+                                'editedby_id'  => auth()->id(),
                             ]);
-                            orderDetail::firstWhere('style_no', $item->style_no)->update(['total_bill'=> ($item->total_price - $item->total_commission) ]);
-                        }
 
+                            orderDetail::firstWhere('style_no', $item->style_no)
+                                ->update(['total_bill'=> $itemData['total_price']]);
+                        }
                     } else {
-                                // Create new item
+                        // Create new item
                         ProformaInvoiceItem::create([
                             'proforma_invoice_id' => $pi->id,
                             'composition'         => $itemData['composition'],
                             'fabrication'         => $itemData['fabrication'],
                             'gsm'                 => $itemData['gsm'] ?? null,
                             'style_no'            => $itemData['style_no'],
-                            'color_name'          => $itemData['color_name'],
-                            'color_qty'           => $itemData['color_qty'],
+                            'order_qty'           => $itemData['order_qty'],
                             'unit_price'          => $itemData['unit_price'],
                             'total_price'         => $itemData['total_price'],
-                            'commission_type'     => $itemData['commission_type'],
-                            'commission'          => $itemData['commission'],
-                            'total_commission'    => $itemData['total_commission'],
-                            'shipment_date'       => $itemData['shipment_date'],
                             'addedby_id'          => auth()->id(),
                         ]);
-                        orderDetail::firstWhere('style_no', $itemData['style_no'])->update(['total_bill'=> ( $itemData['total_price'] - $itemData['total_commission']) ]);
+
+                        orderDetail::firstWhere('style_no', $itemData['style_no'])
+                            ->update(['total_bill'=> $itemData['total_price']]);
                     }
                 }
             }
 
-
-                    /* ---------------------------
-                SUCCESS
+            /* ---------------------------
+            SUCCESS
             --------------------------- */
             session()->flash('success', 'Proforma Invoice Updated Successfully');
             return redirect()->route('admin.proformaInvoiceAction', ['invoice', $pi->id]);
         }
+
 
         if($action=='delete'){
             $pi->items()->delete();
