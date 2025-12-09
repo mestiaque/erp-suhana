@@ -1009,7 +1009,8 @@ class MerchandisingController extends Controller
                 // -------------------------------
                 // LOAD EDIT PAGE
                 // -------------------------------
-        $piOrder = ProformaInvoice::pluck('order_no')->toArray();
+        $piOrder = ProformaInvoice::whereNotNull('order_no')->pluck('order_no')->toArray();
+
         $orders = OrderDetails::where('status', 'confirmed')
                     ->whereNotIn('order_no', $piOrder)
                     ->get()
