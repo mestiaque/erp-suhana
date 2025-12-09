@@ -19,7 +19,7 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3>Purchase Order View</h3>
+            <h3>Proforma Invoice View</h3>
             <div class="dropdown">
                 <a href="{{ route('admin.proformaInvoice') }}" class="btn-custom primary">
                     <i class="bx bx-left-arrow-alt"></i> Back List
