@@ -25,5 +25,9 @@ Thumbs.db
 bootstrap/cache/*.php
 !bootstrap/cache/.gitignore
 
+/storage/
+/public/*.php
+/storage/framework/views/*
+
 
 
