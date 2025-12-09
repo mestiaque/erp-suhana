@@ -264,7 +264,7 @@
                             <td>{{$expense->company_name}}</td>
                             <td>{{$expense->receiver_name}}</td>
                             <td>{{$expense->category?$expense->category->name:'not found'}}</td>
-                            <td>{{numberFormat($expense->amount,1)}}</td>
+                            <td>{{number_format($expense->amount)}}</td>
                             <td>{!! nl2br(e($expense->description)) !!}</td>
                             <td>{{$expense->method?$expense->method->name:'not found'}}</td>
                             <td>{{$expense->branch?$expense->branch->name:'not found'}}</td>
@@ -279,8 +279,8 @@
                     <tfoot>
                         <tr>
                             <th colspan="4"></th>
-                            <th style="text-align: right">Total</th>
-                            <th>{{numberFormat($expenses->sum('amount'),1)}}</th>
+                            <th style="text-align: right" id="total_amount_input" data-amount="{{$expenses->sum('amount')}}">Total</th>
+                            <th>{{number_format($expenses->sum('amount'))}}</th>
                             <th colspan="3"></th>
                         </tr>
                     </tfoot>
@@ -309,7 +309,7 @@
                 </div>
             </div>
         </div>
-
+        <p  style="margin-top: 10px; font-weight: bold;text-align:center;">In Words - Total Amount (Tk) : <span id="total_amount_word"></span></p>
 
         @else
         <span>No Report Data Found</span>
@@ -360,7 +360,10 @@
 	        ]
 	    } );
 
-
+            var amount = Number($('#total_amount_input').data('amount'));
+            console.log(amount);
+            var words = toWords(amount);
+            $('#total_amount_word').html(words + ' Taka Only');
 
 
     });
