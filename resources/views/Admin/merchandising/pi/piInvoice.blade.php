@@ -54,7 +54,7 @@
                     }
 
                     .invoice-header {
-                        margin-bottom: 15px;
+                        margin-bottom: 5px;
                     }
 
                     .invoice-header img {

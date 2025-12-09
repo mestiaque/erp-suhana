@@ -75,17 +75,28 @@
         @include(adminTheme().'alerts')
 
         <div class="row">
-            <div class="col-lg-6 col-md-6">
+            <div class="col-lg-10 col-md-8">
                 <form action="{{route('admin.expensesIOU')}}">
                     <div class="row">
 
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-4 mb-2">
                             <div class="input-group">
                                 <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
                                 <input type="date" name="endDate" value="{{request()->endDate}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
                             </div>
                         </div>
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-3 mb-2">
+                            <select name="quick_filter" class="form-control">
+                                <option value="">-- Select Filter --</option>
+                                <option value="all" {{ request()->quick_filter=='today'?'selected':'' }}>All Records</option>
+                                <option value="today" {{ request()->quick_filter=='today'?'selected':'' }}>Today</option>
+                                <option value="yesterday" {{ request()->quick_filter=='yesterday'?'selected':'' }}>Yesterday</option>
+                                <option value="over_2_days" {{ request()->quick_filter=='over_2_days'?'selected':'' }}>Older than 2 Days</option>
+                                <option value="over_7_days" {{ request()->quick_filter=='over_7_days'?'selected':'' }}>Older than 7 Days</option>
+                                <option value="over_1_month" {{ request()->quick_filter=='over_1_month'?'selected':'' }}>Older than 1 Month</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5 mb-2">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Name">
                                 <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
@@ -94,7 +105,7 @@
                     </div>
                 </form>
             </div>
-            <div class="col-lg-3 col-md-6">
+            {{-- <div class="col-lg-3 col-md-6">
                 <div class="stats-card-box">
                     <div class="icon-box">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
@@ -110,6 +121,15 @@
                     </div>
                     <span class="sub-title">This Month</span>
                     <h3>{{$report['monthly_expenses']}}</h3>
+                </div>
+            </div> --}}
+            <div class="col-lg-2 col-md-12">
+                <div class="stats-card-box">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <span class="sub-title">Total Amount</span>
+                    <h3>{{ number_format($expenseIou->sum('amount'),2) }}</h3>
                 </div>
             </div>
         </div>
@@ -165,7 +185,10 @@
                     </thead>
                     <tbody>
                         @foreach($expenseIou as $i=>$Iou)
-                        <tr>
+                        @php
+                            $isOlderThan2Days = $Iou->created_at->lt(\Carbon\Carbon::now()->subDays(2));
+                        @endphp
+                        <tr @if($isOlderThan2Days) style="background-color: #ffebeb;" @endif>
                             <td>
                                 <div class="checkbox">
                                      <input class="inp-cbx" id="cbx_{{$Iou->id}}" type="checkbox" name="checkid[]" value="{{$Iou->id}}" style="display: none;" />
@@ -179,7 +202,7 @@
                                      </label>
                                      @endcan
                                  </div>
-                                <span style="margin:0 5px;">{{$expenseIou->currentpage()==1?$i+1:$i+($expenseIou->perpage()*($expenseIou->currentpage() - 1))+1}}</span>
+                                <span style="margin:0 5px;">{{ $i+1 }}</span>
                                 @if($Iou->status=='completed')
                                 <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:relative;">
                                     <i class="bx bx-check-circle"></i>
