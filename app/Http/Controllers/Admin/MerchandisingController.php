@@ -999,7 +999,7 @@ class MerchandisingController extends Controller
                 // PO SELECT via AJAX
                 // -------------------------------
         if ($action == 'po-select') {
-            $orders = OrderDetail::where('order_no', $r->order_no)->get()->makeHidden(['id']);
+            $orders = OrderDetail::where('order_no', $r->order_no)->where('status', 'confirned')->get()->makeHidden(['id']);
             $orders = $orders->map(function ($o) {
                 unset($o->id);
                 return $o;
