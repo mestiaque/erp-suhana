@@ -787,7 +787,7 @@ h4{
                             <th>Line</th>
                             <th>Style</th>
                             <th>Order</th>
-                            <th>Buyer</th>
+                            {{-- <th>Buyer</th> --}}
                             <th>Target</th>
 
                             @for($h = $startHour; $h < $endHour; $h++)
@@ -861,7 +861,7 @@ h4{
                             <td>{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
                             <td>{{ $style_no }}</td>
                             <td>{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
-                            <td>{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
+                            {{-- <td>{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td> --}}
                             <td>{{ $swing->capacity_hour }}</td>
 
                             @for($h=$startHour; $h<$endHour; $h++)
@@ -884,7 +884,7 @@ h4{
                             <td style="color:#ff0000b5">{{ $balance }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="{{5 + $maxWorkingTime + 4}}" class="text-center text-muted"><i>No data found.</i></td></tr>
+                        <tr><td colspan="{{4 + $maxWorkingTime + 4}}" class="text-center text-muted"><i>No data found.</i></td></tr>
                     @endforelse
 
                     @php
@@ -899,7 +899,7 @@ h4{
                             <td colspan="">Lines: {{ count($swings) }}</td>
                             <td colspan="">Style: {{ count(array_unique($unique_styles)) }}</td>
                             <td>Orders: {{ count(array_unique($unique_orders)) }}</td>
-                            <td>Buyers: {{ count(array_unique($unique_buyers)) }}</td>
+                            {{-- <td>Buyers: {{ count(array_unique($unique_buyers)) }}</td> --}}
                             <td>{{ $sum_target }}</td>
                             @for($h=$startHour; $h<$endHour; $h++)
                                 <td style="background:#f2f5fbcf">{{ $hourly_sums[$h] }}</td>
