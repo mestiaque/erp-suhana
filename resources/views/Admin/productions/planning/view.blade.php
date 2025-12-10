@@ -146,7 +146,7 @@
                                                 Buyer :<b>{{$plan->style?->buyer_name}}</b> <br>
                                                 Merchandiser :<b>{{$plan->style?->merchant_name}}</b> <br>
                                             </p>
-                                            
+
                                                 @php
                                                     $lines = $plan->floorLines()->groupBy('name');
                                                 @endphp
@@ -155,11 +155,19 @@
                                                 <p>
                                                     <b>{{ $name }}</b> : <br>
                                                     @foreach($items as $line)
-                                                       <span class="lineCheck"> Line - <b>{{ $line->slug }}</b> / C/H: {{ $line->capacity }}</span>
+                                                    @php
+                                                        $exSew = App\Models\ProductionSewing::where('planning_id', $plan->id)->where('line_name', $line->slug)->first();
+                                                    @endphp
+
+                                                    <span class="lineCheck">
+                                                        <span class="p-1 text-white mr-2 badge bg-primary">Line: {{ $line->slug }}</span>
+                                                        <span class="p-1 text-white mr-2 badge bg-success">C/H: {{ $exSew?->capacity_hour ?? $line->capacity ?? 0 }}</span>
+                                                        <span class="p-1 text-white mr-2 badge bg-info">WH: {{ $exSew?->working_hours ?? 8 }}</span>
+                                                    </span>
                                                     @endforeach
                                                 </p>
                                                 @endforeach
-                                            
+
                                             <b>Lose Time (In Minite):</b> {{$plan->extra_time}}
                                         </td>
                                         <td>

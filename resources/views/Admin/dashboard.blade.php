@@ -753,9 +753,14 @@ h4{
 
 
         @php
+            $now = now(); // current timestamp
+            $nextHour = $now->copy()->addHour(); // now + 1 hour
             $swings = App\Models\ProductionSewing::with(['planning', 'planning.style', 'outputs'])
-                            ->whereHas('planning', function ($q) {
-                                $q->where('status', 'confirmed');
+                            ->whereHas('planning', function ($q) use ($now, $nextHour) {
+                                // Filter by exact datetime instead of date only
+                                $q->where('status', 'confirmed')
+                                ->where('sewing_start', '<=', $now)
+                                ->where('sewing_end', '>=', $nextHour);
                             })
                             ->get();
             function badgeClass($value, $target){
@@ -766,45 +771,48 @@ h4{
                 else return 'value-tag low-performance';
             }
         @endphp
+
         <div class="">
             <div class="table-responsive data-table">
+                @php
+                    $maxWorkingTime = $swings->pluck('working_hours')->max(); // maximum across all lines
+                    $startHour = 8;
+                    $endHour = $startHour + $maxWorkingTime;
+                    $today_date = request('startDate') ?? date('Y-m-d');
+                @endphp
+
                 <table class="table table-bordered table-striped mb-0">
                     <thead class="deliRport">
                         <tr>
-                            <th style="width:10rem">Line</th>
-                            <th style="width:10rem">Style</th>
-                            <th style="width:10rem">Order</th>
-                            <th style="width:10rem">Buyer</th>
-                            <th style="width:10rem">Target</th>
-                            @for($h = 8; $h <= 19; $h++)
+                            <th>Line</th>
+                            <th>Style</th>
+                            <th>Order</th>
+                            <th>Buyer</th>
+                            <th>Target</th>
+
+                            @for($h = $startHour; $h < $endHour; $h++)
                                 @php
                                     $start = ($h > 12) ? $h - 12 : $h;
-                                    $endHour = $h + 1;
-                                    $end = ($endHour > 12) ? $endHour - 12 : $endHour;
-                                    $endPeriod = $endHour < 12 ? 'AM' : 'PM';
+                                    $endHourNext = $h + 1;
+                                    $end = ($endHourNext > 12) ? $endHourNext - 12 : $endHourNext;
+                                    $endPeriod = $endHourNext < 12 ? 'AM' : 'PM';
                                 @endphp
-                                <th style="width:20rem; white-space: nowrap;">{{ $start }}-{{ $end }} <span>{{ $endPeriod }}</span></th>
+                                <th>{{ $start }}-{{ $end }} {{ $endPeriod }}</th>
                             @endfor
-                            <th style="width:10rem; white-space: nowrap;">Today Total</th>
-                            <th style="width:10rem; white-space: nowrap;">Previous</th>
-                            <th style="width:10rem; white-space: nowrap;">Grand Total</th>
-                            <th style="width:10rem; white-space: nowrap;">Balance</th>
+
+                            <th>Today Total</th>
+                            <th>Previous</th>
+                            <th>Grand Total</th>
+                            <th>Balance</th>
                         </tr>
                     </thead>
                     <tbody>
-
                     @php
-                        $sum_target = 0;
-                        $sum_today = 0;
-                        $sum_previous = 0;
-                        $sum_grand = 0;
-                        $unique_orders = [];
-                        $unique_buyers = [];
-                        $unique_styles = [];
+                        $sum_target = $sum_today = $sum_previous = $sum_grand = 0;
+                        $unique_orders = $unique_buyers = $unique_styles = [];
                         $hourly_sums = [];
-                        for($h=8;$h<=19;$h++) $hourly_sums[$h] = 0;
+                        for($h=$startHour; $h<$endHour; $h++) $hourly_sums[$h] = 0;
                         $styleBalances = [];
-                        $today_date = request('startDate') ?? date('Y-m-d');
                     @endphp
 
                     @forelse($swings as $swing)
@@ -816,64 +824,67 @@ h4{
 
                             $today_total = 0;
                             $hour_values = [];
-                            for($h=8;$h<=19;$h++){
-                                if(!$swing->isBreakHour($h)){
-                                    $val = $swing->getProductionHour($h,$today_date);
-                                    $today_total += $val;
-                                    $hour_values[$h] = $val;
-                                    $hourly_sums[$h] += $val;
+
+                            for($h=$startHour; $h<$endHour; $h++){
+                                if($h >= $startHour + $swing->working_hours){
+                                    $hour_values[$h] = null; // disabled beyond this line's working hours
+                                } elseif($swing->isBreakHour($h)){
+                                    $hour_values[$h] = 'Break';
                                 } else {
-                                    $hour_values[$h] = null; // Break
+                                    $val = $swing->getProductionHour($h,$today_date);
+                                    $hour_values[$h] = $val;
+                                    $today_total += $val;
+                                    $hourly_sums[$h] += $val;
                                 }
                             }
 
                             $previous_total = $swing->outputs()->where('date','<',$today_date)->sum('production');
-                            $style_output = $swing->outputs()->sum('production');
                             $grand_total = $today_total + $previous_total;
                             $style_qty = $swing->planning->sum('style_qty');
-                            $balance = $style_qty - $style_output;
 
-                            $sum_target += $swing->capacity_hour;
-                            $sum_today += $today_total;
-                            $sum_previous += $previous_total;
-                            $sum_grand += $grand_total;
-
+                            // per-style balance
                             if(!isset($styleBalances[$style_no])){
                                 $styleBalances[$style_no] = ['style_qty'=>$style_qty, 'grand'=>$grand_total];
                             } else {
                                 $styleBalances[$style_no]['grand'] += $grand_total;
                             }
 
+                            $balance = $style_qty - $styleBalances[$style_no]['grand'];
+
+                            $sum_target += $swing->capacity_hour;
+                            $sum_today += $today_total;
+                            $sum_previous += $previous_total;
+                            $sum_grand += $grand_total;
                         @endphp
 
                         <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}">
-                            <td class="line-label" style="white-space: nowrap;">{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
-                            <td style="white-space: nowrap;">{{ $style_no }}</td>
-                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
-                            <td style="white-space: nowrap;">{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
-                            <td class="target">{{ $swing->capacity_hour }}</td>
+                            <td>{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
+                            <td>{{ $style_no }}</td>
+                            <td>{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
+                            <td>{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
+                            <td>{{ $swing->capacity_hour }}</td>
 
-                            @for($h=8;$h<=19;$h++)
-                                @if($swing->isBreakHour($h))
+                            @for($h=$startHour; $h<$endHour; $h++)
+                                @if(is_null($hour_values[$h]))
+                                    <td class="text-disabled">--</td>
+                                @elseif($hour_values[$h] === 'Break')
                                     <td class="text-danger" style="background:#f9ecef">Break</td>
                                 @else
-                                    <td contenteditable="false" class="data-row"
-                                        data-plan="{{ $swing->id }}"
-                                        data-hour="{{ $h }}"
-                                        data-terget="{{ $swing->capacity_hour }}"
-                                        data-date="{{ $today_date }}">
-                                        <span class="{{ badgeClass( intval($hour_values[$h]), intval($swing->capacity_hour)) }}">{{ $hour_values[$h] }}</span>
+                                    <td>
+                                        <span class="{{ badgeClass(intval($hour_values[$h]), intval($swing->capacity_hour)) }}">
+                                            {{ $hour_values[$h] }}
+                                        </span>
                                     </td>
                                 @endif
                             @endfor
 
-                            <td class="today badge-cell total-column" data-target="{{ $swing->capacity_hour }}">{{ $today_total }}</td>
-                            <td class="previous total-column">{{ $previous_total }}</td>
-                            <td class="grand total-column">{{ $grand_total }}</td>
-                            <td class="balance total-column" style="color: #ff0000b5">{{ $balance }}</td>
+                            <td>{{ $today_total }}</td>
+                            <td>{{ $previous_total }}</td>
+                            <td>{{ $grand_total }}</td>
+                            <td style="color:#ff0000b5">{{ $balance }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="21" class="text-center text-muted"><i>No data found.</i></td></tr>
+                        <tr><td colspan="{{5 + $maxWorkingTime + 4}}" class="text-center text-muted"><i>No data found.</i></td></tr>
                     @endforelse
 
                     @php
@@ -884,27 +895,26 @@ h4{
                     @endphp
 
                     @if(count($swings) > 0)
-                    <!-- SUMMARY ROW -->
-                    <tr style="font-weight:bold;background:#eef3ff">
-                        <td colspan="" style="white-space: nowrap;">Lines: {{ count($swings) }}</td>
-                        <td colspan="" style="white-space: nowrap;">Style: {{ count(array_unique($unique_styles)) }}</td>
-                        <td style="white-space: nowrap;">Orders: {{ count(array_unique($unique_orders)) }}</td>
-                        <td style="white-space: nowrap;">Buyers: {{ count(array_unique($unique_buyers)) }}</td>
-                        <td>{{ $sum_target }}</td>
-                        @for($h=8;$h<=19;$h++)
-                            <td style="background:#f2f5fbcf !important">{{ $hourly_sums[$h] }}</td>
-                        @endfor
-                        <td>{{ $sum_today }}</td>
-                        <td>{{ $sum_previous }}</td>
-                        <td>{{ $sum_grand }}</td>
-                        <td style="color:#ff0000c5">{{ $sum_balance }}</td>
-                    </tr>
+                        <tr style="font-weight:bold;background:#eef3ff">
+                            <td colspan="">Lines: {{ count($swings) }}</td>
+                            <td colspan="">Style: {{ count(array_unique($unique_styles)) }}</td>
+                            <td>Orders: {{ count(array_unique($unique_orders)) }}</td>
+                            <td>Buyers: {{ count(array_unique($unique_buyers)) }}</td>
+                            <td>{{ $sum_target }}</td>
+                            @for($h=$startHour; $h<$endHour; $h++)
+                                <td style="background:#f2f5fbcf">{{ $hourly_sums[$h] }}</td>
+                            @endfor
+                            <td>{{ $sum_today }}</td>
+                            <td>{{ $sum_previous }}</td>
+                            <td>{{ $sum_grand }}</td>
+                            <td style="color:#ff0000c5">{{ $sum_balance }}</td>
+                        </tr>
                     @endif
-
                     </tbody>
                 </table>
             </div>
         </div>
+
 
 
     </div>

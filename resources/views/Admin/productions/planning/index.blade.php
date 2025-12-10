@@ -16,7 +16,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Planning List</h3>
              <div class="dropdown">
-            
+
                 @can('samples.add')
                  <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Planning
@@ -84,7 +84,7 @@
                         <tr>
                             <td>
                                 <b>No:</b> {{ $order->style_no}}
-                                <br> <b>Qty:</b> {{number_format($order->style_qty)}} pcs
+                                <br> <b>Qty:</b> {{number_format($order->order_qty)}} pcs
                             </td>
                             <td>
                                 <b>M:</b> {{$order->style?->merchant_name}}
@@ -123,8 +123,8 @@
                                     @can('samples.edit')
                                     <a href="{{ route('admin.productionPlanningAction',['edit',$order->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
                                     @endcan
-                                @else 
-                                -- 
+                                @else
+                                --
                                 @endif
                                 <br>
                                 @if($order->status=='pending')
