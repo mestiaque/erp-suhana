@@ -686,11 +686,11 @@ class MerchandisingController extends Controller
                     'status'        => 'temp',
                     'addedby_id'    => Auth::id(),
                     'created_at'    => now(),
-                    'buyer_id'      => $lastOrder->buyer_id,
-                    'buyer_name'    => $lastOrder->buyer_name,
-                    'merchant_id'   => $lastOrder->merchant_id,
-                    'merchant_name' => $lastOrder->merchant_name,
-                    'company_name'  => $lastOrder->company_name,
+                    'buyer_id'      => $lastOrder?->buyer_id ?? null,
+                    'buyer_name'    => $lastOrder?->buyer_name ?? null,
+                    'merchant_id'   => $lastOrder?->merchant_id ?? null,
+                    'merchant_name' => $lastOrder?->merchant_name ?? null,
+                    'company_name'  => $lastOrder?->company_name ?? null,
                 ]);
                 OrderDetailItem::create([
                     'order_detail_id' => $orderDetails->id
