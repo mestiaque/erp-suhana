@@ -95,7 +95,7 @@
                             }
                             $previous_total = $swing->outputs()->where('date','<',$today_date)->sum('production');
                             $grand_total = $today_total + $previous_total;
-                            $style_qty = $swing->planning->sum('style_qty');
+                            $style_qty = $swing->planning->style_qty;
 
                             $sum_target += $swing->capacity_hour;
                             $sum_today += $today_total;

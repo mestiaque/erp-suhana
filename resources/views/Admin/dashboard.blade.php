@@ -840,7 +840,7 @@ h4{
 
                             $previous_total = $swing->outputs()->where('date','<',$today_date)->sum('production');
                             $grand_total = $today_total + $previous_total;
-                            $style_qty = $swing->planning->sum('style_qty');
+                            $style_qty = $swing->planning->style_qty;
 
                             // per-style balance
                             if(!isset($styleBalances[$style_no])){

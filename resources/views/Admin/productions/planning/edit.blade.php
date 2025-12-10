@@ -421,9 +421,7 @@
 .style-info.sticky {
     position: fixed;
     top: 10rem;
-    width: 250px;
-    background: #fff;
-    padding: 10px;
+    padding: 2px;
     border: 1px solid #4caf50;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     z-index: 1000;
