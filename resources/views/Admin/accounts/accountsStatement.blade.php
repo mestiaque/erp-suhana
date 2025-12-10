@@ -105,6 +105,10 @@
                                 <td>{{priceFormat($openingBalance)}}</td>
                                 <td></td>
                             </tr>
+                            @php
+                                $debetTotal = 0;
+                                $creditTotal = 0;
+                            @endphp
                             @forelse($transections as $tran)
                                 <tr>
                                     <td>{{ $tran->created_at->format('d-m-Y') }}</td>
@@ -167,11 +171,17 @@
                                     <td>
                                         @if(in_array($tran->type, [3,4,5,6,7]))
                                             {{ priceFormat($tran->amount) }}
+                                            @php
+                                                $debetTotal += $tran->amount;
+                                            @endphp
                                         @endif
                                     </td>
                                     <td>
                                         @if(in_array($tran->type, [0,1]))
                                             {{ priceFormat($tran->amount) }}
+                                            @php
+                                                $creditTotal += $tran->amount;
+                                            @endphp
                                         @endif
                                     </td>
                                     <td>{{ priceFormat($tran->running_balance) }}</td>
@@ -185,9 +195,14 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="4"></td>
-                                <td>Available</td>
-                                <td>{{ priceFormat($availableBalance ?? 0) }}</td>
+                                <td colspan="3"></td>
+                                <td>
+                                    {{ priceFormat($debetTotal) }}
+                                </td>
+                                <td>
+                                    {{ priceFormat($creditTotal) }}
+                                </td>
+                                <td></td>
                                 <td></td>
                             </tr>
                         </tfoot>
