@@ -189,7 +189,7 @@
         @if($from->toDateString() == $to->toDateString())
             {{ $to->format('d.m.Y') }}
         @else
-            {{ $to->format('d.m.Y') }} to  {{ $from->format('d.m.Y') }}
+           {{ $from->format('d.m.Y') }} To {{ $to->format('d.m.Y') }}
         @endif
     </p>
     <table>

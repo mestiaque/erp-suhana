@@ -29,10 +29,4 @@ class SewingOutput extends Model
         return $this->belongsTo(User::class, 'addedby_id');
     }
 
-
-    public function sewing()
-    {
-        return $this->belongsTo(ProductionSewing::class, 'sewing_id');
-    }
-
 }
