@@ -245,6 +245,7 @@
                                         @endif
                                         <td>{{$pi->remarks}}</td>
                                     </tr>
+                                     @php $prevShipmentDate = $shipmentDate; @endphp
                                 @empty
                                     <tr>
                                         <td colspan="10" class="text-center text-muted">No items found</td>
@@ -306,10 +307,10 @@
                     <div style="margin-top: 3.5rem">
                         @if(general()->signature())
                         <p style="margin-bottom: 5px">For  {{general()->title}}</p>
+                        <img src="{{asset(general()->signature())}}" alt="Sign" style="max-width: 12.5rem">
                         @else
                         <p style="margin-bottom: 5rem">For  {{general()->title}}</p>
                         @endif
-                        <img src="{{asset(general()->signature())}}" alt="Sign" style="max-width: 12.5rem">
                         <p>Authorized signature</p>
                     </div>
 
