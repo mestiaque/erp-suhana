@@ -39,7 +39,7 @@
             @include(adminTheme().'alerts')
 
             @php
-                $maxWorkingTime = $swings->count() ? $swings->pluck('working_hours')->max() : 0;
+                $maxWorkingTime = $swings->count() ? $swings->pluck('working_hours')->max() : 9;
                 $startHour = 8;
                 $endHour = $startHour + $maxWorkingTime;
                 $today_date = request('startDate') ?? date('Y-m-d');

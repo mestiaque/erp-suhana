@@ -775,7 +775,7 @@ h4{
         <div class="">
             <div class="table-responsive data-table">
                 @php
-                    $maxWorkingTime = $swings->pluck('working_hours')->max(); // maximum across all lines
+                    $maxWorkingTime = $swings->pluck('working_hours')->max() ?? 9; // maximum across all lines
                     $startHour = 8;
                     $endHour = $startHour + $maxWorkingTime;
                     $today_date = request('startDate') ?? date('Y-m-d');
