@@ -752,7 +752,7 @@ h4{
     <div>
 
 
-        {{-- @php
+        @php
             $now = now(); // current timestamp
             $nextHour = $now->copy()->addHour(); // now + 1 hour
             $swings = App\Models\ProductionSewing::with(['planning', 'planning.style', 'outputs'])
@@ -770,9 +770,9 @@ h4{
                 elseif($percentage >= 95) return 'value-tag medium-performance';
                 else return 'value-tag low-performance';
             }
-        @endphp --}}
+        @endphp
 
-        {{-- <div class="">
+        <div class="">
             <div class="table-responsive data-table">
                 @php
                     $maxWorkingTime = $swings->pluck('working_hours')->max() ?? 9; // maximum across all lines
@@ -787,6 +787,7 @@ h4{
                             <th>Line</th>
                             <th>Style</th>
                             <th>Order</th>
+                            {{-- <th>Buyer</th> --}}
                             <th>Target</th>
 
                             @for($h = $startHour; $h < $endHour; $h++)
@@ -860,6 +861,7 @@ h4{
                             <td>{{ $swing->floor_name }} - {{ $swing->line_name }}</td>
                             <td>{{ $style_no }}</td>
                             <td>{{ $swing?->planning?->style?->order_no ?? '--' }}</td>
+                            {{-- <td>{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td> --}}
                             <td>{{ $swing->capacity_hour }}</td>
 
                             @for($h=$startHour; $h<$endHour; $h++)
@@ -897,6 +899,7 @@ h4{
                             <td colspan="">Lines: {{ count($swings) }}</td>
                             <td colspan="">Style: {{ count(array_unique($unique_styles)) }}</td>
                             <td>Orders: {{ count(array_unique($unique_orders)) }}</td>
+                            {{-- <td>Buyers: {{ count(array_unique($unique_buyers)) }}</td> --}}
                             <td>{{ $sum_target }}</td>
                             @for($h=$startHour; $h<$endHour; $h++)
                                 <td style="background:#f2f5fbcf">{{ $hourly_sums[$h] }}</td>
@@ -910,7 +913,7 @@ h4{
                     </tbody>
                 </table>
             </div>
-        </div> --}}
+        </div>
 
 
 

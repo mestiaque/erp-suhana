@@ -109,6 +109,7 @@ class AdminController extends Controller
         $loginLogsByUser = ActivityLog::where('event', 'login')
             ->whereBetween('created_at', [$start, $end])
             ->select('user_id', 'created_at')
+            ->whereHas('user')
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('user_id');
@@ -122,6 +123,7 @@ class AdminController extends Controller
         // 2. Last active logs for all users
         $lastActive = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'user_active')
+            ->whereHas('user')
             ->whereBetween('created_at', [$start, $end])
             ->orderBy('created_at', 'desc')
             ->get()
@@ -130,6 +132,7 @@ class AdminController extends Controller
         // 3. Recent activity and logout in last 10 minutes
         $recentActiveLogs = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'user_active')
+            ->whereHas('user')
             ->where('created_at', '>=', $nMinutesAgo)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -137,6 +140,7 @@ class AdminController extends Controller
 
         $recentLogoutLogs = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'logout')
+            ->whereHas('user')
             ->where('created_at', '>=', $nMinutesAgo)
             ->orderBy('created_at', 'desc')
             ->get()
