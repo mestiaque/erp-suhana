@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\SampleItem;
+use App\Models\OrderDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use App\Models\OrderDetails;
@@ -122,8 +123,8 @@ class ProductionController extends Controller
             return response()->json(['success'=>true,'view'=>'']);
         }
 
-        if($action=='update'){
-
+        if($action=='updatex'){
+            return  $r->all();
 
             $plan->style_no      = $r->style_no;
             $plan->style_qty     = $r->style_qty?:0;
@@ -178,13 +179,102 @@ class ProductionController extends Controller
             return redirect()->route('admin.productionPlanningAction',['view',$plan->id]);
         }
 
+        if ($action == 'update') {
+
+            $plan->style_no      = $r->style_no;
+            $plan->style_qty     = $r->style_qty ?: 0;
+            $plan->extra_time    = $r->extra_time ?: 0;
+            $plan->sewing_end    = $r->sewing_end;
+            $plan->status        = 'confirmed';
+            $plan->save();
+
+            /* ---------------------------
+            FLOOR DATA COLLECTION
+            ----------------------------*/
+            $selectedFloorData = collect($r->floor)->map(function($floorSlug) use ($r) {
+                return [
+                    'line'     => $floorSlug,
+                    'capacity' => $r->capacity[$floorSlug] ?? 0,
+                    'whours'   => $r->hours[$floorSlug] ?? 0,
+                ];
+            });
+
+            /* ---------------------------
+            DELETE REMOVED FLOORS
+            ----------------------------*/
+            $existingFloors = $plan->sewingLines()->pluck('line_name')->toArray();
+            $newFloors      = $selectedFloorData->pluck('line')->toArray();
+
+            $toDelete = array_diff($existingFloors, $newFloors);
+
+            if (!empty($toDelete)) {
+                $plan->sewingLines()->whereIn('line_name', $toDelete)->delete();
+            }
+
+            /* ---------------------------
+            INSERT / UPDATE FLOORS
+            ----------------------------*/
+            foreach ($selectedFloorData as $floor) {
+
+                $floorLine = Attribute::where('type', 4)
+                            ->where('slug', $floor['line'])
+                            ->first();
+
+                if (!$floorLine) continue;
+
+                $line = $plan->sewingLines()
+                        ->where('line_name', $floorLine->slug)
+                        ->first();
+
+                if (!$line) {
+                    $line = new ProductionSewing();
+                    $line->planning_id = $plan->id;
+                    $line->floor_name  = $floorLine->name;
+                    $line->line_name   = $floorLine->slug;
+                }
+
+                // UPDATE LINE-WISE capacity + working hour
+                $line->style_no      = $plan->style_no;
+                $line->capacity_hour = intval($floor['capacity']);
+                $line->working_hours = intval($floor['whours']);
+                $line->save();
+            }
+
+            /* ---------------------------
+                TOTAL HOURLY CAPACITY
+            ----------------------------*/
+            $plan->total_hourly_capacity = $plan->sewingLines()->sum('capacity_hour');
+
+
+            /* ---------------------------
+                TOTAL WORKING TIME CALC
+            ----------------------------*/
+            $totalMinutes = 0;
+
+            foreach ($selectedFloorData as $floor) {
+                $totalMinutes += intval($floor['whours']) * 60;
+            }
+
+            // add extra time
+            $totalMinutes += intval($plan->extra_time);
+
+            $hours   = floor($totalMinutes / 60);
+            $minutes = $totalMinutes % 60;
+
+            $plan->total_working_time = "{$hours}h - {$minutes}m";
+            $plan->save();
+
+            session()->flash('success', 'Production Planning Updated');
+            return redirect()->route('admin.productionPlanningAction', ['view', $plan->id]);
+        }
+
         // return $plan->sewingLines;
         $productionStyleNos = ProductionPlanning::pluck('style_no')
             ->filter() // removes null values
             ->map(fn($val) => trim($val)) // removes extra spaces
             ->toArray();
 
-        $styles = OrderDetails::where('status', 'confirmed')
+        $styles = OrderDetail::where('status', 'confirmed')
             ->whereNotIn('style_no', $productionStyleNos)
             ->orderBy('id', 'desc')
             ->get();
@@ -282,6 +372,9 @@ class ProductionController extends Controller
     public function dailyProduction(Request $r)
     {
         $search = $r->search;
+        $now = now(); // current timestamp
+        $nextHour = $now->copy()->addHour(); // now + 1 hour
+
         $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
             ->when($search, function ($q) use ($search) {
                 $q->where('floor_name', 'LIKE', "%{$search}%")
@@ -304,13 +397,16 @@ class ProductionController extends Controller
                     ->whereDate('created_at', '<=', $to);
                 });
             })
-            ->whereHas('planning', function ($q) {
-                $q->where('status', 'confirmed');
+            ->whereHas('planning', function ($q) use ($now, $nextHour) {
+                // Filter by exact datetime instead of date only
+                $q->where('status', 'confirmed')
+                ->where('sewing_start', '<=', $now)
+                ->where('sewing_end', '>=', $nextHour);
             })
             ->get();
+
         return view(adminTheme().'productions.daily.index', compact('swings'));
     }
-
 
     public function dailyProductionAction(Request $r, $action)
     {

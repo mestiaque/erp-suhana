@@ -1,3 +1,18 @@
+@php
+$advisingBank =
+    'Beneficiary Bank :' . "\n" .
+    'MODHUMOTI BANK PLC' . "\n" .
+    'Uttara Branch' . "\n" .
+    'Siaam Tower (Level-3)' . "\n" .
+    'Plot : 15, Road : 02, Sector : 03' . "\n" .
+    'Uttara, Dhaka-1230' . "\n" .
+    'Bangladesh' . "\n" .
+    'SWIFT CODE : MODHBDDHUT' . "\n" .
+    'A/C NO. : 111011100000878';
+
+@endphp
+
+
 @extends(adminTheme().'layouts.app')
 
 @section('title')
@@ -94,10 +109,9 @@
                         </select>
                     </div>
                     <div class="col-md-12 mb-3">
+
                         <label>Advising Bank</label>
-                        <textarea name="advising_bank" class="form-control advising_bank" rows="1" placeholder="Advising Bank">{{ $pi->advising_bank ?? '' }}</textarea>
-
-
+                        <textarea name="advising_bank" class="form-control advising_bank" rows="9" placeholder="Advising Bank readonly">{{ $pi->advising_bank ?? $advisingBank }}</textarea>
                     </div>
                 </div>
 
@@ -107,10 +121,66 @@
                     @include(adminTheme().'merchandising.pi.includes.items', ['items' => $pi->items ?? []])
                 </div>
 
-                <div>
-                    <label for="">Payment Terms</label>
-                    <textarea name="payment_terms" class="form-control summernote" cols="30" rows="10" placeholder="Payment Terms">{!! $pi->payment_terms !!}</textarea>
+                <div class="mt-4">
+                    <label>Terms & Conditions</label>
+                    <div id="payment-terms-list">
+                        @php
+                            // Predefined terms
+                            $defaultTerms = [
+                                'PAYMENT'           => 'LC AT SIGHT',
+                                'BUYING HOUSE'      => 'SERVICE CHARGE : 3.5%',
+                                'TRADE TERM'        => 'FOB, BY SEA',
+                                'PORT OF LOADING'   => 'CHOTTROGRAM PORT, BANGLADESH',
+                                'PORT OF DISCHARGE' => 'ANY PORT IN JAPAN',
+                                'FINAL DESTINATION' => 'JAPAN',
+                                'BILL OF LADING'    => 'FULL SET 3/3 SHIPPED ON BOARD CLEAN OCEAN BILL OF LADING OUT OF THE ORDER OF ANY BANK IN BANGLADESH AND ENDORSED TO THE LC ISSUING BANK MARKED FREIGHT COLLECT',
+                                'PARTIAL SHIPMENT'  => 'ALLOWED',
+                                'TRANSSHIPMENT'     => 'ALLOWED',
+                                'TOLERANCE'         => '+/- 5%',
+                                'DOCUMENTATION'     => 'AS PER LC TERMS',
+                                'COUNTRY OF ORIGIN' => 'BANGLADESH'
+                            ];
+
+                            // Previously saved terms
+                            $savedTerms = json_decode($pi->terms ?? '{}', true);
+                            $allTerms = $defaultTerms;
+                            foreach ($savedTerms as $key => $value) {
+                                $allTerms[$key] = $value;
+                            }
+                            $termIndex = count($allTerms);
+                        @endphp
+
+                        <ul class="list-group" style="list-style:none;" id="termsUl">
+                            @foreach($allTerms as $key => $value)
+                                <li class="mb-2">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <input type="checkbox"
+                                            name="terms[{{ $loop->index }}][checked]"
+                                            class="form-control form-control-sm"
+                                            style="width: 20px !important"
+                                            {{ isset($savedTerms[$key]) ? 'checked' : '' }}> &nbsp;&nbsp;
+
+                                        <input type="text"
+                                            name="terms[{{ $loop->index }}][key]"
+                                            value="{{ $key }}"
+                                            class="form-control form-control-sm"
+                                            style="width:30%; height: 24px;"> &nbsp;&nbsp;:&nbsp;&nbsp;
+
+                                        <input type="text"
+                                            name="terms[{{ $loop->index }}][value]"
+                                            value="{{ $value }}"
+                                            class="form-control form-control-sm"
+                                            style="width:70%; height: 24px;">
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                    </div>
+
+                    <button type="button" id="add-term-btn" class="btn btn-sm btn-success mt-2">+ Add Term</button>
                 </div>
+
 
                 <br>
                 <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Proforma Invoice</button>
@@ -128,28 +198,18 @@ $(document).ready(function() {
     function updateItemRow(row) {
         let qty = parseFloat(row.find('.qty').val()) || 0;
         let unitPrice = parseFloat(row.find('input[name*="[unit_price]"]').val()) || 0;
-        let commission = parseFloat(row.find('input[name*="[commission]"]').val()) || 0;
         let commissionType = row.find('.commission_type').val();
 
         // Total Price
         let totalPrice = qty * unitPrice;
         row.find('input[name*="[total_price]"]').val(totalPrice.toFixed(2));
 
-        // Total Commission
-        let totalCommission = 0;
-        if (commissionType === 'percentage') {
-            totalCommission = totalPrice * (commission / 100);
-        } else if (commissionType === 'per_pcs') {
-            totalCommission = qty * commission;
-        }
-        row.find('input[name*="[total_commission]"]').val(totalCommission.toFixed(2));
     }
 
     // === Update all rows and summary ===
     function updateAllItems() {
         let totalQty = 0;
         let totalAmount = 0;
-        let totalCommission = 0;
 
         $('.itemRow').each(function() {
             let row = $(this);
@@ -157,19 +217,17 @@ $(document).ready(function() {
 
             totalQty += parseFloat(row.find('.qty').val()) || 0;
             totalAmount += parseFloat(row.find('input[name*="[total_price]"]').val()) || 0;
-            totalCommission += parseFloat(row.find('input[name*="[total_commission]"]').val()) || 0;
         });
 
         $('.totalQty').text(totalQty);
         $('.totalAmount').text(totalAmount.toFixed(2));
-        $('.totalCommission').text(totalCommission.toFixed(2));
     }
 
     // === Initial calculation on page load ===
     updateAllItems();
 
     // === Trigger recalculation when any relevant input changes ===
-    $(document).on('input change', '.updateItem, .commission_type, .qty', function() {
+    $(document).on('input change', '.updateItem, .qty', function() {
         updateAllItems();
     });
 
@@ -196,5 +254,58 @@ $(document).ready(function() {
 });
 </script>
 
+<script>
+$(document).ready(function() {
+    let termIndex = {{ $termIndex }}; // শুরু index
+
+    $('#add-term-btn').click(function() {
+        const newLi = `
+        <li class="mb-2">
+            <div class="d-flex gap-2 align-items-center">
+                <!-- checkbox -->
+                <input type="checkbox"
+                    name="terms[${termIndex}][checked]"
+                    class="form-control form-control-sm" checked
+                    style="width: 20px !important;" /> &nbsp;&nbsp;
+
+                <!-- editable key -->
+                <input type="text"
+                    name="terms[${termIndex}][key]"
+                    class="form-control form-control-sm"
+                    style="width:30%; height:24px;"
+                    placeholder="Key" /> &nbsp;&nbsp;:&nbsp;&nbsp;
+
+                <!-- editable value -->
+                <input type="text"
+                    name="terms[${termIndex}][value]"
+                    class="form-control form-control-sm"
+                    style="width:70%; height:24px;"
+                    placeholder="Value" />
+            </div>
+        </li>
+        `;
+
+        $('#termsUl').append(newLi); // prepend করা, list এর শুরুতে যাবে
+        termIndex++; // index increment
+    });
+
+});
+
+</script>
+
 
 @endpush
+
+@push('css')
+<style>
+    #termsUl li:nth-child(odd) {
+        background-color: #f8f9fa; /* হালকা ধূসর */
+    }
+
+    #termsUl li:nth-child(even) {
+        background-color: #ffffff; /* সাদা */
+    }
+</style>
+@endpush
+
+

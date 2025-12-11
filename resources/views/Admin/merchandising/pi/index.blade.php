@@ -68,7 +68,6 @@
                                 <th>Merchant</th>
                                 <th>Total Qty</th>
                                 <th>Total Bill</th>
-                                <th>Total Commission</th>
                                 <th>Status</th>
                                 <th>Created Date</th>
                                 <th width="200">Action</th>
@@ -85,11 +84,9 @@
 
                                 <td>{{ $pi->merchant?->name ?? '--' }}</td>
 
-                                <td>{{ number_format($pi->items->sum('color_qty')) }}</td>
+                                <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
 
                                 <td>{{ number_format($pi->items->sum('total_price'),2) }}</td>
-
-                                <td>{{ number_format($pi->items->sum('total_commission'),2) }}</td>
 
                                 <td>
                                     <span class="badge
@@ -132,7 +129,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="12" class="text-center text-muted">No Proforma Invoice Found</td>
+                                <td colspan="11" class="text-center text-muted">No Proforma Invoice Found</td>
                             </tr>
                             @endforelse
                         </tbody>

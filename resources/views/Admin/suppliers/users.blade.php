@@ -16,7 +16,7 @@
         }
  }
 
-    
+
 </style>
 @endpush
 @section('contents')
@@ -51,7 +51,7 @@
                </div>
                <div class="col-md-5 mb-1">
                    <div class="input-group">
-                       <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
+                       <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile, Company" class="form-control {{$errors->has('search')?'error':''}}" />
                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                    </div>
                </div>

@@ -42,13 +42,17 @@
              <h3>Production Planning</h3>
              <div class="dropdown">
                 @if($plan->status!='temp')
+                @can('production_planning.edit')
                  <a href="{{ route('admin.productionPlanningAction',['edit',$plan->id]) }}" class="btn-custom primary" style="padding:5px 15px;">
                     Edit
                  </a>
+                 @endcan
                 @endif
+                @can('production_planning.view')
                  <a href="{{ route('admin.productionPlanningAction',['view',$plan->id]) }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
+                 @endcan
              </div>
         </div>
         <div class="card-body">
@@ -146,7 +150,7 @@
                                                 Buyer :<b>{{$plan->style?->buyer_name}}</b> <br>
                                                 Merchandiser :<b>{{$plan->style?->merchant_name}}</b> <br>
                                             </p>
-                                            
+
                                                 @php
                                                     $lines = $plan->floorLines()->groupBy('name');
                                                 @endphp
@@ -155,11 +159,19 @@
                                                 <p>
                                                     <b>{{ $name }}</b> : <br>
                                                     @foreach($items as $line)
-                                                       <span class="lineCheck"> Line - <b>{{ $line->slug }}</b> / C/H: {{ $line->capacity }}</span>
+                                                    @php
+                                                        $exSew = App\Models\ProductionSewing::where('planning_id', $plan->id)->where('line_name', $line->slug)->first();
+                                                    @endphp
+
+                                                    <span class="lineCheck">
+                                                        <span class="p-1 text-white mr-2 badge bg-primary">Line: {{ $line->slug }}</span>
+                                                        <span class="p-1 text-white mr-2 badge bg-success">C/H: {{ $exSew?->capacity_hour ?? $line->capacity ?? 0 }}</span>
+                                                        <span class="p-1 text-white mr-2 badge bg-info">WH: {{ $exSew?->working_hours ?? 8 }}</span>
+                                                    </span>
                                                     @endforeach
                                                 </p>
                                                 @endforeach
-                                            
+
                                             <b>Lose Time (In Minite):</b> {{$plan->extra_time}}
                                         </td>
                                         <td>

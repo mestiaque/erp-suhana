@@ -26,5 +26,10 @@ class ProformaInvoiceItem extends Model
         return $this->belongsTo(User::class, 'addedby_id');
     }
 
+    public function orderDetails()
+    {
+        return $this->belongsTo(OrderDetail::class,'style_no','style_no');
+    }
+
 
 }

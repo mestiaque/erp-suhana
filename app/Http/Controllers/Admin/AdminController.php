@@ -109,6 +109,7 @@ class AdminController extends Controller
         $loginLogsByUser = ActivityLog::where('event', 'login')
             ->whereBetween('created_at', [$start, $end])
             ->select('user_id', 'created_at')
+            ->whereHas('user')
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('user_id');
@@ -122,6 +123,7 @@ class AdminController extends Controller
         // 2. Last active logs for all users
         $lastActive = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'user_active')
+            ->whereHas('user')
             ->whereBetween('created_at', [$start, $end])
             ->orderBy('created_at', 'desc')
             ->get()
@@ -130,6 +132,7 @@ class AdminController extends Controller
         // 3. Recent activity and logout in last 10 minutes
         $recentActiveLogs = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'user_active')
+            ->whereHas('user')
             ->where('created_at', '>=', $nMinutesAgo)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -137,6 +140,7 @@ class AdminController extends Controller
 
         $recentLogoutLogs = ActivityLog::whereIn('user_id', $userIds)
             ->where('event', 'logout')
+            ->whereHas('user')
             ->where('created_at', '>=', $nMinutesAgo)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -3918,24 +3922,57 @@ class AdminController extends Controller
                                  $q->where('status',$r->status);
                               }
 
-                              if($r->startDate || $r->endDate)
-                                {
-                                    if($r->startDate){
-                                        $from =$r->startDate;
-                                    }else{
-                                        $from=Carbon::now()->format('Y-m-d');
-                                    }
-                                    if($r->endDate){
-                                        $to =$r->endDate;
-                                    }else{
-                                        $to=Carbon::now()->format('Y-m-d');
-                                    }
-                                    $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+                            if ($r->quick_filter) {
+
+                                // All → no filtering
+                                if ($r->quick_filter === 'all') {
+                                    // Do nothing, show all records
+                                }
+                                // Today
+                                else if ($r->quick_filter === 'today') {
+                                    $q->whereDate('created_at', Carbon::today());
+                                }
+                                // Yesterday
+                                else if ($r->quick_filter === 'yesterday') {
+                                    $q->whereDate('created_at', Carbon::yesterday());
+                                }
+                                // Over 2 Days
+                                else if ($r->quick_filter === 'over_2_days') {
+                                    $q->whereDate('created_at', '<=', Carbon::now()->subDays(2));
+                                }
+                                // Over 7 Days
+                                else if ($r->quick_filter === 'over_7_days') {
+                                    $q->whereDate('created_at', '<=', Carbon::now()->subDays(7));
+                                }
+                                // Over 1 Month
+                                else if ($r->quick_filter === 'over_1_month') {
+                                    $q->whereDate('created_at', '<=', Carbon::now()->subMonth());
+                                }
+                                // Optional: Invalid filter
+                                else {
+                                    // Do nothing or handle invalid filter
                                 }
 
-                        })
-                        ->paginate(25)->appends($r->all());
+                            }
 
+
+                            if($r->startDate || $r->endDate)
+                            {
+                                if($r->startDate){
+                                    $from =$r->startDate;
+                                }else{
+                                    $from=Carbon::now()->format('Y-m-d');
+                                }
+                                if($r->endDate){
+                                    $to =$r->endDate;
+                                }else{
+                                    $to=Carbon::now()->format('Y-m-d');
+                                }
+                                $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
+                            }
+
+                        })
+                        ->get();
         $paymentMethods =Attribute::where('type',9)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
         $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();

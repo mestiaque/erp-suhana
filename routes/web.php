@@ -138,11 +138,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/order-details/{action}/{id?}',[MerchandisingController::class,'orderDetailsAction'])->name('orderDetailsAction');
     Route::get('/proforma-invoice',[MerchandisingController::class,'proformaInvoice'])->name('proformaInvoice');
     Route::any('/proforma-invoice/{action}/{id?}',[MerchandisingController::class,'proformaInvoiceAction'])->name('proformaInvoiceAction');
+    Route::get('/fabrications', [MerchandisingController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'fabrications')->name('fabrications');
+    Route::any('/fabrications/{action}/{id?}', [MerchandisingController::class, 'manageAttribute'])->defaults('type', 11)->defaults('view', 'fabrications')->name('fabricationsAction');
+    Route::get('/compositions', [MerchandisingController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'compositions')->name('compositions');
+    Route::any('/compositions/{action}/{id?}', [MerchandisingController::class, 'manageAttribute'])->defaults('type', 12)->defaults('view', 'compositions')->name('compositionsAction');
 
     //Production
     Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
-    
+
     Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');
     Route::get('/procurement/knitting-booking',[ProductionController::class,'knittingBooking'])->name('knittingBooking');
     Route::get('/procurement/dying-booking',[ProductionController::class,'dyingBooking'])->name('dyingBooking');
@@ -165,7 +169,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/hr/floor-lines',[AdminController::class,'floorLines'])->name('floorLines');
     Route::any('/hr/floor-lines/{action}/{id?}',[AdminController::class,'floorLinesAction'])->name('floorLinesAction');
     // Floor Route End
-    
+
     // Branch Route
     Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
     Route::any('/hr/branchs/{action}/{id?}',[AdminController::class,'branchsAction'])->name('branchsAction');
