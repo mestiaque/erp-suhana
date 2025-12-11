@@ -37,7 +37,7 @@
                     </td>
 
                     <td class="p-1">
-                        <input type="number" step="any" class="form-control form-control-sm updateItem" name="items[{{ $i }}][unit_price]" value="{{ $item->unit_price }}">
+                        <input type="number" step="any" class="form-control form-control-sm updateItem" name="items[{{ $i }}][unit_price]" value="{{ $item->unit_price }}" required>
                     </td>
 
                     <td class="p-1">
