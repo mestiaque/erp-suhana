@@ -209,7 +209,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="text-center">No payment history found</td>
+                                                <td colspan="9" class="text-center">No payment history found</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
