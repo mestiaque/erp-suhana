@@ -13,7 +13,6 @@ use App\Models\SampleItem;
 use App\Models\OrderDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
-use App\Models\OrderDetails;
 use Illuminate\Http\Request;
 use App\Models\OrderDetailItem;
 use App\Models\ProformaInvoice;
@@ -1152,7 +1151,7 @@ class MerchandisingController extends Controller
 
         $piOrder = ProformaInvoice::whereNotNull('order_no')->pluck('order_no')->toArray();
 
-        $orders = OrderDetails::where('status', 'confirmed')
+        $orders = OrderDetail::where('status', 'confirmed')
                     ->whereNotIn('order_no', $piOrder)
                     ->get()
             ->unique('order_no');

@@ -64,7 +64,9 @@
                         <div class="style-info">
                             @if($plan->style_no)
                             <input type="hidden" name="{{ $plan->style_no ? 'style_no': '' }}" value="{{ $plan->style_no ? $plan->style_no : '' }}">
-                            <input type="text" value="{{ $plan->style_no ? $plan->style_no : '' }}" disabled>
+                            <select class="form-control form-control-sm mb-2 styleSelect" name="style_no" disabled >
+                                <option value="{{$plan->style_no}}" selected data-buyer="{{$plan->style?->buyer_name}}"  data-merchandiser="{{$plan->style?->merchant_name}}"  data-qty="{{$plan->style?->total_qty ?? 0}}" >{{$plan->style_no}}</option>
+                            </select>
                             @else
                             <select class="form-control form-control-sm mb-2 styleSelect" name="style_no">
                                 <option value="">Select</option>

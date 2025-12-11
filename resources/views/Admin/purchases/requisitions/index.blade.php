@@ -4,12 +4,7 @@
 @endsection
 
 @push('css')
-<style type="text/css">
-    table.table thead {
-    background: #7fd0b42e;
-    color: #3c3a3a;
-}
-</style>
+
 @endpush
 
 @section('contents')
@@ -79,7 +74,6 @@
                             <li><a href="{{route('admin.purchasesRequisitions',['status'=>'pending'])}}">Pending ({{$totals->pending}})</a></li>
                             <li><a href="{{route('admin.purchasesRequisitions',['status'=>'approved'])}}">Approved ({{$totals->approved}})</a></li>
                             <li><a href="{{route('admin.purchasesRequisitions',['status'=>'rejected'])}}">Rejected ({{$totals->rejected}})</a></li>
-                            <li><a href="{{route('admin.purchasesRequisitions',['status'=>'trash'])}}">Trash ({{$totals->trash}})</a></li>
                         </ul>
                     </div>
                 </div>
