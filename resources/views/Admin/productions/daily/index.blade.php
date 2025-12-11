@@ -146,14 +146,28 @@
                     @endforelse
 
                     @if($swings->count() > 0)
-                        <tr style="font-weight:bold;background:#eef3ff">
+                        <tr class="summary-hourly"  style="font-weight:bold;background:#eef3ff">
                             <td colspan="">Lines: {{ count($swings) }}</td>
                             <td colspan="">Style: {{ count(array_unique($unique_styles)) }}</td>
                             <td>Orders: {{ count(array_unique($unique_orders)) }}</td>
                             {{-- <td>Buyers: {{ count(array_unique($unique_buyers)) }}</td> --}}
                             <td>{{ $sum_target }}</td>
+                            @php
+                                $hourly_sums = [];
+                                for($h = $startHour; $h < $endHour; $h++) {
+                                    $hourly_sums[$h] = 0;
+
+                                    foreach($swings as $swing) {
+                                        // শুধু valid production hour-এ হিসাব নাও
+                                        if($h <= $startHour + $swing->working_hours - 1 && !$swing->isBreakHour($h)) {
+                                            $hourly_sums[$h] += $swing->getProductionHour($h, $today_date);
+                                        }
+                                    }
+                                }
+                            @endphp
+
                             @for($h=$startHour; $h<$endHour; $h++)
-                                <td style="background:#f2f5fbcf !important"></td>
+                                <td style="background:#f2f5fbcf !important" class="hourly-sum" data-hour="{{ $h }}">{{ $hourly_sums[$h] }}</td>
                             @endfor
                             <td id="sum-today">{{ $sum_today }}</td>
                             <td id="sum-prev">{{ $sum_previous }}</td>
@@ -246,6 +260,36 @@ $(document).ready(function(){
         $('#sum-balance').text(sum_balance);
     }
 
+    function hourlySummary() {
+        let startHour = {{ $startHour }};
+        let endHour = {{ $endHour }};
+
+        // hourly sums initialize
+        let hourly_sums = {};
+        for(let h=startHour; h<endHour; h++) hourly_sums[h] = 0;
+
+        // tbody row iterate করে hourly sums হিসাব করা
+        $('tbody tr').each(function(){
+            let row = $(this);
+            row.find('.data-row').each(function(){
+                let cell = $(this);
+                let val = parseInt(cell.text()) || 0;
+                let hour = parseInt(cell.data('hour'));
+                if(hourly_sums[hour] !== undefined){
+                    hourly_sums[hour] += val;
+                }
+            });
+        });
+
+        // update summary row td
+        $('tr.summary-hourly td.hourly-sum').each(function(){
+            let td = $(this);
+            let h = parseInt(td.data('hour'));
+            td.text(hourly_sums[h] || 0);
+        });
+    }
+
+
     $('.data-row').on('focus', function(){
         let cell = $(this);
         let value = cell.find('span').text() || cell.text();
@@ -262,6 +306,7 @@ $(document).ready(function(){
 
         setBadge(cell, value);
         updateRowsAndSummary();
+        hourlySummary();
 
         if(!isNaN(value) && value !== ''){
             $.post('{{ route("admin.dailyProductionAction", ["action"=>"update"]) }}', {
@@ -275,6 +320,8 @@ $(document).ready(function(){
     });
 
     updateRowsAndSummary();
+    // hourlySummary();
+
 });
 </script>
 @endpush
