@@ -652,6 +652,7 @@ class PurchasesController extends Controller
               $q->where('name','LIKE','%'.$r->search.'%');
               $q->orWhere('email','LIKE','%'.$r->search.'%');
               $q->orWhere('mobile','LIKE','%'.$r->search.'%');
+              $q->orWhere('company_name','LIKE','%'.$r->search.'%');
           }
           if($r->status){
             $q->where('status',$r->status=='inactive'?0:1);
