@@ -42,13 +42,17 @@
              <h3>Production Planning</h3>
              <div class="dropdown">
                 @if($plan->status!='temp')
+                @can('production_planning.edit')
                  <a href="{{ route('admin.productionPlanningAction',['edit',$plan->id]) }}" class="btn-custom primary" style="padding:5px 15px;">
                     Edit
                  </a>
+                 @endcan
                 @endif
+                @can('production_planning.view')
                  <a href="{{ route('admin.productionPlanningAction',['view',$plan->id]) }}" class="btn-custom yellow">
                      <i class="bx bx-rotate-left"></i>
                  </a>
+                 @endcan
              </div>
         </div>
         <div class="card-body">

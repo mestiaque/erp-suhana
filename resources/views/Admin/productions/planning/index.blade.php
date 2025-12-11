@@ -17,7 +17,7 @@
              <h3>Planning List</h3>
              <div class="dropdown">
 
-                @can('samples.add')
+                @can('production_planning.add')
                  <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Planning
                  </a>
@@ -116,11 +116,11 @@
                                 <br><b>Date:</b> {{ $order->created_at->format('d.m.Y') }}
                             </td>
                             <td class="text-center">
-                                @if(can('samples.view') || can('samples.view') || can('samples.view'))
-                                    @can('samples.view')
+                                @if(can('production_planning.view') || can('production_planning.view'))
+                                    @can('production_planning.view')
                                     <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
                                     @endcan
-                                    @can('samples.edit')
+                                    @can('production_planning.edit')
                                     <a href="{{ route('admin.productionPlanningAction',['edit',$order->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
                                     @endcan
                                 @else

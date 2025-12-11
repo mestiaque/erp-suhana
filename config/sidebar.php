@@ -166,7 +166,7 @@ return [
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/production-planning',
                     'icon_color'  => 'text-warning',
-                    'permission'  => 'samples'
+                    'permission'  => 'production_planning'
                 ],
                 [
                     'title'       => 'Procurement',

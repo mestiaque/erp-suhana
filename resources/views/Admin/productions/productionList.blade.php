@@ -118,6 +118,9 @@
                                 @elseif($order->status=='cancel')
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
+                                @can('production_planning.view')
+                                    <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
+                                @endcan
                             </td>
                         </tr>
                         @empty

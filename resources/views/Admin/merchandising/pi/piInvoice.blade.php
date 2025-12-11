@@ -275,7 +275,7 @@
 
                     <div class="row m-0 p-0">
                         <div class="col-10 pl-0">
-                            @if($pi->terms)
+                            @if($pi->terms !== null && !empty(json_decode($pi->terms, true)))
                                 <div style="margin-top: 1rem">
                                     <h6 style="font-size: 13px;">TERMS & CONDITIONS</h2>
                                     <div style="">
