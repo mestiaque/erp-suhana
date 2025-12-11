@@ -292,8 +292,6 @@ $(document).ready(function() {
 });
 
 </script>
-
-
 @endpush
 
 @push('css')

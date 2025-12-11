@@ -4289,12 +4289,14 @@ class AdminController extends Controller
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+        $supplierBill = Transaction::where('type', 3)->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)->sum('amount');
 
         if($r->summery){
-            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches'));
+
+            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill'));
         }
 
-        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches'));
+        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill'));
     }
 
     // Services Management Function

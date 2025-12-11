@@ -165,6 +165,15 @@
                 </li>
                 @endif
                 @endforeach
+
+                @if($supplierBill > 0)
+                <li>
+                    <i class="bx bx-check-double" style="background: #13bba4"></i>
+                    <span>Creditor Bill</span>
+                    {{$supplierBill ?? 0}} BDT
+                </li>
+                @endif
+
             </ul>
         </div>
     </div>
