@@ -61,7 +61,7 @@
                                     $end = ($endH > 12) ? $endH - 12 : $endH;
                                     $endPeriod = $endH < 12 ? 'AM' : 'PM';
                                 @endphp
-                                <th>{{ $start }}-{{ $end }} <span>{{ $endPeriod }}</span></th>
+                                <th style="white-space: nowrap;">{{ $start }}-{{ $end }} <span>{{ $endPeriod }}</span></th>
                             @endfor
                             <th>Today Total</th>
                             <th>Previous</th>

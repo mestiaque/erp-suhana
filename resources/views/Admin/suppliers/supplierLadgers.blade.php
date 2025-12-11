@@ -33,7 +33,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Ledger @if($supplier) of
                 <span class="font-weight-bold">
-                    <a href="{{route('admin.suppliersAction',['view',$supplier->id])}}">{{ $supplier?->name }}</a>
+                    <a href="{{route('admin.suppliersAction',['view',$supplier->id])}}">{{ $supplier?->name }} {{ $supplier->company_name?' - ('.$supplier->company_name.')': ''}}</a>
                 </span> @endif
             </h3>
              <div class="d-flex align-items-center" style="gap:0.5rem;">
@@ -42,7 +42,7 @@
                         <option value="">-- Select Supplier --</option>
                         @foreach($suppliers as $s)
                             <option value="{{ $s->id }}" {{ request()->supplier_id == $s->id ? 'selected' : '' }}>
-                                {{ $s->name }}
+                                {{ $s->name }} {{ $s->company_name?' - ('.$s->company_name.')': ''}}
                             </option>
                         @endforeach
                     </select>

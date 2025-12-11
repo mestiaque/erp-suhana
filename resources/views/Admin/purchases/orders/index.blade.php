@@ -83,7 +83,6 @@ table.table a {
                             <li><a href="{{ route('admin.purchasesOrders',['status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
                             <li><a href="{{ route('admin.purchasesOrders',['status'=>'approved']) }}">Approved ({{ $totals->approved }})</a></li>
                             <li><a href="{{ route('admin.purchasesOrders',['status'=>'rejected']) }}">Rejected ({{ $totals->rejected }})</a></li>
-                            <li><a href="{{ route('admin.purchasesOrders',['status'=>'trash']) }}">Trash ({{ $totals->trash }})</a></li>
                         </ul>
                     </div>
                 </div>

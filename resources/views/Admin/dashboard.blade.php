@@ -797,7 +797,7 @@ h4{
                                     $end = ($endHourNext > 12) ? $endHourNext - 12 : $endHourNext;
                                     $endPeriod = $endHourNext < 12 ? 'AM' : 'PM';
                                 @endphp
-                                <th>{{ $start }}-{{ $end }} {{ $endPeriod }}</th>
+                                <th style="white-space: nowrap;">{{ $start }}-{{ $end }} {{ $endPeriod }}</th>
                             @endfor
 
                             <th>Today Total</th>

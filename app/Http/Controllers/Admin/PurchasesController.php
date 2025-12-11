@@ -450,7 +450,6 @@ class PurchasesController extends Controller
             ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
             ->selectRaw("count(case when status = 'approved' then 1 end) as approved")
             ->selectRaw("count(case when status = 'rejected' then 1 end) as rejected")
-            ->selectRaw("count(case when status = 'trash' then 1 end) as trash")
             ->first();
 
         return view(adminTheme().'purchases.requisitions.index', compact('requisitions','totals'));
@@ -1094,7 +1093,7 @@ class PurchasesController extends Controller
                 $order->created_at = now();
                 $order->save();
             }
-            $order->currency = general()->currency;
+            $order->currency = general()->currency?: 'BDT';
             $order->order_no = now()->format('ymd') . $order->id;
             $order->save();
 
@@ -1279,7 +1278,7 @@ class PurchasesController extends Controller
             return redirect()->back();
         }
 
-        $receives = PurchaseReceive::latest()->where('status','<>','trash')
+        $receives = PurchaseReceive::latest()->where('status','<>','temp')
             ->where(function($q) use ($r){
                 if ($r->search){
                     $q->where('purchase_receive_no','LIKE','%'.$r->search.'%');
@@ -1302,7 +1301,7 @@ class PurchasesController extends Controller
             ->appends($r->all());
 
         $totals = DB::table('purchase_receives')
-            ->where('status','<>','trash')
+            ->where('status','<>','temp')
             ->selectRaw("count(*) as total")
             ->selectRaw("count(case when status='pending' then 1 end) as pending")
             ->selectRaw("count(case when status='approved' then 1 end) as approved")

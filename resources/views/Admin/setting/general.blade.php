@@ -125,7 +125,24 @@
                     <a href="{{route('admin.setting','logo')}}" style="color: red;" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                     @endif
                 </div>
-
+                <div class="col-xl-6 col-lg-6 col-md-12 form-group">
+                    <label for="helpInputTop">Finance Currency</label>
+                        <div class="input-group">
+                         <input type="text" name="currency" value="{{ $general->currency }}" placeholder="Finanmce Currency" class="form-control {{$errors->has('currency')?'error':''}}" />
+                         <select class="form-control" name="currency_decimal">
+                         		<option value="0" {{$general->currency_decimal==0?'selected':''}} >0 Decimal</option>
+                         		<option value="1" {{$general->currency_decimal==1?'selected':''}} >0.0 Decimal</option>
+                         		<option value="2" {{$general->currency_decimal==2?'selected':''}} >0.00 Decimal</option>
+                         </select>
+                         <select class="form-control" name="currency_position">
+                         		<option value="0" {{$general->currency_position==0?'selected':''}} >Left Position</option>
+                         		<option value="1" {{$general->currency_position==1?'selected':''}} >Right Position</option>
+                         </select>
+                        </div>
+                        @if ($errors->has('currency'))
+    				    	<p style="color: red;margin: 0;font-size: 10px;">{{ $errors->first('currency') }}</p>
+    				    @endif
+                </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="website">Website Url</label>
                     <input type="text" name="website" value="{{ $general->website }}" placeholder="Website website" class="form-control {{$errors->has('website')?'error':''}}" />
