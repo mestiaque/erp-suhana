@@ -174,6 +174,11 @@
         $filteredItems = $items->filter(function($item) use ($expenses){
             return $expenses->where('category_id', $item->id)->sum('amount') > 0;
         })->values();
+        $filteredItems->push((object)[
+            'id' => 'supplierbill',
+            'name' => 'Creditor Bill',
+            'amount' => $supplierBill // this can be 0 if no transactions
+        ]);
 
         $count = $filteredItems->count();
         $half = ceil($count / 2);
@@ -212,13 +217,29 @@
                 @php
                     // Left
                     $left = $leftItems[$i] ?? null;
-                    $leftTotal = $left ? $expenses->where('category_id',$left->id)->sum('amount') : 0;
-                    $leftSubTotal += $leftTotal;
+                    if ($left) {
+                        if ($left->id === 'supplierbill') {
+                            $leftTotal = $supplierBill; // use the pre-calculated custom value
+                        } else {
+                            $leftTotal = $expenses->where('category_id', $left->id)->sum('amount');
+                        }
+                        $leftSubTotal += $leftTotal;
+                    } else {
+                        $leftTotal = 0;
+                    }
 
-                    // Right
+                    // Right side
                     $right = $rightItems[$i] ?? null;
-                    $rightTotal = $right ? $expenses->where('category_id',$right->id)->sum('amount') : 0;
-                    $rightSubTotal += $rightTotal;
+                    if ($right) {
+                        if ($right->id === 'supplierbill') {
+                            $rightTotal = $supplierBill; // custom value for Creditor Bill
+                        } else {
+                            $rightTotal = $expenses->where('category_id', $right->id)->sum('amount');
+                        }
+                        $rightSubTotal += $rightTotal;
+                    } else {
+                        $rightTotal = 0;
+                    }
                 @endphp
 
                 <tr>

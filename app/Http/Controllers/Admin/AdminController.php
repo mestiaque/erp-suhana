@@ -27,6 +27,7 @@ use Redirect,Response;
 use App\Models\Company;
 use App\Models\Country;
 use App\Models\Expense;
+use App\Models\OrderDetail;
 use App\Models\General;
 use App\Models\Meeting;
 use App\Models\Service;
@@ -78,10 +79,10 @@ class AdminController extends Controller
     public function dashboard(){
 
         $reports =[
-            'total_order' => 0,
-            'total_order_confirmed' => 0,
-            'total_order_pending' => 0,
-            'total_order_cancelled' => 0,
+            'total_order' => OrderDetail::where('status','<>','temp')->count(),
+            'total_order_confirmed' => OrderDetail::where('status','confirmed')->count(),
+            'total_order_pending' => OrderDetail::where('status','pending')->count(),
+            'total_order_cancelled' => OrderDetail::where('status','cancelled')->count(),
             'total_staff' => User::where('status',1)->where('staff',true)->count(),
             'total_staff_present' => User::where('status',1)->where('staff',true)->count(),
             'total_staff_absent' => 0,
@@ -4289,12 +4290,14 @@ class AdminController extends Controller
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+        $supplierBill = Transaction::where('type', 3)->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)->sum('amount');
 
         if($r->summery){
-            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches'));
+
+            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill'));
         }
 
-        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches'));
+        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill'));
     }
 
     // Services Management Function
@@ -11291,6 +11294,8 @@ class AdminController extends Controller
             'email' => 'nullable|max:100',
             'email2' => 'nullable|max:100',
             'currency' => 'nullable|max:10',
+            'currency_decimal' => 'nullable|numeric',
+            'currency_position' => 'nullable|numeric',
             'website' => 'nullable|max:100',
             'meta_author' => 'nullable|max:100',
             'meta_title' => 'nullable|max:200',
@@ -11309,6 +11314,8 @@ class AdminController extends Controller
         $general->address_one=$r->address_one;
         $general->address_two=$r->address_two;
         $general->currency=$r->currency;
+        $general->currency_decimal=$r->currency_decimal;
+        $general->currency_position=$r->currency_position;
         $general->website=$r->website;
         $general->meta_author=$r->meta_author;
         $general->meta_title=$r->meta_title;

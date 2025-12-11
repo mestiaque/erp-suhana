@@ -148,6 +148,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
 
     Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');
+    Route::any('/procurement/yarn-booking/{action}/{id?}',[ProductionController::class,'yarnBookingAction'])->name('yarnBookingAction');
     Route::get('/procurement/knitting-booking',[ProductionController::class,'knittingBooking'])->name('knittingBooking');
     Route::get('/procurement/dying-booking',[ProductionController::class,'dyingBooking'])->name('dyingBooking');
 

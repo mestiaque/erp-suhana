@@ -5,8 +5,8 @@
 @endsection
 
 @push('css')
-<style type="text/css">
-
+<style>
+.table th, .table td { vertical-align: middle; }
 </style>
 @endpush
 
@@ -14,66 +14,110 @@
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Yarn Booking List</h3>
-             <div class="dropdown">
-                 <a href="{{ route('admin.yarnBooking') }}" class="btn-custom yellow">
-                     <i class="bx bx-rotate-left"></i>
-                 </a>
-             </div>
+            <h3>Yarn Booking List</h3>
+
+            <a href="{{ route('admin.yarnBookingAction', 'create') }}" class="btn btn-primary btn-sm">
+                <i class="bx bx-plus"></i> Add New
+            </a>
         </div>
 
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-            <!-- Search Form -->
-            <form action="{{ route('admin.yarnBooking') }}">
-                <div class="row mb-2">
+            {{-- Search / Filter --}}
+            <form method="GET" action="{{ route('admin.yarnBooking') }}">
+                <div class="row mb-3">
+
+                    {{-- Date Range --}}
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
-                            <input type="date" name="startDate" value="{{ request()->startDate ? Carbon\Carbon::parse(request()->startDate)->format('Y-m-d') : '' }}" class="form-control" />
-                            <input type="date" name="endDate" value="{{ request()->endDate ? Carbon\Carbon::parse(request()->endDate)->format('Y-m-d') : '' }}" class="form-control" />
+                            <input type="date" name="startDate"
+                                   value="{{ request()->startDate ?? '' }}"
+                                   class="form-control">
+
+                            <input type="date" name="endDate"
+                                   value="{{ request()->endDate ?? '' }}"
+                                   class="form-control">
                         </div>
                     </div>
+
+                    {{-- Search Text --}}
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Buyer, Style" class="form-control" />
-                            <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                            <input type="text" name="search"
+                                   value="{{ request()->search ?? '' }}"
+                                   placeholder="Search Buyer, Pi No, Booking No, Fabrication"
+                                   class="form-control">
+
+                            <button class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
+
                 </div>
             </form>
 
-            <!-- Status Filter -->
-            <div class="row mb-2">
-                <div class="col-md-12">
-
-                </div>
-            </div>
-
-            <!-- Samples Table -->
+            {{-- Table --}}
             <div class="table-responsive">
-                <table class="table table-striped table-borderd">
+                <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th style="width: 80px">SL</th>
-                            <th style="width: 150px">Order No</th>
-                            <th style="width: 150px">Style No</th>
-                            <th style="width: 150px">Merchant</th>
-                            <th style="min-width:200px">Buyer</th>
-                            <th style="width: 150px">Total Qty</th>
-                            <th style="width: 150px">Composition</th>
-                            <th style="width: 150px">GSM</th>
-                            <th style="width: 150px">Size</th>
+                            <th style="width: 60px">SL</th>
+                            <th>Booking No</th>
+                            <th>Buyer</th>
+                            <th>Booking Date</th>
+                            <th>Total Items</th>
+                            <th>Total OrderQty</th>
+                            <th>Added By</th>
+                            <th style="width: 180px">Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                       
+                        @forelse ($list as $i => $row)
+                        <tr>
+                            <td class="text-center">{{ $list->firstItem() + $i }}</td>
+                            <td>{{ $row->getBookingNo() }}</td>
+                            <td>{{ $row->buyer?->name ?? '-' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($row->booking_date)->format('d-m-Y') }}</td>
+                            <td class="text-center">{{ $row->items->count() }}</td>
+                            <td class="text-right">
+                                {{ number_format($row->items->sum('requisition_qty'), 2) }}
+                            </td>
+                            <td>{{ $row->addedBy?->name ?? '-' }}</td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->id }}">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                <a href="{{ route('admin.yarnBookingAction',['edit',$row->id]) }}" class="btn-custom success mr-1">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                                <a href="{{ route('admin.yarnBookingAction',['delete',$row->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger">
+                                    <i class="bx bx-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-3">
+                                No Yarn Booking Found
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
-
             </div>
+
+            {{-- Pagination --}}
+            <div class="mt-3">
+                {{ $list->appends(request()->query())->links() }}
+            </div>
+
         </div>
     </div>
+
+     @include(adminTheme().'productions.yarn-booking.includes.details')
+
+
 </div>
 @endsection
 
