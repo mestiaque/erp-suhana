@@ -275,7 +275,7 @@ class ProductionController extends Controller
             ->toArray();
 
         $styles = OrderDetail::where('status', 'confirmed')
-            // ->whereNotIn('style_no', $productionStyleNos)
+            ->whereNotIn('style_no', $productionStyleNos)
             ->orderBy('id', 'desc')
             ->get();
 

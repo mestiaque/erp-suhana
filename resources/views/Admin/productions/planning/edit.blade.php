@@ -62,13 +62,17 @@
                 <div class="row">
                     <div class="col-md-2">
                         <div class="style-info">
-                            <select class="form-control form-control-sm mb-2 styleSelect" name="{{ $plan->style_no ? '': 'style_no' }}" {{ $plan->style_no ? 'disabled':'' }}>
+                            @if($plan->style_no)
+                            <input type="hidden" name="{{ $plan->style_no ? 'style_no': '' }}" value="{{ $plan->style_no ? $plan->style_no : '' }}">
+                            <input type="text" value="{{ $plan->style_no ? $plan->style_no : '' }}" disabled>
+                            @else
+                            <select class="form-control form-control-sm mb-2 styleSelect" name="style_no">
                                 <option value="">Select</option>
                                 @foreach($styles as $style)
                                 <option value="{{$style->style_no}}" {{$style->style_no==$plan->style_no?'selected':''}} data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
                                 @endforeach
                             </select>
-                            <input type="hidden" name="{{ $plan->style_no ? 'style_no': '' }}" value="{{ $plan->style_no ? $plan->style_no : '' }}">
+                            @endif
                             <p>
                                 <input type="hidden" name="style_qty" value="{{$plan->style?->total_qty ?? 0}}" class="style_qty">
                                 Order Qty :<b class="styleQty">{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
