@@ -22,18 +22,7 @@
                         <strong>PI No:</strong>
                         <p>{{ $booking->pi_no ?? '--' }}</p>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Status:</strong><br>
-                        @if($booking->status=='pending')
-                            <span class="badge badge-warning">Pending</span>
-                        @elseif($booking->status=='confirmed')
-                            <span class="badge badge-info">Confirmed</span>
-                        @elseif($booking->status=='approved')
-                            <span class="badge badge-success">Approved</span>
-                        @elseif($booking->status=='cancel')
-                            <span class="badge badge-danger">Cancelled</span>
-                        @endif
-                    </div>
+
 
                     <div class="col-md-4">
                         <strong>Booking Date:</strong>
@@ -49,11 +38,27 @@
                         <strong>Total Yarn Qty:</strong>
                         <p>{{ number_format($booking->items->sum('requisition_qty'), 2) }}</p>
                     </div>
+                    <div class="col-md-4">
+                        <strong>Total Yarn Qty:</strong>
+                        <p>{{ number_format($booking->items->sum('received_qty'), 2) }}</p>
+                    </div>
+                    {{-- <div class="col-md-4">
+                        <strong>Status:</strong><br>
+                        @if($booking->status=='pending')
+                            <span class="badge badge-warning">Pending</span>
+                        @elseif($booking->status=='confirmed')
+                            <span class="badge badge-info">Confirmed</span>
+                        @elseif($booking->status=='approved')
+                            <span class="badge badge-success">Approved</span>
+                        @elseif($booking->status=='cancel')
+                            <span class="badge badge-danger">Cancelled</span>
+                        @endif
+                    </div>
 
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <strong>Remarks:</strong>
                         <p>{{ $booking->remarks ?? '--' }}</p>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <hr>
@@ -69,6 +74,7 @@
                                 <th>Fabrication</th>
                                 <th>Yarn Count</th>
                                 <th>Yarn Req. Qty</th>
+                                <th>Yarn Req. Qty</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -78,10 +84,11 @@
                                     <td>{{ $item->fabrication ?? '--' }}</td>
                                     <td>{{ $item->yarn_count ?? '--' }}</td>
                                     <td>{{ number_format($item->requisition_qty, 2) }}</td>
+                                    <td>{{ number_format($item->received_qty, 2) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">No Yarn Items Found</td>
+                                    <td colspan="5" class="text-center text-muted">No Yarn Items Found</td>
                                 </tr>
                             @endforelse
                         </tbody>

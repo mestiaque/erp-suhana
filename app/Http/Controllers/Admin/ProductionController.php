@@ -19,11 +19,13 @@ use App\Models\OrderDetails;
 use App\Models\SewingOutput;
 use Illuminate\Http\Request;
 use App\Models\ProformaInvoice;
+use App\Models\YarnBookingItem;
+use App\Models\YarnItemReceive;
 use App\Models\ProductionSewing;
 use App\Models\ProductionPlanning;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use App\Models\ProformaInvoiceItem;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -124,62 +126,6 @@ class ProductionController extends Controller
             }
 
             return response()->json(['success'=>true,'view'=>'']);
-        }
-
-        if($action=='updatex'){
-            return  $r->all();
-
-            $plan->style_no      = $r->style_no;
-            $plan->style_qty     = $r->style_qty?:0;
-            $plan->extra_time    = $r->extra_time?:0;
-            $plan->sewing_end    = $r->sewing_end;
-            $plan->working_hours = 10;
-            $plan->status = 'confirmed';
-            $plan->save();
-
-            $newFloors = $r->floor ?? [];
-            $existingFloors = $plan->sewingLines()->pluck('line_name')
-                                ->toArray();
-
-            $toDelete = array_diff($existingFloors, $newFloors);
-            if (!empty($toDelete)) {
-                    $plan->sewingLines()
-                    ->whereIn('line_name', $toDelete)
-                    ->delete();
-            }
-
-            foreach ($newFloors as $floorSlug) {
-                $floorLine = Attribute::where('type', 4)
-                                ->where('slug', $floorSlug)
-                                ->first();
-                if($floorLine){
-                    $line = $plan->sewingLines()
-                            ->where('line_name', $floorLine->slug)
-                            ->first();
-                    if (!$line) {
-                        $line = new ProductionSewing();
-                        $line->planning_id = $plan->id;
-                        $line->floor_name  = $floorLine->name;
-                        $line->line_name   = $floorLine->slug;
-                    }
-                    $line->style_no      = $plan->style_no;
-                    $line->capacity_hour = $floorLine->capacity;
-                    $line->save();
-                }
-            }
-
-            $plan->total_hourly_capacity = $plan->sewingLines()->sum('capacity_hour');
-
-            $totalMinutes = $this->calculateWorkingMinutes($plan->sewing_start, $plan->sewing_end);
-            // add lose time
-            $totalMinutes += intval($plan->extra_time);
-            $hours = floor($totalMinutes / 60);
-            $minutes = $totalMinutes % 60;
-            $plan->total_working_time = "{$hours}h - {$minutes}m";
-            $plan->save();
-
-            session()->flash('success','Production Planning Updated');
-            return redirect()->route('admin.productionPlanningAction',['view',$plan->id]);
         }
 
         if ($action == 'update') {
@@ -490,7 +436,6 @@ class ProductionController extends Controller
         return view(adminTheme().'productions.yarn-booking.index', compact('list'));
     }
 
-
     public function yarnBookingAction(Request $r, $action, $id = null)
     {
         // -------------------------------
@@ -518,6 +463,34 @@ class ProductionController extends Controller
             return redirect()->route('admin.yarnBookingAction', ['edit', $booking->id]);
         }
 
+        if ($action == 'delivery-update') {
+            $r->validate([
+                'id'  => 'required|exists:yarn_item_receives,id',
+                'qty' => 'required|numeric|min:0.01',
+                'created_at' => 'required|date',
+            ]);
+            // Existing received record
+            $receive = YarnItemReceive::findOrFail($r->id);
+            // Corresponding booking item
+            $bookingItem = YarnBookingItem::findOrFail($receive->yarn_booking_item_id);
+            // Calculate qty difference
+            $oldQty = $receive->delivery_qty;
+            $newQty = $r->qty;
+            $diff   = $newQty - $oldQty;
+            // Update received_qty in booking item
+            $bookingItem->increment('received_qty', $diff);
+            // Update receive record
+            $receive->update([
+                'delivery_qty' => $newQty,
+                'created_at'   => $r->created_at,
+            ]);
+
+            session()->flash('success', 'Yarn Received Updated Successfully');
+
+            return redirect()->route('admin.yarnBookingAction', ['delivery', $bookingItem->yarn_booking_id]);
+        }
+
+
 
         // -------------------------------
         // FIND YARN BOOKING
@@ -535,6 +508,46 @@ class ProductionController extends Controller
         if ($action == 'show') {
             return view(adminTheme() . 'productions.yarn-booking.show', compact('booking'));
         }
+
+        if ($action == 'delivery') {
+            return view(adminTheme() . 'productions.yarn-booking.receive', compact('booking'));
+        }
+
+        if ($action == 'delivery-add') {
+
+            $r->validate([
+                'items.*.id'           => 'required|exists:yarn_booking_items,id',
+                'items.*.delivery_qty'=> 'required|numeric|min:0.01',
+            ]);
+
+            foreach ($r->items as $itemData) {
+
+                $bookingItem = YarnBookingItem::find($itemData['id']);
+
+                if (!$bookingItem) {
+                    continue;
+                }
+
+                YarnItemReceive::create([
+                    'yarn_booking_id'       => $booking->id,
+                    'yarn_booking_item_id'  => $bookingItem->id,
+                    'fabrication'           => $bookingItem->fabrication,
+                    'yarn_count'            => $bookingItem->yarn_count,
+                    'delivery_qty'          => $itemData['delivery_qty'],
+                    'addedby_id'            => Auth::id(),
+                ]);
+
+                $bookingItem->increment(
+                    'received_qty',
+                    $itemData['delivery_qty']
+                );
+            }
+            session()->flash('success', 'Yarn Received Successfully');
+
+
+            return redirect()->route('admin.yarnBookingAction', ['delivery', $booking->id]);
+        }
+
 
         // -------------------------------
         // EDIT PAGE

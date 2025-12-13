@@ -66,9 +66,10 @@
                             <th>Buyer</th>
                             <th>Booking Date</th>
                             <th>Total Items</th>
-                            <th>Total OrderQty</th>
+                            <th>Total Req. Qty</th>
+                            <th>Total Del. Qty</th>
                             <th>Added By</th>
-                            <th style="width: 180px">Action</th>
+                            <th style="width: 200px">Action</th>
                         </tr>
                     </thead>
 
@@ -80,11 +81,17 @@
                             <td>{{ $row->buyer?->name ?? '-' }}</td>
                             <td>{{ \Carbon\Carbon::parse($row->booking_date)->format('d-m-Y') }}</td>
                             <td class="text-center">{{ $row->items->count() }}</td>
-                            <td class="text-right">
+                            <td class="text-">
                                 {{ number_format($row->items->sum('requisition_qty'), 2) }}
+                            </td>
+                            <td class="text-">
+                                {{ number_format($row->items->sum('received_qty'), 2) }}
                             </td>
                             <td>{{ $row->addedBy?->name ?? '-' }}</td>
                             <td>
+                                <a href="{{ route('admin.yarnBookingAction',['delivery',$row->id]) }}" class="btn-custom info mr-1">
+                                    <i class="fa fa-truck"></i>
+                                </a>
                                 <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->id }}">
                                     <i class="fa fa-eye"></i>
                                 </a>
@@ -98,7 +105,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-3">
+                            <td colspan="9" class="text-center text-muted py-3">
                                 No Yarn Booking Found
                             </td>
                         </tr>
