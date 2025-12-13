@@ -15,10 +15,17 @@
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>Yarn Booking List</h3>
+            <div class="dropdown">
+                {{-- @can('production_planning.add') --}}
+                    <a href="{{ route('admin.yarnBookingAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                        <i class="bx bx-plus"></i> Add Yarn Booking
+                    </a>
+                {{-- @endcan --}}
 
-            <a href="{{ route('admin.yarnBookingAction', 'create') }}" class="btn btn-primary btn-sm">
-                <i class="bx bx-plus"></i> Add New
-            </a>
+                    <a href="{{ route('admin.yarnBooking') }}" class="btn-custom yellow">
+                        <i class="bx bx-rotate-left"></i>
+                    </a>
+            </div>
         </div>
 
         <div class="card-body">

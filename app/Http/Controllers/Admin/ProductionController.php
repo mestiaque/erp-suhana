@@ -401,7 +401,7 @@ class ProductionController extends Controller
 
             $query->where(function ($q) use ($search) {
                 // Booking No or PI No
-                $q->where('booking_no', 'LIKE', "%{$search}%")
+                $q->where('id', 'LIKE', '%' . ltrim($search, '0') . '%')
                 ->orWhere('pi_no', 'LIKE', "%{$search}%")
                 // Buyer Name
                 ->orWhereHas('buyer', function ($b) use ($search) {
