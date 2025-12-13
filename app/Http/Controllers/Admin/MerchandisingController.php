@@ -1082,8 +1082,16 @@ class MerchandisingController extends Controller
             $pi->pi_no         = $r->pi_no ?? $pi->pi_no;
             $pi->created_at    = $r->created_at ?? $pi->created_at;
             $pi->order_date    = $r->order_date ?? $pi->order_date;
-            $pi->advising_bank = $r->advising_bank ?? $pi->advising_bank;
+            // $pi->advising_bank = $r->advising_bank ?? $pi->advising_bank;
             $pi->terms         = json_encode($checkedTerms);
+            // New fields
+            $pi->applicant               = $r->applicant ?? null ;
+            $pi->applicant_bank          = $r->applicant_bank ?? null;
+            $pi->first_beneficiary       = $r->first_beneficiary ?? null;
+            $pi->first_beneficiary_bank  = $r->first_beneficiary_bank ?? null;
+            $pi->second_beneficiary      = $r->second_beneficiary ?? null;
+            $pi->second_beneficiary_bank = $r->second_beneficiary_bank ?? null;
+            $pi->notify_party            = $r->notify_party ?? null;
 
             $pi->total_qty  = $total_qty;
             $pi->total_bill = $total_bill;
