@@ -10713,6 +10713,18 @@ class AdminController extends Controller
         }
         $user = $query->first();
 
+        $mobile = $r->input('mobile');
+        $exUser = User::where('mobile', $mobile)->first();
+        $trashedUser = User::withTrashed()->where('mobile', $mobile)->first();
+        if($trashedUser && !$exUser) {
+            Session()->flash('info', 'This mobile number is associated with an account that has been temporarily deleted.');
+            return redirect()->back();
+        }
+        if($exUser) {
+            Session()->flash('info', 'This mobile number is already in use.');
+            return redirect()->back();
+        }
+
         if(!$user){
           $password=Str::random(8);
           $user =new User();
