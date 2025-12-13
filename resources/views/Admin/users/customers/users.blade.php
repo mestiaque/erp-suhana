@@ -88,6 +88,9 @@
                         <li><a href="{{route('admin.usersCustomer')}}" class="{{request()->status?'':'active'}}" >All ({{$totals->total}})</a></li>
                         <li><a href="{{route('admin.usersCustomer',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}" >Active ({{$totals->active}})</a></li>
                         <li><a href="{{route('admin.usersCustomer',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}" >Inactive ({{$totals->inactive}})</a></li>
+                        @if($totals->deleted > 0)
+                        <li><a href="{{route('admin.usersCustomer',['view'=>'deleted'])}}" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -167,9 +170,9 @@
                                 <span style="color: #FF9800;">No Designation</span>
                                 @endif
                             </td>
-                            <td>{{$user->created_at->format('d M Y')}}</td>
+                            <td>{{$user->created_at->format('d.m.Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
-                                @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
+                                @if(can('employee.edit')  || can('employee.delete'))
                                     @can('employee.edit')
                                         <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success">
                                             <i class="bx bx-edit"></i>

@@ -10565,104 +10565,132 @@ class AdminController extends Controller
 
 
 
-    public function usersCustomer(Request $r){
+    public function usersCustomer(Request $r)
+    {
+        // Filter Actions (same as before)
+        if ($r->action) {
+            if ($r->checkid) {
+                $datas = User::latest()
+                    ->whereIn('status', [0, 1])
+                    ->whereIn('id', $r->checkid)
+                    ->get();
 
-      //Filter Actions Start
-      if($r->action){
-        if($r->checkid){
-        $datas=User::latest()->whereIn('status',[0,1])->whereIn('id',$r->checkid)->get();
-
-        foreach($datas as $data){
-
-            if($r->action==1){
-              $data->status=1;
-              $data->save();
-            }elseif($r->action==2){
-              $data->status=0;
-              $data->save();
-            }elseif($r->action==5){
-
-              $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
-              foreach ($userFiles as $media) {
-                  if(File::exists($media->file_url)){
-                        File::delete($media->file_url);
+                foreach ($datas as $data) {
+                    if ($r->action == 1) {
+                        $data->status = 1;
+                        $data->save();
+                    } elseif ($r->action == 2) {
+                        $data->status = 0;
+                        $data->save();
+                    } elseif ($r->action == 5) {
+                        $userFiles = Media::latest()->where('src_type', 6)->where('src_id', $data->id)->get();
+                        foreach ($userFiles as $media) {
+                            if (File::exists($media->file_url)) {
+                                File::delete($media->file_url);
+                            }
+                            $media->delete();
+                        }
+                        $data->delete(); // soft delete
                     }
-                  $media->delete();
-              }
-              $data->delete();
+                }
 
+                Session()->flash('success', 'Action Successfully Completed!');
+            } else {
+                Session()->flash('info', 'Please Need To Select Minimum One Post');
             }
 
+            return redirect()->back();
         }
 
-        Session()->flash('success','Action Successfully Completed!');
+        // Query Users
+        $usersQuery = User::latest()
+            ->where(function ($q) use ($r) {
+                if ($r->search) {
+                    $q->where('name', 'LIKE', '%' . $r->search . '%')
+                    ->orWhere('email', 'LIKE', '%' . $r->search . '%')
+                    ->orWhere('mobile', 'LIKE', '%' . $r->search . '%');
+                }
+                if ($r->status) {
+                    $q->where('status', $r->status == 'inactive' ? 0 : 1);
+                }
+                if ($r->role_id) {
+                    $q->where('permission_id', $r->role_id);
+                }
+                if ($r->startDate || $r->endDate) {
+                    $from = $r->startDate ?? Carbon::now()->format('Y-m-d');
+                    $to = $r->endDate ?? Carbon::now()->format('Y-m-d');
+                    $q->whereDate('created_at', '>=', $from)
+                    ->whereDate('created_at', '<=', $to);
+                }
+            });
 
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
+        // Show soft-deleted users if view=deleted, otherwise normal users
+        if ($r->view == 'deleted') {
+            $usersQuery->onlyTrashed()->with('deletedBy');
+        } else {
+            $usersQuery->whereIn('status', [0, 1])
+                    ->where('buyer', false)
+                    ->where('merchandiser', false);
         }
 
-        return redirect()->back();
-      }
+        $users = $usersQuery->select(['id','permission_id','name','email','employee_id','designation_id','mobile','created_at','addedby_id','status', 'deleted_by', 'deleted_at'])
+                            ->paginate(25)
+                            ->appends($r->all());
 
-      //Filter Action End
+        $totals = DB::table('users')->whereIn('status', [0, 1])
+            ->selectRaw('count(*) as total')
+            ->selectRaw("count(case when status = 1 then 1 end) as active")
+            ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+            ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
+            ->first();
 
-      $users =User::latest()->whereIn('status',[0,1])->where('buyer', false)->where('merchandiser', false)
+        $roles = Permission::latest()->where('status', 'active')->get();
 
-      ->where(function($q) use($r) {
-
-          if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
-              $q->orWhere('email','LIKE','%'.$r->search.'%');
-              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
-          }
-          if($r->status){
-            $q->where('status',$r->status=='inactive'?0:1);
-          }
-
-
-          if($r->role_id){
-              $q->where('permission_id',$r->role_id);
-          }
-
-          if($r->startDate || $r->endDate)
-          {
-              if($r->startDate){
-                  $from =$r->startDate;
-              }else{
-                  $from=Carbon::now()->format('Y-m-d');
-              }
-
-              if($r->endDate){
-                  $to =$r->endDate;
-              }else{
-                  $to=Carbon::now()->format('Y-m-d');
-              }
-
-              $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-          }
-
-      })
-      ->select(['id','permission_id','name','email','employee_id','designation_id','mobile','created_at','addedby_id','status'])
-        ->paginate(25)->appends([
-          'search'=>$r->search,
-          'status'=>$r->status,
-          'startDate'=>$r->startDate,
-          'endDate'=>$r->endDate,
-        ]);
-
-      //Total Count Results
-      $totals = DB::table('users')->whereIn('status',[0,1])
-      ->selectRaw('count(*) as total')
-      ->selectRaw("count(case when status = 1 then 1 end) as active")
-      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
-      ->first();
-
-      $roles =Permission::latest()->where('status','active')->get();
-      return view(adminTheme().'users.customers.users',compact('users','totals','roles'));
+        // Return different views
+        if ($r->view == 'deleted') {
+            return view(adminTheme() . 'users.customers.users_deleted', compact('users', 'totals', 'roles'));
+        } else {
+            return view(adminTheme() . 'users.customers.users', compact('users', 'totals', 'roles'));
+        }
     }
 
 
+
     public function usersCustomerAction(Request $r,$action,$id=null){
+
+
+        if($action == 'restore') {
+            // Soft deleted user খুঁজে বের করা
+            $user = User::onlyTrashed()->find($id); // এখানে $id বা user object ধরে নিই
+
+            if(!$user){
+                Session()->flash('error', 'User not found or already restored!');
+                return redirect()->back();
+            }
+
+            $user->restore(); // Restore করা হলো
+            Session()->flash('success', 'User has been restored successfully!');
+            return redirect()->back();
+        }
+        if($action == 'force-delete'){
+            $user = User::onlyTrashed()->find($id);
+            $userFiles = Media::latest()->where('src_type', 6)->where('src_id', $user->id)->get();
+
+            foreach ($userFiles as $media){
+                $filePath = $media->file_url;
+                if(str_starts_with($filePath, 'public/')){
+                    $filePath = substr($filePath, 7);
+                }
+                if(File::exists($filePath)){
+                    File::delete($filePath); // ফাইল permanent delete
+                }
+                $media->delete(); // Soft delete বা Permanent delete, Media model এর উপর নির্ভর করে
+            }
+
+            $user->forceDelete(); // Permanent delete
+            Session()->flash('success', 'User has been permanently deleted!');
+            return redirect()->back();
+        }
 
       //Add New User Start
       if($action=='create' && $r->isMethod('post')){
@@ -10967,23 +10995,15 @@ class AdminController extends Controller
         //Update User Password Change End
 
         //Delete User Start
-        if($action=='delete'){
 
-          $userFiles =Media::latest()->where('src_type',6)->where('src_id',$user->id)->get();
-          foreach ($userFiles as $media){
-                $file0 = $media->file_url;
-                if(str_starts_with($file0, 'public/')){
-                    $file0 = substr($file0, 7);
-                }
-                if(File::exists($file0)){
-                  File::delete($file0);
-                }
-                $media->delete();
-          }
-          $user->delete();
-          Session()->flash('success','User Are Deleted Successfully Deleted!');
-          return redirect()->back();
+        if($action == 'delete'){
+            $user->deleted_by = auth()->id(); // যে user delete করছে
+            $user->save();
+            $user->delete(); // Soft delete হবে
+            Session()->flash('success', 'User has been soft deleted successfully!');
+            return redirect()->back();
         }
+
         //Delete User End
 
 

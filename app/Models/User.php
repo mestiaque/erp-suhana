@@ -6,13 +6,14 @@ use App\Models\Attribute;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     //Models Information Data
     /********
@@ -95,9 +96,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'addedby_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
-
-
 
     public function identities() {
        return $this->hasMany(SocialIdentity::class);
@@ -109,6 +109,10 @@ class User extends Authenticatable
 
     public function addedBy(){
         return $this->belongsTo(User::class,'addedby_id');
+    }
+
+    public function deletedBy(){
+        return $this->belongsTo(User::class, 'deleted_by')->withTrashed();
     }
 
     public function designation(){
