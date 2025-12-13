@@ -10055,10 +10055,10 @@ class AdminController extends Controller
           }
 
           if(Hash::check($r->old_password, $user->password)){
+
             $user->password_show=$r->password;
             $user->password=Hash::make($r->password);
             $user->update();
-
             Session()->flash('success','Your Are Successfully Done');
             return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
           }else{
