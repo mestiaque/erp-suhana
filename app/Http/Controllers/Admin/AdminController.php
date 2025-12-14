@@ -10259,7 +10259,7 @@ class AdminController extends Controller
            $user->city =$r->city;
            $user->postal_code =$r->postal_code;
            $user->permission_id =$r->role;
-           $hasUser->merchandiser=true;
+           $user->merchandiser=true;
 
            ///////Image UploadStart////////////
            if($r->hasFile('image')){
