@@ -9855,757 +9855,817 @@ class AdminController extends Controller
 
 
     // Staff Management Function Start
+    /* =====================================================
+     | Staff Actions
+     ===================================================== */
 
-    public function staffAdmin(Request $r){
 
-      //Filter Actions Start
-      if($r->action){
-        if($r->checkid){
-
-        $datas=User::latest()->whereIn('status',[0,1])->where('staff',true)->whereIn('id',$r->checkid)->get();
-
-        foreach($datas as $data){
-
-            if($r->action==1){
-              $data->status=1;
-              $data->save();
-            }elseif($r->action==2){
-              $data->status=0;
-              $data->save();
-            }elseif($r->action==3){
-              $data->fetured=true;
-              $data->save();
-            }elseif($r->action==4){
-              $data->fetured=false;
-              $data->save();
-            }elseif($r->action==5){
-
-              //User Media File Delete
-              $data->staff=false;
-              $data->addedby_at=null;
-              $data->permission_id=null;
-              $data->addedby_id=null;
-              $data->save();
-
+    public function staffAdmin(Request $r)
+    {
+        /* ================= Bulk Actions ================= */
+        if ($r->action) {
+            if (!$r->checkid) {
+                Session()->flash('info','Please select at least one item');
+                return redirect()->back();
             }
 
+            $users = User::withTrashed()->filterByType('staff')->whereIn('id',$r->checkid)->get();
+
+            foreach ($users as $user) {
+                switch ($r->action) {
+                    case 1: $user->status = 1; $user->save(); break;
+                    case 2: $user->status = 0; $user->save(); break;
+                    case 3: $user->fetured = true; $user->save(); break;
+                    case 4: $user->fetured = false; $user->save(); break;
+                    case 5: // Soft Delete
+                        if (!$user->trashed()) {
+                            $user->deleted_at = Carbon::now();
+                            $user->deleted_by = Auth::id();
+                            $user->save();
+                        }
+                        break;
+                    case 6: if ($user->trashed()) $user->restore(); break;
+                    case 7: // Force Delete
+                        if ($user->trashed()) {
+                            deleteUserFiles($user->id);
+                            $user->forceDelete();
+                        }
+                        break;
+                }
+            }
+
+            Session()->flash('success','Bulk action completed successfully!');
+            return redirect()->back();
+        }
+        /* ================= Bulk Actions End ================= */
+
+
+        /* ================= Staff List ================= */
+        $users = User::latest()
+            ->whereIn('status',[0,1])
+            ->filterByType('staff')
+            ->where(function ($q) use ($r) {
+                if ($r->search) {
+                    $q->where('name','LIKE',"%{$r->search}%")
+                    ->orWhere('mobile','LIKE',"%{$r->search}%")
+                    ->orWhere('email','LIKE',"%{$r->search}%");
+                }
+            })
+            ->paginate(12)
+            ->appends($r->all());
+
+        $totals = User::withTrashed()->filterByType('staff')
+            ->selectRaw('count(*) as total')
+            ->selectRaw("count(case when status=1 then 1 end) as active")
+            ->selectRaw("count(case when status=0 then 1 end) as inactive")
+            ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
+            ->first();
+
+                    /* ================= Trash View ================= */
+        if ($r->view == 'deleted') {
+            $users = User::onlyTrashed()->filterByType('staff')->latest()->paginate(12);
+            return view(adminTheme().'users.staff.users_deleted', compact('users','totals'));
         }
 
-        Session()->flash('success','Action Successfully Completed!');
-
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-
-        return redirect()->back();
-      }
-
-      //Filter Action End
-
-
-      $users =User::latest()->whereIn('status',[0,1])->where('staff',true)
-        ->where(function($q) use($r) {
-
-          if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
-              $q->orWhere('email','LIKE','%'.$r->search.'%');
-              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
-          }
-
-          if($r->role){
-             $q->where('permission_id',$r->role);
-          }
-
-          if($r->startDate || $r->endDate)
-          {
-              if($r->startDate){
-                  $from =$r->startDate;
-              }else{
-                  $from=Carbon::now()->format('Y-m-d');
-              }
-
-              if($r->endDate){
-                  $to =$r->endDate;
-              }else{
-                  $to=Carbon::now()->format('Y-m-d');
-              }
-
-              $q->whereDate('addedby_at','>=',$from)->whereDate('addedby_at','<=',$to);
-          }
-
-      })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
-      ->paginate(12)->appends([
-        'search'=>$r->search,
-        'startDate'=>$r->startDate,
-        'endDate'=>$r->endDate,
-      ]);
-
-      //Total Count Results
-      $totals = DB::table('users')->whereIn('status',[0,1])->where('staff',true)
-      ->selectRaw('count(*) as total')
-      ->selectRaw("count(case when status = 1 then 1 end) as active")
-      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
-      ->first();
-
-      $roles =Permission::latest()->where('status','active')->get();
-
-      return view(adminTheme().'users.staff.users',compact('users','totals','roles'));
+        return view(adminTheme().'users.staff.users', compact('users','totals'));
     }
 
-    public function staffAdminAction (Request $r,$action,$id=null){
+    public function staffAdminAction(Request $r, $action, $id = null)
+    {
+        /* ================= CREATE STAFF ================= */
+        if ($action == 'create' && $r->isMethod('post')) {
+            $r->validate([
+                'name'   => 'required|string|max:255',
+                'mobile' => 'required|digits:11|regex:/^0[0-9]{10}$/',
+                'email'  => 'nullable|email|max:255',
+            ]);
 
-      //Add Admin User Start
-      if($action=='create' && $r->isMethod('post')){
+            // Active check
+            $activeQuery = User::where('mobile',$r->mobile);
+            if ($r->email) $activeQuery->orWhere('email',$r->email);
 
-        if(filter_var($r->username, FILTER_VALIDATE_EMAIL)){
-          $hasUser =User::latest()->whereIn('status',[0,1])->where('email',$r->username)->first();
-        }else{
-          $hasUser =User::latest()->whereIn('status',[0,1])->where('mobile',$r->username)->first();
+            if ($activeQuery->exists()) {
+                Session()->flash('info','Email or Mobile already exists');
+                return redirect()->back();
+            }
+
+            // Trash check
+            $trashQuery = User::onlyTrashed()->where('mobile',$r->mobile);
+            if ($r->email) $trashQuery->orWhere('email',$r->email);
+
+            if ($trashQuery->exists()) {
+                Session()->flash('info','This email or mobile exists in trash');
+                return redirect()->back();
+            }
+
+            $password = Str::random(8);
+            $user = new User();
+            $user->name = $r->name;
+            $user->mobile = $r->mobile;
+            $user->email = $r->email ?? null;
+            $user->password_show = $password;
+            $user->password = Hash::make($password);
+            $user->setTypes('staff');
+            $user->addedby_id = Auth::id();
+            $user->addedby_at = Carbon::now();
+            $user->save();
+
+            Session()->flash('success','Staff created successfully!');
+            return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
         }
+        /* ================= CREATE END ================= */
 
-        if(!$hasUser){
-            Session()->flash('error','This User Are Not Register');
+        /* ================= RESTORE ================= */
+        if ($action == 'restore') {
+            $user = User::onlyTrashed()->filterByType('staff')->find($id);
+            if (!$user) {
+                Session()->flash('error','Staff not found in trash');
+                return redirect()->route('admin.staffAdmin',['view'=>'deleted']);
+            }
+            $user->restore();
+            Session()->flash('success','Staff restored successfully!');
             return redirect()->route('admin.staffAdmin');
         }
 
-        if($hasUser->staff){
-            Session()->flash('error','This User Are already Staff Authorize');
+        /* ================= FORCE DELETE ================= */
+        if ($action == 'force-delete') {
+            $user = User::onlyTrashed()->filterByType('staff')->find($id);
+            if (!$user) {
+                Session()->flash('error','Staff not found in trash');
+                return redirect()->route('admin.staffAdmin',['view'=>'deleted']);
+            }
+            deleteUserFiles($user->id);
+            $user->forceDelete();
+            Session()->flash('success','Staff permanently deleted!');
+            return redirect()->route('admin.staffAdmin',['view'=>'deleted']);
+        }
+
+        /* ================= FIND STAFF ================= */
+        $user = User::filterByType('staff')->find($id);
+        if (!$user) {
+            Session()->flash('error','Staff user not found');
             return redirect()->route('admin.staffAdmin');
         }
 
-        $hasUser->staff=true;
-        $hasUser->permission_id=1;
-        $hasUser->addedby_at=Carbon::now();
-        $hasUser->addedby_id=Auth::id();
-        $hasUser->save();
+        /* ================= UPDATE ================= */
+        if ($action == 'update' && $r->isMethod('post')) {
+            $r->validate([
+                'name'   => 'required|max:100|unique:users,name,'.$user->id,
+                'email'  => 'nullable|unique:users,email,'.$user->id,
+                'mobile' => 'nullable|unique:users,mobile,'.$user->id,
+            ]);
 
-        Session()->flash('success','User Are Successfully Staff Authorize Done!');
-        return redirect()->route('admin.staffAdminAction',['edit',$hasUser->id]);
+            $user->name = $r->name;
+            $user->email = $r->email;
+            $user->mobile = $r->mobile;
+            $user->status = $r->status ? 1 : 0;
+            $user->setTypes('staff');
 
-      }
-      //Add Admin User End
+            if ($r->hasFile('image')) {
+                uploadFile($r->image,$user->id,6,1,Auth::id());
+            }
 
-
-      $user=User::whereIn('status',[0,1])->where('staff',true)->find($id);
-
-      if(!$user){
-        Session()->flash('error','This Staff User Are Not Found');
-        return redirect()->route('admin.staffAdmin');
-      }
-
-        //Update User Profile Start
-        if($action=='update' && $r->isMethod('post')){
-
-            $check = $r->validate([
-                 'name' => 'required|max:100|unique:users,name,'.$user->id,
-                 'email' => 'required|max:100|unique:users,email,'.$user->id,
-                 'mobile' => 'nullable|max:20|unique:users,mobile,'.$user->id,
-                 'gender' => 'nullable|max:10',
-                 'address' => 'nullable|max:191',
-                 'division' => 'nullable|numeric',
-                 'district' => 'nullable|max:191',
-                 'city' => 'nullable|max:191',
-                 'postal_code' => 'nullable|max:20',
-                 'role' => 'nullable|numeric',
-                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-
-             ]);
-
-           $user->name =$r->name;
-           $user->mobile =$r->mobile;
-           $user->email =$r->email;
-           $user->gender =$r->gender;
-           $user->address_line1 =$r->address;
-           $user->division =$r->division;
-           $user->district =$r->district;
-           $user->city =$r->city;
-           $user->postal_code =$r->postal_code;
-           $user->permission_id =$r->role;
-
-           ///////Image UploadStart////////////
-           if($r->hasFile('image')){
-             $file =$r->image;
-             $src  =$user->id;
-             $srcType  =6;
-             $fileUse  =1;
-             $author=Auth::id();
-             uploadFile($file,$src,$srcType,$fileUse,$author);
-           }
-           ///////Image Upload End////////////
-
-           $user->status=$r->status?true:false;
-           $user->save();
-
-           Session()->flash('success','Your Updated Are Successfully Done!');
-           return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
-        }
-        //Update User Profile End
-
-        //Update User Password Start
-        if($action=='change-password' && $r->isMethod('post')){
-
-          $validator = Validator::make($r->all(), [
-              'old_password' => 'required|string|min:8',
-              'password' => 'required|string|min:8|confirmed|different:old_password',
-          ]);
-
-          if($validator->fails()){
-              return redirect()->route('admin.staffAdminAction',['edit',$user->id])->withErrors($validator)->withInput();
-          }
-
-          if(Hash::check($r->old_password, $user->password)){
-            $user->password_show=$r->password;
-            $user->password=Hash::make($r->password);
-            $user->update();
-
-            Session()->flash('success','Your Are Successfully Done');
-            return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
-          }else{
-            Session()->flash('error','Current Password Are Not Match');
-            return redirect()->route('admin.staffAdminAction',['edit',$user->id]);
-          }
-        }
-        //Update User Password End
-
-        //Delete User End
-        if($action=='delete'){
-          $user->staff=false;
-          $user->addedby_at=null;
-          $user->permission_id=null;
-          $user->addedby_id=null;
-          $user->save();
-
-          Session()->flash('success','Staff User Are Removed Successfully Done');
-          return redirect()->route('admin.staffAdmin');
-        }
-        //Delete User End
-        $roles =Permission::latest()->where('status','active')->get();
-
-        if($action == 'view'){
-            return view(adminTheme().'users.staff.viewUser',compact('user','roles', 'action'));
+            $user->save();
+            Session()->flash('success','Staff updated successfully!');
+            return redirect()->back();
         }
 
-        return view(adminTheme().'users.staff.editUser',compact('user','roles'));
+        /* ================= PASSWORD ================= */
+        if ($action == 'change-password' && $r->isMethod('post')) {
+            $r->validate([
+                'old_password' => 'required|min:8',
+                'password' => 'required|min:8|confirmed|different:old_password',
+            ]);
 
+            if (!Hash::check($r->old_password,$user->password)) {
+                Session()->flash('error','Old password not match');
+                return redirect()->back();
+            }
+
+            $user->password_show = $r->password;
+            $user->password = Hash::make($r->password);
+            $user->save();
+
+            Session()->flash('success','Password updated successfully!');
+            return redirect()->back();
+        }
+
+        /* ================= SOFT DELETE ================= */
+        if ($action == 'delete') {
+            $user->deleted_at = Carbon::now();
+            $user->deleted_by = Auth::id();
+            $user->save();
+            Session()->flash('success','Staff deleted successfully!');
+            return redirect()->route('admin.staffAdmin');
+        }
+
+        if ($action == 'view') {
+            return view(adminTheme().'users.staff.viewUser', compact('user','action'));
+        }
+        $roles = Permission::where('status','active')->get();
+
+        return view(adminTheme().'users.staff.editUser', compact('user', 'roles'));
     }
+
 
     // merchandisers Management Function Start
-
-    public function merchandisers(Request $r){
-
-      //Filter Actions Start
-      if($r->action){
-        if($r->checkid){
-
-        $datas=User::latest()->whereIn('status',[0,1])->where('merchandiser',true)->whereIn('id',$r->checkid)->get();
-
-        foreach($datas as $data){
-
-            if($r->action==1){
-              $data->status=1;
-              $data->save();
-            }elseif($r->action==2){
-              $data->status=0;
-              $data->save();
-            }elseif($r->action==3){
-              $data->fetured=true;
-              $data->save();
-            }elseif($r->action==4){
-              $data->fetured=false;
-              $data->save();
-            }elseif($r->action==5){
-
-              //User Media File Delete
-              $data->merchandiser=false;
-              $data->addedby_at=null;
-              $data->permission_id=null;
-              $data->addedby_id=null;
-              $data->save();
-
-            }
-
-        }
-
-        Session()->flash('success','Action Successfully Completed!');
-
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-
-        return redirect()->back();
-      }
-
-      //Filter Action End
-
-
-      $users =User::latest()->whereIn('status',[0,1])->where('merchandiser',true)
-        ->where(function($q) use($r) {
-
-          if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
-              $q->orWhere('email','LIKE','%'.$r->search.'%');
-              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
-          }
-
-          if($r->role){
-             $q->where('permission_id',$r->role);
-          }
-
-          if($r->startDate || $r->endDate)
-          {
-              if($r->startDate){
-                  $from =$r->startDate;
-              }else{
-                  $from=Carbon::now()->format('Y-m-d');
-              }
-
-              if($r->endDate){
-                  $to =$r->endDate;
-              }else{
-                  $to=Carbon::now()->format('Y-m-d');
-              }
-
-              $q->whereDate('addedby_at','>=',$from)->whereDate('addedby_at','<=',$to);
-          }
-
-      })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
-      ->paginate(12)->appends([
-        'search'=>$r->search,
-        'startDate'=>$r->startDate,
-        'endDate'=>$r->endDate,
-      ]);
-
-      //Total Count Results
-      $totals = DB::table('users')->whereIn('status',[0,1])->where('merchandiser',true)
-      ->selectRaw('count(*) as total')
-      ->selectRaw("count(case when status = 1 then 1 end) as active")
-      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
-      ->first();
-
-      $roles =Permission::latest()->where('status','active')->get();
-
-      return view(adminTheme().'users.merchandisers.users',compact('users','totals','roles'));
-    }
-
-    public function merchandisersAction (Request $r,$action,$id=null){
-
-      //Add Admin User Start
-      if($action=='create' && $r->isMethod('post')){
-
-        if(filter_var($r->username, FILTER_VALIDATE_EMAIL)){
-          $hasUser =User::latest()->whereIn('status',[0,1])->where('email',$r->username)->first();
-        }else{
-          $hasUser =User::latest()->whereIn('status',[0,1])->where('mobile',$r->username)->first();
-        }
-
-        if(!$hasUser){
-            Session()->flash('error','This User Are Not Register');
-            return redirect()->route('admin.merchandisers');
-        }
-
-        if($hasUser->merchandiser){
-            Session()->flash('error','This User Are already Merchandisers Authorize');
-            return redirect()->route('admin.merchandisers');
-        }
-
-        $hasUser->merchandiser=true;
-        $hasUser->admin=true;
-        $hasUser->permission_id=1;
-        $hasUser->addedby_at=Carbon::now();
-        $hasUser->addedby_id=Auth::id();
-        $hasUser->save();
-
-        Session()->flash('success','User Are Successfully Merchandisers Authorize Done!');
-        return redirect()->route('admin.merchandisersAction',['edit',$hasUser->id]);
-
-      }
-      //Add Admin User End
-
-
-      $user=User::whereIn('status',[0,1])->where('merchandiser',true)->find($id);
-
-      if(!$user){
-        Session()->flash('error','This Merchandisers User Are Not Found');
-        return redirect()->route('admin.merchandisers');
-      }
-
-        //Update User Profile Start
-        if($action=='update' && $r->isMethod('post')){
-
-            $check = $r->validate([
-                 'name' => 'required|max:100|unique:users,name,'.$user->id,
-                 'email' => 'nullable|max:100|unique:users,email,'.$user->id,
-                 'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
-                 'gender' => 'nullable|max:10',
-                 'address' => 'nullable|max:191',
-                 'division' => 'nullable|numeric',
-                 'district' => 'nullable|max:191',
-                 'city' => 'nullable|max:191',
-                 'postal_code' => 'nullable|max:20',
-                 'role' => 'nullable|numeric',
-                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-
-             ]);
-
-           $user->name =$r->name;
-           $user->mobile =$r->mobile;
-           $user->email =$r->email;
-           $user->gender =$r->gender;
-           $user->address_line1 =$r->address;
-           $user->division =$r->division;
-           $user->district =$r->district;
-           $user->city =$r->city;
-           $user->postal_code =$r->postal_code;
-           $user->permission_id =$r->role;
-           $user->admin=true;
-
-           ///////Image UploadStart////////////
-           if($r->hasFile('image')){
-             $file =$r->image;
-             $src  =$user->id;
-             $srcType  =6;
-             $fileUse  =1;
-             $author=Auth::id();
-             uploadFile($file,$src,$srcType,$fileUse,$author);
-           }
-           ///////Image Upload End////////////
-
-           $user->status=$r->status?true:false;
-           $user->save();
-
-           Session()->flash('success','Your Updated Are Successfully Done!');
-           return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
-        }
-        //Update User Profile End
-
-        //Update User Password Start
-        if($action=='change-password' && $r->isMethod('post')){
-
-          $validator = Validator::make($r->all(), [
-              'old_password' => 'required|string|min:8',
-              'password' => 'required|string|min:8|confirmed|different:old_password',
-          ]);
-
-          if($validator->fails()){
-              return redirect()->route('admin.merchandisersAction',['edit',$user->id])->withErrors($validator)->withInput();
-          }
-
-          if(Hash::check($r->old_password, $user->password)){
-            $user->password_show=$r->password;
-            $user->password=Hash::make($r->password);
-            $user->update();
-
-            Session()->flash('success','Your Are Successfully Done');
-            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
-          }else{
-            Session()->flash('error','Current Password Are Not Match');
-            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
-          }
-        }
-        //Update User Password End
-
-        //Delete User End
-        if($action=='delete'){
-          $user->merchandiser=false;
-          $user->addedby_at=null;
-          $user->permission_id=null;
-          $user->addedby_id=null;
-          $user->save();
-
-          Session()->flash('success','Merchandisers User Are Removed Successfully Done');
-          return redirect()->route('admin.merchandisers');
-        }
-        //Delete User End
-        $roles =Permission::latest()->where('status','active')->get();
-
-        if($action == 'view'){
-            return view(adminTheme().'users.merchandisers.viewUser',compact('user','roles', 'action'));
-        }
-
-        return view(adminTheme().'users.merchandisers.editUser',compact('user','roles'));
-
-    }
-
-    // User Management Function Start
-
-    public function usersAdmin(Request $r){
-
-      //Filter Actions Start
-      if($r->action){
-        if($r->checkid){
-
-        $datas=User::latest()->whereIn('status',[0,1])->where('admin',true)->whereIn('id',$r->checkid)->get();
-
-        foreach($datas as $data){
-
-            if($r->action==1){
-              $data->status=1;
-              $data->save();
-            }elseif($r->action==2){
-              $data->status=0;
-              $data->save();
-            }elseif($r->action==3){
-              $data->fetured=true;
-              $data->save();
-            }elseif($r->action==4){
-              $data->fetured=false;
-              $data->save();
-            }elseif($r->action==5){
-
-              //User Media File Delete
-              $data->admin=false;
-              $data->addedby_at=null;
-              $data->permission_id=null;
-              $data->addedby_id=null;
-              $data->save();
-
-            }
-
-        }
-
-        Session()->flash('success','Action Successfully Completed!');
-
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-
-        return redirect()->back();
-      }
-
-      //Filter Action End
-
-
-      $users =User::latest()->whereIn('status',[0,1])->where('admin',true)
-        ->where('permission_id',1)
-        ->where(function($q) use($r) {
-
-          if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
-              $q->orWhere('email','LIKE','%'.$r->search.'%');
-              $q->orWhere('mobile','LIKE','%'.$r->search.'%');
-          }
-
-          if($r->role){
-             $q->where('permission_id',$r->role);
-          }
-
-          if($r->startDate || $r->endDate)
-          {
-              if($r->startDate){
-                  $from =$r->startDate;
-              }else{
-                  $from=Carbon::now()->format('Y-m-d');
-              }
-
-              if($r->endDate){
-                  $to =$r->endDate;
-              }else{
-                  $to=Carbon::now()->format('Y-m-d');
-              }
-
-              $q->whereDate('addedby_at','>=',$from)->whereDate('addedby_at','<=',$to);
-          }
-
-      })
-      ->select(['id','permission_id','name', 'designation_id', 'email','mobile','addedby_at','addedby_id','status', 'created_at', 'employee_id'])
-      ->paginate(12)->appends([
-        'search'=>$r->search,
-        'startDate'=>$r->startDate,
-        'endDate'=>$r->endDate,
-      ]);
-
-      //Total Count Results
-      $totals = DB::table('users')->whereIn('status',[0,1])->where('admin',true)
-      ->selectRaw('count(*) as total')
-      ->selectRaw("count(case when status = 1 then 1 end) as active")
-      ->selectRaw("count(case when status = 0 then 1 end) as inactive")
-      ->first();
-
-      $roles =Permission::latest()->where('status','active')->get();
-
-      return view(adminTheme().'users.admins.users',compact('users','totals','roles'));
-    }
-
-    public function usersAdminAction (Request $r,$action,$id=null){
-      //Add Admin User Start
-      if($action=='create' && $r->isMethod('post')){
-
-        if(filter_var($r->username, FILTER_VALIDATE_EMAIL)){
-          $hasUser =User::latest()->whereIn('status',[0,1])->where('email',$r->username)->first();
-        }else{
-          $hasUser =User::latest()->whereIn('status',[0,1])->where('mobile',$r->username)->first();
-        }
-
-        if(!$hasUser){
-            Session()->flash('error','This User Are Not Register');
-            return redirect()->route('admin.usersAdmin');
-        }
-
-        if($hasUser->admin){
-            Session()->flash('error','This User Are already Admin Authorize');
-            return redirect()->route('admin.usersAdmin');
-        }
-
-        $hasUser->admin=true;
-        $hasUser->permission_id=1;
-        $hasUser->addedby_at=Carbon::now();
-        $hasUser->addedby_id=Auth::id();
-        $hasUser->save();
-
-        Session()->flash('success','User Are Successfully Admin Authorize Done!');
-        return redirect()->route('admin.usersAdminAction',['edit',$hasUser->id]);
-
-      }
-      //Add Admin User End
-
-
-      $user=User::whereIn('status',[0,1])->where('admin',true)->find($id);
-
-      if(!$user){
-        Session()->flash('error','This Admin User Are Not Found');
-        return redirect()->route('admin.usersAdmin');
-      }
-
-        //Update User Profile Start
-        if($action=='update' && $r->isMethod('post')){
-
-            $check = $r->validate([
-                 'name' => 'required|max:100|unique:users,name,'.$user->id,
-                 'email' => 'required|max:100|unique:users,email,'.$user->id,
-                 'mobile' => 'nullable|max:20|unique:users,mobile,'.$user->id,
-                 'gender' => 'nullable|max:10',
-                 'address' => 'nullable|max:191',
-                 'division' => 'nullable|numeric',
-                 'district' => 'nullable|max:191',
-                 'city' => 'nullable|max:191',
-                 'postal_code' => 'nullable|max:20',
-                 'role' => 'nullable|numeric',
-                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-
-             ]);
-
-           $user->name =$r->name;
-           $user->mobile =$r->mobile;
-           $user->email =$r->email;
-           $user->gender =$r->gender;
-           $user->address_line1 =$r->address;
-           $user->division =$r->division;
-           $user->district =$r->district;
-           $user->city =$r->city;
-           $user->postal_code =$r->postal_code;
-           $user->permission_id =$r->role;
-
-           ///////Image UploadStart////////////
-           if($r->hasFile('image')){
-             $file =$r->image;
-             $src  =$user->id;
-             $srcType  =6;
-             $fileUse  =1;
-             $author=Auth::id();
-             uploadFile($file,$src,$srcType,$fileUse,$author);
-           }
-           ///////Image Upload End////////////
-
-           $user->status=$r->status?true:false;
-           $user->save();
-
-           Session()->flash('success','Your Updated Are Successfully Done!');
-           return redirect()->route('admin.usersAdminAction',['edit',$user->id]);
-        }
-        //Update User Profile End
-
-        //Update User Password Start
-        if($action=='change-password' && $r->isMethod('post')){
-
-          $validator = Validator::make($r->all(), [
-              'old_password' => 'required|string|min:8',
-              'password' => 'required|string|min:8|confirmed|different:old_password',
-          ]);
-
-          if($validator->fails()){
-              return redirect()->route('admin.usersAdminAction',['edit',$user->id])->withErrors($validator)->withInput();
-          }
-
-          if(Hash::check($r->old_password, $user->password)){
-            $user->password_show=$r->password;
-            $user->password=Hash::make($r->password);
-            $user->update();
-
-            Session()->flash('success','Your Are Successfully Done');
-            return redirect()->route('admin.usersAdminAction',['edit',$user->id]);
-          }else{
-            Session()->flash('error','Current Password Are Not Match');
-            return redirect()->route('admin.usersAdminAction',['edit',$user->id]);
-          }
-        }
-        //Update User Password End
-
-        //Delete User End
-        if($action=='delete'){
-          $user->admin=false;
-          $user->addedby_at=null;
-          $user->permission_id=null;
-          $user->addedby_id=null;
-          $user->save();
-
-          Session()->flash('success','Admin User Are Removed Successfully Done');
-          return redirect()->route('admin.usersAdmin');
-        }
-        //Delete User End
-        $roles =Permission::latest()->where('status','active')->get();
-
-
-        if($action == 'view'){
-            return view(adminTheme().'users.admins.viewUser',compact('user','roles', 'action'));
-        }
-
-        return view(adminTheme().'users.admins.editUser',compact('user','roles'));
-
-    }
-
-
-
-    public function usersCustomer(Request $r)
+    // Merchandisers List + Bulk Actions
+    public function merchandisers(Request $r)
     {
-        // Filter Actions (same as before)
+        // Bulk Actions
         if ($r->action) {
             if ($r->checkid) {
-                $datas = User::latest()
+                $datas = User::latest()->filterByType('merchandiser')
                     ->whereIn('status', [0, 1])
                     ->whereIn('id', $r->checkid)
                     ->get();
 
                 foreach ($datas as $data) {
-                    if ($r->action == 1) {
-                        $data->status = 1;
-                        $data->save();
-                    } elseif ($r->action == 2) {
-                        $data->status = 0;
-                        $data->save();
-                    } elseif ($r->action == 5) {
-                        $userFiles = Media::latest()->where('src_type', 6)->where('src_id', $data->id)->get();
-                        foreach ($userFiles as $media) {
-                            if (File::exists($media->file_url)) {
-                                File::delete($media->file_url);
-                            }
-                            $media->delete();
-                        }
-                        $data->delete(); // soft delete
+                    switch ($r->action) {
+                        case 1:
+                            $data->status = 1;
+                            $data->save();
+                            break;
+                        case 2:
+                            $data->status = 0;
+                            $data->save();
+                            break;
+                        case 3:
+                            $data->fetured = true;
+                            $data->save();
+                            break;
+                        case 4:
+                            $data->fetured = false;
+                            $data->save();
+                            break;
+                        case 5:
+                            // Soft Delete
+                            $data->merchandiser = false;
+                            $data->addedby_at = null;
+                            $data->permission_id = null;
+                            $data->addedby_id = null;
+                            $data->save();
+                            $data->delete(); // soft delete
+                            break;
                     }
                 }
 
                 Session()->flash('success', 'Action Successfully Completed!');
             } else {
-                Session()->flash('info', 'Please Need To Select Minimum One Post');
+                Session()->flash('info', 'Please select at least one user');
+            }
+            return redirect()->back();
+        }
+
+        // Filter & Search
+        $usersQuery = User::latest()->filterByType('merchandiser')
+            ->whereIn('status', [0, 1])
+            ->where('merchandiser', true)
+            ->where(function ($q) use ($r) {
+                if ($r->search) {
+                    $q->where('name', 'LIKE', '%' . $r->search . '%')
+                    ->orWhere('email', 'LIKE', '%' . $r->search . '%')
+                    ->orWhere('mobile', 'LIKE', '%' . $r->search . '%');
+                }
+                if ($r->role) {
+                    $q->where('permission_id', $r->role);
+                }
+                if ($r->startDate || $r->endDate) {
+                    $from = $r->startDate ?? Carbon::now()->format('Y-m-d');
+                    $to = $r->endDate ?? Carbon::now()->format('Y-m-d');
+                    $q->whereDate('addedby_at', '>=', $from)
+                    ->whereDate('addedby_at', '<=', $to);
+                }
+            });
+
+        // Show soft-deleted if requested
+        if ($r->view == 'deleted') {
+            $usersQuery->onlyTrashed()->with('deletedBy');
+        }
+
+        $users = $usersQuery->select([
+                'id','permission_id','name','email','mobile','addedby_at','addedby_id','status','created_at','employee_id', 'deleted_at', 'deleted_by'
+            ])
+            ->paginate(12)
+            ->appends($r->all());
+
+        $totals = User::withTrashed()->filterByType('merchandiser')
+            ->whereIn('status', [0,1])
+        ->selectRaw('count(*) as total')
+        ->selectRaw("count(case when status = 1 then 1 end) as active")
+        ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+        ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
+        ->first();
+
+        $roles = Permission::latest()->where('status','active')->get();
+
+        if ($r->view == 'deleted') {
+            return view(adminTheme().'users.merchandisers.users_deleted', compact('users','totals','roles'));
+        }
+
+            return view(adminTheme().'users.merchandisers.users', compact('users','totals','roles'));
+    }
+
+    // Merchandisers Action (Create, Edit, Update, Password, Delete, Restore, Force Delete)
+    public function merchandisersAction(Request $r, $action, $id=null)
+    {
+        // CREATE MERCHANDISER
+        if ($action == 'create' && $r->isMethod('post')) {
+            $r->validate([
+                'name'   => 'required|string|max:255',
+                'mobile' => 'required|digits:11|regex:/^0[0-9]{10}$/',
+                'email'  => 'nullable|email|max:255',
+            ], [
+                'name.required'   => 'Name is required.',
+                'mobile.required' => 'Mobile is required.',
+                'mobile.digits'   => 'Mobile must be 11 digits.',
+                'mobile.regex'    => 'Mobile must start with 0.',
+                'email.email'     => 'Enter valid email.'
+            ]);
+
+            $query = User::where('mobile',$r->mobile);
+            if(!empty($r->email)) $query->orWhere('email',$r->email);
+            $user = $query->first();
+
+            $exUser = User::where('mobile',$r->mobile)->first();
+            $trashedUser = User::withTrashed()->where('mobile',$r->mobile)->first();
+            if($trashedUser && !$exUser){
+                Session()->flash('info','Mobile associated with soft-deleted account.');
+                return redirect()->back();
+            }
+            if($exUser){
+                Session()->flash('info','Mobile already in use.');
+                return redirect()->back();
+            }
+
+            if(!$user){
+                $password = Str::random(8);
+                $user                = new User();
+                $user->name          = $r->name;
+                $user->mobile        = $r->mobile;
+                $user->email         = $r->email ?? null;
+                $user->password_show = $password;
+                $user->password      = Hash::make($password);
+
+                  // Default flags
+                $user->setTypes('merchandiser');
+
+                $user->addedby_id = Auth::id();
+                $user->addedby_at = Carbon::now();
+                $user->save();
+            }
+
+            Session()->flash('success','Merchandiser created successfully!');
+            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
+        }
+
+        // Fetch User (active merchandiser)
+        $user = User::whereIn('status',[0,1])->where('merchandiser',true)->find($id);
+
+        // Handle Restore & Force Delete (soft-deleted users)
+        if ($action == 'restore') {
+            $user = User::onlyTrashed()->find($id);
+            if(!$user){
+                Session()->flash('error','User not found or already restored!');
+                return redirect()->back();
+            }
+            $user->restore();
+            Session()->flash('success','User restored successfully!');
+            return redirect()->back();
+        }
+
+        if ($action == 'force-delete') {
+            $user = User::onlyTrashed()->find($id);
+            // TODO: Delete media if needed
+            $user->forceDelete();
+            Session()->flash('success','User permanently deleted!');
+            return redirect()->back();
+        }
+
+        if(!$user){
+            Session()->flash('error','User not found.');
+            return redirect()->route('admin.merchandisers');
+        }
+
+        // UPDATE MERCHANDISER
+        if ($action == 'update' && $r->isMethod('post')) {
+            $r->validate([
+                'name'        => 'required|max:100|unique:users,name,'.$user->id,
+                'email'       => 'nullable|max:100|unique:users,email,'.$user->id,
+                'mobile'      => 'required|max:20|unique:users,mobile,'.$user->id,
+                'gender'      => 'nullable|max:10',
+                'address'     => 'nullable|max:191',
+                'division'    => 'nullable|numeric',
+                'district'    => 'nullable|max:191',
+                'city'        => 'nullable|max:191',
+                'postal_code' => 'nullable|max:20',
+                'role'        => 'nullable|numeric',
+                'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            $user->name          = $r->name;
+            $user->mobile        = $r->mobile;
+            $user->email         = $r->email;
+            $user->gender        = $r->gender;
+            $user->address_line1 = $r->address;
+            $user->division      = $r->division;
+            $user->district      = $r->district;
+            $user->city          = $r->city;
+            $user->postal_code   = $r->postal_code;
+            $user->permission_id = $r->role;
+            $user->setTypes('merchandiser');
+
+
+            if($r->hasFile('image')){
+                $file = $r->image;
+                $src  = $user->id;
+                $srcType  = 6;
+                $fileUse  = 1;
+                $author=Auth::id();
+                uploadFile($file,$src,$srcType,$fileUse,$author);
+            }
+
+            $user->status = $r->status?true:false;
+            $user->save();
+
+            Session()->flash('success','User updated successfully!');
+            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
+        }
+
+        // CHANGE PASSWORD
+        if($action=='change-password' && $r->isMethod('post')){
+            $validator = Validator::make($r->all(), [
+                'old_password'=>'required|string|min:8',
+                'password'=>'required|string|min:8|confirmed|different:old_password',
+            ]);
+            if($validator->fails()){
+                return redirect()->route('admin.merchandisersAction',['edit',$user->id])->withErrors($validator)->withInput();
+            }
+            if(Hash::check($r->old_password,$user->password)){
+                $user->password_show=$r->password;
+                $user->password=Hash::make($r->password);
+                $user->update();
+                Session()->flash('success','Password changed successfully!');
+            }else{
+                Session()->flash('error','Current password does not match!');
+            }
+            return redirect()->route('admin.merchandisersAction',['edit',$user->id]);
+        }
+
+        // SOFT DELETE
+        if($action=='delete'){
+            $user->deleted_at = now();
+            $user->deleted_by = Auth::id();
+            $user->save();
+            $user->delete();
+            Session()->flash('success','Merchandiser soft-deleted successfully!');
+            return redirect()->route('admin.merchandisers');
+        }
+
+        $roles = Permission::latest()->where('status','active')->get();
+        return view(adminTheme().'users.merchandisers.editUser',compact('user','roles'));
+    }
+
+
+    // User Management Function Start
+    /* =========================================================
+     | Admin User Actions
+     ========================================================= */
+    public function usersAdmin(Request $r)
+    {
+        /* ================= Bulk Actions ================= */
+        if ($r->action) {
+
+            if (!$r->checkid) {
+                Session()->flash('info', 'Please select at least one item');
+                return redirect()->back();
+            }
+
+            $users = User::whereIn('id', $r->checkid)
+                ->filterByType('admin')
+                ->withTrashed()
+                ->get();
+
+            foreach ($users as $user) {
+
+                switch ($r->action) {
+
+                    case 1: // Active
+                        $user->status = 1;
+                        $user->save();
+                        break;
+
+                    case 2: // Inactive
+                        $user->status = 0;
+                        $user->save();
+                        break;
+
+                    case 3: // Featured
+                        $user->fetured = true;
+                        $user->save();
+                        break;
+
+                    case 4: // Unfeatured
+                        $user->fetured = false;
+                        $user->save();
+                        break;
+
+                    case 5: // Soft Delete
+                        if (!$user->trashed()) {
+                            $user->deleted_at = Carbon::now();
+                            $user->deleted_by = Auth::id();
+                            $user->save();
+                        }
+                        break;
+
+                    case 6: // Restore
+                        if ($user->trashed()) {
+                            $user->restore();
+                        }
+                        break;
+
+                    case 7: // Force Delete
+                        if ($user->trashed()) {
+                            deleteUserFiles($user->id);
+                            $user->forceDelete();
+                        }
+                        break;
+                }
+            }
+
+            Session()->flash('success', 'Bulk action completed successfully!');
+            return redirect()->back();
+        }
+        /* ================= Bulk Actions End ================= */
+
+        /* ================= Admin List ================= */
+        $users = User::latest()
+            ->whereIn('status', [0,1])
+            ->filterByType('admin')
+            ->where(function ($q) use ($r) {
+
+                if ($r->search) {
+                    $q->where('name','LIKE',"%{$r->search}%")
+                      ->orWhere('mobile','LIKE',"%{$r->search}%")
+                      ->orWhere('email','LIKE',"%{$r->search}%");
+                }
+
+                if ($r->role) {
+                    $q->where('permission_id',$r->role);
+                }
+
+                if ($r->startDate || $r->endDate) {
+
+                    $from = $r->startDate ?? Carbon::now()->format('Y-m-d');
+                    $to   = $r->endDate   ?? Carbon::now()->format('Y-m-d');
+
+                    $q->whereDate('addedby_at','>=',$from)
+                      ->whereDate('addedby_at','<=',$to);
+                }
+            })
+            ->paginate(12)
+            ->appends($r->all());
+
+
+        $totals = User::withTrashed()->filterByType('admin')
+            ->whereIn('status',[0,1])
+            ->selectRaw('count(*) as total')
+            ->selectRaw("count(case when status=1 then 1 end) as active")
+            ->selectRaw("count(case when status=0 then 1 end) as inactive")
+            ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
+            ->first();
+
+        $roles = Permission::where('status','active')->get();
+
+        if ($r->view == 'deleted') {
+
+            $users = User::onlyTrashed()
+                ->filterByType('admin')
+                ->latest()
+                ->paginate(12)->appends($r->all());;
+
+            return view(adminTheme().'users.admins.users_deleted', compact('users','totals','roles'));
+        }
+
+        return view(adminTheme().'users.admins.users', compact('users','totals','roles'));
+    }
+
+    public function usersAdminAction(Request $r, $action, $id = null)
+    {
+        /* ================= CREATE ADMIN ================= */
+        if ($action == 'create' && $r->isMethod('post')) {
+
+            $r->validate([
+                'name'   => 'required|string|max:255',
+                'mobile' => 'required|digits:11|regex:/^0[0-9]{10}$/',
+                'email'  => 'nullable|email|max:255',
+            ]);
+
+            // Active check
+            $activeQuery = User::where('mobile',$r->mobile);
+            if ($r->email) {
+                $activeQuery->orWhere('email',$r->email);
+            }
+
+            if ($activeQuery->exists()) {
+                Session()->flash('error','Email or Mobile already exists');
+                return redirect()->back();
+            }
+
+            // Trash check
+            $trashQuery = User::onlyTrashed()->where('mobile',$r->mobile);
+            if ($r->email) {
+                $trashQuery->orWhere('email',$r->email);
+            }
+
+            if ($trashQuery->exists()) {
+                Session()->flash('error','This email or mobile exists in trash');
+                return redirect()->back();
+            }
+
+            $password = Str::random(8);
+
+            $user = new User();
+            $user->name          = $r->name;
+            $user->mobile        = $r->mobile;
+            $user->email         = $r->email ?? null;
+            $user->password_show = $password;
+            $user->password      = Hash::make($password);
+            $user->permission_id = 1;
+            $user->addedby_at    = Carbon::now();
+            $user->addedby_id    = Auth::id();
+
+            $user->setTypes('admin');
+            $user->save();
+
+            Session()->flash('success','Admin created successfully!');
+            return redirect()->route('admin.usersAdminAction',['edit',$user->id]);
+        }
+        /* ================= CREATE END ================= */
+
+
+        /* ================= RESTORE ================= */
+        if ($action == 'restore') {
+
+            $user = User::onlyTrashed()->find($id);
+
+            if (!$user) {
+                Session()->flash('error','Admin not found in trash');
+                return redirect()->route('admin.usersAdmin',['view'=>'deleted']);
+            }
+
+            $user->restore();
+            Session()->flash('success','Admin restored successfully!');
+            return redirect()->route('admin.usersAdmin');
+        }
+
+
+        /* ================= FORCE DELETE ================= */
+        if ($action == 'force-delete') {
+
+            $user = User::onlyTrashed()->find($id);
+
+            if (!$user) {
+                Session()->flash('error','Admin not found in trash');
+                return redirect()->route('admin.usersAdmin',['view'=>'deleted']);
+            }
+
+            deleteUserFiles($user->id);
+            $user->forceDelete();
+
+            Session()->flash('success','Admin permanently deleted!');
+            return redirect()->route('admin.usersAdmin',['view'=>'deleted']);
+        }
+
+
+        /* ================= FIND USER ================= */
+        $user = User::filterByType('admin')->find($id);
+
+        if (!$user) {
+            Session()->flash('error','Admin user not found');
+            return redirect()->route('admin.usersAdmin');
+        }
+
+
+        /* ================= UPDATE ================= */
+        if ($action == 'update' && $r->isMethod('post')) {
+
+            $r->validate([
+                'name'   => 'required|max:100|unique:users,name,'.$user->id,
+                'email'  => 'nullable|unique:users,email,'.$user->id,
+                'mobile' => 'nullable|unique:users,mobile,'.$user->id,
+            ]);
+
+            $user->name = $r->name;
+            $user->email = $r->email;
+            $user->mobile = $r->mobile;
+            $user->status = $r->status ? 1 : 0;
+            $user->permission_id = $r->role;
+
+            $user->setTypes('admin');
+
+            if ($r->hasFile('image')) {
+                uploadFile($r->image,$user->id,6,1,Auth::id());
+            }
+
+            $user->save();
+
+            Session()->flash('success','Admin updated successfully!');
+            return redirect()->back();
+        }
+
+
+        /* ================= PASSWORD ================= */
+        if ($action == 'change-password' && $r->isMethod('post')) {
+
+            $r->validate([
+                'old_password' => 'required|min:8',
+                'password' => 'required|min:8|confirmed|different:old_password',
+            ]);
+
+            if (!Hash::check($r->old_password,$user->password)) {
+                Session()->flash('error','Old password not match');
+                return redirect()->back();
+            }
+
+            $user->password_show = $r->password;
+            $user->password = Hash::make($r->password);
+            $user->save();
+
+            Session()->flash('success','Password updated successfully!');
+            return redirect()->back();
+        }
+
+
+        /* ================= SOFT DELETE ================= */
+        if ($action == 'delete') {
+
+            $user->deleted_at = Carbon::now();
+            $user->deleted_by = Auth::id();
+            $user->save();
+
+            Session()->flash('success','Admin deleted successfully!');
+            return redirect()->route('admin.usersAdmin');
+        }
+
+
+        $roles = Permission::where('status','active')->get();
+
+        if ($action == 'view') {
+            return view(adminTheme().'users.admins.viewUser', compact('user','roles','action'));
+        }
+
+        return view(adminTheme().'users.admins.editUser', compact('user','roles'));
+    }
+
+
+    // Users Customer List + Bulk Actions
+    public function usersCustomer(Request $r)
+    {
+        // Bulk Actions
+        if ($r->action) {
+            if ($r->checkid) {
+                $datas = User::latest()
+                    ->filterByType('customer')
+                    ->whereIn('id', $r->checkid)
+                    ->get();
+
+                foreach ($datas as $data) {
+                    switch ($r->action) {
+                        case 1: // Activate
+                            $data->status = 1;
+                            $data->save();
+                            break;
+                        case 2: // Deactivate
+                            $data->status = 0;
+                            $data->save();
+                            break;
+                        case 5: // Soft Delete
+                            // Delete user media
+                            $userFiles = Media::where('src_type', 6)->where('src_id', $data->id)->get();
+                            foreach ($userFiles as $media) {
+                                if (File::exists($media->file_url)) {
+                                    File::delete($media->file_url);
+                                }
+                                $media->delete();
+                            }
+                            $data->deleted_by = auth()->id();
+                            $data->save();
+                            $data->delete();
+                            break;
+                    }
+                }
+
+                Session()->flash('success', 'Action Successfully Completed!');
+            } else {
+                Session()->flash('info', 'Please select at least one user.');
             }
 
             return redirect()->back();
         }
 
         // Query Users
-        $usersQuery = User::latest()
+        $usersQuery = User::latest()->filterByType('customer')
             ->where(function ($q) use ($r) {
                 if ($r->search) {
                     $q->where('name', 'LIKE', '%' . $r->search . '%')
@@ -10626,29 +10686,29 @@ class AdminController extends Controller
                 }
             });
 
-        // Show soft-deleted users if view=deleted, otherwise normal users
+        // Show soft-deleted users if requested
         if ($r->view == 'deleted') {
             $usersQuery->onlyTrashed()->with('deletedBy');
         } else {
-            $usersQuery->whereIn('status', [0, 1])
-                    ->where('buyer', false)
-                    ->where('merchandiser', false);
+            $usersQuery->whereIn('status', [0, 1]);
         }
 
-        $users = $usersQuery->select(['id','permission_id','name','email','employee_id','designation_id','mobile','created_at','addedby_id','status', 'deleted_by', 'deleted_at'])
-                            ->paginate(25)
-                            ->appends($r->all());
+        $users = $usersQuery->select([
+            'id','permission_id','name','email','employee_id','designation_id','mobile','created_at','addedby_id','status','deleted_by','deleted_at'
+        ])
+        ->paginate(25)
+        ->appends($r->all());
 
-        $totals = DB::table('users')->whereIn('status', [0, 1])
+        $totals = User::withTrashed()->filterByType('customer')
+            ->whereIn('status', [0,1])
             ->selectRaw('count(*) as total')
             ->selectRaw("count(case when status = 1 then 1 end) as active")
             ->selectRaw("count(case when status = 0 then 1 end) as inactive")
             ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
             ->first();
 
-        $roles = Permission::latest()->where('status', 'active')->get();
+        $roles = Permission::latest()->where('status','active')->get();
 
-        // Return different views
         if ($r->view == 'deleted') {
             return view(adminTheme() . 'users.customers.users_deleted', compact('users', 'totals', 'roles'));
         } else {
@@ -10656,146 +10716,107 @@ class AdminController extends Controller
         }
     }
 
-
-
-    public function usersCustomerAction(Request $r,$action,$id=null){
-
-
-        if($action == 'restore') {
-            // Soft deleted user খুঁজে বের করা
-            $user = User::onlyTrashed()->find($id); // এখানে $id বা user object ধরে নিই
-
-            if(!$user){
+    // Users Customer Action (Create, Edit, Update, Password, Soft Delete, Restore, Force Delete)
+    public function usersCustomerAction(Request $r, $action, $id = null)
+    {
+        // RESTORE SOFT DELETED USER
+        if ($action == 'restore') {
+            $user = User::onlyTrashed()->find($id);
+            if (!$user) {
                 Session()->flash('error', 'User not found or already restored!');
                 return redirect()->back();
             }
-
-            $user->restore(); // Restore করা হলো
-            Session()->flash('success', 'User has been restored successfully!');
+            $user->restore();
+            Session()->flash('success', 'User restored successfully!');
             return redirect()->back();
         }
-        if($action == 'force-delete'){
+
+        // FORCE DELETE USER
+        if ($action == 'force-delete') {
             $user = User::onlyTrashed()->find($id);
-            $userFiles = Media::latest()->where('src_type', 6)->where('src_id', $user->id)->get();
+            if ($user) {
+                $userFiles = Media::where('src_type', 6)->where('src_id', $user->id)->get();
+                foreach ($userFiles as $media) {
+                    if (File::exists($media->file_url)) {
+                        File::delete($media->file_url);
+                    }
+                    $media->delete();
+                }
+                $user->forceDelete();
+            }
+            Session()->flash('success', 'User permanently deleted!');
+            return redirect()->back();
+        }
 
-            foreach ($userFiles as $media){
-                $filePath = $media->file_url;
-                if(str_starts_with($filePath, 'public/')){
-                    $filePath = substr($filePath, 7);
-                }
-                if(File::exists($filePath)){
-                    File::delete($filePath); // ফাইল permanent delete
-                }
-                $media->delete(); // Soft delete বা Permanent delete, Media model এর উপর নির্ভর করে
+        // CREATE USER
+        if ($action == 'create' && $r->isMethod('post')) {
+
+            $r->validate([
+                'name'         => 'required|max:100',
+                'company_name' => 'nullable|max:100',
+                'email'        => 'nullable|email|max:100',
+                'mobile'       => 'nullable|max:100',
+                'country'      => 'nullable|max:100',
+                'address'      => 'nullable|max:500',
+            ]);
+            // Check for existing user by mobile
+            $existingUser = User::where('mobile', $r->mobile)->first();
+
+            // Check for soft-deleted user with same mobile
+            $trashedUser = User::withTrashed()->where('mobile', $r->mobile)->first();
+            if ($trashedUser && !$existingUser) {
+                Session()->flash('info', 'This mobile number is associated with a soft-deleted account.');
+                return redirect()->back();
             }
 
-            $user->forceDelete(); // Permanent delete
-            Session()->flash('success', 'User has been permanently deleted!');
-            return redirect()->back();
-        }
-
-      //Add New User Start
-      if($action=='create' && $r->isMethod('post')){
-
-        $r->validate([
-            'name'   => 'required|string|max:255',
-            'mobile' => 'required|digits:11|regex:/^0[0-9]{10}$/',
-            'email'  => 'nullable|email|max:255',
-        ], [
-            'name.required'   => 'Name is required.',
-            'mobile.required' => 'Mobile number is required.',
-            'mobile.digits'   => 'Mobile number must be exactly 11 digits.',
-            'mobile.regex'    => 'Mobile number must be start with 0.',
-            'email.email'     => 'Please enter a valid email address.',
-        ]);
-
-        $query = User::where('mobile', $r->mobile);
-        if (!empty($r->email)) {
-            $query->orWhere('email', $r->email);
-        }
-        $user = $query->first();
-
-        $mobile = $r->input('mobile');
-        $exUser = User::where('mobile', $mobile)->first();
-        $trashedUser = User::withTrashed()->where('mobile', $mobile)->first();
-        if($trashedUser && !$exUser) {
-            Session()->flash('info', 'This mobile number is associated with an account that has been temporarily deleted.');
-            return redirect()->back();
-        }
-        if($exUser) {
-            Session()->flash('info', 'This mobile number is already in use.');
-            return redirect()->back();
-        }
-
-        if(!$user){
-          $password=Str::random(8);
-          $user =new User();
-          $user->name =$r->name;
-          $user->mobile =$r->mobile;
-          $user->email =$r->email ?? null;
-          $user->password_show=$password;
-          $user->password=Hash::make($password);
-          $user->save();
-        }
-
-        return redirect()->route('admin.usersCustomerAction',['edit',$user->id]);
-      }
-      //Add New User End
-
-
-      $user=User::whereIn('status',[0,1])->find($id);
-      if(!$user){
-        Session()->flash('error','This User Are Not Found');
-        return redirect()->route('admin.usersCustomer');
-      }
-
-         if($action == 'location'){
-            if($r->ajax()){
-                $lat = null;
-                $lng = null;
-                $time = null;
-
-                if($user->lastLocation){
-                    $lat = $user->lastLocation->latitude ?? null;
-                    $lng = $user->lastLocation->longitude ?? null;
-                    $time = $user->lastLocation->updated_at->format('d M y, h:i A');
+            // Check for existing user by email only if email provided
+            if (!empty($r->email)) {
+                $existingUserByEmail = User::where('email', $r->email)->first();
+                if ($existingUserByEmail) {
+                    Session()->flash('info', 'This email is already in use.');
+                    return redirect()->back();
                 }
-
-                return response()->json([
-                    'latitude' => $lat,
-                    'longitude'=> $lng,
-                    'time'=> $time,
-                ]);
             }
 
-            return view('admin.user_location', compact('user', 'action'));
+            // If mobile/email already exist, do not forcefully change roles
+            if ($existingUser) {
+                Session()->flash('info', 'Mobile already in use.');
+                return redirect()->back();
+            }
+
+            // Otherwise, create new buyer
+            $password = Str::random(8);
+            $user = new User();
+            $user->name          = $r->name;
+            $user->mobile        = $r->mobile;
+            $user->email         = $r->email;
+            $user->country_text  = $r->country;
+            $user->company_name  = $r->company_name;
+            $user->address_line1 = $r->address;
+            $user->password_show = $password;
+            $user->password      = Hash::make($password);
+
+            // Set buyer flags properly
+            $user->setTypes('buyer'); // if you already have setTypes method
+            $user->save();
+
+            Session()->flash('success', 'Buyer registered successfully!');
+            return redirect()->route('admin.buyersAction', ['view', $user->id]);
         }
 
-      if($action=='edit'){
-        $departments =Attribute::latest()->where('type',3)->where('status','<>','temp')->get();
-        $designations =Attribute::latest()->where('type',2)->where('status','<>','temp')->get();
 
-        $roles =Permission::latest()->where('status','active')->get();
+        $user = User::whereIn('status', [0,1])->find($id);
+        if (!$user) {
+            Session()->flash('error', 'User not found.');
+            return redirect()->route('admin.usersCustomer');
+        }
 
-        return view(adminTheme().'users.customers.editUser',compact('user','departments','designations','roles'));
-      }
-
-      if($action=='salary-details'){
-        $salaries =$user->salaries()->latest()->paginate(12);
-        return view(adminTheme().'users.customers.salaryDetails',compact('user','salaries'));
-      }
-
-      if($action=='loan-details'){
-        $loans =$user->loans()->latest()->paginate(12);
-        return view(adminTheme().'users.customers.loanDetails',compact('user','loans'));
-      }
-
-      //Update User Profile Start
-      if($action=='update' && $r->isMethod('post')){
-            $check = $r->validate([
+        // UPDATE USER PROFILE
+        if ($action == 'update' && $r->isMethod('post')) {
+            $r->validate([
                 'name' => 'required|max:100',
-                'email' => 'nullable|max:100|unique:users,email,'.$user->id,
-                'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
+                'email' => 'nullable|max:100|unique:users,email,' . $user->id,
+                'mobile' => 'required|max:20|unique:users,mobile,' . $user->id,
                 'date_of_birth' => 'nullable|date',
                 'gender' => 'nullable|max:10',
                 'marital_status' => 'nullable|max:20',
@@ -10818,277 +10839,91 @@ class AdminController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 
-            $user->name =$r->name;
-            $user->mobile =$r->mobile;
-            $user->email =$r->email;
-            $user->gender =$r->gender;
-            $user->marital_status =$r->marital_status;
-            $user->dob =$r->date_of_birth;
-            $user->address_line1 =$r->address;
-            $user->address_line2 =$r->present_address;
-            $user->division =$r->division;
-            $user->district =$r->district;
-            $user->city =$r->city;
-            $user->postal_code =$r->postal_code;
-            $user->designation_id =$r->designation;
-            $user->department_id =$r->department;
-            $user->employee_id =$r->employee_id;
-            $user->salary_amount =$r->salary_amount?:0;
-            $user->profile =$r->profile;
-            $user->salary_type =$r->salary_type?:'Monthly';
-            $user->employment_status =$r->employment_status?:'Monthly';
-            $user->created_at =$r->created_at?:Carbon::now();
-            $user->exited_at =$r->exited_at;
-
-              if($r->password){
-                $user->password_show=$r->password;
-                $user->password=Hash::make($r->password);
-              }
-
-            if($user->id!=Auth::id() && Auth::user()->permission_id==1){
-
-                if($r->role){
-                    // $user->admin=true;
-                    $user->permission_id=$r->role;
-                    $user->addedby_at=Carbon::now();
-                    $user->addedby_id=Auth::id();
-                }else{
-                  $user->admin=false;
-                  $user->addedby_at=null;
-                  $user->permission_id=null;
-                  $user->addedby_id=null;
-                  $user->save();
-                }
-            }
-          ///////Image UploadStart////////////
-          if($r->hasFile('image')){
-
-            $file =$r->image;
-            $src  =$user->id;
-            $srcType  =6;
-            $fileUse  =1;
-            $author =Auth::id();
-            uploadFile($file,$src,$srcType,$fileUse,$author);
-          }
-          ///////Image Upload End////////////
-
-          $user->login_status=$r->login_status?true:false;
-          $user->status=$r->status?true:false;
-          $user->save();
-
-          Session()->flash('success','Your Updated Are Successfully Done!');
-          return redirect()->back();
-
-        }
-        //Update User Profile End
-
-        if($action=='user-document'){
-
-            if($r->file_action=='addfile'){
-                $media =new Media();
-                $media->src_id=$user->id;
-                $media->src_type=6;
-                $media->use_Of_file=3;
-                $media->addedby_id=Auth::id();
-                $media->save();
-            }
-
-            if($r->file_action=='removeData'){
-                $file =$user->galleryFiles()->find($r->file_id);
-                if($file){
-                    if(File::exists($file->file_url)){
-                        File::delete($file->file_url);
-                    }
-                    $file->delete();
-                }
-            }
-
-            if($r->file_action=='removeFile'){
-                $file =$user->galleryFiles()->find($r->file_id);
-                if($file){
-                    if(File::exists($file->file_url)){
-                        File::delete($file->file_url);
-                    }
-                    $file->file_url=null;
-                    $file->alt_text=null;
-                    $file->file_rename=null;
-                    $file->file_size=null;
-                    $file->file_path=null;
-                    $file->save();
-                }
-            }
-
-            if($r->file_action=='updateTitle'){
-                $file =$user->galleryFiles()->find($r->file_id);
-                if($file){
-                   $file->file_name =$r->title;
-                   $file->save();
-
-                }
-            }
-
-            if($r->file_action=='updateFile'){
-                $fileData =$user->galleryFiles()->find($r->file_id);
-                if($fileData){
-                    if(File::exists($fileData->file_url)){
-                        File::delete($fileData->file_url);
-                    }
-
-                    $file =$r->file;
-
-                    $name = basename($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension());
-                    $fullname = basename($file->getClientOriginalName());
-                    $ext =$file->getClientOriginalExtension();
-                    $size =$file->getSize();
-
-                    $year =carbon::now()->format('Y');
-                    $month =carbon::now()->format('M');
-                    $folder = $month.'_'.$year;
-
-                    $img =time().'.'.uniqid().'.'.$file->getClientOriginalExtension();
-                    $path ="medies/".$folder;
-                    $fullpath ="public/medies/".$folder.'/'.$img;
-                    $fileData->alt_text=Str::limit($name,250);
-                    $fileData->file_rename=Str::limit($img,100);
-                    $fileData->file_size=$size;
-                    if($ext=='png' || $ext=='jpeg' || $ext=='svg' || $ext=='gif' || $ext=='jpg' || $ext=='webp'){
-                      $fileData->file_type=1;
-                      }elseif($ext=='pdf'){
-                      $fileData->file_type=2;
-                      }elseif($ext=='docx'){
-                      $fileData->file_type=3;
-                      }elseif($ext=='zip' || $ext=='rar'){
-                      $fileData->file_type=4;
-                      }elseif($ext=='mp4' || $ext=='webm' || $ext=='mov' || $ext=='wmv'){
-                      $fileData->file_type=5;
-                      }elseif($ext=='mp3'){
-                      $fileData->file_type=6;
-                    }
-                    $file->move(public_path($path), $img);
-                    $fileData->file_url =$fullpath;
-                    $fileData->file_path =$path;
-                    $fileData->save();
-                }
-            }
-
-            $view =View(adminTheme().'users.customers.includes.userFiles',compact('user'))->render();
-
-            return Response()->json([
-              'success' => true,
-              'view' => $view,
+            $user->fill([
+                'name' => $r->name,
+                'mobile' => $r->mobile,
+                'email' => $r->email,
+                'gender' => $r->gender,
+                'marital_status' => $r->marital_status,
+                'dob' => $r->date_of_birth,
+                'address_line1' => $r->address,
+                'address_line2' => $r->present_address,
+                'division' => $r->division,
+                'district' => $r->district,
+                'city' => $r->city,
+                'postal_code' => $r->postal_code,
+                'designation_id' => $r->designation,
+                'department_id' => $r->department,
+                'employee_id' => $r->employee_id,
+                'salary_amount' => $r->salary_amount ?: 0,
+                'profile' => $r->profile,
+                'salary_type' => $r->salary_type ?: 'Monthly',
+                'employment_status' => $r->employment_status ?: 'Monthly',
+                'created_at' => $r->created_at ?: Carbon::now(),
+                'exited_at' => $r->exited_at,
+                'status' => $r->status ? true : false,
+                'login_status' => $r->login_status ? true : false,
             ]);
 
-        }
+            if ($r->password) {
+                $user->password_show = $r->password;
+                $user->password = Hash::make($r->password);
+            }
 
+            // Image upload
+            if ($r->hasFile('image')) {
+                $file = $r->image;
+                uploadFile($file, $user->id, 6, 1, Auth::id());
+            }
+            $user->setTypes('customer');
 
-        //Update User Password Change Start
-        if($action=='change-password' && $r->isMethod('post')){
-
-          $validator = Validator::make($r->all(), [
-              'old_password' => 'required|string|min:8',
-              'password' => 'required|string|min:8|confirmed|different:old_password',
-          ]);
-
-          if($validator->fails()){
-              return redirect()->back()->withErrors($validator)->withInput();
-          }
-
-          if(Hash::check($r->old_password, $user->password)){
-            $user->password_show=$r->password;
-            $user->password=Hash::make($r->password);
-            $user->update();
-
-            Session()->flash('success','Your Are Successfully Done');
-            return redirect()->back();
-          }else{
-          Session()->flash('error','Current Password Are Not Match');
-          return redirect()->back();
-          }
-
-        }
-        //Update User Password Change End
-
-        //Delete User Start
-
-        if($action == 'delete'){
-            $user->deleted_by = auth()->id(); // যে user delete করছে
             $user->save();
-            $user->delete(); // Soft delete হবে
-            Session()->flash('success', 'User has been soft deleted successfully!');
+            Session()->flash('success', 'User updated successfully!');
             return redirect()->back();
         }
 
-        //Delete User End
+        // PASSWORD CHANGE
+        if ($action == 'change-password' && $r->isMethod('post')) {
+            $validator = Validator::make($r->all(), [
+                'old_password' => 'required|string|min:8',
+                'password' => 'required|string|min:8|confirmed|different:old_password',
+            ]);
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+            if (Hash::check($r->old_password, $user->password)) {
+                $user->password_show = $r->password;
+                $user->password = Hash::make($r->password);
+                $user->save();
+                Session()->flash('success', 'Password changed successfully!');
+            } else {
+                Session()->flash('error', 'Current password does not match!');
+            }
+            return redirect()->back();
+        }
 
+        // SOFT DELETE
+        if ($action == 'delete') {
+            $user->deleted_by = auth()->id();
+            $user->save();
+            $user->delete();
+            Session()->flash('success', 'User soft deleted successfully!');
+            return redirect()->back();
+        }
 
+        // Return view
+        $startDate = $r->startDate ? Carbon::parse($r->startDate) : Carbon::now()->startOfMonth();
+        $endDate = $r->endDate ? Carbon::parse($r->endDate) : Carbon::now();
 
-        $startDate=$r->startDate?Carbon::parse($r->startDate):Carbon::now()->startOfMonth();
-        $endDate=$r->endDate?Carbon::parse($r->endDate):Carbon::now();
-
-
-        return view(adminTheme().'users.customers.viewUser',compact('user','action','startDate','endDate'));
+        return view(adminTheme() . 'users.customers.viewUser', compact('user', 'action', 'startDate', 'endDate'));
     }
-
-    public function subscribes(Request $r){
-
-    // Filter Action Start
-      if($r->action){
-        if($r->checkid){
-
-        PostExtra::latest()->where('type',1)->whereIn('id',$r->checkid)->delete();
-
-        Session()->flash('success','Action Successfully Completed!');
-
-        }else{
-          Session()->flash('info','Please Need To Select Minimum One Post');
-        }
-
-        return redirect()->back();
-      }
-
-      //Filter Action End
-
-    $subscribes =PostExtra::where('type',1)
-    ->where(function($q) use ($r){
-
-      if($r->search){
-            $q->where('name','LIKE','%'.$r->search.'%');
-      }
-
-      if($r->startDate || $r->endDate)
-        {
-            if($r->startDate){
-                $from =$r->startDate;
-            }else{
-                $from=Carbon::now()->format('Y-m-d');
-            }
-
-            if($r->endDate){
-                $to =$r->endDate;
-            }else{
-                $to=Carbon::now()->format('Y-m-d');
-            }
-
-            $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-        }
-
-    })
-    ->select(['id','name','created_at'])
-    ->paginate(50)->appends([
-      'search'=>$r->search,
-      'startDate'=>$r->startDate,
-      'endDate'=>$r->endDate,
-    ]);
-
-    return view(adminTheme().'users.subscribes.subscribeAll',compact('subscribes'));
-  }
 
 
     public function userRoles(Request $r){
 
-    $roles =Permission::latest()
-    ->where('status','active')
-    ->where(function($q) use($r) {
+        $roles =Permission::latest()
+        ->where('status','active')
+        ->where(function($q) use($r) {
 
       if($r->search){
           $q->where('name','LIKE','%'.$r->search.'%');
@@ -11112,68 +10947,68 @@ class AdminController extends Controller
 
       }
 
-  })
-  ->select(['id','name','created_at','addedby_id','status'])
-    ->paginate(25)->appends([
-      'search'=>$r->search,
-      'startDate'=>$r->startDate,
-      'endDate'=>$r->endDate,
-    ]);
+        })
+        ->select(['id','name','created_at','addedby_id','status'])
+        ->paginate(25)->appends([
+        'search'=>$r->search,
+        'startDate'=>$r->startDate,
+        'endDate'=>$r->endDate,
+        ]);
 
-  return view(adminTheme().'users.roles.userRoles',compact('roles'));
-}
+        return view(adminTheme().'users.roles.userRoles',compact('roles'));
+    }
 
 
   public function userRoleAction(Request $r,$action,$id=null){
-    if($action=='create'){
-        $role  =Permission::where('addedby_id',Auth::id())->where('status','temp')->first();
-        if(!$role){
-          $role = new Permission();
-          $role->status='temp';
-          $role->addedby_id=Auth::id();
+        if($action=='create'){
+            $role  =Permission::where('addedby_id',Auth::id())->where('status','temp')->first();
+            if(!$role){
+            $role = new Permission();
+            $role->status='temp';
+            $role->addedby_id=Auth::id();
+            }
+            $role->created_at=Carbon::now();
+            $role->save();
+
+            return redirect()->route('admin.userRoleAction',['edit',$role->id]);
         }
-        $role->created_at=Carbon::now();
+
+        $role=Permission::find($id);
+        if(!$role){
+        Session()->flash('error','This Role Are Not Found');
+        return redirect()->route('admin.userRoles');
+        }
+
+        if($action=='update'){
+        //Role Update
+        $check = $r->validate([
+            'name' => 'required|max:100',
+        ]);
+
+        if($role->id==1){
+            $role->name =$r->name;
+            $role->permission =$r->permission;
+        }else{
+            $role->name =$r->name;
+            $role->permission =$r->permission;
+        }
+        $role->status ='active';
         $role->save();
 
-        return redirect()->route('admin.userRoleAction',['edit',$role->id]);
-    }
+        Session()->flash('success','Role Updated Are Successfully Done!');
+        return redirect()->back();
+        }
 
-    $role=Permission::find($id);
-    if(!$role){
-      Session()->flash('error','This Role Are Not Found');
-      return redirect()->route('admin.userRoles');
-    }
+        if($action=='delete'){
+        //Role Delete
+        $role->delete();
 
-    if($action=='update'){
-      //Role Update
-      $check = $r->validate([
-          'name' => 'required|max:100',
-      ]);
+        Session()->flash('success','Role Deleted Are Successfully Done!');
+        return redirect()->route('admin.userRoles');
 
-      if($role->id==1){
-        $role->name =$r->name;
-        $role->permission =$r->permission;
-      }else{
-        $role->name =$r->name;
-        $role->permission =$r->permission;
-      }
-      $role->status ='active';
-      $role->save();
+        }
 
-      Session()->flash('success','Role Updated Are Successfully Done!');
-      return redirect()->back();
-    }
-
-    if($action=='delete'){
-      //Role Delete
-      $role->delete();
-
-      Session()->flash('success','Role Deleted Are Successfully Done!');
-      return redirect()->route('admin.userRoles');
-
-    }
-
-    return view(adminTheme().'users.roles.userRoleEdit',compact('role'));
+        return view(adminTheme().'users.roles.userRoleEdit',compact('role'));
 
   }
 

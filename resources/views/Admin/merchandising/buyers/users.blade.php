@@ -84,6 +84,9 @@
                         <li><a href="{{route('admin.buyers')}}" class="{{request()->status?'':'active'}}" >All ({{$total->total}})</a></li>
                         <li><a href="{{route('admin.buyers',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}" >Active ({{$total->active}})</a></li>
                         <li><a href="{{route('admin.buyers',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}" >Inactive ({{$total->inactive}})</a></li>
+                        @if($total->deleted > 0)
+                            <li><a href="{{route('admin.buyers',['view'=>'deleted'])}}" class="text-danger" >Deleted ({{$total->deleted}})</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>

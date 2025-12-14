@@ -74,17 +74,17 @@
 
                         <li class="list-group-item py-1">
                             <strong>Total Orders:</strong>
-                            <span class="text-success">{{ priceFullFormat($user->sales->sum('grand_total')) }}</span>
+                            <span class="text-success">{{ priceFullFormat($user?->sales?->sum('grand_total')) }}</span>
                         </li>
 
                         <li class="list-group-item py-1">
                             <strong>Total Received:</strong>
-                            <span class="text-info">{{ priceFullFormat($user->sales->sum('paid_amount')) }}</span>
+                            <span class="text-info">{{ priceFullFormat($user?->sales?->sum('paid_amount')) }}</span>
                         </li>
 
                         <li class="list-group-item py-1">
                             <strong>Total Due:</strong>
-                            <span class="text-danger">{{ priceFullFormat($user->sales->sum('due_amount')) }}</span>
+                            <span class="text-danger">{{ priceFullFormat($user?->sales?->sum('due_amount')) }}</span>
                         </li>
                     </ul>
 
@@ -157,7 +157,7 @@
 
     <!-- Payment Section -->
     @php
-        $totalDue = $user->sales->sum('due_amount');
+        $totalDue = $user?->sales?->sum('due_amount');
     @endphp
 
     <div class="card mb-30 mt-30 p-0 d-none">

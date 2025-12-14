@@ -13,17 +13,17 @@
 <!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
-         <h3>Employee List</h3>
+         <h3>Mer List</h3>
          <div class="dropdown">
 
          </div>
     </div>
     <div class="card-body">
 
-        <form action="{{route('admin.usersCustomer')}}">
+        <form action="{{route('admin.merchandisers')}}">
             <div class="row">
                 <div class="col-md-8">
-                     <form action="{{route('admin.usersCustomer')}}">
+                     <form action="{{route('admin.merchandisers')}}">
                         @if(request()->view == 'deleted')
                             <input type="hidden" name="view" value="deleted">
                         @endif
@@ -46,7 +46,7 @@
                                 <div class="input-group">
                                     <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
                                     <button type="submit" class="btn btn-success btn-sm rounded-0 mr-1">Search</button>
-                                    <a href="{{route('admin.usersCustomer', ['view' => 'deleted'])}}" class="btn-custom yellow" style="height: auto;">
+                                    <a href="{{route('admin.merchandisers', ['view' => 'deleted'])}}" class="btn-custom yellow" style="height: auto;">
                                         <i class="bx bx-rotate-left"></i>
                                     </a>
                                 </div>
@@ -56,10 +56,10 @@
                 </div>
                 <div class="col-md-4">
                     <ul class="statuslist">
-                        <li><a href="{{route('admin.usersCustomer')}}" class="{{request()->status?'':'active'}}" >All ({{$totals->total}})</a></li>
-                        <li><a href="{{route('admin.usersCustomer',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}" >Active ({{$totals->active}})</a></li>
-                        <li><a href="{{route('admin.usersCustomer',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}" >Inactive ({{$totals->inactive}})</a></li>
-                        <li><a href="{{route('admin.usersCustomer',['view'=>'deleted'])}}" target="_blank" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
+                        <li><a href="{{route('admin.merchandisers')}}" class="{{request()->status?'':'active'}}" >All ({{$totals->total}})</a></li>
+                        <li><a href="{{route('admin.merchandisers',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}" >Active ({{$totals->active}})</a></li>
+                        <li><a href="{{route('admin.merchandisers',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}" >Inactive ({{$totals->inactive}})</a></li>
+                        <li><a href="{{route('admin.merchandisers',['view'=>'deleted'])}}" target="_blank" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
                     </ul>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                                     <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
                                 </span>
                             </td>
-                            <td><a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
+                            <td><a href="{{route('admin.merchandisersAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
                                 @if($user->permission)
                                 <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
                                 @endif
@@ -108,16 +108,16 @@
                                 @endif
                             </td>
                             <td>{{$user->created_at->format('d.m.Y')}}</td>
-                            <td>{{ $user->deleted_at->format('d.m.Y, h:i A') }}</td>
+                            <td>{{ $user->deleted_at?->format('d.m.Y, h:i A') }}</td>
 
                             <td>
-                                {{$user->deletedBy->name }}</td>
+                                {{$user->deletedBy?->name }}</td>
                             <td style="padding: 8px 5px; text-align: center;">
                                 @if(can('employee.delete'))
-                                    <a href="{{ route('admin.usersCustomerAction', ['restore', $user->id]) }}" class="btn-custom success" onclick="return confirm('Are you sure you want to restore this user?')">
+                                    <a href="{{ route('admin.merchandisersAction', ['restore', $user->id]) }}" class="btn-custom success" onclick="return confirm('Are you sure you want to restore this user?')">
                                         <i class="bx bx-reset"></i>
                                     </a>
-                                    <a href="{{ route('admin.usersCustomerAction', ['force-delete', $user->id]) }}" class="btn-custom danger" onclick="return confirm('Are you sure you want to permanently delete this user?')">
+                                    <a href="{{ route('admin.merchandisersAction', ['force-delete', $user->id]) }}" class="btn-custom danger" onclick="return confirm('Are you sure you want to permanently delete this user?')">
                                         <i class="bx bx-trash"></i>
                                     </a>
                                 @else -- @endif
