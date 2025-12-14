@@ -10235,7 +10235,7 @@ class AdminController extends Controller
 
             $check = $r->validate([
                  'name' => 'required|max:100|unique:users,name,'.$user->id,
-                 'email' => 'nuallable|max:100|unique:users,email,'.$user->id,
+                 'email' => 'nullable|max:100|unique:users,email,'.$user->id,
                  'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
                  'gender' => 'nullable|max:10',
                  'address' => 'nullable|max:191',

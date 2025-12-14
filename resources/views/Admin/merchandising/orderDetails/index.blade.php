@@ -158,14 +158,14 @@
                                                     <td>{{ $order->style_no ?? '--' }}</td>
                                                     <td>{{ $order->order_no ?? '--' }}</td>
                                                     @if($ii == 0)
-                                                        <td style="vertical-align: middle;" rowspan="{{ count($order->items) }}">{{ numberFormat($order->total_qty, 2) ?? '--' }}</td>
+                                                        <td style="vertical-align: middle;" rowspan="{{ count($order->items) }}">{{ number_format($order->total_qty, 2) ?? '--' }}</td>
                                                     @endif
                                                     <td>{{ $order && $order->shipment_date ? \Carbon\Carbon::parse($order->shipment_date)->format('d.m.Y') : '--' }}</td>
                                                     <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
                                                     <td>{{ $order->fabrication ?? '--' }}</td>
                                                     <td>{{ $order->gsm ?? '--' }}</td>
                                                     <td>{{ $item->color_name ?? '--' }}</td>
-                                                    <td>{{ numberFormat($item->qty, 2) ?? '--' }}</td>
+                                                    <td>{{ number_format($item->qty, 2) ?? '--' }}</td>
                                                 </tr>
                                                 @empty
                                                 <tr>
