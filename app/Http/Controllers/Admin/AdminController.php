@@ -10211,6 +10211,7 @@ class AdminController extends Controller
         }
 
         $hasUser->merchandiser=true;
+        $hasUser->admin=true;
         $hasUser->permission_id=1;
         $hasUser->addedby_at=Carbon::now();
         $hasUser->addedby_id=Auth::id();
