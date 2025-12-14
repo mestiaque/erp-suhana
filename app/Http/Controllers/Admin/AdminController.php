@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use DB;
 use Pdf;
 use Str;
-use Auth;
 use File;
 use Hash;
 use Image;
@@ -27,7 +26,6 @@ use Redirect,Response;
 use App\Models\Company;
 use App\Models\Country;
 use App\Models\Expense;
-use App\Models\OrderDetail;
 use App\Models\General;
 use App\Models\Meeting;
 use App\Models\Service;
@@ -38,6 +36,7 @@ use App\Models\ExpenseIou;
 use App\Models\LeadPerson;
 use App\Models\Permission;
 use App\Models\ActivityLog;
+use App\Models\OrderDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
 use App\Models\UserLocation;
@@ -47,6 +46,7 @@ use App\Models\PostAttribute;
 use Illuminate\Validation\Rule;
 use App\Models\CompanyMachinery;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class AdminController extends Controller
@@ -3494,6 +3494,8 @@ class AdminController extends Controller
                         ->paginate(25)->appends([
                           'search'=>$r->search,
                           'status'=>$r->status,
+                          'startDate' => $r->startDate,
+                          'endDate' => $r->endDate,
                         ]);
 
         $report = [
@@ -3619,6 +3621,57 @@ class AdminController extends Controller
             return redirect()->route('admin.expenses');
         }
 
+        // if($action=='update'){
+
+        //     $check = $r->validate([
+        //         'expense_type' => 'required|numeric',
+        //         'payment' => 'required|numeric',
+        //         'branch_id' => 'required|numeric',
+        //         'company_name' => 'required|max:100',
+        //         'receiver_name' => 'required|max:100',
+        //         'received_mobile' => 'nullable|max:100',
+        //         // 'title' => 'required|max:100',
+        //         'created_at' => 'nullable|date',
+        //         'attachment' => 'nullable||file|max:25600',
+        //     ]);
+        //     $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
+
+
+        //     $expense->category_id=$r->expense_type;
+        //     $expense->method_id=$r->payment;
+        //     $expense->branch_id=$r->branch_id;
+        //     $expense->title=$r->title;
+        //     $expense->description=$r->description;
+        //     $expense->company_name=$r->company_name;
+        //     $expense->receiver_name=$r->receiver_name;
+        //     $expense->receiver_mobile=$r->receiver_mobile;
+        //     $expense->status =$r->status?'active':'inactive';
+        //     $expense->editedby_id =Auth::id();
+        //     if (!$createDate->isSameDay($expense->created_at)) {
+        //         $expense->created_at = $createDate;
+        //     }
+        //     $expense->save();
+        //     if($transection = $expense->transection){
+        //         $transection->payment_method_id =$expense->method_id;
+        //         $transection->created_at =$expense->created_at;
+        //         $transection->save();
+        //     }
+
+        //     ///////Image Upload End////////////
+        //     if($r->hasFile('attachment')){
+        //       $file =$r->attachment;
+        //       $src  =$expense->id;
+        //       $srcType  =8;
+        //       $fileUse  =1;
+        //       uploadFile($file,$src,$srcType,$fileUse);
+        //     }
+        //     ///////Image Upload End////////////
+
+        //     Session()->flash('success','Your Are Successfully Added');
+        //     return redirect()->back();
+
+        // }
+
         if($action=='update'){
 
             $check = $r->validate([
@@ -3627,49 +3680,73 @@ class AdminController extends Controller
                 'branch_id' => 'required|numeric',
                 'company_name' => 'required|max:100',
                 'receiver_name' => 'required|max:100',
-                'received_mobile' => 'nullable|max:100',
+                'receiver_mobile' => 'nullable|max:100',
                 // 'title' => 'required|max:100',
+                'amount' => 'required|numeric', // <-- amount validation
                 'created_at' => 'nullable|date',
-                'attachment' => 'nullable||file|max:25600',
+                'attachment' => 'nullable|file|max:25600',
             ]);
+
             $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
+            $oldAmount = $expense->amount; // পুরানো amount
+            $newAmount = $r->amount;
+            $diff = $newAmount - $oldAmount; // পরিবর্তনের পরিমাণ
 
-            $expense->category_id=$r->expense_type;
-            $expense->method_id=$r->payment;
-            $expense->branch_id=$r->branch_id;
-            $expense->title=$r->title;
-            $expense->description=$r->description;
-            $expense->company_name=$r->company_name;
-            $expense->receiver_name=$r->receiver_name;
-            $expense->receiver_mobile=$r->receiver_mobile;
-            $expense->status =$r->status?'active':'inactive';
-            $expense->editedby_id =Auth::id();
+            $method = Attribute::find($expense->account_id);
+            if(!$method){
+                Session()->flash('error','Account method not found');
+                return redirect()->back();
+            }
+
+            // Check if account balance is sufficient (only if increasing expense)
+            if($diff > 0 && $diff > $method->amount){
+                Session()->flash('error','Account Balance Not Sufficient');
+                return redirect()->back();
+            }
+
+            // Update expense fields
+            $expense->category_id = $r->expense_type;
+            $expense->method_id = $r->payment;
+            $expense->branch_id = $r->branch_id;
+            $expense->title = $r->title;
+            $expense->description = $r->description;
+            $expense->company_name = $r->company_name;
+            $expense->receiver_name = $r->receiver_name;
+            $expense->receiver_mobile = $r->receiver_mobile;
+            $expense->amount = $newAmount; // নতুন amount
+            $expense->status = $r->status ? 'active' : 'inactive';
+            $expense->editedby_id = Auth::id();
             if (!$createDate->isSameDay($expense->created_at)) {
                 $expense->created_at = $createDate;
             }
             $expense->save();
+
+            // Update account balance
+            $method->amount -= $diff; // পুরানো থেকে নতুন অনুযায়ী adjust
+            $method->save();
+
+            // Update related transaction
             if($transection = $expense->transection){
-                $transection->payment_method_id =$expense->method_id;
-                $transection->created_at =$expense->created_at;
+                $transection->amount = $expense->amount;
+                $transection->balance = $method->amount;
+                $transection->payment_method_id = $expense->method_id;
+                $transection->created_at = $expense->created_at;
                 $transection->save();
             }
 
-            ///////Image Upload End////////////
+            // Handle attachment
             if($r->hasFile('attachment')){
-              $file =$r->attachment;
-              $src  =$expense->id;
-              $srcType  =8;
-              $fileUse  =1;
-              uploadFile($file,$src,$srcType,$fileUse);
+                $file = $r->attachment;
+                $src = $expense->id;
+                $srcType = 8;
+                $fileUse = 1;
+                uploadFile($file, $src, $srcType, $fileUse);
             }
-            ///////Image Upload End////////////
 
-            Session()->flash('success','Your Are Successfully Added');
+            Session()->flash('success','Expense successfully updated');
             return redirect()->back();
-
         }
-
 
         if($action=='delete'){
 
@@ -5402,6 +5479,7 @@ class AdminController extends Controller
         // return $openingBalance;
         return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
     }
+
 
     // Services Management Function
 
