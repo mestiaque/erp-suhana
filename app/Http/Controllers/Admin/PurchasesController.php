@@ -905,6 +905,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'suppliers.supplierLadgers', compact('ledgerEntries', 'supplier', 'suppliers'));
     }
 
+    
 
     public function purchasesReports(Request $r){
 
