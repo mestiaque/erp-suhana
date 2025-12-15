@@ -94,7 +94,7 @@ class AdminController extends Controller
         ];
 
         $userActivity = $this->getUserActivityReport(new Request());
-        return view('Admin.dashboard',compact('reports', 'userActivity'));
+        return view('admin.dashboard',compact('reports', 'userActivity'));
     }
 
     public function getUserActivityReport(Request $request)
@@ -10862,7 +10862,6 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
-            // Otherwise, create new buyer
             $password = Str::random(8);
             $user = new User();
             $user->name          = $r->name;
@@ -10874,12 +10873,11 @@ class AdminController extends Controller
             $user->password_show = $password;
             $user->password      = Hash::make($password);
 
-            // Set buyer flags properly
-            $user->setTypes('buyer'); // if you already have setTypes method
+            $user->setTypes('customer'); // if you already have setTypes method
             $user->save();
 
-            Session()->flash('success', 'Buyer registered successfully!');
-            return redirect()->route('admin.buyersAction', ['view', $user->id]);
+            Session()->flash('success', 'Employee registered successfully!');
+            return redirect()->route('admin.usersCustomerAction', ['view', $user->id]);
         }
 
 

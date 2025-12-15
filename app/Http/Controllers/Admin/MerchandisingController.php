@@ -152,11 +152,25 @@ class MerchandisingController extends Controller
                 ->orWhere('mobile',$r->mobile)->first();
 
             if ($trashedUser) {
+                if($r->has('api')){
+                    return response()->json([
+                        'success'       => false,
+                        'msg'           => "This email or mobile exists in trash.",
+                        'buyer_created' => false,
+                    ]);
+                }
                 Session()->flash('error','This email or mobile exists in trash.');
                 return redirect()->back();
             }
 
             if ($existsUser) {
+                if($r->has('api')){
+                    return response()->json([
+                        'success'       => false,
+                        'msg'           => "his email or mobile alrady used.",
+                        'buyer_created' => false,
+                    ]);
+                }
                 Session()->flash('error','This email or mobile alrady used.');
                 return redirect()->back();
             }
@@ -176,6 +190,16 @@ class MerchandisingController extends Controller
             $user->buyer         = true;
             $user->customer      = false;
             $user->save();
+
+            if($r->has('api')){
+                return response()->json([
+                    'success'       => true,
+                    'msg'           => "Buyer registered successfully",
+                    'buyer_created' => true,
+                    'id'            => $user->id,
+                    'name'          => $user->name,
+                ]);
+            }
 
             Session()->flash('success','Buyer registered successfully!');
             return redirect()->route('admin.buyersAction',['view',$user->id]);
@@ -994,28 +1018,56 @@ class MerchandisingController extends Controller
                 // -------------------------------
                 // PO SELECT via AJAX
                 // -------------------------------
-        if ($action == 'po-select') {
-            $orders = OrderDetail::where('order_no', $r->order_no)->where('status', 'confirmed')->get()->makeHidden(['id']);
-            $orders = $orders->map(function ($o) {
-                unset($o->id);
-                return $o;
-            });
+        if ($action == 'buyer-select') {
 
-            if (count($orders) < 1) {
+            $orders = OrderDetail::where('buyer_id', $r->buyer_id)
+                // ->where('status', 'confirmed')
+                ->select('order_no')
+                ->distinct()
+                ->get();
+
+            if ($orders->isEmpty()) {
+                return response()->json(['success' => false]);
+            }
+
+            $html = '<option value="">-- Select Order Number --</option>';
+            foreach ($orders as $order) {
+                $html .= '<option value="'.$order->order_no.'">'.$order->order_no.'</option>';
+            }
+
+            return response()->json([
+                'success' => true,
+                'html'    => $html
+            ]);
+        }
+
+
+
+        if ($action == 'po-select') {
+
+            $orders = OrderDetail::where('order_no', $r->order_no)
+                // ->where('status', 'confirmed')
+                ->get();
+
+            if ($orders->isEmpty()) {
                 return response()->json([
                     'success' => false,
-                    'html'    => '<tr><td colspan="10" class="text-center">Order not found</td></tr>'
+                    'html' => '<tr><td colspan="10" class="text-center">Order not found</td></tr>'
                 ]);
             }
 
-                    // Render items partial
             $html = view(adminTheme().'merchandising.pi.includes.items', [
                 'order' => $orders->first(),
                 'items' => $orders
             ])->render();
 
-            return response()->json(['success' => true, 'html' => $html, 'order' => $orders->first()]);
+            return response()->json([
+                'success' => true,
+                'html'    => $html,
+                'order'   => $orders->first()
+            ]);
         }
+
 
                 // -------------------------------
                 // UPDATE PI
@@ -1026,6 +1078,7 @@ class MerchandisingController extends Controller
             VALIDATION
             --------------------------- */
             $r->validate([
+                'buyer_id' => 'required|string',
                 'order_no' => 'required|string',
                 'status'   => 'required|string',
                 'remarks'  => 'nullable|string',
@@ -1044,6 +1097,7 @@ class MerchandisingController extends Controller
             FETCH ORDER INFO
             --------------------------- */
             $order = OrderDetail::firstWhere('order_no', $r->order_no);
+            $buyer = User::filterByType('buyer')->where('id', $r->buyer_id)->first();
 
             if (!$order) {
                 return back()->with('error', 'Order not found for this Order No.');
@@ -1069,8 +1123,8 @@ class MerchandisingController extends Controller
             UPDATE MAIN PI
             --------------------------- */
             $pi->order_no      = $r->order_no;
-            $pi->buyer_id      = $order->buyer_id;
-            $pi->buyer_name    = $order->buyer_name;
+            $pi->buyer_id      = $buyer->id;
+            $pi->buyer_name    = $buyer->name;
             $pi->merchant_name = $order->merchant_name;
             $pi->merchant_id   = $order->merchant_id;
             $pi->remarks       = $r->remarks;
@@ -1160,9 +1214,10 @@ class MerchandisingController extends Controller
                     ->whereNotIn('order_no', $piOrder)
                     ->get()
             ->unique('order_no');
+        $buyers = User::with('orderDetails')->whereHas('orderDetails')->filterByType('buyer')->whereIn('status', [0, 1])->get();
         $items  = $pi->items;
 
-        return view(adminTheme().'merchandising.pi.edit', compact('pi', 'items', 'orders'));
+        return view(adminTheme().'merchandising.pi.edit', compact('pi', 'items', 'orders', 'buyers'));
     }
 
     public function manageAttribute(Request $r, $action = null, $id = null)
