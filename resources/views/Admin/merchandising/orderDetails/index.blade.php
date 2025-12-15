@@ -10,9 +10,22 @@
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Order Details List</h3>
-             <div class="dropdown">
+             <div class="dropdown d-inline-flex">
+
+
+                <form action="{{ route('admin.orderDetails') }}" method="GET" target="_blank">
+                    <input type="hidden" name="print" value="true">
+                    <input type="hidden" name="startDate" value="{{ request()->startDate }}">
+                    <input type="hidden" name="endDate" value="{{ request()->endDate }}">
+                    <input type="hidden" name="search" value="{{ request()->search }}">
+                    <button type="submit" class="btn-custom info mr-1" style="padding:5px 15px;">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                </form>
+
+
                 @can('order_details.add')
-                 <a href="{{ route('admin.orderDetailsAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                 <a href="{{ route('admin.orderDetailsAction','create') }}" class="btn-custom primary  mr-1" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Order Details
                  </a>
                  @endcan
@@ -86,7 +99,7 @@
                                 <td>{{ $order->company_name ?? '--' }}</td>
                                 <td>{{ $order->style_no ?? '--' }}</td>
                                 <td>{{ $order->order_no ?? '--' }}</td>
-                                <td>{{ numberFormat($order->total_qty, 2) ?? '--' }}</td>
+                                <td>{{ number_format($order->total_qty, 2) ?? '--' }}</td>
                                 <td>{{ $order && $order->shipment_date ? \Carbon\Carbon::parse($order->shipment_date)->format('d.m.Y') : '--' }}</td>
                                 {{-- <td>{{ $order->composition ?? '--' }}</td> --}}
                                 <td>{{ $order->fabrication ?? '--' }}</td>
@@ -158,14 +171,14 @@
                                                     <td>{{ $order->style_no ?? '--' }}</td>
                                                     <td>{{ $order->order_no ?? '--' }}</td>
                                                     @if($ii == 0)
-                                                        <td style="vertical-align: middle;" rowspan="{{ count($order->items) }}">{{ numberFormat($order->total_qty, 2) ?? '--' }}</td>
+                                                        <td style="vertical-align: middle;" rowspan="{{ count($order->items) }}">{{ number_format($order->total_qty, 2) ?? '--' }}</td>
                                                     @endif
                                                     <td>{{ $order && $order->shipment_date ? \Carbon\Carbon::parse($order->shipment_date)->format('d.m.Y') : '--' }}</td>
                                                     <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
                                                     <td>{{ $order->fabrication ?? '--' }}</td>
                                                     <td>{{ $order->gsm ?? '--' }}</td>
                                                     <td>{{ $item->color_name ?? '--' }}</td>
-                                                    <td>{{ numberFormat($item->qty, 2) ?? '--' }}</td>
+                                                    <td>{{ number_format($item->qty, 2) ?? '--' }}</td>
                                                 </tr>
                                                 @empty
                                                 <tr>

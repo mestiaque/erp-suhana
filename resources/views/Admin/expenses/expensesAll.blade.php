@@ -431,7 +431,7 @@
                  	</div>
     	            <div class="col-md-6 form-group">
         			    <label for="name">Amount* </label>
-                        <input type="number" disabled="" class="form-control {{$errors->has('amount')?'error':''}}" step="any" value="{{$dpm->amount}}" placeholder="Amount" >
+                        <input type="number" name="amount" class="form-control {{$errors->has('amount')?'error':''}}" step="any" value="{{$dpm->amount}}" placeholder="Amount" >
         				@if ($errors->has('amount'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('amount') }}</p>
         				@endif

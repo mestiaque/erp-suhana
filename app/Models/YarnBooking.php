@@ -26,6 +26,11 @@ protected $guarded = [];
         return $this->hasMany(YarnBookingItem::class);
     }
 
+    public function receiveItems()
+    {
+        return $this->hasMany(YarnItemReceive::class);
+    }
+
     public function buyer()
     {
         return $this->belongsTo(User::class, 'buyer_id');

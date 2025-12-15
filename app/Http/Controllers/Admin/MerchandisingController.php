@@ -33,9 +33,10 @@ class MerchandisingController extends Controller
         if ($r->action) {
             if ($r->checkid) {
 
-                $datas = User::where('buyer', true)
+                $datas = User::filterByType('buyer')
                     ->whereIn('status', [0, 1])
                     ->whereIn('id', $r->checkid)
+                    ->withTrashed()
                     ->get();
 
                 foreach ($datas as $data) {
@@ -47,17 +48,17 @@ class MerchandisingController extends Controller
                         $data->status = 0;
                         $data->save();
                     } elseif ($r->action == 5) {
-                        $userFiles = Media::latest()
-                            ->where('src_type', 7)  // buyer file srcType=7
-                            ->where('src_id', $data->id)
-                            ->get();
+                        // $userFiles = Media::latest()
+                        //     ->where('src_type', 7)  // buyer file srcType=7
+                        //     ->where('src_id', $data->id)
+                        //     ->get();
 
-                        foreach ($userFiles as $media) {
-                            if (File::exists($media->file_url)) {
-                                File::delete($media->file_url);
-                            }
-                            $media->delete();
-                        }
+                        // foreach ($userFiles as $media) {
+                        //     if (File::exists($media->file_url)) {
+                        //         File::delete($media->file_url);
+                        //     }
+                        //     $media->delete();
+                        // }
 
                         $data->delete();
                     }
@@ -74,7 +75,7 @@ class MerchandisingController extends Controller
 
 
         $users = User::latest()
-            ->where('buyer', true)
+            ->filterByType('buyer')
             ->whereIn('status', [0, 1])
             ->where(function ($q) use ($r) {
 
@@ -107,187 +108,181 @@ class MerchandisingController extends Controller
             ]);
 
                 // Total Count Results
-        $total = DB::table('users')
-            ->where('buyer', true)
+        $total = User::withTrashed()->filterByType('buyer')
             ->whereIn('status', [0, 1])
             ->selectRaw('count(*) as total')
             ->selectRaw("count(case when status = 1 then 1 end) as active")
             ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+            ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
             ->first();
+
+        if ($r->view == 'deleted') {
+
+            $users = User::onlyTrashed()
+                ->filterByType('buyer')
+                ->latest()
+                ->paginate(12)->appends($r->all());;
+
+            return view(adminTheme().'merchandising.buyers.users_deleted', compact('users','total'));
+        }
 
         return view(adminTheme().'merchandising.buyers.users', compact('users', 'total'));
     }
 
-    public function buyersAction(Request $r, $action, $id = null)
+    public function buyersAction(Request $r, $action, $id=null)
     {
-                // Add New Buyer Start
-        if ($action == 'create' && $r->isMethod('post')) {
-            $check = $r->validate([
+        /* ================= CREATE BUYER ================= */
+        if ($action=='create' && $r->isMethod('post')) {
+
+            $r->validate([
                 'name'         => 'required|max:100',
                 'company_name' => 'nullable|max:100',
-                'email'        => 'nullable|email|max:100|unique:users,email',
+                'email'        => 'nullable|email|max:100',
                 'mobile'       => 'nullable|max:100',
                 'country'      => 'nullable|max:100',
                 'address'      => 'nullable|max:500',
             ]);
-            $user = User::where('email', $r->email)->first();
-            if ($user) {
-                $user->buyer    = true;
-                $user->customer = false;
-                $user->save();
-                if($r->has('api')){
-                    return response()->json([
-                        'success'       => true,
-                        'msg'           => "User found! Now marked as Buyer",
-                        'buyer_created' => true,
-                        'id'            => $user->id,
-                        'name'          => $user->name,
-                    ]);
-                }
-                Session()->flash('success', 'User found! Now marked as Buyer.');
-            } else {
 
-                $password            = Str::random(8);
-                $user                = new User();
-                $user->name          = $r->name;
-                $user->mobile        = $r->mobile;
-                $user->email         = $r->email;
-                $user->country_text  = $r->country;
-                $user->company_name  = $r->company_name;
-                $user->address_line1 = $r->address;
-                $user->password_show = $password;
-                $user->password      = Hash::make($password);
+            // Check active user
+            $existsUser = User::where('email',$r->email)
+                ->orWhere('mobile',$r->mobile)->first();
 
-                $user->buyer    = true;
-                $user->customer = false;
-                $user->save();
-                if($r->has('api')){
-                    return response()->json([
-                        'success'       => true,
-                        'msg'           => "Buyer registered successfully",
-                        'buyer_created' => true,
-                        'id'            => $user->id,
-                        'name'          => $user->name,
-                    ]);
-                }
-                Session()->flash('success', 'Buyer registered successfully!');
+            // Check trashed user
+            $trashedUser = User::onlyTrashed()->where('email',$r->email)
+                ->orWhere('mobile',$r->mobile)->first();
+
+            if ($trashedUser) {
+                Session()->flash('error','This email or mobile exists in trash.');
+                return redirect()->back();
             }
 
-            return redirect()->route('admin.buyersAction', ['view', $user->id]);
+            if ($existsUser) {
+                Session()->flash('error','This email or mobile alrady used.');
+                return redirect()->back();
+            }
+
+            // Create new buyer
+            $password = Str::random(8);
+            $user = new User();
+            $user->name          = $r->name;
+            $user->mobile        = $r->mobile;
+            $user->email         = $r->email ?? null;
+            $user->company_name  = $r->company_name;
+            $user->address_line1 = $r->address;
+            $user->country_text  = $r->country;
+            $user->password_show = $password;
+            $user->password      = Hash::make($password);
+            $user->setTypes('buyer');
+            $user->buyer         = true;
+            $user->customer      = false;
+            $user->save();
+
+            Session()->flash('success','Buyer registered successfully!');
+            return redirect()->route('admin.buyersAction',['view',$user->id]);
         }
-                // Add New Buyer End
+        /* ================= CREATE END ================= */
 
 
-        $user = User::where('buyer', true)
-            ->whereIn('status', [0, 1])
-            ->find($id);
 
-        if (!$user) {
-            Session()->flash('error', 'Buyer not found');
+        /* ================= RESTORE ================= */
+        if ($action=='restore') {
+            $user = User::onlyTrashed()->filterByType('buyer')->find($id);
+            if (!$user) {
+                Session()->flash('error','Buyer not found in trash.');
+                return redirect()->route('admin.buyers',['view'=>'deleted']);
+            }
+            $user->restore();
+            Session()->flash('success','Buyer restored successfully!');
             return redirect()->route('admin.buyers');
         }
 
 
-                // View Buyer
-        if ($action == 'view') {
+        /* ================= FORCE DELETE ================= */
+        if ($action=='force-delete') {
+            $user = User::onlyTrashed()->filterByType('buyer')->find($id);
+            if (!$user) {
+                Session()->flash('error','Buyer not found in trash.');
+                return redirect()->route('admin.buyers',['view'=>'deleted']);
+            }
+            $files = Media::where('src_type',7)->where('src_id',$user->id)->get();
+            foreach ($files as $file) {
+                if (File::exists($file->file_url)) {
+                    File::delete($file->file_url);
+                }
+                $file->delete();
+            }
+            $user->forceDelete();
+            Session()->flash('success','Buyer permanently deleted!');
+            return redirect()->route('admin.buyers',['view'=>'deleted']);
+        }
 
-            $orders = $user->orders()->whereIn('status', ['approved'])
-                ->paginate(10, ['*'], 'orders_page');
-
-            $paymentMethods = Attribute::latest()
-                ->where('type', 9)
-                ->where('status', 'active')
-                ->select(['id', 'name', 'amount'])
-                ->get();
-
-            $accountMethods = Attribute::latest()
-                ->where('type', 10)
-                ->where('status', 'active')
-                ->where('addedby_id', Auth::id())
-                ->select(['id', 'name', 'amount'])
-                ->get();
-
-            $transactions = Transaction::where('user_id', $user->id)
-                ->where('type', 4)  // buyer payment
-                ->orderBy('id', 'desc')
-                ->paginate(10, ['*'], 'trans_page');
-
-            return view(adminTheme().'merchandising.buyers.viewUser', compact('user', 'orders', 'transactions', 'accountMethods', 'paymentMethods'));
+        /* ================= FIND BUYER ================= */
+        $user = User::filterByType('buyer')->find($id);
+        if (!$user) {
+            Session()->flash('error','Buyer not found.');
+            return redirect()->route('admin.buyers');
         }
 
 
-                // Update Buyer
-        if ($action == 'update' && $r->isMethod('post')) {
+        /* ================= VIEW BUYER ================= */
+        if ($action == 'view') {
+            $orders = $user->orders()->where('status','approved')->paginate(10);
+            return view(adminTheme().'merchandising.buyers.viewUser', compact('user','orders'));
+        }
 
-            $check = $r->validate([
+
+        /* ================= UPDATE BUYER ================= */
+        if ($action=='update' && $r->isMethod('post')) {
+
+            $r->validate([
                 'name'         => 'required|max:100',
-                'email'        => 'required|email|max:100|unique:users,email,' . $user->id,
+                'email'        => 'nullable|email|max:100|unique:users,email,'.$user->id,
                 'mobile'       => 'nullable|max:100',
-                'country'      => 'nullable|max:100',
-                'address'      => 'nullable|max:200',
                 'company_name' => 'nullable|max:200',
-                'created_at'   => 'nullable|date|max:50',
+                'address'      => 'nullable|max:500',
+                'country'      => 'nullable|max:100',
+                'created_at'   => 'nullable|date',
                 'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 
-            $createDate = $r->created_at ?
-                Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):
-                Carbon::now();
-
-            if (!$createDate->isSameDay($user->created_at)) {
-                $user->created_at = $createDate;
-            }
-
             $user->name          = $r->name;
-            $user->mobile        = $r->mobile;
             $user->email         = $r->email;
+            $user->mobile        = $r->mobile;
             $user->company_name  = $r->company_name;
             $user->address_line1 = $r->address;
             $user->country_text  = $r->country;
 
-
-
-                    // Image Upload
             if ($r->hasFile('image')) {
-                $file = $r->image;
-                uploadFile($file, $user->id, 6, 1, Auth::id());  // src_type=7 for buyer
+                uploadFile($r->image, $user->id, 7, 1, Auth::id()); // src_type=7
             }
 
-            $user->status = $r->status ? true : false;
+            $user->status = $r->status ? 1 : 0;
+            $user->setTypes('buyer');
             $user->save();
 
-            Session()->flash('success', 'Buyer updated successfully!');
+            Session()->flash('success','Buyer updated successfully!');
             return redirect()->back();
         }
 
 
-                // Delete Buyer
+        /* ================= SOFT DELETE ================= */
         if ($action == 'delete') {
 
-            $userFiles = Media::latest()
-                ->where('src_type', 7)
-                ->where('src_id', $user->id)
-                ->get();
+            // $files = Media::where('src_type',7)->where('src_id',$user->id)->get();
+            // foreach ($files as $file) {
+            //     if (File::exists($file->file_url)) {
+            //         File::delete($file->file_url);
+            //     }
+            //     $file->delete();
+            // }
 
-            foreach ($userFiles as $media) {
-                if (File::exists($media->file_url)) {
-                    File::delete($media->file_url);
-                }
-                $media->delete();
-            }
+            $user->deleted_at = Carbon::now();
+            $user->deleted_by = Auth::id();
+            $user->save();
 
-            $user->delete();
-
-            Session()->flash('success', 'Buyer deleted successfully!');
-            return redirect()->back();
+            Session()->flash('success','Buyer deleted successfully!');
+            return redirect()->route('admin.buyers');
         }
-
-
-                // Buyer Payment (optional, like supplier)
-        if ($action == 'payment') {
-                    // If want payment module here, I will generate similar code like supplier.
-        }
-
 
         return view(adminTheme().'merchandising.buyers.editUser', compact('user'));
     }
@@ -447,13 +442,13 @@ class MerchandisingController extends Controller
                         // Style update with unique check
                 elseif ($field == 'style') {
                     $existsStyle = Sample::where('style', $value)->where('id', '<>', $sample->id)->exists();
-                    if ($existsStyle) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'This style already exists',
-                            'field'   => 'style'                       // যেই input field
-                        ]);
-                    }
+                    // if ($existsStyle) {
+                    //     return response()->json([
+                    //         'success' => false,
+                    //         'message' => 'This style already exists',
+                    //         'field'   => 'style'                       // যেই input field
+                    //     ]);
+                    // }
                     $sample->style = $value;
                 }
 
@@ -513,10 +508,10 @@ class MerchandisingController extends Controller
 
             $existsStyle = Sample::where('style', $r->style)->where('id', '<>', $sample->id)->exists();
 
-            if ($existsStyle) {
-                session()->flash('info', 'This style already exists');
-                return redirect()->back();  // Save unnecessary
-            }
+            // if ($existsStyle) {
+            //     session()->flash('info', 'This style already exists');
+            //     return redirect()->back();  // Save unnecessary
+            // }
 
             if (count($sample->items) == 0) {
                 session()->flash('info', 'No items found for this sample');
@@ -561,9 +556,6 @@ class MerchandisingController extends Controller
 
     public function orderDetails(Request $r)
     {
-                // -----------------------------
-                // QUERY SAMPLES
-                // -----------------------------
         $orderDetails = OrderDetail::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
@@ -585,6 +577,7 @@ class MerchandisingController extends Controller
                         ->orWhere('merchant_name', 'LIKE', "%{$search}%");
                     });
                 }
+
 
                         // DATE RANGE
                 if ($r->startDate || $r->endDate) {
@@ -624,8 +617,12 @@ class MerchandisingController extends Controller
             ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
             ->selectRaw("COUNT(CASE WHEN status = 'canceled' THEN 1 END) AS canceled")
             ->first();
+        if($r->has('print')){
+            return view(adminTheme().'merchandising.orderDetails.printList', compact('orderDetails', 'totals'));
+        }else{
+            return view(adminTheme().'merchandising.orderDetails.index', compact('orderDetails', 'totals'));
+        }
 
-        return view(adminTheme().'merchandising.orderDetails.index', compact('orderDetails', 'totals'));
     }
 
     public function orderDetailsAction(Request $r, $action, $id = null)
@@ -746,13 +743,13 @@ class MerchandisingController extends Controller
                     ->where('id', '!=', $orderDetails->id)
                     ->exists();
 
-                if ($exists) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'This style already exists',
-                        'field'   => 'style_no'
-                    ]);
-                }
+                // if ($exists) {
+                //     return response()->json([
+                //         'success' => false,
+                //         'message' => 'This style already exists',
+                //         'field'   => 'style_no'
+                //     ]);
+                // }
 
                 $orderDetails->style_no = $value;
             }
@@ -805,10 +802,10 @@ class MerchandisingController extends Controller
                 ->where('id', '!=', $orderDetails->id)
                 ->exists();
 
-            if ($existsStyle) {
-                session()->flash('info', 'This style already exists');
-                return back();
-            }
+            // if ($existsStyle) {
+            //     session()->flash('info', 'This style already exists');
+            //     return back();
+            // }
 
             DB::beginTransaction();
 
@@ -1082,8 +1079,16 @@ class MerchandisingController extends Controller
             $pi->pi_no         = $r->pi_no ?? $pi->pi_no;
             $pi->created_at    = $r->created_at ?? $pi->created_at;
             $pi->order_date    = $r->order_date ?? $pi->order_date;
-            $pi->advising_bank = $r->advising_bank ?? $pi->advising_bank;
+            // $pi->advising_bank = $r->advising_bank ?? $pi->advising_bank;
             $pi->terms         = json_encode($checkedTerms);
+            // New fields
+            $pi->applicant               = $r->applicant ?? null ;
+            $pi->applicant_bank          = $r->applicant_bank ?? null;
+            $pi->first_beneficiary       = $r->first_beneficiary ?? null;
+            $pi->first_beneficiary_bank  = $r->first_beneficiary_bank ?? null;
+            $pi->second_beneficiary      = $r->second_beneficiary ?? null;
+            $pi->second_beneficiary_bank = $r->second_beneficiary_bank ?? null;
+            $pi->notify_party            = $r->notify_party ?? null;
 
             $pi->total_qty  = $total_qty;
             $pi->total_bill = $total_bill;

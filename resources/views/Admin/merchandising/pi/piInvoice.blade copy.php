@@ -108,9 +108,6 @@
                         width: 100%;
                         justify-content: center;
                     }
-                    .uppercase {
-                        text-transform: uppercase;
-                    }
                     table th, td{
                         padding: 2px !important;
                     }
@@ -144,7 +141,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="row d-none" style="margin:0px">
+                        <div class="row" style="margin:0px">
                             <div class="col-8" style="padding:0px;">
                                 Proforma Invoice no. {{ $pi->pi_no}}
                                 <div style="margin-top: 2rem;">
@@ -183,170 +180,21 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row d-none " style="margin:0px">
-                            <div class="col-7" style="padding:0px;">
-                                Proforma Invoice no. {{ $pi->pi_no }}
-
-                                {{-- Applicant --}}
-                                <div style="margin-top: 2rem;">
-                                    <b>Applicant :</b>
-                                    <br>{!! nl2br(e($pi->applicant)) !!}
-                                </div>
-
-
-
-                                {{-- 1st Beneficiary --}}
-                                <div style="margin-top: 2rem;">
-                                    <b>1st Beneficiary :</b>
-                                    <br>{!! nl2br(e($pi->first_beneficiary)) !!}
-                                </div>
-
-
-
-                                {{-- 2nd Beneficiary --}}
-                                <div style="margin-top: 2rem;">
-                                    <b>2nd Beneficiary :</b>
-                                    <br>{!! nl2br(e($pi->second_beneficiary)) !!}
-                                </div>
-
-                                {{-- Buyer --}}
-                                <div style="margin-top: 2rem;">
-                                    <b>Buyer :</b> {{ $pi->buyer?->name ?? '' }}
-                                    <br>
-                                    @php
-                                        $words = preg_split('/\s+/', strip_tags($pi->buyer?->address_line1 ?? ''));
-                                        $chunks = array_chunk($words, 4);
-                                    @endphp
-                                    @foreach($chunks as $line)
-                                        {{ implode(' ', $line) }} <br>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div class="col-5">
-                                <div style="padding:5px;">
-                                    Date : {{ $pi->created_at->format('d.m.Y') }}
-                                {{-- Applicant Bank --}}
-                                    <div style="margin-top: 1rem;">
-                                        <b>Applicant Bank :</b>
-                                        <br>{!! nl2br(e($pi->applicant_bank)) !!}
-                                    </div>
-                                            {{-- 1st Beneficiary Bank --}}
-                                    <div style="margin-top: 1rem;">
-                                        <b>1st Beneficiary Bank :</b>
-                                        <br>{!! nl2br(e($pi->first_beneficiary_bank)) !!}
-                                    </div>
-                                            {{-- 2nd Beneficiary Bank --}}
-                                    <div style="margin-top: 1rem;">
-                                        <b>2nd Beneficiary Bank :</b>
-                                        <br>{!! nl2br(e($pi->second_beneficiary_bank)) !!}
-                                    </div>
-                                    <div style="margin-top: 1rem;">
-                                        <b>Notify Party /Consignee :</b>
-                                        <br>{!! nl2br(e($pi->notify_party)) !!}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Date Row (optional, you can keep it on top or bottom) --}}
-                        <div class="row" style="margin:0px; margin-top:0.5rem;">
-                            <div class="col-7" style="padding:0px;">
-                                Proforma Invoice no. {{ $pi->pi_no}}
-                            </div>
-                            <div class="col-5 p-0">
-                                Date : {{ $pi->created_at->format('d.m.Y') }}
-                            </div>
-                        </div>
-
-                         {{-- Applicant Row --}}
-                        <div class="row" style="margin:0px; margin-top:0.5rem;">
-                            <div class="col-7" style="padding:0px;">
-                                @if($pi->applicant !== null)
-                                    <b class="uppercase">Applicant :</b>
-                                    <br>{!! nl2br(e($pi->applicant)) !!}
-                                @endif
-                            </div>
-                            <div class="col-5" style="padding:0px;">
-                                @if($pi->applicant_bank !== null)
-                                    <b class="uppercase">Applicant Bank :</b>
-                                    <br>{!! nl2br(e($pi->applicant_bank)) !!}
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- 1st Beneficiary Row --}}
-                        <div class="row" style="margin:0px; margin-top:0.5rem;">
-                            <div class="col-7" style="padding:0px;">
-                                @if($pi->first_beneficiary !== null)
-                                    <b class="uppercase">1st Beneficiary :</b>
-                                    <br>{!! nl2br(e($pi->first_beneficiary)) !!}
-                                @endif
-                            </div>
-                            <div class="col-5" style="padding:0px;">
-                                @if($pi->first_beneficiary_bank !== null)
-                                    <b class="uppercase">1st Beneficiary Bank :</b>
-                                    <br>{!! nl2br(e($pi->first_beneficiary_bank)) !!}
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- 2nd Beneficiary Row --}}
-                        <div class="row" style="margin:0px; margin-top:0.5rem;">
-                            <div class="col-7" style="padding:0px;">
-                                @if($pi->second_beneficiary !== null)
-                                    <b class="uppercase">2nd Beneficiary :</b>
-                                    <br>{!! nl2br(e($pi->second_beneficiary)) !!}
-                                @endif
-                            </div>
-                            <div class="col-5" style="padding:0px;">
-                                @if($pi->second_beneficiary_bank !== null)
-                                    <b class="uppercase">2nd Beneficiary Bank :</b>
-                                    <br>{!! nl2br(e($pi->second_beneficiary_bank)) !!}
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- Buyer + Notify Party Row --}}
-                        <div class="row" style="margin:0px; margin-top:0.5rem;">
-                            <div class="col-7" style="padding:0px;">
-                                @if($pi->buyer !== null)
-                                    <b class="uppercase">Buyer :</b> {{ $pi->buyer?->name ?? '' }}
-                                    <br>
-                                    @php
-                                        $words = preg_split('/\s+/', strip_tags($pi->buyer?->address_line1 ?? ''));
-                                        $chunks = array_chunk($words, 4);
-                                    @endphp
-                                    @foreach($chunks as $line)
-                                        {{ implode(' ', $line) }} <br>
-                                    @endforeach
-                                @endif
-                            </div>
-                            <div class="col-5" style="padding:0px;">
-                                @if($pi->notify_party !== null)
-                                    <b class="uppercase">Notify Party / Consignee :</b>
-                                    <br>{!! nl2br(e($pi->notify_party)) !!}
-                                @endif
-                            </div>
-                        </div>
-
-
                     </div>
                     <div class="mt-4">
                         <div class="table-responsive">
                             <table class="table table-bordered invoice-table">
                                 <thead>
                                     <tr>
-                                        <th>SN</th>
+                                        <th>SL NO.</th>
                                         <th>STYLE</th>
-                                        <th>Description</th>
-                                        <th>PO Number</th>
-                                        <th>CL</th>
-                                        <th>Qty in PCS/SET</th>
-                                        <th>FOB</th>
-                                        <th>Total Value</th>
-                                        <th>Buyer Del. Date</th>
+                                        <th>Size Range</th>
+                                        <th>Item Description</th>
+                                        <th>Fabric / Composition</th>
+                                        <th>Quantity (Pc)</th>
+                                        <th>Unit Price</th>
+                                        <th>Total Amount</th>
+                                        <th>Shipment Date</th>
                                         <th>Remarks</th>
                                     </tr>
                                 </thead>
@@ -383,12 +231,15 @@
                                     <tr>
                                         <td>{{ $i+1 }}</td>
                                         <td>{{ $item->style_no }}</td>
-                                        <td>{{ $item->fabrication }}</td>
-                                        <td>{{ $pi->order_no ?? '--' }}</td>
-                                        <td>--</td>
+                                        <td>{{ $item->size ?? '' }}</td>
+                                        <td>{{ $item->description ?? '' }}</td>
+                                        <td>
+                                            {{ $item->fabrication }},
+                                            {{ $item->gsm }} gsm
+                                        </td>
                                         <td>{{ number_format($item->order_qty) }}</td>
-                                        <td>${{ number_format($item->unit_price, 2) }}</td>
-                                        <td>${{ number_format($item->total_price, 2) }}</td>
+                                        <td>{{ number_format($item->unit_price, 2) }}</td>
+                                        <td>{{ number_format($item->total_price, 2) }}</td>
                                         @if($prevShipmentDate !== $shipmentDate)
                                             <td rowspan="{{ $rowspan }}">{{ $shipmentDate }}</td>
                                         @endif
@@ -407,14 +258,14 @@
                                         <td colspan="5" class="text-center">Total</td>
                                         <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
                                         <td></td>
-                                        <td>${{ number_format($pi->items->sum('total_price'),2) }}</td>
+                                        <td>{{ number_format($pi->items->sum('total_price'),2) }}</td>
                                         <td colspan=""></td>
                                         <td colspan=""></td>
                                     </tr>
                                     <tr>
                                         <td colspan="10" class="text-center">
                                             <input type="hidden" name="total_amount_input" id="total_amount_input" value="{{ $pi->items->sum('total_price') }}">
-                                            In Words - Total Amount (USD) : <span id="total_amount_word"></span>
+                                            In Words - Total Amount (Tk) : <span id="total_amount_word"></span>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -423,9 +274,9 @@
                     </div>
 
                     <div class="row m-0 p-0">
-                        <div class="col-9 pl-0">
+                        <div class="col-10 pl-0">
                             @if($pi->terms !== null && !empty(json_decode($pi->terms, true)))
-                                <div style="margin-top: 0.2rem">
+                                <div style="margin-top: 1rem">
                                     <h6 style="font-size: 13px;">TERMS & CONDITIONS</h2>
                                     <div style="">
                                         @php
@@ -445,7 +296,7 @@
                                 </div>
                             @endif
                         </div>
-                        <div class="col-3 pl-5">
+                        <div class="col-2 pl-5">
                             BIN : 004569897-0103 <br>
                             ERC : 260326211263822 <br>
                             IRC : 260326120696022 <br>
@@ -478,7 +329,7 @@
 <script>
     var amount = Number($('#total_amount_input').val());
     var words = toWords(amount);
-    $('#total_amount_word').html(words + ' USD Only');
+    $('#total_amount_word').html(words + ' Taka Only');
 
 </script>
 @endpush

@@ -108,11 +108,49 @@ $advisingBank =
                             <option value="cancel" {{ $pi->status=='cancel'?'selected':'' }}>Cancel</option>
                         </select>
                     </div>
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-12 mb-3 d-none">
 
                         <label>Advising Bank</label>
                         <textarea name="advising_bank" class="form-control advising_bank" rows="9" placeholder="Advising Bank readonly">{{ $pi->advising_bank ?? $advisingBank }}</textarea>
                     </div>
+
+
+
+                    <div class="col-md-6 mb-3">
+                        <label>Applicant</label>
+                        <textarea name="applicant" class="form-control" rows="3" placeholder="Applicant">{{ $pi->applicant ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Applicant Bank</label>
+                        <textarea name="applicant_bank" class="form-control" rows="3" placeholder="Applicant Bank">{{ $pi->applicant_bank ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>1st Beneficiary</label>
+                        <textarea name="first_beneficiary" class="form-control" rows="3" placeholder="1st Beneficiary">{{ $pi->first_beneficiary ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>1st Beneficiary Bank</label>
+                        <textarea name="first_beneficiary_bank" class="form-control" rows="3" placeholder="1st Beneficiary Bank">{{ $pi->first_beneficiary_bank ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>2nd Beneficiary</label>
+                        <textarea name="second_beneficiary" class="form-control" rows="3" placeholder="2nd Beneficiary">{{ $pi->second_beneficiary ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>2nd Beneficiary Bank</label>
+                        <textarea name="second_beneficiary_bank" class="form-control" rows="3" placeholder="2nd Beneficiary Bank">{{ $pi->second_beneficiary_bank ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Notify Party</label>
+                        <textarea name="notify_party" class="form-control" rows="3" placeholder="Notify Party">{{ $pi->notify_party ?? '' }}</textarea>
+                    </div>
+
                 </div>
 
                 <br>
