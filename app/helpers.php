@@ -10,10 +10,14 @@ use App\Models\PostExtra;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
+    function general() {
+        // Skip DB query if running in console (artisan commands)
+        if (app()->runningInConsole()) {
+            return null; // or return default object if you want
+        }
 
-function general(){
-  return $general =General::first();
-}
+        return General::first();
+    }
 
 function websiteTitle($title=null){
 
