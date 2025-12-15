@@ -608,7 +608,7 @@ class PurchasesController extends Controller
          //Filter Actions Start
         if($r->action){
             if($r->checkid){
-                $datas=User::where('supplier',true)->whereIn('status',[0,1])
+                $datas=User::filterByType('supplier')->whereIn('status',[0,1])
                     ->whereIn('id',$r->checkid)->get();
 
                 foreach($datas as $data){
@@ -621,13 +621,13 @@ class PurchasesController extends Controller
                     $data->save();
                     }elseif($r->action==5){
 
-                    $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
-                    foreach ($userFiles as $media) {
-                        if(File::exists($media->file_url)){
-                                File::delete($media->file_url);
-                            }
-                        $media->delete();
-                    }
+                    // $userFiles =Media::latest()->where('src_type',6)->where('src_id',$data->id)->get();
+                    // foreach ($userFiles as $media) {
+                    //     if(File::exists($media->file_url)){
+                    //             File::delete($media->file_url);
+                    //         }
+                    //     $media->delete();
+                    // }
                     $data->delete();
 
                     }
@@ -645,7 +645,7 @@ class PurchasesController extends Controller
 
       //Filter Action End
 
-      $users =User::latest()->where('supplier',true)->whereIn('status',[0,1])
+      $users =User::latest()->filterByType('supplier')->whereIn('status',[0,1])
       ->where(function($q) use($r) {
           if($r->search){
               $q->where('name','LIKE','%'.$r->search.'%');
@@ -674,7 +674,7 @@ class PurchasesController extends Controller
           }
 
       })
-      ->select(['id','name','email','mobile','created_at','company_name','address_line1','addedby_id','status'])
+      ->select(['id','name','email','mobile','created_at','company_name','address_line1','addedby_id','status', 'deleted_by', 'deleted_at'])
         ->paginate(25)->appends([
           'search'=>$r->search,
           'status'=>$r->status,
@@ -683,238 +683,166 @@ class PurchasesController extends Controller
         ]);
 
       //Total Count Results
-      $total = DB::table('users')->whereIn('status',[0,1])->where('supplier',true)
+      $total = User::withTrashed()->filterByType('supplier')->whereIn('status',[0,1])
       ->selectRaw('count(*) as total')
       ->selectRaw("count(case when status = 1 then 1 end) as active")
       ->selectRaw("count(case when status = 0 then 1 end) as inactive")
+      ->selectRaw("count(case when deleted_at IS NOT NULL then 1 end) as deleted")
       ->first();
+
+        if ($r->view == 'deleted') {
+            $users = User::onlyTrashed()
+                ->filterByType('supplier')
+                ->latest()
+                ->paginate(12)->appends($r->all());;
+
+            return view(adminTheme().'suppliers.users_deleted', compact('users','total'));
+        }
+
       return view(adminTheme().'suppliers.users',compact('users','total'));
     }
 
-    public function suppliersAction(Request $r,$action,$id=null){
+    public function suppliersAction(Request $r, $action, $id = null)
+    {
+        /* ================= CREATE SUPPLIER ================= */
+        if ($action == 'create' && $r->isMethod('post')) {
 
-      //Add New User Start
-      if($action=='create' && $r->isMethod('post')){
-        $check = $r->validate([
-          'name' => 'required|max:100',
-          'company_name' => 'nullable|max:100',
-          'email_mobile' => 'required|max:100',
-          'address' => 'nullable|max:500',
-        ]);
+            $r->validate([
+                'name'         => 'required|max:100',
+                'company_name' => 'nullable|max:100',
+                'email_mobile' => 'required|max:100',
+                'address'      => 'nullable|max:500',
+            ]);
 
-        $user =User::where('email',$r->email_mobile)->orWhere('mobile',$r->email_mobile)->first();
-        if($user){
-          $user->supplier=true;
-          $user->save();
-          Session()->flash('success','User Already Register! Now you are Supplier.');
-        }else{
-          $password=Str::random(8);
-          $user =new User();
-          $user->name =$r->name;
-          if(filter_var($r->email_mobile, FILTER_VALIDATE_EMAIL)){
-            $user->email =$r->email_mobile;
-          }else{
-            $user->mobile =$r->email_mobile;
-          }
-          $user->company_name=$r->company_name;
-          $user->address_line1=$r->address;
-          $user->password_show=$password;
-          $user->password=Hash::make($password);
-          $user->supplier=true;
-          $user->save();
+            // Check existing active user
+            $query = User::query()->where('mobile', $r->email_mobile);
+            if (filter_var($r->email_mobile, FILTER_VALIDATE_EMAIL)) {
+                $query->orWhere('email', $r->email_mobile);
+            }
+            $existsUser = $query->first();
 
-          Session()->flash('success','Supplier Are Successfully Register Done!');
+            // Check trashed user
+            $trashedQuery = User::onlyTrashed()->where('mobile', $r->email_mobile);
+            if (filter_var($r->email_mobile, FILTER_VALIDATE_EMAIL)) {
+                $trashedQuery->orWhere('email', $r->email_mobile);
+            }
+            $trashedUser = $trashedQuery->first();
+
+            if ($trashedUser) {
+                Session()->flash('info', 'This email or mobile exists in trash.');
+                return redirect()->back();
+            }
+
+            if ($existsUser) {
+                Session()->flash('info', 'This email or mobile is already in use.');
+                return redirect()->back();
+            }
+
+            // Create new supplier
+            $password = Str::random(8);
+            $user = new User();
+            $user->name          = $r->name;
+            if (filter_var($r->email_mobile, FILTER_VALIDATE_EMAIL)) {
+                $user->email = $r->email_mobile;
+            } else {
+                $user->mobile = $r->email_mobile;
+            }
+            $user->company_name  = $r->company_name;
+            $user->address_line1 = $r->address;
+            $user->password_show = $password;
+            $user->password      = Hash::make($password);
+
+            // Set supplier type
+            $user->setTypes('supplier');
+            $user->save();
+
+            Session()->flash('success', 'Supplier registered successfully!');
+            return redirect()->route('admin.suppliersAction', ['view', $user->id]);
+        }
+        /* ================= CREATE END ================= */
+
+
+        /* ================= RESTORE ================= */
+        if ($action == 'restore') {
+            $user = User::onlyTrashed()->filterByType('supplier')->find($id);
+            if (!$user) {
+                Session()->flash('error', 'Supplier not found in trash.');
+                return redirect()->route('admin.suppliers', ['view' => 'deleted']);
+            }
+            $user->restore();
+            Session()->flash('success', 'Supplier restored successfully!');
+            return redirect()->route('admin.suppliers');
         }
 
+        /* ================= SOFT DELETE ================= */
+        if ($action == 'delete') {
+            $user = User::filterByType('supplier')->find($id);
+            if (!$user) {
+                Session()->flash('error', 'Supplier not found.');
+                return redirect()->route('admin.suppliers');
+            }
 
-        return redirect()->route('admin.suppliersAction',['view',$user->id]);
-      }
-        //Add New User End
+            // Optional: delete media here if needed
+            $user->deleted_at = now();
+            $user->deleted_by = Auth::id();
+            $user->save();
 
+            Session()->flash('success', 'Supplier soft-deleted successfully!');
+            return redirect()->route('admin.suppliers');
+        }
 
-      $user=User::where('supplier',true)->whereIn('status',[0,1])->find($id);
-      if(!$user){
-        Session()->flash('error','This Supplier Are Not Found');
-        return redirect()->route('admin.suppliers');
-      }
+        /* ================= FIND SUPPLIER ================= */
+        $user = User::filterByType('supplier')->whereIn('status', [0,1])->find($id);
+        if (!$user && $action != 'create') {
+            Session()->flash('error', 'Supplier not found.');
+            return redirect()->route('admin.suppliers');
+        }
 
-      if($action=='view'){
-        $orders =$user->orders()->whereIn('status',['approved'])->paginate(10, ['*'], 'orders_page');
-        $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
-        $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
-        $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id', 'desc')->paginate(10, ['*'], 'trans_page');
-        return view(adminTheme().'suppliers.viewUser',compact('user','orders', 'transactions', 'accountMethods', 'paymentMethods', 'transactions'));
-      }
+        /* ================= VIEW SUPPLIER ================= */
+        if ($action == 'view') {
+            $orders = $user->orders()->where('status', 'approved')->paginate(10);
+            $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->where('addedby_id', Auth::id())->select(['id','name','amount'])->get();
+            $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
+            return view(adminTheme().'suppliers.viewUser', compact('user','orders','transactions','accountMethods','paymentMethods'));
+        }
 
-      //Update User Profile Start
-      if($action=='update' && $r->isMethod('post')){
-
-          $check = $r->validate([
-                'name' => 'required|max:100',
-                'email' => 'nullable|max:100|unique:users,email,'.$user->id,
-                'mobile' => 'required|max:20|unique:users,mobile,'.$user->id,
-                'address' => 'nullable|max:200',
+        /* ================= UPDATE SUPPLIER ================= */
+        if ($action == 'update' && $r->isMethod('post')) {
+            $r->validate([
+                'name'         => 'required|max:100',
+                'email'        => 'nullable|max:100|unique:users,email,'.$user->id,
+                'mobile'       => 'required|max:20|unique:users,mobile,'.$user->id,
+                'address'      => 'nullable|max:200',
                 'company_name' => 'nullable|max:200',
-                'created_at' => 'nullable|date|max:50',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'created_at'   => 'nullable|date|max:50',
+                'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 
-          $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
-          if (!$createDate->isSameDay($user->created_at)) {
-              $user->created_at = $createDate;
-          }
-
-          $user->name =$r->name;
-          $user->mobile =$r->mobile;
-          $user->email =$r->email;
-          $user->company_name =$r->company_name;
-          $user->address_line1 =$r->address;
-          ///////Image UploadStart////////////
-          if($r->hasFile('image')){
-            $file =$r->image;
-            $src  =$user->id;
-            $srcType  =6;
-            $fileUse  =1;
-            $author =Auth::id();
-            uploadFile($file,$src,$srcType,$fileUse,$author);
-          }
-          ///////Image Upload End////////////
-          $user->status=$r->status?true:false;
-          $user->save();
-
-          Session()->flash('success','Your Updated Are Successfully Done!');
-          return redirect()->back();
-
-        }
-        //Update User Profile End
-
-        //Delete User Start
-        if($action=='delete'){
-
-          $userFiles =Media::latest()->where('src_type',6)->where('src_id',$user->id)->get();
-          foreach ($userFiles as $media) {
-              if(File::exists($media->file_url)){
-                    File::delete($media->file_url);
-                }
-              $media->delete();
-          }
-          $user->delete();
-          Session()->flash('success','User Are Deleted Successfully Deleted!');
-          return redirect()->back();
-        }
-        //Delete User End
-
-
-        if($action == 'payment'){
-            $check = $r->validate([
-                'pay_amount' => 'required',
-                'account_id' => 'required',
-                'payment_method_id' => 'required',
-                'attachment' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,PNG,pdf|max:2048',
-            ]);
-
-            $supplier_id = $r->user_id;
-            $pay_amount  = floatval($r->pay_amount);
-            $payment_method_id = $r->payment_method_id;
-            $note = $r->note;
-
-            $accountMethod =Attribute::where('type',10)->where('status','active')->find($r->account_id);
-            if(!$accountMethod){
-                Session()->flash('error','Account method Are Not found');
-                return redirect()->back();
-            }
-            if($pay_amount > $accountMethod->amount){
-                Session()->flash('error','Account Balance Are Not Available');
-                return redirect()->back();
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
+            if (!$createDate->isSameDay($user->created_at)) {
+                $user->created_at = $createDate;
             }
 
-            $paymentMethod = Attribute::findOrFail($payment_method_id);
-            $purchases = PurchaseOrder::where('supplier_id', $supplier_id)
-                                        ->where('due_amount', '>', 0)
-                                        ->where('can_pay', 1)
-                                        ->orderBy('id', 'asc')
-                                        ->get();
+            $user->name          = $r->name;
+            $user->mobile        = $r->mobile;
+            $user->email         = $r->email;
+            $user->company_name  = $r->company_name;
+            $user->address_line1 = $r->address;
 
-            if ($purchases->count() == 0) {
-                return back()->with('error', 'No due found for this supplier.');
+            if ($r->hasFile('image')) {
+                uploadFile($r->image, $user->id, 6, 1, Auth::id()); // src_type=6
             }
 
-            $remaining = $pay_amount;
+            $user->status = $r->status ? true : false;
+            $user->setTypes('supplier');
+            $user->save();
 
-
-            foreach ($purchases as $purchase) {
-
-                if ($remaining <= 0)
-                    break;
-
-                $due = $purchase->due_amount;
-
-                $payToThis = min($due, $remaining); // this purchase e joto jabe
-
-                // Update purchase paid/due
-                $purchase->paid_amount += $payToThis;
-                $purchase->due_amount -= $payToThis;
-
-                // Update payment_status
-                if ($purchase->due_amount <= 0) {
-                    $purchase->payment_status = 'paid';
-                    $purchase->due_amount = 0;
-                } elseif ($purchase->paid_amount > 0) {
-                    $purchase->payment_status = 'partial';
-                } else {
-                    $purchase->payment_status = 'due';
-                }
-
-                $purchase->save();
-
-                // ==========================
-                //   Create Transaction Log
-                // ==========================
-                $trans = Transaction::create([
-                    "src_id"            => $purchase->id,
-                    "user_id"           => $purchase->supplier_id,
-
-                    "billing_name"      => $purchase->supplier_name,
-                    "billing_mobile"    => $purchase->supplier_mobile,
-                    "billing_email"     => $purchase->supplier_email,
-                    "billing_address"   => $purchase->supplier_address,
-                    "billing_note"      => $note,
-
-                    "type"              => 3, // purchase payment
-                    "account_id"        => $r->account_id,
-                    "transection_id"    => date('Ymd') . random_int(1000, 9999),
-
-                    "payment_method"    => $paymentMethod->name,
-                    "payment_method_id" => $paymentMethod->id,
-                    "amount"            => $payToThis,
-                    "currency"          => "BDT",
-                    "status"            => "success",
-                    "addedby_id"        => Auth::id(),
-                ]);
-
-                // Remaining reduce
-                $remaining -= $payToThis;
-
-
-                ///////Image Upload End////////////
-                if($r->hasFile('attachment')){
-                $file =$r->attachment;
-                $src  =$trans->id;
-                $srcType  =9;
-                $fileUse  =1;
-                uploadFile($file,$src,$srcType,$fileUse);
-                }
-                ///////Image Upload End////////////
-            }
-
-            $accountMethod->amount -=$pay_amount;
-            $accountMethod->save();
-
-            return back()->with('success', 'Supplier payment successfully completed!');
+            Session()->flash('success','Supplier updated successfully!');
+            return redirect()->back();
         }
 
-      return view(adminTheme().'suppliers.editUser',compact('user'));
-
+        return view(adminTheme().'suppliers.editUser', compact('user'));
     }
 
 
@@ -977,6 +905,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'suppliers.supplierLadgers', compact('ledgerEntries', 'supplier', 'suppliers'));
     }
 
+    
 
     public function purchasesReports(Request $r){
 

@@ -91,6 +91,9 @@
                         <li><a href="{{route('admin.merchandisers')}}" class="{{request()->status?'':'active'}}">All ({{$totals->total}})</a></li>
                         <li><a href="{{route('admin.merchandisers',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}">Active ({{$totals->active}})</a></li>
                         <li><a href="{{route('admin.merchandisers',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}">Inactive ({{$totals->inactive}})</a></li>
+                        @if($totals->deleted > 0)
+                            <li><a href="{{route('admin.merchandisers',['view'=>'deleted'])}}" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -218,10 +221,33 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="username"
-                               placeholder="Enter Email/Mobile" required>
-                    </div>
+                        <div class="form-group">
+                        <label for="name">Name* </label>
+                        <div class="controls">
+                            <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
+                            @if ($errors->has('name'))
+                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                            @endif
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Mobile* </label>
+                            <div class="controls">
+                                <input type="mobile" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required>
+                                @if ($errors->has('mobile'))
+                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Email </label>
+                            <div class="controls">
+                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
+                                @if ($errors->has('email'))
+                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
+                                @endif
+                            </div>
+                        </div>
                 </div>
 
                 <div class="modal-footer">

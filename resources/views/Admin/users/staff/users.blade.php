@@ -41,15 +41,6 @@
                    </div>
                </div>
 
-               <div class="col-md-2 mb-1">
-                   <select class="form-control" name="role_id">
-                       <option value="">Select Role</option>
-                       @foreach($roles as $role)
-                       <option value="{{$role->id}}" {{request()->role_id==$role->id?'selected':''}}>{{$role->name}}</option>
-                       @endforeach
-                   </select>
-               </div>
-
                <div class="col-md-5 mb-1">
                    <div class="input-group">
                        <input type="text" name="search" value="{{request()->search?:''}}" placeholder="Name, Email, Mobile" class="form-control">
@@ -91,6 +82,9 @@
                         <li><a href="{{route('admin.staffAdmin')}}" class="{{request()->status?'':'active'}}">All ({{$totals->total}})</a></li>
                         <li><a href="{{route('admin.staffAdmin',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}">Active ({{$totals->active}})</a></li>
                         <li><a href="{{route('admin.staffAdmin',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}">Inactive ({{$totals->inactive}})</a></li>
+                        @if($totals->deleted > 0)
+                            <li><a href="{{route('admin.staffAdmin',['view'=>'deleted'])}}" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -218,10 +212,33 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="username"
-                               placeholder="Enter Email/Mobile" required>
-                    </div>
+                        <div class="form-group">
+                        <label for="name">Name* </label>
+                        <div class="controls">
+                            <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
+                            @if ($errors->has('name'))
+                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                            @endif
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Mobile* </label>
+                            <div class="controls">
+                                <input type="mobile" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required>
+                                @if ($errors->has('mobile'))
+                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Email </label>
+                            <div class="controls">
+                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
+                                @if ($errors->has('email'))
+                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
+                                @endif
+                            </div>
+                        </div>
                 </div>
 
                 <div class="modal-footer">

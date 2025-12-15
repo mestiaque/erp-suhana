@@ -132,9 +132,9 @@ class User extends Authenticatable
     }
 
 
-    public function sales(){
-        return $this->hasMany(Order::class,'addedby_id')->where('order_type','sale_invoices')->where('order_status','confirmed');
-    }
+    // public function sales(){
+    //     return $this->hasMany(Order::class,'addedby_id')->where('order_type','sale_invoices')->where('order_status','confirmed');
+    // }
 
     public function comments(){
         return $this->hasMany(Review::class,'addedby_id')->where('type',1);
@@ -280,6 +280,112 @@ class User extends Authenticatable
     {
         return $this->admin ==  1;
     }
+
+    // for supplier only supplier true
+    // for buyer only buyer true bakigula false
+    // for staff only staff true bakigula false
+    // for admin only admin true bakigula false
+    // for customer, customer true, admin true bakigula false
+    // for merchandiser , merchandiser true and admin true, customer true bakigula false
+
+
+    // In User.php (Model)
+    // example: User::filterByType('admin')->get();
+    public function scopeFilterByType($query, $type)
+    {
+        return match ($type) {
+
+            'supplier' => $query->where([
+                'supplier'     => true,
+                'buyer'        => false,
+                'staff'        => false,
+                'admin'        => false,
+                'customer'     => false,
+                'merchandiser' => false,
+            ]),
+
+            'buyer' => $query->where([
+                'supplier'     => false,
+                'buyer'        => true,
+                'staff'        => false,
+                'admin'        => false,
+                'customer'     => false,
+                'merchandiser' => false,
+            ]),
+
+            'staff' => $query->where([
+                'supplier'     => false,
+                'buyer'        => false,
+                'staff'        => true,
+                'admin'        => false,
+                'customer'     => false,
+                'merchandiser' => false,
+            ]),
+
+            'admin' => $query->where([
+                'supplier'     => false,
+                'buyer'        => false,
+                'staff'        => false,
+                'admin'        => true,
+                'customer'     => false,
+                'merchandiser' => false,
+            ]),
+
+            'customer' => $query->where([
+                'supplier'     => false,
+                'buyer'        => false,
+                'staff'        => false,
+                'admin'        => true,
+                'customer'     => true,
+                'merchandiser' => false,
+            ]),
+
+            'merchandiser' => $query->where([
+                'supplier'     => false,
+                'buyer'        => false,
+                'staff'        => false,
+                'admin'        => true,
+                'customer'     => true,
+                'merchandiser' => true,
+            ]),
+
+            default => $query
+        };
+    }
+
+
+    // example: $user->setTypes('merchandiser');
+    public function setTypes($type)
+    {
+        // Reset all flags
+        $this->supplier     = false;
+        $this->buyer        = false;
+        $this->staff        = false;
+        $this->admin        = false;
+        $this->customer     = false;
+        $this->merchandiser = false;
+
+        match ($type) {
+            'supplier' => $this->supplier = true,
+            'buyer'    => $this->buyer = true,
+            'staff'    => $this->staff = true,
+            'admin'    => $this->admin = true,
+
+            'customer' => [
+                $this->customer = true,
+                $this->admin    = true,
+            ],
+
+            'merchandiser' => [
+                $this->merchandiser = true,
+                $this->customer     = true,
+                $this->admin        = true,
+            ],
+        };
+
+        return $this;
+    }
+
 
 
     public function hasPermission($permission)

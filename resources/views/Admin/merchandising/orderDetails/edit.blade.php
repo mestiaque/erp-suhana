@@ -84,7 +84,7 @@
 
                             <!-- Merchandiser -->
                             <div class="col-md-6 mb-3">
-                                <label>Merchandiser *</label>
+                                <label>Merchandiser * <a href="{{ route('admin.merchandisers') }}" target="_blank"><i class="fa fa-external-link"></i></a></label>
                                 <select name="merchant" class="form-control updateHead"
                                         data-name="merchant"
                                         data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
@@ -121,8 +121,8 @@
                             <!-- Order Qty -->
                             <div class="col-md-6 mb-3">
                                 <label>Order Qty *</label>
-                                <input type="number" name="total_qty" class="form-control updateHead"
-                                       value="{{ $orderDetails->total_qty }}"
+                                <input type="number" name="total_qty" class="form-control total_qty updateHead"
+                                       value="{{ $orderDetails->total_qty }}" readonly
                                        data-name="total_qty" placeholder="Order Quantity"
                                        required
                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">
@@ -242,7 +242,7 @@
                                                 value="{{ $item->color_name }}" placeholder="Color" required>
 
                                             <input type="number" name="qtys[{{$item->id}}]" class="form-control mr-2 updateItem" data-name="qty" data-url="{{ route('admin.orderDetailsAction',['update-item',$item->id]) }}"
-                                                value="{{ $item->qty }}" placeholder="Qty" required>
+                                                value="{{ ($item->qty && $item->qty > 0) ? $item->qty : '' }}" placeholder="Qty" required>
 
                                             <button type="button" class="btn-custom danger removeRow" data-url="{{ route('admin.orderDetailsAction',['remove-item',$item->id]) }}">
                                                 <i class="bx bx-trash"></i>
@@ -282,28 +282,6 @@
 @push('js')
 <script>
 
-// ADD COLOR ROW
-// $("#addColorRow").click(function () {
-//     let url = $(this).data('url');
-//     $.get(url, function(res){
-//         if(res.success){
-//             let removeUrl = `/admin/order-details/remove-item/${res.id}`;
-//             let updateUrl = `/admin/order-details/update-item/${res.id}`;
-//             let row = `
-//                 <div class="color-row mb-2 d-flex align-items-center">
-//                     <input type="text" name="colors[${res.id}]" class="form-control mr-2 updateItem" placeholder="Color" data-name="color_name" data-url="${updateUrl}">
-//                     <input type="number" name="qtys[${res.id}]" class="form-control mr-2 updateItem" placeholder="Qty"  data-name="qty" data-url="${updateUrl}">
-//                     <button type="button" class="btn-custom danger removeRow" data-url="${removeUrl}">
-//                         <i class="bx bx-trash"></i>
-//                     </button>
-//                 </div>
-//             `;
-//             $("#colorQtyArea").append(row);
-//         }
-//     });
-// });
-
-
 $("#addColorRow").click(function () {
     let url = $(this).data('url');
     let mainComposition = "{{ $orderDetails->composition }}"; // main order composition
@@ -342,6 +320,7 @@ $(document).on('click', '.removeRow', function () {
     $.get(url, function(res){
         if(res.success){
             button.closest('.color-row').remove();
+            calculateTotalQty();
         }
     });
 });
@@ -355,16 +334,6 @@ $(document).on('change','.updateHead', function(){
         value: $(this).val()
     });
 });
-
-// $(document).on('change','.updateItem', function(){
-//     let url = $(this).data('url');
-//     console.log(url);
-
-//     $.get(url, {
-//         field: $(this).data('name'),
-//         value: $(this).val()
-//     });
-// });
 
 
 $(document).on('change','.updateItem', function(){
@@ -413,6 +382,26 @@ $('select[name="composition"]').on('change', function(){
         $(this).val(mainComp).trigger('change'); // updates value & triggers AJAX
     });
 });
+
+$(document).on('keyup input change', 'input[name^="qtys"]', function () {
+    calculateTotalQty();
+});
+
+function calculateTotalQty() {
+    let totalQty = 0;
+
+    $('input[name^="qtys"]').each(function () {
+        let val = parseInt($(this).val());
+        if (!isNaN(val)) {
+            totalQty += val;
+        }
+    });
+
+    $('.total_qty').val(totalQty).trigger('change');
+
+    console.log('Total Order Qty:', totalQty);
+}
+
 
 
 </script>
