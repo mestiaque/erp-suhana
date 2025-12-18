@@ -147,10 +147,24 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
 
+    Route::get('/booking',[MerchandisingController::class,'booking'])->name('booking');
+    Route::any('/booking/{action}/{id?}',[MerchandisingController::class,'bookingAction'])->name('bookingAction');
+    Route::get('/budget',[MerchandisingController::class,'budget'])->name('budget');
+    Route::any('/budget/{action}/{id?}',[MerchandisingController::class,'budgetAction'])->name('budgetAction');
+
     Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');
     Route::any('/procurement/yarn-booking/{action}/{id?}',[ProductionController::class,'yarnBookingAction'])->name('yarnBookingAction');
     Route::get('/procurement/knitting-booking',[ProductionController::class,'knittingBooking'])->name('knittingBooking');
-    Route::get('/procurement/dying-booking',[ProductionController::class,'dyingBooking'])->name('dyingBooking');
+    Route::any('/procurement/knitting-booking/{action}/{id?}',[ProductionController::class,'knittingBookingAction'])->name('knittingBookingAction');
+    Route::get('/procurement/dyeing-booking',[ProductionController::class,'dyeingBooking'])->name('dyeingBooking');
+    Route::any('/procurement/dyeing-booking/{action}/{id?}',[ProductionController::class,'dyeingBookingAction'])->name('dyeingBookingAction');
+
+    Route::get('/procurement/yarn-receive',[ProductionController::class,'yarnReceive'])->name('yarnReceive');
+    Route::any('/procurement/yarn-receive/{action}/{id?}',[ProductionController::class,'yarnReceiveAction'])->name('yarnReceiveAction');
+    Route::get('/procurement/knitting-receive',[ProductionController::class,'knittingReceive'])->name('knittingReceive');
+    Route::any('/procurement/knitting-receive/{action}/{id?}',[ProductionController::class,'knittingReceiveAction'])->name('knittingReceiveAction');
+    Route::get('/procurement/dyeing-receive',[ProductionController::class,'dyeingReceive'])->name('dyeingReceive');
+    Route::any('/procurement/dyeing-receive/{action}/{id?}',[ProductionController::class,'dyeingReceiveAction'])->name('dyeingReceiveAction');
 
     Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
