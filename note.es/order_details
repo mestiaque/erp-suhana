@@ -1,0 +1,222 @@
+order_details:
+buyer_id
+buyer_name
+merchant_id
+merchant_name
+style_no
+color_name
+total_qty
+total_bill
+status
+company_name
+invoice_no
+order_no
+shipment_date
+composition
+fabrication
+gsm
+remarks
+
+
+order_detail_items:
+order_detail_id
+color_name
+composition
+order_no
+style_no
+qty
+
+proforma_invoices:
+order_id
+order_no
+buyer_id
+buyer_name
+merchant_id
+merchant_name
+total_qty
+total_bill
+status
+remarks
+addedby_id
+editedby_id
+created_at
+updated_at
+pi_no
+order_date
+advising_bank
+applicant
+applicant_bank
+first_beneficiary
+first_beneficiary_bank
+second_beneficiary
+second_beneficiary_bank
+notify_party
+buyer_info
+terms
+
+
+proforma_invoice_items:
+proforma_invoice_id
+composition
+fabrication
+gsm
+shipment_date
+style_no
+order_qty
+status
+unit_price
+total_price
+
+
+
+
+
+
+
+order_details
+
+    id
+
+    buyer_id
+
+    buyer_name
+
+    merchant_id
+
+    merchant_name
+
+    company_name
+
+    order_no
+
+    invoice_no
+
+    style_no
+
+    total_qty
+
+    total_bill
+
+    status
+
+    shipment_date
+
+    composition
+
+    fabrication
+
+    gsm
+
+    remarks
+
+    item_count
+
+order_detail_items
+
+    id
+
+    order_detail_id
+
+    style_no
+
+    order_no
+
+    item_name
+
+    color_name
+
+    composition
+
+    fabrication
+
+    gsm
+
+    qty
+
+    unit_price
+
+    total_price
+
+    shipment_date
+
+    status
+
+proforma_invoices
+
+    id
+
+    order_id
+
+    pi_no
+
+    order_no
+
+    buyer_id
+
+    buyer_name
+
+    merchant_id
+
+    merchant_name
+
+    total_qty
+
+    total_bill
+
+    status
+
+    remarks
+
+    addedby_id
+
+    editedby_id
+
+    order_date
+
+    advising_bank
+
+    applicant
+
+    applicant_bank
+
+    first_beneficiary
+
+    first_beneficiary_bank
+
+    second_beneficiary
+
+    second_beneficiary_bank
+
+    notify_party
+
+    buyer_info
+
+    terms
+
+proforma_invoice_items
+
+    id
+
+    proforma_invoice_id
+
+    style_no
+
+    item_name
+
+    color_name
+
+    composition
+
+    fabrication
+
+    gsm
+
+    shipment_date
+
+    order_qty
+
+    unit_price
+
+    total_price
+
+    status

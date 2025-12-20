@@ -44,7 +44,7 @@
 
                             <div class="col-md-4 mb-2">
                                 <strong>Total Order Qty</strong>
-                                <div>{{ number_format($order->total_qty ?? 0, 2) }}</div>
+                                <div>{{ number_format($order->total_qty ?? 0) }}</div>
                             </div>
 
                             <div class="col-md-4 mb-2">
@@ -119,7 +119,7 @@
                                         <td>{{ $item->item_name ?? '--' }}</td>
                                         <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
                                         <td>{{ $item->color_name ?? '--' }}</td>
-                                        <td>{{ number_format($item->qty,2) }}</td>
+                                        <td>{{ number_format($item->qty) }}</td>
                                     </tr>
                                 @empty
                                     <tr>

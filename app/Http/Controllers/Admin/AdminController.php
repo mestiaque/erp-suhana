@@ -10990,8 +10990,14 @@ class AdminController extends Controller
         // Return view
         $startDate = $r->startDate ? Carbon::parse($r->startDate) : Carbon::now()->startOfMonth();
         $endDate = $r->endDate ? Carbon::parse($r->endDate) : Carbon::now();
+        $designations=Attribute::latest()->where('type',2)->where('status','<>','temp')->get();
+        $departments=Attribute::latest()->where('type',3)->where('status','<>','temp')->get();
+        $roles = Permission::where('status','active')->get();
 
-        return view(adminTheme() . 'users.customers.viewUser', compact('user', 'action', 'startDate', 'endDate'));
+        if( $action == 'view' ){
+            return view(adminTheme() . 'users.customers.viewUser', compact('user', 'action', 'startDate', 'endDate', 'designations','departments', 'roles'));
+        }
+        return view(adminTheme() . 'users.customers.editUser', compact('user', 'action', 'startDate', 'endDate', 'designations','departments', 'roles'));
     }
 
 

@@ -91,7 +91,7 @@
                             <td>{{ $order->company_name ?? '--' }}</td>
                             <td>{{ $order->style_no ?? '--' }}</td>
                             <td>{{ $order->order_no ?? '--' }}</td>
-                            <td>{{ number_format($order->total_qty,2) }}</td>
+                            <td>{{ number_format($order->total_qty) }}</td>
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
                             <td>{{ $order->gsm ?? '--' }}</td>
@@ -110,14 +110,14 @@
                             </td>
                             <td>
                                 @can('order_details.view')
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#viewModal_{{ $order->id }}"><i class="fa fa-eye"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-custom yellow" data-toggle="modal" data-target="#viewModal_{{ $order->id }}"><i class="fa fa-eye"></i></a>
                                 @endcan
                                 @if(in_array($order->status,['pending','confirmed']))
                                     @can('order_details.edit')
-                                        <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}" class="btn btn-sm btn-success"><i class="bx bx-edit"></i></a>
+                                        <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}" class="btn btn-custom success"><i class="bx bx-edit"></i></a>
                                     @endcan
                                     @can('order_details.delete')
-                                        <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="bx bx-trash"></i></a>
+                                        <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn btn-custom danger"><i class="bx bx-trash"></i></a>
                                     @endcan
                                 @endif
                             </td>
@@ -141,7 +141,7 @@
                                             <td>{{ $ii+1 }}</td>
                                             <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
                                             <td>{{ $item->color_name ?? '--' }}</td>
-                                            <td>{{ number_format($item->qty,2) }}</td>
+                                            <td>{{ number_format($item->qty) }}</td>
                                         </tr>
                                         @empty
                                         <tr><td colspan="4" class="text-center text-muted">No items found</td></tr>
