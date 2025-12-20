@@ -90,6 +90,10 @@
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
                             </div>
+                            <div class="col-md-4 mb-2">
+                                <strong>Created Date</strong><br>
+                                {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d.m.Y h:i A') : '--' }}
+                            </div>
 
                             <div class="col-md-12 mt-2">
                                 <strong>Remarks</strong>

@@ -16,13 +16,13 @@
                     <input type="hidden" name="startDate" value="{{ request()->startDate }}">
                     <input type="hidden" name="endDate" value="{{ request()->endDate }}">
                     <input type="hidden" name="search" value="{{ request()->search }}">
-                    <button type="submit" class="btn btn-info btn-sm">
+                    <button type="submit" class="btn btn-info btn-sm mr-1">
                         <i class="fa fa-print"></i> Print
                     </button>
                 </form>
 
                 @can('order_details.add')
-                    <a href="{{ route('admin.orderDetailsAction','create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.orderDetailsAction','create') }}" class="btn btn-primary btn-sm mr-1">
                         <i class="bx bx-plus"></i> Add Order Details
                     </a>
                 @endcan
@@ -58,8 +58,6 @@
                         <li class=""><a class=" {{ !request('status') ? 'active' : '' }}" href="{{ route('admin.orderDetails') }}">All ({{ $totals->total }})</a></li>
                         <li class=""><a class=" {{ request('status')=='pending' ? 'active' : '' }}" href="{{ route('admin.orderDetails',['status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
                         <li class=""><a class=" {{ request('status')=='confirmed' ? 'active' : '' }}" href="{{ route('admin.orderDetails',['status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
-                        <li class=""><a class=" {{ request('status')=='completed' ? 'active' : '' }}" href="{{ route('admin.orderDetails',['status'=>'completed']) }}">Completed ({{ $totals->completed }})</a></li>
-                        <li class=""><a class=" {{ request('status')=='canceled' ? 'active' : '' }}" href="{{ route('admin.orderDetails',['status'=>'canceled']) }}">Cancelled ({{ $totals->canceled ?? 0 }})</a></li>
                     </ul>
                 </div>
             </div>
@@ -71,16 +69,16 @@
                         <tr>
                             <th>SL</th>
                             <th>Buyer</th>
-                            <th>Brand / Customer</th>
+                            <th style="min-width: 150px">Brand / Customer</th>
                             <th>Style No</th>
-                            <th>Order / PO No</th>
-                            <th>Order Qnty</th>
-                            <th>Shipment Date</th>
+                            <th style="width: 130px;min-width: 130px">Order / PO No</th>
+                            <th style="width: 130px;min-width: 130px">Order Qty</th>
+                            <th style="width: 140px;min-width: 140px">Shipment Date</th>
                             <th>Fabrication</th>
                             <th>GSM</th>
                             <th>Remarks</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th style="width: 140px;min-width: 140px">Action</th>
                         </tr>
                     </thead>
                     <tbody class="table-hover">
@@ -123,34 +121,6 @@
                             </td>
                         </tr>
 
-                        {{-- Collapsible Items --}}
-                        <tr class="collapse" id="items_{{ $order->id }}">
-                            <td colspan="12" class="p-0">
-                                <table class="table table-sm mb-0">
-                                    <thead class="table-secondary">
-                                        <tr>
-                                            <th>SL</th>
-                                            <th>Composition</th>
-                                            <th>Color</th>
-                                            <th>Qnty</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($order->items as $ii=>$item)
-                                        <tr>
-                                            <td>{{ $ii+1 }}</td>
-                                            <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
-                                            <td>{{ $item->color_name ?? '--' }}</td>
-                                            <td>{{ number_format($item->qty,2) }}</td>
-                                        </tr>
-                                        @empty
-                                        <tr><td colspan="4" class="text-center text-muted">No items found</td></tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-
                         @empty
                         <tr><td colspan="12" class="text-center text-muted">No order details found</td></tr>
                         @endforelse
@@ -167,12 +137,7 @@
 @endsection
 
 @push('css')
-<style>
-    .accordion-toggle:hover {
-        background-color: #f8f9fa;
-        cursor: pointer;
-    }
-</style>
+
 @endpush
 
 @push('js')

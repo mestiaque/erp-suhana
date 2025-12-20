@@ -217,8 +217,6 @@
                                 required>
                             <option value="pending" {{ $orderDetails->status=="pending"?'selected':'' }}>Pending</option>
                             <option value="confirmed" {{ $orderDetails->status=="confirmed"?'selected':'' }}>Confirmed</option>
-                            <option value="completed" {{ $orderDetails->status=="completed"?'selected':'' }}>Completed</option>
-                            <option value="cancelled" {{ $orderDetails->status=="cancelled"?'selected':'' }}>Cancelled</option>
                         </select>
                     </div>
 

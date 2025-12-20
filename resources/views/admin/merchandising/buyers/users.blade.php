@@ -203,12 +203,12 @@
 
        <div class="modal-body">
             <div class="form-group">
-                <label>Buyer Name</label>
-                <input type="text" class="form-control" name="name" placeholder="Enter Buyer Name" required>
+                <label>Customer Name</label>
+                <input type="text" class="form-control" name="name" placeholder="Enter Customer Name" required>
             </div>
             <div class="form-group">
-                <label>Company Name</label>
-                <input type="text" class="form-control" name="company_name" placeholder="Enter Company Name">
+                <label>Buying/Agent Name</label>
+                <input type="text" class="form-control" name="company_name" placeholder="Enter Buying/Agent Name">
             </div>
             <div class="form-group">
                 <label>Email *</label>
@@ -229,7 +229,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Address Line</label>
+                <label>Buying House/Agent Address</label>
                 <input type="text" class="form-control" name="address" placeholder="Enter Address">
             </div>
 

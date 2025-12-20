@@ -144,24 +144,17 @@ class MerchandisingController extends Controller
             ]);
 
             // Check active user
-            $existsUser = User::where('email',$r->email)
-                ->orWhere('mobile',$r->mobile)->first();
+            $existsUser = User::where(function ($q) use ($r) {
 
-            // Check trashed user
-            $trashedUser = User::onlyTrashed()->where('email',$r->email)
-                ->orWhere('mobile',$r->mobile)->first();
+                    if (!empty($r->email)) {
+                        $q->where('email', $r->email);
+                    }
 
-            if ($trashedUser) {
-                if($r->has('api')){
-                    return response()->json([
-                        'success'       => false,
-                        'msg'           => "This email or mobile exists in trash.",
-                        'buyer_created' => false,
-                    ]);
-                }
-                Session()->flash('error','This email or mobile exists in trash.');
-                return redirect()->back();
-            }
+                    if (!empty($r->mobile)) {
+                        $q->orWhere('mobile', $r->mobile);
+                    }
+
+                })->first();
 
             if ($existsUser) {
                 if($r->has('api')){
@@ -199,7 +192,7 @@ class MerchandisingController extends Controller
             }
 
             Session()->flash('success','Buyer registered successfully!');
-            return redirect()->route('admin.buyersAction',['view',$user->id]);
+            return redirect()->route('admin.buyersAction',['edit',$user->id]);
         }
         /* ================= CREATE END ================= */
 
@@ -210,7 +203,7 @@ class MerchandisingController extends Controller
             $user = User::onlyTrashed()->filterByType('buyer')->find($id);
             if (!$user) {
                 Session()->flash('error','Buyer not found in trash.');
-                return redirect()->route('admin.buyers',['view'=>'deleted']);
+                return redirect()->route('admin.buyers',['edit'=>'deleted']);
             }
             $user->restore();
             Session()->flash('success','Buyer restored successfully!');
@@ -223,7 +216,7 @@ class MerchandisingController extends Controller
             $user = User::onlyTrashed()->filterByType('buyer')->find($id);
             if (!$user) {
                 Session()->flash('error','Buyer not found in trash.');
-                return redirect()->route('admin.buyers',['view'=>'deleted']);
+                return redirect()->route('admin.buyers',['edit'=>'deleted']);
             }
             $files = Media::where('src_type',7)->where('src_id',$user->id)->get();
             foreach ($files as $file) {
@@ -234,7 +227,7 @@ class MerchandisingController extends Controller
             }
             $user->forceDelete();
             Session()->flash('success','Buyer permanently deleted!');
-            return redirect()->route('admin.buyers',['view'=>'deleted']);
+            return redirect()->route('admin.buyers',['edit'=>'deleted']);
         }
 
         /* ================= FIND BUYER ================= */
