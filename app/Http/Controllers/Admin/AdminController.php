@@ -3513,6 +3513,13 @@ class AdminController extends Controller
                         ->sum('amount'),
                     2
                 ),
+                'filtered_expenses' => numberFormat(
+                    Expense::where('status', '<>', 'temp')
+                        ->whereDate('created_at', '>=', $this->from)
+                        ->whereDate('created_at', '<=', $this->to)
+                        ->sum('amount'),
+                    2
+                ),
             ];
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
