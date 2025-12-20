@@ -67,6 +67,7 @@
                             <th>Previous</th>
                             <th>Grand Total</th>
                             <th>Balance</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,10 +139,13 @@
                             <td class="previous total-column">{{ $previous_total }}</td>
                             <td class="grand total-column">{{ $grand_total }}</td>
                             <td class="balance total-column" style="color:#ff0000b5"></td>
+                            <td>
+                                <a href="{{route('admin.dailyProductionAction',['status-update','s_id' => $swing->id])}}" class="btn-custom success" onclick="return confirm('Are You Want To Complete This Line?')"><i class="bx bx-check"></i></a>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{4 + $maxWorkingTime + 4}}" class="text-center text-muted"><i>No data found.</i></td>
+                            <td colspan="{{4 + $maxWorkingTime + 5}}" class="text-center text-muted"><i>No data found.</i></td>
                         </tr>
                     @endforelse
 
@@ -173,6 +177,7 @@
                             <td id="sum-prev">{{ $sum_previous }}</td>
                             <td id="sum-grand">{{ $sum_grand }}</td>
                             <td id="sum-balance" style="color:#ff0000c5"></td>
+                            <td></td>
                         </tr>
                     @endif
                     </tbody>

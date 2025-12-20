@@ -43,7 +43,7 @@
                             </div>
 
                             <div class="col-md-4 mb-2">
-                                <strong>Total Order Qty</strong>
+                                <strong>Total Order Qnty</strong>
                                 <div>{{ number_format($order->total_qty ?? 0) }}</div>
                             </div>
 
@@ -69,6 +69,11 @@
                             <div class="col-md-4 mb-2">
                                 <strong>GSM</strong>
                                 <div>{{ $order->gsm ?? '--' }}</div>
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <strong>Created Time</strong>
+                                <div>{{ $order->created_at->format('d.m.Y H:i A') ?? '--' }}</div>
                             </div>
 
                             <div class="col-md-4 mb-2">
@@ -109,7 +114,7 @@
                                     <th>Item Name</th>
                                     <th>Composition</th>
                                     <th>Color Name</th>
-                                    <th>Qty</th>
+                                    <th>Qnty</th>
                                 </tr>
                             </thead>
                             <tbody>

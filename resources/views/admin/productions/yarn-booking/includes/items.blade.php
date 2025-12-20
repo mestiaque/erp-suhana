@@ -12,8 +12,8 @@
                 <th width="5%">SL</th>
                 <th width="10%">Style</th>
                 <th width="25%">Fabrication</th>
-                <th width="45%">Yarn Count Wise Qty</th>
-                <th width="15%">Total Req Qty</th>
+                <th width="45%">Yarn Count Wise Qnty</th>
+                <th width="15%">Total Req Qnty</th>
             </tr>
         </thead>
         <tbody>
@@ -50,7 +50,7 @@
                         <input type="hidden" name="items[{{ $i }}][fabrication]" value="{{ $item->fabric_type ?? $item->fabrication }}">
                     </td>
 
-                    {{-- Yarn Count + Qty --}}
+                    {{-- Yarn Count + Qnty --}}
                     <td>
                         <table class="table table-bordered table-sm yarn-sub-table mb-0">
                             <tbody class="yarnBody">
@@ -114,7 +114,7 @@
                         </table>
                     </td>
 
-                    {{-- Total Qty --}}
+                    {{-- Total Qnty --}}
                     <td>
                         <input type="number"
                                name="items[{{ $i }}][requisition_qty]"

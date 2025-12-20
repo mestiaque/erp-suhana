@@ -7,7 +7,7 @@
                 <th width="25%">Fabrication</th>
                 <th width="25%">Composition</th>
                 <th width="25%">Color</th>
-                <th width="15%">Req Qty</th>
+                <th width="15%">Req Qnty</th>
             </tr>
         </thead>
         <tbody>

@@ -84,7 +84,7 @@
                         <tr>
                             <td>
                                 <b>No:</b> {{ $order->style_no}}
-                                <br> <b>Qty:</b> {{number_format($order->order_qty)}} pcs
+                                <br> <b>Qnty:</b> {{number_format($order->order_qty)}} pcs
                             </td>
                             <td>
                                 <b>M:</b> {{$order->style?->merchant_name}}
@@ -118,6 +118,7 @@
                             <td class="text-center">
                                 @if(can('production_planning.view') || can('production_planning.view'))
                                     @can('production_planning.view')
+                                    <a href="{{ route('admin.productionPlanningAction',['print',$order->id]) }}" class="btn-custom info mr-1"><i class="fa fa-print"></i></a>
                                     <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
                                     @endcan
                                     @can('production_planning.edit')

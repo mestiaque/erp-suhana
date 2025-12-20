@@ -77,7 +77,7 @@
                             @endif
                             <p>
                                 <input type="hidden" name="style_qty" value="{{$plan->style?->total_qty ?? 0}}" class="style_qty">
-                                Order Qty :<b class="styleQty">{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
+                                Order Qnty :<b class="styleQty">{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
                                 Buyer :<b class="styleBuyer">{{$plan->style?->buyer_name}}</b> <br>
                                 Merchandiser :<b class="styleMerchant">{{$plan->style?->merchant_name}}</b> <br>
                             </p>

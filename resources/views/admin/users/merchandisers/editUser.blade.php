@@ -78,7 +78,9 @@
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                                     <label for="mobile">Mobile* </label>
-                                    <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" />
+                                    {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" /> --}}
+                                    <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
+
                                     @if ($errors->has('mobile'))
                                     <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
                                     @endif

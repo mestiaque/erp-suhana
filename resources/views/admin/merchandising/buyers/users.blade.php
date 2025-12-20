@@ -216,7 +216,8 @@
             </div>
             <div class="form-group">
                 <label>Mobile</label>
-                <input type="text" class="form-control" name="mobile" placeholder="Enter Mobile">
+                {{-- <input type="text" class="form-control" name="mobile" placeholder="Enter Mobile"> --}}
+                <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" required>
             </div>
             <div class="form-group">
                 <label>Country</label>

@@ -116,7 +116,7 @@
         justify-content:space-between;
         align-items:center;
         padding:10px 0;
-        
+
      ">
 
     <!-- Back Button (Left) -->
@@ -204,8 +204,8 @@
                 <th>Fabrication</th>
                 <th>GSM</th>
                 <th>Color</th>
-                <th class="text-right">Color Qty</th>
-                <th class="text-right">Order Qty</th>
+                <th class="text-right">Color Qnty</th>
+                <th class="text-right">Order Qnty</th>
             </tr>
         </thead>
 
@@ -229,12 +229,12 @@
                         <td>{{ $order->fabrication ?? '--' }}</td>
                         <td>{{ $order->gsm ?? '--' }}</td>
                         <td>{{ $item->color_name ?? '--' }}</td>
-                        <td class="text-right">{{ number_format($item->qty, 2) }}</td>
+                        <td class="text-right">{{ number_format($item->qty) }}</td>
 
-                        {{-- Order Total Qty (rowspan) --}}
+                        {{-- Order Total Qnty (rowspan) --}}
                         @if($i === 0)
                             <td class="text-right" rowspan="{{ $itemCount }}" style="vertical-align: middle; font-weight:600;">
-                                {{ number_format($order->total_qty, 2) }}
+                                {{ number_format($order->total_qty) }}
                             </td>
                         @endif
                     </tr>
@@ -249,7 +249,7 @@
                 <td colspan="2">Total Colors</td>
                 <td colspan="2">{{ $totalColors }}</td>
 
-                <td class="text-right">{{ number_format($grandOrderQty, 2) }}</td>
+                <td class="text-right">{{ number_format($grandOrderQty) }}</td>
             </tr>
         </tfoot>
 

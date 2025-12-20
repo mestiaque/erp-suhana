@@ -7,7 +7,8 @@
                 <th class="px-2 pb-1" style="width: 150px;">Composition</th>
                 <th class="px-2 pb-1" style="width: 150px;">Fabrication</th>
                 <th class="px-2 pb-1" style="width: 80px;">GSM</th>
-                <th class="px-2 pb-1" style="width: 80px;">Qty</th>
+                <th class="px-2 pb-1" style="width: 80px;">Qnty</th>
+                <th class="px-2 pb-1" style="width: 80px;">Unit of Measurement</th>
                 <th class="px-2 pb-1" style="width: 80px;">Unit Price</th>
                 <th class="px-2 pb-1" style="width: 80px;">Total Amount</th>
             </tr>
@@ -35,6 +36,13 @@
                     <td class="p-1">
                         <input type="number" class="form-control form-control-sm qty" name="items[{{ $i }}][order_qty]" value="{{ $item->order_qty ?? $item->total_qty }}" readonly>
                     </td>
+                    <td class="p-1">
+                        <select class="form-control form-control-sm" name="items[{{ $i }}][uom]">
+                            <option value="">-- Select UOM --</option>
+                            <option value="PCS" {{ ($item->uom ?? '') == 'PCS' ? 'selected' : '' }}>PCS</option>
+                            <option value="SETS" {{ ($item->uom ?? '') == 'SETS' ? 'selected' : '' }}>SETS</option>
+                        </select>
+                    </td>
 
                     <td class="p-1">
                         <input type="number" step="any" class="form-control form-control-sm updateItem" name="items[{{ $i }}][unit_price]" value="{{ $item->unit_price }}" required>
@@ -50,11 +58,12 @@
                     <td colspan="5" class="text-right">Total </td>
                     <td class="totalQty text-center">0</td>
                     <td></td>
+                    <td></td>
                     <td class="totalAmount text-center">0.00</td>
                 </tr>
             @else
                 <tr>
-                    <td colspan="8" class="text-center text-muted">No Items Found</td>
+                    <td colspan="9" class="text-center text-muted">No Items Found</td>
                 </tr>
             @endif
         </tbody>

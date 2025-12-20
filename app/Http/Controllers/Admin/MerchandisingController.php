@@ -187,10 +187,7 @@ class MerchandisingController extends Controller
             $user->password_show = $password;
             $user->password      = Hash::make($password);
             $user->setTypes('buyer');
-            $user->buyer         = true;
-            $user->customer      = false;
             $user->save();
-
             if($r->has('api')){
                 return response()->json([
                     'success'       => true,
@@ -250,7 +247,7 @@ class MerchandisingController extends Controller
 
         /* ================= VIEW BUYER ================= */
         if ($action == 'view') {
-            $orders = $user->orders()->where('status','approved')->paginate(10);
+            $orders = ProformaInvoice::where('buyer_id', $user->id)->get();
             return view(adminTheme().'merchandising.buyers.viewUser', compact('user','orders'));
         }
 
@@ -1042,6 +1039,7 @@ class MerchandisingController extends Controller
                 'items.*.unit_price'  => 'required|numeric|min:0',
                 'items.*.total_price' => 'required|numeric|min:0',
                 'items.*.order_qty'   => 'required|numeric|min:0',
+                'items.*.uom'   => 'required|',
             ]);
 
             DB::transaction(function () use ($r, $pi) {
@@ -1102,6 +1100,7 @@ class MerchandisingController extends Controller
                             'order_qty'   => $row['order_qty'],
                             'unit_price'  => $row['unit_price'],
                             'total_price' => $row['total_price'],
+                            'uom' => $row['uom'],
                             'status'      => 'active',
                             'created_by'  => auth()->id(),
                             'edited_by' => auth()->id(),

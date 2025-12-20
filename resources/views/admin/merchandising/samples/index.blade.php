@@ -71,7 +71,7 @@
                             <th style="width: 150px">Buyer</th>
                             <th style="width: 120px">Merchent</th>
                             <th style="width: 100px">Style</th>
-                            <th style="width: 100px">Items | Qty</th>
+                            <th style="width: 100px">Items | Qnty</th>
                             <th style="width: 100px">Create Date</th>
                             <th style="width: 110px">Received Date</th>
                             <th style="width: 100px">Delivery Date</th>
@@ -111,7 +111,7 @@
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
                             </td>
-                            
+
                             <td class="text-center">
                                 @if(can('samples.view') || can('samples.view') || can('samples.view'))
                                     @can('samples.view')

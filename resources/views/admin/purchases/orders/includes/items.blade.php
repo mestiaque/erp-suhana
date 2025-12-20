@@ -17,7 +17,7 @@
         <tr>
             <th class="px-2 pb-1" style="width:40px;">SL</th>
             <th class="px-2 pb-1" style="min-width:200px;">Material</th>
-            <th class="px-2 pb-1" style="width:80px;">Qty</th>
+            <th class="px-2 pb-1" style="width:80px;">Qnty</th>
             <th class="px-2 pb-1" style="width:120px;">Unit</th>
             <th class="px-2 pb-1" style="width:80px;">Price</th>
             <th class="px-2 pb-1" style="width:120px;">Total Price</th>
@@ -43,7 +43,7 @@
 
                     <td style="padding:5px;">
                         <input type="number" step="any" class="form-control form-control-sm update-field qty"
-                               placeholder="Qty"
+                               placeholder="Qnty"
                                value="{{ $item->qty > 0? $item->qty : '' }}"
                                data-url="{{ route('admin.purchasesOrdersAction',['update-item',$order->id,'item_id'=>$item->id,'name'=>'qty']) }}"
                                >

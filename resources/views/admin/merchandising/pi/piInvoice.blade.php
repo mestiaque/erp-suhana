@@ -125,7 +125,7 @@
 
                     <div class="invoice-header">
                         <div style="text-align:center;">
-                            <h2 style="" class="company-title">
+                            {{-- <h2 style="" class="company-title">
                                 <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 60px; margin-right: 1rem;">
                                    {{general()->title}}
                             </h2>
@@ -138,8 +138,46 @@
                                     <b>Phone:</b> {{general()->mobile}}
                                     <b>Email:</b> {{general()->email}}
                                 </span>
-                            </p>
-                            <hr style="border-bottom: 1px solid #2125298c;margin: 1px;">
+                            </p> --}}
+
+
+
+
+                            <div style="width:100%; display:table; table-layout:fixed; margin-bottom:5px">
+                                <div style="display:table-row;">
+
+                                    <!-- LOGO : 10% -->
+                                    <div style="display:table-cell; width:10%; vertical-align:middle;">
+                                        <img src="{{ asset(general()->logo()) }}"
+                                            alt="logo"
+                                            style="max-height:65px;">
+                                    </div>
+
+                                    <!-- TITLE : 50% -->
+                                    <div style="display:table-cell; width:50%; vertical-align:top; text-align:center;">
+                                        <div style="font-size:40px; font-weight:800; color:#0047ab; font-family:'Times New Roman', Times, serif; height:4rem">
+                                            {{ general()->title }}
+                                        </div>
+                                        <div style="font-size:12px; color:coral; margin-top:-12px;">
+                                            (100% Export Oriented Garments Manufacturing Factory)
+                                        </div>
+                                    </div>
+
+                                    <!-- ADDRESS : 40% -->
+                                    <div style="display:table-cell; width:40%; vertical-align:middle; font-size:12px;">
+                                        <div>
+                                            {!! general()->address_one !!}
+                                        </div>
+                                        <div style="margin-top:2px; color:#0047ab;">
+                                            <b>Phone:</b> {{ general()->mobile }}<br>
+                                            <b>Email:</b> {{ general()->email }}
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <hr style="border-bottom: 1px solid #2125298c;margin: 1px; ">
                             <h6 style="margin:2px;margin-top:5px;"><b>PROFORMA INVOICE</b> </h6>
                         </div>
                     </div>
@@ -253,10 +291,12 @@
                         {{-- Date Row (optional, you can keep it on top or bottom) --}}
                         <div class="row" style="margin:0px; margin-top:0.5rem;">
                             <div class="col-7" style="padding:0px;">
-                                Proforma Invoice no. {{ $pi->pi_no}}
+                                <b>Proforma Invoice no. {{ $pi->pi_no}}</b>
                             </div>
                             <div class="col-5 p-0">
-                                Date : {{ $pi->created_at->format('d.m.Y') }}
+                                <b>
+                                    PI Date : {{ $pi->created_at->format('d.m.Y') }}
+                                </b>
                             </div>
                         </div>
 
@@ -343,7 +383,7 @@
                                         <th>Description</th>
                                         <th>PO Number</th>
                                         <th>CL</th>
-                                        <th>Qty in PCS/SET</th>
+                                        <th>Qnty (PCS/SET)</th>
                                         <th>FOB</th>
                                         <th>Total Value</th>
                                         <th>Buyer Del. Date</th>
@@ -386,7 +426,7 @@
                                         <td>{{ $item->fabrication }}</td>
                                         <td>{{ $pi->order_no ?? '--' }}</td>
                                         <td>--</td>
-                                        <td>{{ number_format($item->order_qty) }}</td>
+                                        <td>{{ number_format($item->order_qty) }} {{ $item->uom ?? ''}}</td>
                                         <td>${{ number_format($item->unit_price, 2) }}</td>
                                         <td>${{ number_format($item->total_price, 2) }}</td>
                                         @if($prevShipmentDate !== $shipmentDate)
@@ -453,14 +493,27 @@
                         </div>
                     </div>
 
+
                     <div style="margin-top: 3.5rem">
-                        @if(general()->signature())
-                        <p style="margin-bottom: 5px">For  {{general()->title}}</p>
-                        <img src="{{asset(general()->signature())}}" alt="Sign" style="max-width: 12.5rem">
-                        @else
-                        <p style="margin-bottom: 5rem">For  {{general()->title}}</p>
-                        @endif
-                        <p>Authorized signature</p>
+                        <div style="width:100%; display: table; table-layout: fixed;">
+                           <div style="display: table-row;">
+                               <div style="display: table-cell; width:33.33%; padding:10px; ">
+                                    @if(general()->signature())
+                                    <p style="margin-bottom: 5px">For  {{general()->title}}</p>
+                                    <img src="{{asset(general()->signature())}}" alt="Sign" style="max-width: 12.5rem">
+                                    @else
+                                    <p style="margin-bottom: 5rem">For  {{general()->title}}</p>
+                                    @endif
+                                    <p>Authorized signature</p>
+                               </div>
+                               <div style="display: table-cell; width:33.33%; padding:10px; ">
+                               </div>
+                               <div style="display: table-cell; width:33.33%; padding:10px; ">
+                                    <p style="margin-bottom: 3.9rem">For  Buyer</p>
+                                    <p>Authorized signature</p>
+                               </div>
+                           </div>
+                       </div>
                     </div>
 
                 </div>

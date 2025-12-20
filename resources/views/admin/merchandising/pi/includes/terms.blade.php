@@ -5,7 +5,7 @@
             // Predefined terms
             $defaultTerms = [
                 'PAYMENT'           => 'LC AT SIGHT',
-                'BUYING HOUSE'      => 'SERVICE CHARGE : 3.5%',
+                'BUYING HOUSE SERVICE CHARGE'      => '3.5%',
                 'TRADE TERM'        => 'FOB, BY SEA',
                 'PORT OF LOADING'   => 'CHOTTROGRAM PORT, BANGLADESH',
                 'PORT OF DISCHARGE' => 'ANY PORT IN JAPAN',

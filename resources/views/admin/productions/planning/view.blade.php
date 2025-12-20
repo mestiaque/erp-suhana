@@ -146,7 +146,7 @@
                                         <td style="padding:5px;">
                                             <b>Style No:</b> {{$plan->style_no}}
                                             <p>
-                                                Order Qty :<b>{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
+                                                Order Qnty :<b>{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
                                                 Buyer :<b>{{$plan->style?->buyer_name}}</b> <br>
                                                 Merchandiser :<b>{{$plan->style?->merchant_name}}</b> <br>
                                             </p>

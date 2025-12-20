@@ -55,7 +55,7 @@
                                 <th>SL</th>
                                 <th>Style</th>
                                 <th>Fabrication</th>
-                                <th>Req. Qty</th>
+                                <th>Req. Qnty</th>
                             </tr>
                         </thead>
                         <tbody>

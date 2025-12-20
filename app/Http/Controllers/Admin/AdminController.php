@@ -10261,22 +10261,31 @@ class AdminController extends Controller
                 'email.email'     => 'Enter valid email.'
             ]);
 
-            $query = User::where('mobile',$r->mobile);
-            if(!empty($r->email)) $query->orWhere('email',$r->email);
-            $user = $query->first();
+            $existsUser = User::where(function ($q) use ($r) {
 
-            $exUser = User::where('mobile',$r->mobile)->first();
-            $trashedUser = User::withTrashed()->where('mobile',$r->mobile)->first();
-            if($trashedUser && !$exUser){
-                Session()->flash('info','Mobile associated with soft-deleted account.');
+                    if (!empty($r->email)) {
+                        $q->where('email', $r->email);
+                    }
+
+                    if (!empty($r->mobile)) {
+                        $q->orWhere('mobile', $r->mobile);
+                    }
+
+                })->first();
+
+            if ($existsUser) {
+                if($r->has('api')){
+                    return response()->json([
+                        'success'          => false,
+                        'msg'              => "his email or mobile alrady used.",
+                        'merchant_created' => false,
+                    ]);
+                }
+                Session()->flash('error','This email or mobile alrady used.');
                 return redirect()->back();
             }
-            if($exUser){
-                Session()->flash('info','Mobile already in use.');
-                return redirect()->back();
-            }
 
-            if(!$user){
+            if(!$existsUser){
                 $password = Str::random(8);
                 $user                = new User();
                 $user->name          = $r->name;
@@ -10291,6 +10300,16 @@ class AdminController extends Controller
                 $user->addedby_id = Auth::id();
                 $user->addedby_at = Carbon::now();
                 $user->save();
+            }
+
+            if($r->has('api')){
+                return response()->json([
+                    'success'          => true,
+                    'msg'              => "Merchant registered successfully",
+                    'merchant_created' => true,
+                    'id'               => $user->id,
+                    'name'             => $user->name,
+                ]);
             }
 
             Session()->flash('success','Merchandiser created successfully!');

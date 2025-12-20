@@ -108,7 +108,7 @@ span b {
                             <tr>
                                 <th style="min-width: 50px;width:50px;">SL</th>
                                 <th style="min-width: 150px;">Item name</th>
-                                <th style="min-width: 100px;width:100px;text-align:right;">Qty</th>
+                                <th style="min-width: 100px;width:100px;text-align:right;">Qnty</th>
                                 <th style="min-width: 100px;width:100px;">Unit</th>
                                 <th style="min-width: 150px;width:150px;">Price</th>
                                 <th style="min-width: 150px;width:150px;text-align:right;">Total Price</th>
@@ -140,7 +140,7 @@ span b {
 
                     <div>
                         <p style="font-size: 20px;text-align: center;">
-                            <b>Total Qty:</b> {{number_format($orders->sum('total_qty'))}}
+                            <b>Total Qnty:</b> {{number_format($orders->sum('total_qty'))}}
                             <b>Total Amount:</b> {{number_format($orders->sum('grand_total'),2)}}
                         </p>
                     </div>

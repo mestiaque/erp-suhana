@@ -77,7 +77,7 @@
                         <tr>
                             <td>
                                 <b>No:</b> {{ $order->style_no}}
-                                <br> <b>Qty:</b> {{number_format($order->order_qty)}} pcs
+                                <br> <b>Qnty:</b> {{number_format($order->order_qty)}} pcs
                             </td>
                             <td>
                                 <b>M:</b> {{$order->style?->merchant_name}}

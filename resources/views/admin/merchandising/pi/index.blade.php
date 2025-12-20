@@ -66,7 +66,7 @@
                                 <th>Order No</th>
                                 <th>Buyer</th>
                                 <th>Merchant</th>
-                                <th>Total Qty</th>
+                                <th>Total Qnty</th>
                                 <th>Total Bill</th>
                                 <th>Status</th>
                                 <th>Created Date</th>

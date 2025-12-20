@@ -7,7 +7,7 @@
                 <th width="5%">SL</th>
                 <th width="10%">Style</th>
                 <th width="25%">Fabrication</th>
-                <th width="15%">Total Req Qty</th>
+                <th width="15%">Total Req Qnty</th>
             </tr>
         </thead>
         <tbody>

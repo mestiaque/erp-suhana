@@ -190,7 +190,7 @@
                             <tr>
                                 <th style="width: 50px;min-width: 50px;">SL</th>
                                 <th style="min-width: 200px;">Meterial</th>
-                                <th style="width: 60px;min-width: 60px;">Qty</th>
+                                <th style="width: 60px;min-width: 60px;">Qnty</th>
                                 <th style="width: 80px;min-width: 80px;">Unit</th>
                                 <th style="width: 120px;min-width: 120px;">Price</th>
                                 <th style="width: 120px;min-width: 120px;">Total Price</th>

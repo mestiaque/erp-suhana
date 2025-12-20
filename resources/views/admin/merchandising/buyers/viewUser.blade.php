@@ -193,7 +193,7 @@
                                     </thead>
 
                                     <tbody>
-                                        @forelse($transactions as $i=>$trans)
+                                        {{-- @forelse($transactions as $i=>$trans)
                                             <tr>
                                                 <td>{{ $i+1 }}</td>
                                                 <td>{{ $trans->transection_id }}</td>
@@ -223,11 +223,11 @@
                                             <tr>
                                                 <td colspan="10" class="text-center">No payment history found</td>
                                             </tr>
-                                        @endforelse
+                                        @endforelse --}}
                                     </tbody>
 
                                 </table>
-                                {{ $transactions->appends(request()->except('trans_page'))->links('pagination') }}
+                                {{-- {{ $transactions->appends(request()->except('trans_page'))->links('pagination') }} --}}
                             </div>
 
                         </div>

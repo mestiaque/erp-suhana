@@ -35,12 +35,12 @@
         <li class="item">Profile</li>
     </ol>
 </div>
- 
+
 @include(adminTheme().'alerts')
 <div class="flex-grow-1">
     <div class="row">
         <div class="col-md-12">
-            
+
             <!-- Start -->
             <div class="card mb-30">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -87,7 +87,9 @@
                             </div>
                             <div class="form-group col-xl-4 col-lg-4 col-md-12">
                                 <label for="mobile">Mobile* </label>
-                                <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" required="" />
+                                {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" required="" /> --}}
+                                    <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
+
                                 @if ($errors->has('mobile'))
                                 <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
                                 @endif
@@ -165,7 +167,7 @@
                                     @endforeach @endif
                                 </select>
                             </div>
-                            
+
                             <div class="form-group col-xl-3 col-lg-3 col-md-12">
                                 <label for="postal_code">Postal Code</label>
                                 <input type="text" class="form-control {{$errors->has('postal_code')?'error':''}}" name="postal_code" placeholder="Enter Postal Code" value="{{$user->postal_code?:old('postal_code')}}" />
@@ -188,7 +190,7 @@
                                 @endif
                             </div>
                         </div>
-                        
+
                         <h5 style="color:#009688">Job Information</h5>
                         <hr>
                         <div class="row">
@@ -319,7 +321,7 @@
                                 @endif
                             </div>
                         </div>
-                        
+
                         <h5 style="color:#e91e63">Attach Document</h5>
                         <hr>
                         <div class="table-responsive fileLoader">
@@ -356,9 +358,9 @@
 
 <script>
     $(document).ready(function(){
-        
+
         $(document).on('click','.AddFile',function(){
-            
+
             if(confirm('Are You Want To Add File')){
                 var url =$(this).data('url');
                 $.ajax({
@@ -369,15 +371,15 @@
                     $('.fileAttachment').empty().append(data.view);
                   },error: function () {
                       alert('error');
-        
+
                     }
                 });
             }
-            
+
         });
-        
+
         $(document).on('click','.removeData',function(){
-            
+
             if(confirm('Are You Want To Remove Attachment Data')){
                 var url =$(this).data('url');
                 $.ajax({
@@ -388,15 +390,15 @@
                     $('.fileAttachment').empty().append(data.view);
                   },error: function () {
                       alert('error');
-        
+
                     }
                 });
             }
-            
+
         });
-        
+
         $(document).on('click','.removeFile',function(){
-            
+
             if(confirm('Are You Want To Delete File')){
                 var url =$(this).data('url');
                 $.ajax({
@@ -407,30 +409,30 @@
                     $('.fileAttachment').empty().append(data.view);
                   },error: function () {
                       alert('error');
-        
+
                     }
                 });
             }
-            
+
         });
-        
-        
+
+
         $(document).on('change','.updateFile',function(){
             var url =$(this).data('url');
             var id =$(this).data('id');
             const file = this.files[0];
-            
+
             var allowedExtensions = /\.(jpg|jpeg|png|gif|pdf|doc|docx)$/i;
             var maxSize = 20 * 1024 * 1024;
             var status = true;
-    
+
             if (status) {
                 if (file.size > maxSize) {
                     alert('File size exceeds the maximum limit of 20MB.');
                     status = false;
                 }
             }
-    
+
             if (status) {
                if(!allowedExtensions.test(file.name)) {
                     alert('Please upload a valid Image,PDF,Docs file.');
@@ -438,7 +440,7 @@
                     return false;
                 }
             }
-            
+
             if (status) {
                 var formData = new FormData();
                     formData.append('file', file);
@@ -462,12 +464,12 @@
                             $('.loader').hide();
                         }
                     });
-                
-                
+
+
             }
-            
-            
-             
+
+
+
         });
         $(document).on('keyup','.updateData',function(){
             var url =$(this).data('url');
@@ -482,11 +484,11 @@
                 //$('.fileAttachment').empty().append(data.view);
               },error: function () {
                   alert('error');
-    
+
                 }
             });
         });
-        
+
     });
 </script>
 

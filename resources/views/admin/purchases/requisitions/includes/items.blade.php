@@ -20,7 +20,7 @@
         <tr>
             <th class="px-2 pb-1" style="width: 40px;">SL</th>
             <th class="px-2 pb-1" style="min-width: 200px;">Product</th>
-            <th class="px-2 pb-1" style="width: 80px;">Qty</th>
+            <th class="px-2 pb-1" style="width: 80px;">Qnty</th>
             <th class="px-2 pb-1" style="width: 120px;">Unit</th>
             <th class="p-1" style="width: 60px;text-align:center;vertical-align: middle;">
                 <span class="btn-custom success addItem"
@@ -47,7 +47,7 @@
             <td class="p-1">
                 <input type="number" step="any"
                        class="form-control form-control-sm updateItem qty qty_{{$item->id}}"
-                       placeholder="Qty"
+                       placeholder="Qnty"
                        data-id="{{$item->id}}"
                        data-name="qty"
                        data-url="{{route('admin.purchasesRequisitionsAction',['update-item',$requisition->id,'item_id'=>$item->id])}}"

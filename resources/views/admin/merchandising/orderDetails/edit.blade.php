@@ -103,25 +103,33 @@
                     </div>
 
                     <!-- Merchandiser -->
+
                     <div class="col-md-6 mb-2">
-                        <label>Merchandiser * <a target="_blank" href="{{ route('admin.merchandisers') }}"><i class="fa fa-external-link"></i></a></label>
-                        <select name="merchant" class="form-control updateHead"
-                                data-name="merchant"
-                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
-                                required>
-                            <option value="">-- Select Merchandiser --</option>
-                            @foreach($merchandisers as $m)
-                                <option value="{{ $m->id }}" {{ $orderDetails->merchant_id==$m->id?'selected':'' }}>
-                                    {{ $m->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label>Merchandiser *</label>
+                        <div class="input-group">
+                            <select name="merchant" id="merchantSelect" class="form-control updateHead"
+                                    data-name="merchant"
+                                    data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
+                                    required>
+                                <option value="">-- Select Merchant --</option>
+                                @foreach($merchandisers as $m)
+                                    <option value="{{ $m->id }}" {{ $orderDetails->merchant_id == $m->id ? 'selected':'' }}>
+                                        {{ $m->name }} {{ $m->company_name?'- '.$m->company_name:'' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="input-group-append">
+                                <button type="button" id="openAddMerchant" class="btn btn-primary px-3">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Style -->
                     <div class="col-md-6 mb-2">
                         <label>Style *</label>
-                        <input type="text" name="style_no" class="form-control updateHead"
+                        <input type="text" name="style_no" class="form-control updateHead" placeholder="Style"
                                value="{{ $orderDetails->style_no }}"
                                data-name="style_no"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
@@ -131,16 +139,16 @@
                     <!-- Order No -->
                     <div class="col-md-6 mb-2">
                         <label>Order / PO No *</label>
-                        <input type="text" name="order_no" class="form-control updateHead"
+                        <input type="text" name="order_no" class="form-control updateHead" placeholder="Order / PO No"
                                value="{{ $orderDetails->order_no }}"
                                data-name="order_no"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
                                required>
                     </div>
 
-                    <!-- Total Qty -->
+                    <!-- Total Qnty -->
                     <div class="col-md-6 mb-2">
-                        <label>Total Qty *</label>
+                        <label>Total Qnty *</label>
                         <input type="number" name="total_qty" class="form-control total_qty updateHead"
                                value="{{ $orderDetails->total_qty }}" readonly
                                data-name="total_qty"
@@ -193,7 +201,7 @@
                     <!-- GSM -->
                     <div class="col-md-6 mb-2">
                         <label>GSM *</label>
-                        <input type="text" name="gsm" class="form-control updateHead"
+                        <input type="text" name="gsm" class="form-control updateHead" placeholder="GSM"
                                value="{{ $orderDetails->gsm }}"
                                data-name="gsm"
                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
@@ -217,7 +225,7 @@
                     <!-- Remarks -->
                     <div class="col-md-6 mb-2">
                         <label>Remarks</label>
-                        <textarea name="remarks" class="form-control updateHead" rows="1"
+                        <textarea name="remarks" class="form-control updateHead" rows="1" placeholder="Remarks"
                                   data-name="remarks"
                                   data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}">{{ $orderDetails->remarks }}</textarea>
                     </div>
@@ -233,7 +241,7 @@
                                 <th style="width:20%">Item</th>
                                 <th style="width:25%">Composition</th>
                                 <th style="width:25%">Color Name</th>
-                                <th style="width:15%">Qty</th>
+                                <th style="width:15%">Qnty</th>
                                 <th style="width:5%"></th>
                             </tr>
                         </thead>
@@ -288,7 +296,7 @@
                                             data-name="qty"
                                             data-url="{{ route('admin.orderDetailsAction',['update-item',$item->id]) }}"
                                             value="{{ $item->qty > 0 ? $item->qty : '' }}"
-                                            placeholder="Qty">
+                                            placeholder="Qnty">
                                     </td>
 
                                     {{-- ACTION --}}
@@ -322,6 +330,7 @@
 
     <!-- Buyer Modal -->
     @include(adminTheme().'merchandising.orderDetails.add-buyer')
+    @include(adminTheme().'merchandising.orderDetails.add-merchant')
 
 </div>
 @endsection
@@ -375,7 +384,7 @@ $("#addColorRow").click(function () {
                             class="form-control updateItem"
                             data-name="qty"
                             data-url="${updateUrl}"
-                            placeholder="Qty">
+                            placeholder="Qnty">
                     </td>
                     <td class="text-center">
                         <button type="button"
@@ -442,6 +451,33 @@ $('#addBuyerForm').on('submit', function(e){
     });
 });
 
+// Merchant Modal
+$('#openAddMerchant').click(function(){ $('#AddMerchandisers').modal('show'); });
+
+$('#addMerchandiserForm').on('submit', function(e){
+    e.preventDefault();
+    let form = $(this);
+    $.ajax({
+        url: form.attr('action'),
+        type: form.attr('method'),
+        data: form.serialize(),
+        success: function(response){
+            console.log(response);
+            if(response.id && response.name){
+                let newOption = new Option(response.name, response.id, true, true);
+                $('#merchantSelect').append(newOption).trigger('change');
+                $('#AddMerchandisers').modal('hide');
+                form[0].reset();
+            } else {
+                $('#AddMerchandisers').modal('hide');
+                form[0].reset();
+                alert(response.msg)
+            }
+        },
+        error: function(){ console.log('Error adding merchandiser'); }
+    });
+});
+
 // Update all item compositions when main composition changes
 $('select[name="composition"]').on('change', function(){
     let mainComp = $(this).val();
@@ -458,7 +494,7 @@ function calculateTotalQty() {
         if(!isNaN(val)) totalQty += val;
     });
     $('.total_qty').val(totalQty).trigger('change');
-    console.log('Total Order Qty:', totalQty);
+    console.log('Total Order Qnty:', totalQty);
 }
 </script>
 @endpush

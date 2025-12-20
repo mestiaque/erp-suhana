@@ -64,12 +64,6 @@
                                     {{ $order->display_name }}
                                 </option>
                             @endforeach
-
-                        </select>
-
-                        <label>Select Style</label>
-                        <select name="order_info[style]" id="styleSelect" class="form-control form-control-sm mb-3" disabled>
-                            <option value="">Select a Style</option>
                         </select>
 
                         <table class="table table-bordered table-sm mt-4" style="margin-top: 3rem !important">
@@ -132,7 +126,7 @@
                                     <tr>
                                         <th>Description</th><th>Supplier</th><th>Yarn Count</th>
                                         <th>Unit Price($)</th><th>Consumption(Kg/Dz)</th><th>Wastage%</th>
-                                        <th>Total Qty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
+                                        <th>Total Qnty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -169,7 +163,7 @@
                                     <tr>
                                         <th>Description</th><th>Supplier</th><th>Yarn Count</th>
                                         <th>Unit Price($)</th><th>Consumption(Kg/Dz)</th><th>Wastage%</th>
-                                        <th>Total Qty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
+                                        <th>Total Qnty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -206,7 +200,7 @@
                                     <tr>
                                         <th>Description</th><th>Supplier</th><th>Unit Price($)</th>
                                         <th>Unit(In Number)</th><th>Consumption(Pc)</th><th>Wastage%</th>
-                                        <th>Total Qty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
+                                        <th>Total Qnty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>

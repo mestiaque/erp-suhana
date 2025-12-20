@@ -56,7 +56,7 @@
                                 <th>Style</th>
                                 <th>Fabrication</th>
                                 <th>Yarn Count</th>
-                                <th>Req. Qty</th>
+                                <th>Req. Qnty</th>
                             </tr>
                         </thead>
                         <tbody>

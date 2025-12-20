@@ -231,6 +231,20 @@ class ProductionController extends Controller
             ->get();
 
 
+        if($action == 'print'){
+            $plan = ProductionPlanning::with(['style', 'sewingLines'])->find($id);
+            if (!$plan) {
+                session()->flash('error', 'Plan Not Found');
+                return redirect()->route('admin.productionPlanning');
+            }
+            // Prepare summary data if needed
+            $totalCapacity = $plan->sewingLines->sum('capacity_hour');
+            $totalWorkingHours = $plan->sewingLines->sum('working_hours');
+
+            return view(adminTheme().'productions.planning.print', compact('plan', 'totalCapacity', 'totalWorkingHours'));
+        }
+
+
         return view(adminTheme().'productions.planning.edit', compact('plan', 'styles'));
     }
 
@@ -327,6 +341,7 @@ class ProductionController extends Controller
         $nextHour = $now->copy()->addHour(); // now + 1 hour
 
         $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+            ->where('status', '!=', 'completed')
             ->when($search, function ($q) use ($search) {
                 $q->where('floor_name', 'LIKE', "%{$search}%")
                 ->orWhere('line_name', 'LIKE', "%{$search}%")
@@ -351,10 +366,12 @@ class ProductionController extends Controller
             ->whereHas('planning', function ($q) use ($now, $nextHour) {
                 // Filter by exact datetime instead of date only
                 $q->where('status', 'confirmed')
-                ->where('sewing_start', '<=', $now)
-                ->where('sewing_end', '>=', $nextHour);
+                // ->where('sewing_start', '<=', $now)
+                // ->where('sewing_end', '>=', $nextHour)
+                ;
             })
-            ->get();
+            ->get()
+            ->sortBy('line_name');
 
         return view(adminTheme().'productions.daily.index', compact('swings'));
     }
@@ -383,6 +400,14 @@ class ProductionController extends Controller
             );
 
             return response()->json(['success' => true]);
+        }
+
+        if($action == 'status-update'){
+            $swing = ProductionSewing::find($r->s_id);
+            if ($swing) {
+                $swing->update(['status' => 'completed']);
+            }
+            return redirect()->route('admin.dailyProduction');
         }
 
         $swings = ProductionSewing::with('planning')->with('outputs')->get();

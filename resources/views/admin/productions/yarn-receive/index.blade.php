@@ -73,7 +73,7 @@
                             <th>Receive Date</th>
                             <th>Supplier</th>
                             <th>Total Items</th>
-                            <th>Total Req. Qty</th>
+                            <th>Total Req. Qnty</th>
                             <th>Added By</th>
                             <th style="width: 200px">Action</th>
                         </tr>

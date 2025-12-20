@@ -16,7 +16,7 @@
         <tr>
             <th style="width:40px;">SL</th>
             <th style="min-width:200px;">Product</th>
-            <th style="width:80px;">Qty</th>
+            <th style="width:80px;">Qnty</th>
             <th style="width:120px;">Unit</th>
             <th style="width:80px;">Price</th>
             <th style="width:120px;">Total Price</th>

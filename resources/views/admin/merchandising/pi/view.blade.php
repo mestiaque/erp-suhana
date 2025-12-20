@@ -49,7 +49,7 @@
                 </ul>
 
                 <ul class="list-group flex-grow-1">
-                    <li class="list-group-item"><strong>Total Qty:</strong> {{ number_format($pi->total_qty) }}</li>
+                    <li class="list-group-item"><strong>Total Qnty:</strong> {{ number_format($pi->total_qty) }}</li>
                     <li class="list-group-item"><strong>Total Bill:</strong> {{ number_format($pi->total_bill,2) }}</li>
                     <li class="list-group-item"><strong>Total Commission:</strong> {{ number_format($pi->total_commission,2) }}</li>
                 </ul>
@@ -67,8 +67,9 @@
                             <th>GSM</th>
                             <th>Style No</th>
                             <th>Color</th>
-                            <th>Qty</th>
+                            <th>Qnty</th>
                             <th>Unit Price</th>
+                            <th>Unit of Measurement</th>
                             <th>Total Price</th>
                             <th>Commission Type</th>
                             <th>Commission</th>
@@ -87,6 +88,7 @@
                             <td>{{ $item->color_name }}</td>
                             <td>{{ number_format($item->color_qty) }}</td>
                             <td>{{ number_format($item->unit_price, 2) }}</td>
+                            <td>{{ $item->uom }}</td>
                             <td>{{ number_format($item->total_price, 2) }}</td>
                             <td>{{ ucfirst($item->commission_type) }}</td>
                             <td>{{ number_format($item->commission, 2) }}</td>

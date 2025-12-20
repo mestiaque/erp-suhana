@@ -107,25 +107,25 @@
                         margin-top: 0;
                         padding-top: 20px;
                     }
-                    
+
                     .signature-box {
                         text-align: center;
                         flex: 1;
                     }
-                    
+
                     .signature-line {
                         border-top: 1px solid #000;
                         margin: 40px 20px 5px 20px;
                         position: relative;
                     }
-                    
+
                     .signature-text {
                         font-family: 'Brush Script MT', cursive;
                         font-size: 24px;
                         margin-top: -35px;
                         color: #1a3d0a;
                     }
-                    
+
                     .input-underline {
                         border: none;
                         border-bottom: 1px solid #000;
@@ -133,7 +133,7 @@
                         width: 100%;
                         font-size: 14px;
                     }
-                    
+
                     .input-underline:focus {
                         outline: none;
                         border-bottom-color: #2d5016;
@@ -184,7 +184,7 @@
                             <tr>
                                 <th style="width: 50px;min-width: 50px;">SL</th>
                                 <th style="min-width: 200px;">Meterial</th>
-                                <th style="width: 60px;min-width: 60px;">Qty</th>
+                                <th style="width: 60px;min-width: 60px;">Qnty</th>
                                 <th style="width: 80px;min-width: 80px;">Unit</th>
                             </tr>
                         </thead>

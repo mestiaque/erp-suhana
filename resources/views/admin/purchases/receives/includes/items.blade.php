@@ -3,8 +3,8 @@
         <tr>
             <th style="width:40px;">SL</th>
             <th>Product</th>
-            <th style="width:120px;text-align:center;">Ordered Qty</th>
-            <th style="width:120px;">Received Qty</th>
+            <th style="width:120px;text-align:center;">Ordered Qnty</th>
+            <th style="width:120px;">Received Qnty</th>
             <th style="width:80px;">Unit</th>
         </tr>
 

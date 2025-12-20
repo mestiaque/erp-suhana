@@ -122,8 +122,8 @@
                         <tr>
                             <th style="width: 50px;min-width: 50px;">SL</th>
                             <th style="min-width: 250px;">Product</th>
-                            <th style="width: 120px;min-width: 120px;text-align:center;">Ordered Qty</th>
-                            <th style="width: 120px;min-width: 120px;text-align:center;">Received Qty</th>
+                            <th style="width: 120px;min-width: 120px;text-align:center;">Ordered Qnty</th>
+                            <th style="width: 120px;min-width: 120px;text-align:center;">Received Qnty</th>
                             <th style="width: 60px;min-width: 60px;" >Unit</th>
                         </tr>
                     </thead>
