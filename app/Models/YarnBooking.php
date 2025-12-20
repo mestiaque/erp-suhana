@@ -2,49 +2,67 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class YarnBooking extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'yarn_bookings';
 
-protected $guarded = [];
+    protected $fillable = [
+        'pi_id',
+        'booking_no',
+        'style',
+        'fabric_type',
+        'yarn_count',
+        'yarn_type',
+        'required_qty',
+        'supplier',
+        'expected_delivery',
+        'remarks',
+        'created_by',
+        'updated_by',
+        'deleted_by',
+        'status'
 
-    /**
-     * Relation: YarnBooking belongs to a Proforma Invoice
-     */
-    public function proformaInvoice()
+        //received_qty update when receive
+        //delivery_qty update when deliver
+        //balance ( default 0, increment when received, decremnt when delivery)
+    ];
+
+    protected $dates = [
+        'expected_delivery',
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
+
+    // Relationships
+    public function deliveries()
     {
-        return $this->belongsTo(ProformaInvoice::class);
+        return $this->hasMany(YarnDelivery::class, 'booking_id');
     }
 
-    public function items()
+    public function receives()
     {
-        return $this->hasMany(YarnBookingItem::class);
-    }
-
-    public function buyer()
-    {
-        return $this->belongsTo(User::class, 'buyer_id');
+        return $this->hasMany(YarnReceive::class, 'booking_id');
     }
 
     public function getBookingNo()
     {
         $length = 8; // ID থেকে কত digit number তৈরি হবে
-        return str_pad($this->id, $length, '0', STR_PAD_LEFT);
+        return str_pad($this->booking_no, $length, '0', STR_PAD_LEFT);
     }
 
-    public function addedBy()
+    public function createdBy()
     {
-        return $this->belongsTo(User::class, 'addedby_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function editedBy()
+    public function pi()
     {
-        return $this->belongsTo(User::class, 'editedby_id');
+        return $this->belongsTo(ProformaInvoice::class,'pi_id');
     }
-
 }

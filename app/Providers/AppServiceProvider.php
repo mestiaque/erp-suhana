@@ -17,22 +17,48 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
+    // public function boot(): void
+    // {
+    //     //
+    //     \Config::set("services.facebook.client_id", general()->fb_app_id);
+    //     \Config::set("services.facebook.client_secret", general()->fb_app_secret);
+    //     \Config::set("services.facebook.redirect", general()->fb_app_secret);
+
+    //     \Config::set("services.google.client_id", general()->google_client_id);
+    //     \Config::set("services.google.client_secret", general()->google_client_secret);
+    //     \Config::set("services.google.redirect", general()->google_client_redirect_url);
+
+    //     \Config::set("mail.mailers.smtp.transport", general()->mail_driver);
+    //     \Config::set("mail.mailers.smtp.host", general()->mail_host);
+    //     \Config::set("mail.mailers.smtp.port", general()->mail_port);
+    //     \Config::set("mail.mailers.smtp.encryption", general()->mail_encryption);
+    //     \Config::set("mail.mailers.smtp.username", general()->mail_username);
+    //     \Config::set("mail.mailers.smtp.password", general()->mail_password);
+    // }
+
     public function boot(): void
     {
-        //
-        \Config::set("services.facebook.client_id", general()->fb_app_id);
-        \Config::set("services.facebook.client_secret", general()->fb_app_secret);
-        \Config::set("services.facebook.redirect", general()->fb_app_secret);
+        $general = general(); // helper function
 
-        \Config::set("services.google.client_id", general()->google_client_id);
-        \Config::set("services.google.client_secret", general()->google_client_secret);
-        \Config::set("services.google.redirect", general()->google_client_redirect_url);
+        if ($general) { // Only proceed if general() returns a valid object
+            // Facebook
+            \Config::set("services.facebook.client_id", $general->fb_app_id);
+            \Config::set("services.facebook.client_secret", $general->fb_app_secret);
+            \Config::set("services.facebook.redirect", $general->fb_redirect_url ?? null);
 
-        \Config::set("mail.mailers.smtp.transport", general()->mail_driver);
-        \Config::set("mail.mailers.smtp.host", general()->mail_host);
-        \Config::set("mail.mailers.smtp.port", general()->mail_port);
-        \Config::set("mail.mailers.smtp.encryption", general()->mail_encryption);
-        \Config::set("mail.mailers.smtp.username", general()->mail_username);
-        \Config::set("mail.mailers.smtp.password", general()->mail_password);
+            // Google
+            \Config::set("services.google.client_id", $general->google_client_id);
+            \Config::set("services.google.client_secret", $general->google_client_secret);
+            \Config::set("services.google.redirect", $general->google_client_redirect_url ?? null);
+
+            // Mail
+            \Config::set("mail.mailers.smtp.transport", $general->mail_driver);
+            \Config::set("mail.mailers.smtp.host", $general->mail_host);
+            \Config::set("mail.mailers.smtp.port", $general->mail_port);
+            \Config::set("mail.mailers.smtp.encryption", $general->mail_encryption);
+            \Config::set("mail.mailers.smtp.username", $general->mail_username);
+            \Config::set("mail.mailers.smtp.password", $general->mail_password);
+        }
     }
+
 }

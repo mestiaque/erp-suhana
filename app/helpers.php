@@ -10,10 +10,14 @@ use App\Models\PostExtra;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
+    function general() {
+        // Skip DB query if running in console (artisan commands)
+        if (app()->runningInConsole()) {
+            return null; // or return default object if you want
+        }
 
-function general(){
-  return $general =General::first();
-}
+        return General::first();
+    }
 
 function websiteTitle($title=null){
 
@@ -30,13 +34,34 @@ function isMobileDevice() {
 , $_SERVER["HTTP_USER_AGENT"]);
 }
 
-function adminTheme(){
-  $theme=general()->adminTheme.'.';
-  if(isMobileDevice()){
-    $theme=general()->adminTheme.'.';
-  }
-  return $theme;
+// function adminTheme(){
+//   $theme=general()->adminTheme.'.';
+//   if(isMobileDevice()){
+//     $theme=general()->adminTheme.'.';
+//   }
+//   return $theme;
+// }
+
+function adminTheme() {
+    // মূল theme name
+    $theme = general()->adminTheme;
+
+    // Mobile device হলে আলাদা theme ব্যবহার করতে চাইলে uncomment করতে পারো
+    // if (isMobileDevice()) {
+    //     $theme = general()->mobileTheme ?? $theme;
+    // }
+
+    $viewPath = resource_path('views/' . $theme);
+
+    // Linux case-sensitive: যদি folder না থাকে, strtolower try করি
+    if (!file_exists($viewPath) && file_exists(resource_path('views/' . strtolower($theme)))) {
+        $theme = strtolower($theme);
+    }
+
+    // শেষে dot দিয়ে return (Laravel view path convention)
+    return $theme . '.';
 }
+
 
 function welcomeTheme(){
   $theme=general()->theme.'.';

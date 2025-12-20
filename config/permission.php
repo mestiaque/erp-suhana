@@ -237,8 +237,8 @@ return [
                     'all'    => 'All',
                 ],
             ],
-            'dying_booking' => [
-                'label'       => 'Dying (Procurement)',
+            'dyeing_booking' => [
+                'label'       => 'Dyeing (Procurement)',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
