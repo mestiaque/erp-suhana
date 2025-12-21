@@ -144,19 +144,26 @@ class MerchandisingController extends Controller
             ]);
 
             // Check active user
-            $existsUser = User::where('email',$r->email)
-                ->orWhere('mobile',$r->mobile)->first();
+            $existsUser = User::where(function ($q) use ($r) {
 
-            // Check trashed user
-            $trashedUser = User::onlyTrashed()->where('email',$r->email)
-                ->orWhere('mobile',$r->mobile)->first();
+                    if (!empty($r->email)) {
+                        $q->where('email', $r->email);
+                    }
 
-            if ($trashedUser) {
-                Session()->flash('error','This email or mobile exists in trash.');
-                return redirect()->back();
-            }
+                    if (!empty($r->mobile)) {
+                        $q->orWhere('mobile', $r->mobile);
+                    }
+
+                })->first();
 
             if ($existsUser) {
+                if($r->has('api')){
+                    return response()->json([
+                        'success'       => false,
+                        'msg'           => "his email or mobile alrady used.",
+                        'buyer_created' => false,
+                    ]);
+                }
                 Session()->flash('error','This email or mobile alrady used.');
                 return redirect()->back();
             }
@@ -173,12 +180,19 @@ class MerchandisingController extends Controller
             $user->password_show = $password;
             $user->password      = Hash::make($password);
             $user->setTypes('buyer');
-            $user->buyer         = true;
-            $user->customer      = false;
             $user->save();
+            if($r->has('api')){
+                return response()->json([
+                    'success'       => true,
+                    'msg'           => "Buyer registered successfully",
+                    'buyer_created' => true,
+                    'id'            => $user->id,
+                    'name'          => $user->name,
+                ]);
+            }
 
             Session()->flash('success','Buyer registered successfully!');
-            return redirect()->route('admin.buyersAction',['view',$user->id]);
+            return redirect()->route('admin.buyersAction',['edit',$user->id]);
         }
         /* ================= CREATE END ================= */
 
@@ -189,7 +203,7 @@ class MerchandisingController extends Controller
             $user = User::onlyTrashed()->filterByType('buyer')->find($id);
             if (!$user) {
                 Session()->flash('error','Buyer not found in trash.');
-                return redirect()->route('admin.buyers',['view'=>'deleted']);
+                return redirect()->route('admin.buyers',['edit'=>'deleted']);
             }
             $user->restore();
             Session()->flash('success','Buyer restored successfully!');
@@ -202,7 +216,7 @@ class MerchandisingController extends Controller
             $user = User::onlyTrashed()->filterByType('buyer')->find($id);
             if (!$user) {
                 Session()->flash('error','Buyer not found in trash.');
-                return redirect()->route('admin.buyers',['view'=>'deleted']);
+                return redirect()->route('admin.buyers',['edit'=>'deleted']);
             }
             $files = Media::where('src_type',7)->where('src_id',$user->id)->get();
             foreach ($files as $file) {
@@ -213,7 +227,7 @@ class MerchandisingController extends Controller
             }
             $user->forceDelete();
             Session()->flash('success','Buyer permanently deleted!');
-            return redirect()->route('admin.buyers',['view'=>'deleted']);
+            return redirect()->route('admin.buyers',['edit'=>'deleted']);
         }
 
         /* ================= FIND BUYER ================= */
@@ -226,7 +240,7 @@ class MerchandisingController extends Controller
 
         /* ================= VIEW BUYER ================= */
         if ($action == 'view') {
-            $orders = $user->orders()->where('status','approved')->paginate(10);
+            $orders = ProformaInvoice::where('buyer_id', $user->id)->get();
             return view(adminTheme().'merchandising.buyers.viewUser', compact('user','orders'));
         }
 
@@ -560,26 +574,24 @@ class MerchandisingController extends Controller
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
 
-                        // SEARCH
+                // SEARCH
                 if ($r->search) {
                     $search = $r->search;
                     $q->where(function($qq) use ($search) {
-                        $qq->where('id', 'LIKE', "%{$search}%")  // Sample ID
-                        ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                        ->orWhere('style_no', 'LIKE', "%{$search}%")
-                        ->orWhere('id', 'LIKE', "%{$search}%")
-                        ->orWhere('company_name', 'LIKE', "%{$search}%")
-                        ->orWhere('invoice_no', 'LIKE', "%{$search}%")
-                        ->orWhere('order_no', 'LIKE', "%{$search}%")
-                        ->orWhere('composition', 'LIKE', "%{$search}%")
-                        ->orWhere('fabrication', 'LIKE', "%{$search}%")
-                        ->orWhere('gsm', 'LIKE', "%{$search}%")
-                        ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                        $qq->where('id', 'LIKE', "%{$search}%")
+                            ->orWhere('buyer_name', 'LIKE', "%{$search}%")
+                            ->orWhere('style_no', 'LIKE', "%{$search}%")
+                            ->orWhere('company_name', 'LIKE', "%{$search}%")
+                            ->orWhere('invoice_no', 'LIKE', "%{$search}%")
+                            ->orWhere('order_no', 'LIKE', "%{$search}%")
+                            ->orWhere('composition', 'LIKE', "%{$search}%")
+                            ->orWhere('fabrication', 'LIKE', "%{$search}%")
+                            ->orWhere('gsm', 'LIKE', "%{$search}%")
+                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
                     });
                 }
 
-
-                        // DATE RANGE
+                // DATE RANGE
                 if ($r->startDate || $r->endDate) {
                     $from = $r->startDate ?: now()->format('Y-m-d');
                     $to   = $r->endDate ?: now()->format('Y-m-d');
@@ -588,47 +600,46 @@ class MerchandisingController extends Controller
                     ->whereDate('created_at', '<=', $to);
                 }
 
-                if ($r->shipmnetStartDate || $r->shipmnetEndDate) {
-                    $sfrom = $r->shipmnetStartDate ?: now()->format('Y-m-d');
-                    $sto   = $r->shipmnetEndDate ?: now()->format('Y-m-d');
+                if ($r->shipmentStartDate || $r->shipmentEndDate) {
+                    $sfrom = $r->shipmentStartDate ?: now()->format('Y-m-d');
+                    $sto   = $r->shipmentEndDate ?: now()->format('Y-m-d');
 
                     $q->whereDate('shipment_date', '>=', $sfrom)
                     ->whereDate('shipment_date', '<=', $sto);
                 }
 
-                        // STATUS
+                // STATUS
                 if ($r->status) {
                     $q->where('status', $r->status);
                 } else {
                     $q->where('status', '<>', 'trash');
                 }
+
             })
             ->paginate(25)
             ->appends($r->all());
 
-
-                // -----------------------------
-                // TOTAL COUNTS
-                // -----------------------------
+        // TOTAL COUNTS
         $totals = OrderDetail::whereNotIn('status', ['trash', 'temp'])
             ->selectRaw("COUNT(*) AS total")
             ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
             ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
             ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
-            ->selectRaw("COUNT(CASE WHEN status = 'canceled' THEN 1 END) AS canceled")
+            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
             ->first();
+
         if($r->has('print')){
             return view(adminTheme().'merchandising.orderDetails.printList', compact('orderDetails', 'totals'));
-        }else{
+        } else {
             return view(adminTheme().'merchandising.orderDetails.index', compact('orderDetails', 'totals'));
         }
-
     }
 
     public function orderDetailsAction(Request $r, $action, $id = null)
     {
-
-        // UPDATE EXISTING ITEM
+        /* ---------------------------------------------------------------------
+        * UPDATE ORDER ITEM
+        * ---------------------------------------------------------------------*/
         if ($action == 'update-item') {
             if (!$r->field) {
                 return response()->json(['success' => false, 'message' => 'Invalid Request']);
@@ -638,15 +649,17 @@ class MerchandisingController extends Controller
 
             $item = OrderDetailItem::find($id);
             if ($item) {
+                if ($field == 'item_name') {
+                    $item->item_name = $value ?: null;
+                }
                 if ($field == 'color_name') {
-
                     $item->color_name = $value ?: null;
                 }
                 if ($field == 'qty') {
                     $item->qty = $value ?: 0;
                 }
                 if ($field == 'composition') {
-                    $item->composition = $value ?: 0;
+                    $item->composition = $value ?: null;
                 }
                 // Add other fields if needed
                 $item->save();
@@ -656,6 +669,9 @@ class MerchandisingController extends Controller
             return response()->json(['success' => false, 'message' => 'Item not found']);
         }
 
+        /* ---------------------------------------------------------------------
+        * REMOVE ORDER ITEM
+        * ---------------------------------------------------------------------*/
         if ($action == 'remove-item') {
             $item = OrderDetailItem::find($id);
             if ($item) {
@@ -665,29 +681,26 @@ class MerchandisingController extends Controller
             return response()->json(['success' => false, 'message' => 'Item not found']);
         }
 
-        // REMOVE ITEM
-
         /* ---------------------------------------------------------------------
-        *  CREATE TEMP ORDER
+        * CREATE TEMP ORDER
         * ---------------------------------------------------------------------*/
         if ($action == 'create') {
-
             $orderDetails = OrderDetail::where('status', 'temp')
-                ->where('addedby_id', Auth::id())
+                ->where('created_by', Auth::id())
                 ->first();
             $lastOrder = OrderDetail::orderBy('id', 'desc')->first();
 
             if (!$orderDetails) {
                 $orderDetails = OrderDetail::create([
                     'status'        => 'temp',
-                    'addedby_id'    => Auth::id(),
-                    'created_at'    => now(),
-                    'buyer_id'      => $lastOrder?->buyer_id ?? null,
-                    'buyer_name'    => $lastOrder?->buyer_name ?? null,
-                    'merchant_id'   => $lastOrder?->merchant_id ?? null,
-                    'merchant_name' => $lastOrder?->merchant_name ?? null,
-                    'company_name'  => $lastOrder?->company_name ?? null,
+                    'created_by'    => Auth::id(),
+                    'buyer_id'      => $lastOrder?->buyer_id,
+                    'buyer_name'    => $lastOrder?->buyer_name,
+                    'merchant_id'   => $lastOrder?->merchant_id,
+                    'merchant_name' => $lastOrder?->merchant_name,
+                    'company_name'  => $lastOrder?->company_name,
                 ]);
+
                 OrderDetailItem::create([
                     'order_detail_id' => $orderDetails->id
                 ]);
@@ -697,16 +710,15 @@ class MerchandisingController extends Controller
         }
 
         /* ---------------------------------------------------------------------
-        *  FIND ORDER
+        * FIND ORDER
         * ---------------------------------------------------------------------*/
         $orderDetails = OrderDetail::find($id);
-
         if (!$orderDetails) {
             session()->flash('error', 'Order Details Not Found');
             return redirect()->route('admin.orderDetails');
         }
 
-        /* LOCKED ORDERS ARE READ ONLY */
+        // LOCKED ORDERS ARE READ ONLY
         if (!in_array($orderDetails->status, ['temp', 'pending']) &&
             in_array($action, ['edit', 'delete', 'update-head', 'update-items'])
         ) {
@@ -714,9 +726,10 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.orderDetails');
         }
 
-
+        /* ---------------------------------------------------------------------
+        * UPDATE HEADER
+        * ---------------------------------------------------------------------*/
         if ($action == 'update-head') {
-
             if (!$r->field) {
                 return response()->json(['success' => false, 'message' => 'Invalid Request']);
             }
@@ -729,117 +742,73 @@ class MerchandisingController extends Controller
                     $orderDetails->buyer_id = $buyer->id;
                     $orderDetails->buyer_name = $buyer->name;
                 }
-            }
-            elseif ($field == 'merchant') {
+            } elseif ($field == 'merchant') {
                 if ($merchant = User::find($value)) {
                     $orderDetails->merchant_id = $merchant->id;
                     $orderDetails->merchant_name = $merchant->name;
                 }
-            }
-
-            elseif ($field == 'style_no') {
-
-                $exists = OrderDetail::where('style_no', $value)
-                    ->where('id', '!=', $orderDetails->id)
-                    ->exists();
-
-                // if ($exists) {
-                //     return response()->json([
-                //         'success' => false,
-                //         'message' => 'This style already exists',
-                //         'field'   => 'style_no'
-                //     ]);
-                // }
-
-                $orderDetails->style_no = $value;
-            }
-            else {
+            } else {
                 $orderDetails->$field = $value;
             }
 
             $orderDetails->save();
-
             return response()->json(['success' => true]);
         }
 
-        // ADD NEW ITEM
+        /* ---------------------------------------------------------------------
+        * ADD ITEM
+        * ---------------------------------------------------------------------*/
         if ($action === 'add-item') {
             $item = new OrderDetailItem();
             $item->order_detail_id = $orderDetails->id;
-            $item->order_no = $orderDetails->order_no ?? null;
-            $item->style_no = $orderDetails->style_no ?? null;
-            $item->composition = $orderDetails->composition ?? null;
+            $item->order_no = $orderDetails->order_no;
+            $item->style_no = $orderDetails->style_no;
+            $item->composition = $orderDetails->composition;
+            $item->fabrication = $orderDetails->fabrication;
+            $item->gsm = $orderDetails->gsm;
+            $item->shipment_date = $orderDetails->shipment_date;
             $item->save();
+
             return response()->json(['success' => true, 'id' => $item->id]);
         }
 
         /* ---------------------------------------------------------------------
-        *  VIEW
+        * UPDATE ITEMS & MAIN ORDER
         * ---------------------------------------------------------------------*/
-        if ($action == 'view') {
-            return view(adminTheme().'merchandising.orderDetails.view', compact('orderDetails'));
-        }
-
-        /* ---------------------------------------------------------------------
-        *  UPDATE MAIN ORDER + ITEMS
-        * ---------------------------------------------------------------------*/
-        if ($action == 'update') {
+        if ($action === 'update') {
 
             $r->validate([
-                'buyer'          => 'required|exists:users,id',
-                'merchant'       => 'required|exists:users,id',
-                'style_no'       => 'required|string|max:255',
-                'order_no'       => 'required|string|max:255',
-                'status'         => 'required|string|max:50',
+                'buyer'      => 'required|exists:users,id',
+                'merchant'   => 'required|exists:users,id',
+                'style_no'   => 'required|string|max:255',
+                'order_no'   => 'required|string|max:255',
+                'status'     => 'required|string|max:50',
+                'shipment_date' => 'nullable|date',
+                'composition'   => 'nullable|string|max:255',
+                'fabrication'   => 'nullable|string|max:255',
+                'gsm'           => 'nullable|string|max:50',
 
-                // ITEMS VALIDATION
-                'item_color.*'   => 'nullable|string|max:100',
-                'item_qty.*'     => 'nullable|numeric|min:0',
+                // ITEM VALIDATION
+                'colors.*' => 'nullable|string|max:100',
+                'qtys.*'   => 'nullable|numeric|min:0',
             ]);
 
-            /* STYLE UNIQUE CHECK */
-            $existsStyle = OrderDetail::where('style_no', $r->style_no)
-                ->where('id', '!=', $orderDetails->id)
-                ->exists();
-
-            // if ($existsStyle) {
-            //     session()->flash('info', 'This style already exists');
-            //     return back();
-            // }
-
             DB::beginTransaction();
-
             try {
-                /* UPDATE HEADER FIELDS */
-                $buyer    = User::find($r->buyer);
+                // UPDATE HEADER
+                $buyer = User::find($r->buyer);
                 $merchant = User::find($r->merchant);
 
-                $orderDetails->update([
-                    'buyer_id'      => $buyer->id,
-                    'buyer_name'    => $buyer->name,
-                    'merchant_id'   => $merchant->id,
-                    'merchant_name' => $merchant->name,
-                    'style_no'      => $r->style_no,
-                    'order_no'      => $r->order_no,
-                    'status'        => $r->status,
-                ]);
+               
 
-                /* ----------------------------------------------------------
-                *  UPDATE ITEMS
-                * ----------------------------------------------------------*/
+                // UPDATE ITEMS
                 $existingIds = [];
-
-
                 if ($r->colors) {
                     foreach ($r->colors as $itemId => $color) {
-
                         $qty = $r->qtys[$itemId] ?? 0;
-
-                        // Skip empty rows
                         if (!$color && !$qty) continue;
 
                         if (is_numeric($itemId)) {
-                            // Existing item
                             $item = OrderDetailItem::where('id', $itemId)
                                 ->where('order_detail_id', $orderDetails->id)
                                 ->first();
@@ -848,20 +817,44 @@ class MerchandisingController extends Controller
                                     'color_name' => $color,
                                     'qty'        => $qty,
                                     'order_no'   => $orderDetails->order_no,
-                                    'style_no'   => $orderDetails->style_no
+                                    'style_no'   => $orderDetails->style_no,
+                                    'composition' => $orderDetails->composition,
+                                    'fabrication' => $orderDetails->fabrication,
+                                    'gsm'         => $orderDetails->gsm,
+                                    'shipment_date' => $orderDetails->shipment_date,
                                 ]);
                                 $existingIds[] = $item->id;
                             }
                         } else {
-                            // New item
                             $item = $orderDetails->items()->create([
-                                'color_name' => $color,
-                                'qty'        => $qty,
+                                'color_name'    => $color,
+                                'qty'           => $qty,
+                                'order_no'      => $orderDetails->order_no,
+                                'style_no'      => $orderDetails->style_no,
+                                'composition'   => $orderDetails->composition,
+                                'fabrication'   => $orderDetails->fabrication,
+                                'gsm'           => $orderDetails->gsm,
+                                'shipment_date' => $orderDetails->shipment_date,
                             ]);
                             $existingIds[] = $item->id;
                         }
                     }
                 }
+
+                 $orderDetails->update([
+                    'buyer_id'      => $buyer?->id ?? null,
+                    'buyer_name'    => $buyer?->name ?? null,
+                    'merchant_id'   => $merchant?->id ?? null,
+                    'merchant_name' => $merchant?->name ?? null,
+                    'style_no'      => $r->style_no,
+                    'order_no'      => $r->order_no,
+                    'status'        => $r->status,
+                    'shipment_date' => $r->shipment_date,
+                    'composition'   => $r->composition,
+                    'fabrication'   => $r->fabrication,
+                    'gsm'           => $r->gsm,
+                    'total_qty'     => $orderDetails->items()->sum('qty'),
+                ]);
 
 
                 // DELETE REMOVED ITEMS
@@ -872,10 +865,9 @@ class MerchandisingController extends Controller
                 }
 
                 DB::commit();
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 DB::rollback();
-                session()->flash('error', 'Something went wrong.');
+                session()->flash('error', 'Something went wrong: ' . $e->getMessage());
                 return back();
             }
 
@@ -883,9 +875,8 @@ class MerchandisingController extends Controller
             return redirect()->route('admin.orderDetails');
         }
 
-
         /* ---------------------------------------------------------------------
-        *  DELETE ORDER
+        * DELETE ORDER
         * ---------------------------------------------------------------------*/
         if ($action == 'delete') {
             $orderDetails->items()->delete();
@@ -894,9 +885,8 @@ class MerchandisingController extends Controller
             return back();
         }
 
-
         /* ---------------------------------------------------------------------
-        *  LOAD EDIT PAGE
+        * LOAD EDIT PAGE
         * ---------------------------------------------------------------------*/
         $items = $orderDetails->items;
         $buyers = User::where('buyer', true)->whereIn('status', [0,1])->get();
@@ -907,262 +897,254 @@ class MerchandisingController extends Controller
         );
     }
 
-
     public function proformaInvoice(Request $r)
     {
-                // -----------------------------
-                // QUERY PROFORMA INVOICES
-                // -----------------------------
-        $pis = ProformaInvoice::with(['buyer', 'merchant', 'user', 'items'])
-            ->orderBy('id', 'desc')
-            ->where('status', '<>', 'temp')
+        $pis = ProformaInvoice::with(['buyer','merchant','items'])
+            ->where('status','<>','temp')
+            ->orderByDesc('id')
             ->when($r->search, function ($q) use ($r) {
                 $search = $r->search;
                 $q->where(function ($qq) use ($search) {
-                    $qq->where('order_no', 'LIKE', "%{$search}%")
-                        ->orWhere('remarks', 'LIKE', "%{$search}%")
-                        ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                        ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                    $qq->where('order_no','LIKE',"%{$search}%")
+                    ->orWhere('pi_no','LIKE',"%{$search}%")
+                    ->orWhere('buyer_name','LIKE',"%{$search}%")
+                    ->orWhere('merchant_name','LIKE',"%{$search}%");
                 });
             })
             ->when($r->startDate || $r->endDate, function ($q) use ($r) {
-                $from = $r->startDate ?: now()->format('Y-m-d');
-                $to   = $r->endDate ?: now()->format('Y-m-d');
-                $q->whereBetween('created_at', [$from, $to]);
+                $q->whereBetween('created_at', [
+                    $r->startDate ?: now()->format('Y-m-d'),
+                    $r->endDate   ?: now()->format('Y-m-d')
+                ]);
             })
-            ->when($r->status, function ($q) use ($r) {
-                $q->where('status', $r->status);
-            })
+            ->when($r->status, fn($q)=>$q->where('status',$r->status))
             ->paginate(25)
             ->appends($r->all());
 
-                // -----------------------------
-                // TOTAL COUNTS
-                // -----------------------------
-        $totals = ProformaInvoice::selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancel' THEN 1 END) AS cancel")
+        $totals = ProformaInvoice::whereNotIn('status',['temp'])
+            ->selectRaw("COUNT(*) total")
+            ->selectRaw("SUM(status='pending') pending")
+            ->selectRaw("SUM(status='confirmed') confirmed")
+            ->selectRaw("SUM(status='approved') approved")
+            ->selectRaw("SUM(status='cancelled') cancelled")
             ->first();
 
-        return view(
-            adminTheme().'merchandising.pi.index',
-            compact('pis', 'totals')
-        );
+        return view(adminTheme().'merchandising.pi.index', compact('pis','totals'));
     }
-
 
     public function proformaInvoiceAction(Request $r, $action, $id = null)
     {
-                // -------------------------------
-                // CREATE SAMPLE PI
-                // -------------------------------
+        /* ---------------------------------------------------------------------
+        * CREATE TEMP PROFORMA INVOICE
+        * ---------------------------------------------------------------------*/
         if ($action == 'create') {
-            $pi = ProformaInvoice::where('status', 'temp')->where('addedby_id', Auth::id())->first();
-            if (!$pi) {
-                $pi             = new ProformaInvoice();
-                $pi->status     = 'temp';
-                $pi->addedby_id = Auth::id();
-            }
-            $pi->created_at = now();
-            $pi->save();
+            $pi = ProformaInvoice::firstOrCreate(
+                ['status' => 'temp', 'created_by' => auth()->id()],
+                ['created_at' => now()]
+            );
+
             return redirect()->route('admin.proformaInvoiceAction', ['edit', $pi->id]);
         }
 
-                // -------------------------------
-                // FIND PI
-                // -------------------------------
-        $pi = ProformaInvoice::with('items')->find($id);
+        /* ---------------------------------------------------------------------
+        * FIND PROFORMA INVOICE
+        * ---------------------------------------------------------------------*/
+        $pi = ProformaInvoice::with('items', 'order')->find($id);
 
         if (!$pi) {
             session()->flash('error', 'Proforma Invoice Not Found');
             return redirect()->route('admin.proformaInvoice');
         }
 
-                // -------------------------------
-                // VIEW PI
-                // -------------------------------
-        if ($action == 'view') {
+        /* ---------------------------------------------------------------------
+        * VIEW PI
+        * ---------------------------------------------------------------------*/
+        if ($action === 'view') {
             return view(adminTheme().'merchandising.pi.view', compact('pi'));
         }
 
-        if ($action == 'invoice') {
+        /* ---------------------------------------------------------------------
+        * VIEW PI AS INVOICE
+        * ---------------------------------------------------------------------*/
+        if ($action === 'invoice') {
             return view(adminTheme().'merchandising.pi.piInvoice', compact('pi'));
         }
 
-                // -------------------------------
-                // PO SELECT via AJAX
-                // -------------------------------
-        if ($action == 'po-select') {
-            $orders = OrderDetail::where('order_no', $r->order_no)->where('status', 'confirmed')->get()->makeHidden(['id']);
-            $orders = $orders->map(function ($o) {
-                unset($o->id);
-                return $o;
-            });
+        /* ---------------------------------------------------------------------
+        * AJAX: SELECT ORDERS BY BUYER
+        * ---------------------------------------------------------------------*/
+        if ($action == 'buyer-select') {
 
-            if (count($orders) < 1) {
+            $orders = OrderDetail::where('buyer_id', $r->buyer_id)
+                ->where('status', '<>', 'temp')
+                ->select('order_no')
+                ->distinct()
+                ->get();
+
+            if ($orders->isEmpty()) {
+                return response()->json(['success' => false]);
+            }
+
+            $html = '<option value="">-- Select Order Number --</option>';
+            foreach ($orders as $order) {
+                $html .= '<option value="'.$order->order_no.'">'.$order->order_no.'</option>';
+            }
+
+            return response()->json([
+                'success' => true,
+                'html'    => $html
+            ]);
+        }
+
+        /* ---------------------------------------------------------------------
+        * AJAX: SELECT ORDER ITEMS BY ORDER NO
+        * ---------------------------------------------------------------------*/
+        if ($action == 'po-select') {
+            $orders = OrderDetail::where('order_no', $r->order_no)
+                // ->where('status', 'confirmed')
+                ->get();
+
+            if ($orders->isEmpty()) {
                 return response()->json([
                     'success' => false,
-                    'html'    => '<tr><td colspan="10" class="text-center">Order not found</td></tr>'
+                    'html' => '<tr><td colspan="10" class="text-center">Order not found</td></tr>'
                 ]);
             }
 
-                    // Render items partial
             $html = view(adminTheme().'merchandising.pi.includes.items', [
                 'order' => $orders->first(),
                 'items' => $orders
             ])->render();
 
-            return response()->json(['success' => true, 'html' => $html, 'order' => $orders->first()]);
+            return response()->json([
+                'success' => true,
+                'html'    => $html,
+                'order'   => $orders->first()
+            ]);
         }
 
-                // -------------------------------
-                // UPDATE PI
-                // -------------------------------
-        if ($action == 'update') {
-
-            /* ---------------------------
-            VALIDATION
-            --------------------------- */
+        /* ---------------------------------------------------------------------
+        * UPDATE PROFORMA INVOICE
+        * ---------------------------------------------------------------------*/
+        if ($action === 'update') {
             $r->validate([
+                'buyer_id' => 'required|exists:users,id',
                 'order_no' => 'required|string',
                 'status'   => 'required|string',
                 'remarks'  => 'nullable|string',
-
-                'items'                    => 'required|array',
-                'items.*.unit_price'       => 'required|numeric|min:0',
-                'items.*.total_price'      => 'required|numeric|min:0',
-                'items.*.order_qty'        => 'required|numeric|min:0',
-            ],[
-                'order_no.required'                => 'Order number is required',
-                'items.*.unit_price.required'      => 'Unit price is required',
-                'items.*.order_qty.required'       => 'Color quantity is required',
+                'items'    => 'required|array',
+                'items.*.unit_price'  => 'required|numeric|min:0',
+                'items.*.total_price' => 'required|numeric|min:0',
+                'items.*.order_qty'   => 'required|numeric|min:0',
+                'items.*.uom'   => 'required|',
             ]);
 
-            /* ---------------------------
-            FETCH ORDER INFO
-            --------------------------- */
-            $order = OrderDetail::firstWhere('order_no', $r->order_no);
+            DB::transaction(function () use ($r, $pi) {
 
-            if (!$order) {
-                return back()->with('error', 'Order not found for this Order No.');
-            }
+                // FETCH ORDER & BUYER
+                $order = OrderDetail::where('order_no', $r->order_no)->firstOrFail();
+                $buyer = User::findOrFail($r->buyer_id);
 
-            /* ---------------------------
-            CALCULATE TOTALS
-            --------------------------- */
-            $total_qty  = collect($r->items)->sum('order_qty');
-            $total_bill = collect($r->items)->sum('total_price');
+                // CALCULATE TOTALS
+                $total_qty  = collect($r->items)->sum('order_qty');
+                $total_bill = collect($r->items)->sum('total_price');
 
-            /* ---------------------------
-            FILTER CHECKED TERMS
-            --------------------------- */
-            $terms = $r->input('terms', []);
+                // FILTER TERMS
+                $terms = collect($r->input('terms', []))
+                    ->filter(fn($t) => isset($t['checked']) && $t['checked'] === 'on')
+                    ->mapWithKeys(fn($t) => [$t['key'] => $t['value']])
+                    ->toArray();
 
-            $checkedTerms = collect($terms)
-                ->filter(fn($term) => isset($term['checked']) && $term['checked'] === 'on')
-                ->mapWithKeys(fn($term) => [$term['key'] => $term['value']])
-                ->toArray();
+                // UPDATE MAIN PI
+                $pi->update([
+                    'order_id'      => $order->id,
+                    'order_no'      => $order->order_no,
+                    'buyer_id'      => $buyer->id,
+                    'buyer_name'    => $buyer->name,
+                    'merchant_id'   => $order->merchant_id,
+                    'merchant_name' => $order->merchant_name,
+                    'remarks'       => $r->remarks,
+                    'status'        => $r->status,
+                    'order_date'    => $r->order_date ?? $pi->order_date,
+                    'pi_no'         => $r->pi_no ?? $pi->pi_no,
+                    'terms'         => json_encode($terms),
+                    'applicant'               => $r->applicant ?? null,
+                    'applicant_bank'          => $r->applicant_bank ?? null,
+                    'first_beneficiary'       => $r->first_beneficiary ?? null,
+                    'first_beneficiary_bank'  => $r->first_beneficiary_bank ?? null,
+                    'second_beneficiary'      => $r->second_beneficiary ?? null,
+                    'second_beneficiary_bank' => $r->second_beneficiary_bank ?? null,
+                    'notify_party'            => $r->notify_party ?? null,
+                    'total_qty'  => $total_qty,
+                    'total_bill' => $total_bill,
+                    'edited_by' => auth()->id(),
+                ]);
 
-            /* ---------------------------
-            UPDATE MAIN PI
-            --------------------------- */
-            $pi->order_no      = $r->order_no;
-            $pi->buyer_id      = $order->buyer_id;
-            $pi->buyer_name    = $order->buyer_name;
-            $pi->merchant_name = $order->merchant_name;
-            $pi->merchant_id   = $order->merchant_id;
-            $pi->remarks       = $r->remarks;
-            $pi->status        = $r->status;
-            $pi->editedby_id   = auth()->id();
-            $pi->pi_no         = $r->pi_no ?? $pi->pi_no;
-            $pi->created_at    = $r->created_at ?? $pi->created_at;
-            $pi->order_date    = $r->order_date ?? $pi->order_date;
-            // $pi->advising_bank = $r->advising_bank ?? $pi->advising_bank;
-            $pi->terms         = json_encode($checkedTerms);
-            // New fields
-            $pi->applicant               = $r->applicant ?? null ;
-            $pi->applicant_bank          = $r->applicant_bank ?? null;
-            $pi->first_beneficiary       = $r->first_beneficiary ?? null;
-            $pi->first_beneficiary_bank  = $r->first_beneficiary_bank ?? null;
-            $pi->second_beneficiary      = $r->second_beneficiary ?? null;
-            $pi->second_beneficiary_bank = $r->second_beneficiary_bank ?? null;
-            $pi->notify_party            = $r->notify_party ?? null;
-
-            $pi->total_qty  = $total_qty;
-            $pi->total_bill = $total_bill;
-
-            $pi->save();
-
-            /* ---------------------------
-            ITEMS UPDATE / CREATE
-            --------------------------- */
-            if ($r->has('items')) {
-                foreach ($r->items as $itemData) {
-                    // Update existing item
-                    if (!empty($itemData['id']) && ($itemData['method'] ?? '') == 'update') {
-                        $item = ProformaInvoiceItem::find($itemData['id']);
-                        if ($item) {
-                            $item->update([
-                                'unit_price'   => $itemData['unit_price'],
-                                'total_price'  => $itemData['total_price'],
-                                'order_qty'    => $itemData['order_qty'],
-                                'editedby_id'  => auth()->id(),
-                            ]);
-
-                            orderDetail::firstWhere('style_no', $item->style_no)
-                                ->update(['total_bill'=> $itemData['total_price']]);
-                        }
-                    } else {
-                        // Create new item
-                        ProformaInvoiceItem::create([
+                // UPDATE OR CREATE ITEMS
+                $keepIds = [];
+                foreach ($r->items as $row) {
+                    $item = ProformaInvoiceItem::updateOrCreate(
+                        ['id' => $row['id'] ?? null],
+                        [
                             'proforma_invoice_id' => $pi->id,
-                            'composition'         => $itemData['composition'],
-                            'fabrication'         => $itemData['fabrication'],
-                            'gsm'                 => $itemData['gsm'] ?? null,
-                            'style_no'            => $itemData['style_no'],
-                            'order_qty'           => $itemData['order_qty'],
-                            'unit_price'          => $itemData['unit_price'],
-                            'total_price'         => $itemData['total_price'],
-                            'addedby_id'          => auth()->id(),
-                        ]);
-
-                        orderDetail::firstWhere('style_no', $itemData['style_no'])
-                            ->update(['total_bill'=> $itemData['total_price']]);
-                    }
+                            'style_no'    => $row['style_no'],
+                            'item_name'   => $row['item_name'] ?? null,
+                            'color_name'  => $row['color_name'] ?? null,
+                            'composition' => $row['composition'] ?? null,
+                            'fabrication' => $row['fabrication'] ?? null,
+                            'gsm'         => $row['gsm'] ?? null,
+                            'shipment_date'=> $row['shipment_date'] ?? null,
+                            'order_qty'   => $row['order_qty'],
+                            'unit_price'  => $row['unit_price'],
+                            'total_price' => $row['total_price'],
+                            'uom' => $row['uom'],
+                            'status'      => 'active',
+                            'created_by'  => auth()->id(),
+                            'edited_by' => auth()->id(),
+                        ]
+                    );
+                    $keepIds[] = $item->id;
                 }
-            }
 
-            /* ---------------------------
-            SUCCESS
-            --------------------------- */
+                // DELETE REMOVED ITEMS
+                ProformaInvoiceItem::where('proforma_invoice_id', $pi->id)
+                    ->whereNotIn('id', $keepIds)
+                    ->delete();
+            });
+
             session()->flash('success', 'Proforma Invoice Updated Successfully');
             return redirect()->route('admin.proformaInvoiceAction', ['invoice', $pi->id]);
         }
 
-
-        if($action=='delete'){
+        /* ---------------------------------------------------------------------
+        * DELETE PROFORMA INVOICE
+        * ---------------------------------------------------------------------*/
+        if ($action === 'delete') {
             $pi->items()->delete();
             $pi->delete();
-            Session()->flash('success','Proforma Invoice Deleted Successfully');
+            session()->flash('success','Proforma Invoice Deleted Successfully');
             return redirect()->back();
         }
 
-
-                // -------------------------------
-                // LOAD EDIT PAGE
-                // -------------------------------
-
+        /* ---------------------------------------------------------------------
+        * LOAD EDIT PAGE
+        * ---------------------------------------------------------------------*/
         $piOrder = ProformaInvoice::whereNotNull('order_no')->pluck('order_no')->toArray();
 
         $orders = OrderDetail::where('status', 'confirmed')
-                    ->whereNotIn('order_no', $piOrder)
-                    ->get()
+            ->whereNotIn('order_no', $piOrder)
+            ->get()
             ->unique('order_no');
-        $items  = $pi->items;
 
-        return view(adminTheme().'merchandising.pi.edit', compact('pi', 'items', 'orders'));
+        $buyers = User::with('orderDetails')
+            ->whereHas('orderDetails')
+            ->filterByType('buyer')
+            ->whereIn('status', [0,1])
+            ->get();
+
+        $items = $pi->items;
+
+        return view(adminTheme().'merchandising.pi.edit', compact('pi','items','orders','buyers'));
     }
 
     public function manageAttribute(Request $r, $action = null, $id = null)
@@ -1268,6 +1250,450 @@ class MerchandisingController extends Controller
 
         return view(adminTheme().'merchandising.masterData.'.$view, compact('data','report'));
     }
+
+
+
+    public function booking(Request $r)
+    {
+        $bookings = Booking::orderBy('id', 'desc')
+            ->when($r->search, function($q) use ($r){
+                $search = $r->search;
+                $q->where(function($qq) use ($search){
+                    $qq->where('booking_no','LIKE',"%{$search}%")
+                        ->orWhere('buyer_name','LIKE',"%{$search}%")
+                        ->orWhere('style_no','LIKE',"%{$search}%")
+                        ->orWhere('merchant_name','LIKE',"%{$search}%");
+                });
+            })
+            ->when($r->startDate || $r->endDate, function($q) use ($r){
+                $from = $r->startDate ?: now()->format('Y-m-d');
+                $to   = $r->endDate   ?: now()->format('Y-m-d');
+                $q->whereBetween('booking_date', [$from,$to]);
+            })
+            ->paginate(25)
+            ->appends($r->all());
+
+        return view(adminTheme().'merchandising.booking.index', compact('bookings'));
+    }
+
+    public function bookingAction(Request $r, $action, $id = null)
+    {
+        /* -----------------------------------------------------------------
+        * CREATE TEMP BOOKING
+        * -----------------------------------------------------------------*/
+        if($action === 'create'){
+            $buyers = User::filterByType('buyer')->whereIn('status',[0,1])->get();
+            $merchandisers = User::filterByType('merchandiser')->whereIn('status',[0,1])->get();
+            $pis =ProformaInvoice::get();
+            return view(adminTheme().'merchandising.booking.edit', compact('buyers','merchandisers', 'pis'));
+            $lastBooking = Booking::orderBy('id','desc')->first();
+
+            $booking = Booking::create([
+                'status'        => 'temp',
+                'created_by'    => Auth::id(),
+                'buyer_id'      => $lastBooking?->buyer_id,
+                'buyer_name'    => $lastBooking?->buyer_name,
+                'merchant_id'   => $lastBooking?->merchant_id,
+                'merchant_name' => $lastBooking?->merchant_name,
+                'company_name'  => $lastBooking?->company_name,
+            ]);
+
+            BookingItem::create(['booking_id' => $booking->id]);
+
+            return redirect()->route('admin.booking.action', ['edit', $booking->id]);
+        }
+
+        /* -----------------------------------------------------------------
+        * FIND BOOKING
+        * -----------------------------------------------------------------*/
+        $booking = Booking::find($id);
+        if(!$booking){
+            session()->flash('error','Booking Not Found');
+            return redirect()->route('admin.booking.index');
+        }
+
+        // LOCKED BOOKINGS ARE READ ONLY
+        if(!in_array($booking->status,['temp','pending']) && in_array($action,['edit','delete','update','update-items'])){
+            session()->flash('error','Booking is confirmed & cannot be edited.');
+            return redirect()->route('admin.booking.index');
+        }
+
+        /* -----------------------------------------------------------------
+        * UPDATE HEADER
+        * -----------------------------------------------------------------*/
+        if($action === 'update-head'){
+            if(!$r->field) return response()->json(['success'=>false,'message'=>'Invalid Request']);
+            $field = $r->field;
+            $value = $r->value;
+
+            if($field === 'buyer'){
+                if($buyer = User::find($value)){
+                    $booking->buyer_id = $buyer->id;
+                    $booking->buyer_name = $buyer->name;
+                }
+            } elseif($field === 'merchant'){
+                if($merchant = User::find($value)){
+                    $booking->merchant_id = $merchant->id;
+                    $booking->merchant_name = $merchant->name;
+                }
+            } else {
+                $booking->$field = $value;
+            }
+
+            $booking->save();
+            return response()->json(['success'=>true]);
+        }
+
+        /* -----------------------------------------------------------------
+        * ADD ITEM
+        * -----------------------------------------------------------------*/
+        if($action === 'add-item'){
+            $item = new BookingItem();
+            $item->booking_id = $booking->id;
+            $item->style_no   = $booking->style_no;
+            $item->booking_no = $booking->booking_no;
+            $item->save();
+
+            return response()->json(['success'=>true,'id'=>$item->id]);
+        }
+
+        /* -----------------------------------------------------------------
+        * UPDATE ITEMS & MAIN BOOKING
+        * -----------------------------------------------------------------*/
+        if($action === 'update'){
+            $r->validate([
+                'buyer'      => 'required|exists:users,id',
+                'merchant'   => 'required|exists:users,id',
+                'booking_no' => 'required|string|max:255',
+                'style_no'   => 'required|string|max:255',
+                'booking_date'=> 'required|date',
+                'items.*.color_name' => 'nullable|string|max:100',
+                'items.*.qty'        => 'nullable|numeric|min:0',
+            ]);
+
+            DB::beginTransaction();
+            try{
+                $buyer = User::find($r->buyer);
+                $merchant = User::find($r->merchant);
+
+                // Update booking header
+                $booking->update([
+                    'buyer_id'      => $buyer->id,
+                    'buyer_name'    => $buyer->name,
+                    'merchant_id'   => $merchant->id,
+                    'merchant_name' => $merchant->name,
+                    'booking_no'    => $r->booking_no,
+                    'style_no'      => $r->style_no,
+                    'booking_date'  => $r->booking_date,
+                    'composition'   => $r->composition,
+                    'status'        => $r->status,
+                ]);
+
+                $existingIds = [];
+                if($r->items){
+                    foreach($r->items as $itemId => $row){
+                        if(is_numeric($itemId)){
+                            $item = BookingItem::where('id',$itemId)
+                                ->where('booking_id',$booking->id)
+                                ->first();
+                            if($item){
+                                $item->update([
+                                    'color_name' => $row['color_name'] ?? null,
+                                    'qty'        => $row['qty'] ?? 0,
+                                    'style_no'   => $booking->style_no,
+                                ]);
+                                $existingIds[] = $item->id;
+                            }
+                        } else {
+                            $item = $booking->items()->create([
+                                'color_name' => $row['color_name'] ?? null,
+                                'qty'        => $row['qty'] ?? 0,
+                                'style_no'   => $booking->style_no,
+                            ]);
+                            $existingIds[] = $item->id;
+                        }
+                    }
+                }
+
+                // Delete removed items
+                if(count($existingIds)){
+                    BookingItem::where('booking_id',$booking->id)
+                        ->whereNotIn('id',$existingIds)
+                        ->delete();
+                }
+
+                DB::commit();
+            } catch(\Exception $e){
+                DB::rollback();
+                session()->flash('error','Something went wrong: '.$e->getMessage());
+                return back();
+            }
+
+            session()->flash('success','Booking & Items Updated Successfully');
+            return redirect()->route('admin.booking.index');
+        }
+
+        /* -----------------------------------------------------------------
+        * DELETE BOOKING
+        * -----------------------------------------------------------------*/
+        if($action === 'delete'){
+            $booking->items()->delete();
+            $booking->delete();
+            session()->flash('success','Booking Deleted Successfully');
+            return back();
+        }
+
+        /* -----------------------------------------------------------------
+        * LOAD EDIT PAGE
+        * -----------------------------------------------------------------*/
+        $items = $booking->items;
+        $buyers = User::where('buyer',true)->whereIn('status',[0,1])->get();
+        $merchandisers = User::where('merchandiser',true)->whereIn('status',[0,1])->get();
+
+        return view(adminTheme().'merchandising.booking.edit', compact('booking','items','buyers','merchandisers'));
+    }
+
+
+
+        public function budgetActionx(Request $r, $action, $id = null)
+        {
+            /* -----------------------------------------------------------------
+            * CREATE TEMP BOOKING
+            * -----------------------------------------------------------------*/
+            if($action === 'create'){
+                $buyers = User::filterByType('buyer')->whereIn('status',[0,1])->get();
+                $merchandisers = User::filterByType('merchandiser')->whereIn('status',[0,1])->get();
+                $pis =ProformaInvoice::get();
+                return view(adminTheme().'merchandising.budget.edit', compact('buyers','merchandisers', 'pis'));
+            }
+        }
+
+
+
+
+        public function budgetAction(Request $r, $action, $id = null)
+        {
+            /* =========================================================
+            | CREATE (LOAD CREATE PAGE)
+            ========================================================= */
+            if ($action === 'create') {
+
+                $orders = OrderDetail::whereIn('status',[0,1])->get();
+                $pis    = ProformaInvoice::whereIn('status',[0,1])->get();
+                return view(adminTheme().'merchandising.budget.edit', compact('orders','pis'));
+            }
+
+            /* =========================================================
+            | FIND BUDGET
+            ========================================================= */
+            if ($id) {
+                $budget = Budget::find($id);
+                if (!$budget) {
+                    session()->flash('error','Budget Not Found');
+                    return redirect()->route('admin.budget.index');
+                }
+
+                // locked protection
+                if (!in_array($budget->status,['draft','revised']) &&
+                    in_array($action,['edit','update','delete'])) {
+                    session()->flash('error','Approved budget cannot be modified');
+                    return redirect()->route('admin.budget.index');
+                }
+            }
+
+            /* =========================================================
+            | GET STYLE (WHEN PI SELECTED)
+            ========================================================= */
+            if ($action === 'get-style') {
+
+                $pi = ProformaInvoice::find($r->pi_id);
+                if (!$pi) return response()->json([]);
+
+                $styles = ProformaInvoiceItem::where('proforma_invoice_id',$pi->id)
+                            ->pluck('style_no')
+                            ->unique()
+                            ->values();
+
+                return response()->json($styles);
+            }
+
+            /* =========================================================
+            | GET DATA (WHEN STYLE SELECTED)
+            ========================================================= */
+            if ($action === 'get-data') {
+
+                $piId  = $r->pi_id;
+                $style = $r->style_no;
+
+                $items = ProformaInvoiceItem::where('proforma_invoice_id',$piId)
+                            ->where('style_no',$style)
+                            ->get();
+
+                return response()->json([
+                    'items' => $items
+                ]);
+            }
+
+            /* =========================================================
+            | STORE (SAVE NEW BUDGET)
+            ========================================================= */
+            if ($action === 'store') {
+
+                $r->validate([
+                    'order_id' => 'required|exists:order_details,id',
+                    'style_no' => 'required|string|max:255'
+                ]);
+
+                DB::beginTransaction();
+                try {
+
+                    $order = OrderDetail::find($r->order_id);
+
+                    $budget = Budget::create([
+                        'order_id'        => $order->id,
+                        'order_no'        => $order->order_no,
+                        'style_no'        => $r->style_no,
+                        'buyer_id'        => $order->buyer_id,
+                        'buyer_name'      => $order->buyer_name,
+                        'merchant_id'     => $order->merchant_id,
+                        'merchant_name'   => $order->merchant_name,
+                        'company_name'    => $order->company_name,
+
+                        'total_order_qty' => $order->total_qty,
+                        'shipment_date'   => $order->shipment_date,
+
+                        'pre_cost_date'   => $r->pre_cost_date,
+                        'post_cost_date'  => $r->post_cost_date,
+
+                        'status'          => 'draft',
+                        'created_by'      => Auth::id(),
+                    ]);
+
+                    /* ---------- YARNS ---------- */
+                    if ($r->yarn_desc) {
+                        foreach ($r->yarn_desc['fab_desc'] as $i => $v) {
+                            BudgetYarn::create([
+                                'budget_id'       => $budget->id,
+                                'fab_desc'        => $v,
+                                'supplier_name'   => $r->yarn_desc['supplier_name'][$i] ?? null,
+                                'yarn_count'      => $r->yarn_desc['yarn_count'][$i] ?? null,
+                                'unit_price'      => $r->yarn_desc['unit_price'][$i] ?? 0,
+                                'consumption'     => $r->yarn_desc['consumption'][$i] ?? 0,
+                                'wastage_percent' => $r->yarn_desc['w'][$i] ?? 0,
+                                'total_qty'       => $r->yarn_desc['total_qty'][$i] ?? 0,
+                                'total_cost'      => $r->yarn_desc['total_cost'][$i] ?? 0,
+                                'pre_cost_percent'=> $r->yarn_desc['pre_cost'][$i] ?? 0,
+                                'created_by'      => Auth::id(),
+                            ]);
+                        }
+                    }
+
+                    /* ---------- KNITTING ---------- */
+                    if ($r->knitting_desc) {
+                        foreach ($r->knitting_desc['fab_desc'] as $i => $v) {
+                            BudgetKnitting::create([
+                                'budget_id'       => $budget->id,
+                                'fab_desc'        => $v,
+                                'supplier_name'   => $r->knitting_desc['supplier_name'][$i] ?? null,
+                                'yarn_count'      => $r->knitting_desc['yarn_count'][$i] ?? null,
+                                'unit_price'      => $r->knitting_desc['unit_price'][$i] ?? 0,
+                                'consumption'     => $r->knitting_desc['consumption'][$i] ?? 0,
+                                'wastage_percent' => $r->knitting_desc['w'][$i] ?? 0,
+                                'total_qty'       => $r->knitting_desc['total_qty'][$i] ?? 0,
+                                'total_cost'      => $r->knitting_desc['total_cost'][$i] ?? 0,
+                                'pre_cost_percent'=> $r->knitting_desc['pre_cost'][$i] ?? 0,
+                                'created_by'      => Auth::id(),
+                            ]);
+                        }
+                    }
+
+                    /* ---------- ACCESSORIES ---------- */
+                    if ($r->accessories_desc) {
+                        foreach ($r->accessories_desc['accessories_des'] as $i => $v) {
+                            BudgetAccessory::create([
+                                'budget_id'       => $budget->id,
+                                'accessories_desc'=> $v,
+                                'supplier_name'   => $r->accessories_desc['supplier_name'][$i] ?? null,
+                                'unit_price'      => $r->accessories_desc['unit_price'][$i] ?? 0,
+                                'unit_number'     => $r->accessories_desc['unit_number'][$i] ?? 0,
+                                'consumption'     => $r->accessories_desc['consumption'][$i] ?? 0,
+                                'wastage_percent' => $r->accessories_desc['w'][$i] ?? 0,
+                                'total_qty'       => $r->accessories_desc['total_qty'][$i] ?? 0,
+                                'total_cost'      => $r->accessories_desc['total_cost'][$i] ?? 0,
+                                'pre_cost_percent'=> $r->accessories_desc['pre_cost'][$i] ?? 0,
+                                'created_by'      => Auth::id(),
+                            ]);
+                        }
+                    }
+
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollback();
+                    session()->flash('error','Error: '.$e->getMessage());
+                    return back();
+                }
+
+                session()->flash('success','Budget Created Successfully');
+                return redirect()->route('admin.budget.index');
+            }
+
+            /* =========================================================
+            | UPDATE
+            ========================================================= */
+            if ($action === 'update') {
+
+                DB::beginTransaction();
+                try {
+
+                    $budget->update([
+                        'pre_cost_date'  => $r->pre_cost_date,
+                        'post_cost_date' => $r->post_cost_date,
+                        'remarks'        => $r->remarks,
+                        'status'         => $r->status,
+                        'updated_by'     => Auth::id(),
+                    ]);
+
+                    // Simple strategy: delete & reinsert
+                    $budget->yarns()->delete();
+                    $budget->knittings()->delete();
+                    $budget->accessories()->delete();
+
+                    $r->merge(['_store' => true]);
+                    $this->budgetAction($r,'store');
+
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollback();
+                    session()->flash('error',$e->getMessage());
+                    return back();
+                }
+
+                session()->flash('success','Budget Updated Successfully');
+                return redirect()->route('admin.budget.index');
+            }
+
+            /* =========================================================
+            | DELETE
+            ========================================================= */
+            if ($action === 'delete') {
+
+                $budget->update([
+                    'deleted_by' => Auth::id()
+                ]);
+
+                $budget->delete();
+
+                session()->flash('success','Budget Deleted Successfully');
+                return back();
+            }
+
+            /* =========================================================
+            | EDIT PAGE
+            ========================================================= */
+            $budget->load(['yarns','knittings','accessories']);
+
+            return view(adminTheme().'merchandising.budget.edit', compact('budget'));
+        }
 
 
 

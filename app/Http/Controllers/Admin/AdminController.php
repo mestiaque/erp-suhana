@@ -94,7 +94,7 @@ class AdminController extends Controller
         ];
 
         $userActivity = $this->getUserActivityReport(new Request());
-        return view('Admin.dashboard',compact('reports', 'userActivity'));
+        return view('admin.dashboard',compact('reports', 'userActivity'));
     }
 
     public function getUserActivityReport(Request $request)
@@ -3510,6 +3510,13 @@ class AdminController extends Controller
                     Expense::where('status', '<>', 'temp')
                         ->whereMonth('created_at', Carbon::now()->month)
                         ->whereYear('created_at', Carbon::now()->year)
+                        ->sum('amount'),
+                    2
+                ),
+                'filtered_expenses' => numberFormat(
+                    Expense::where('status', '<>', 'temp')
+                        ->whereDate('created_at', '>=', $this->from)
+                        ->whereDate('created_at', '<=', $this->to)
                         ->sum('amount'),
                     2
                 ),
@@ -10261,22 +10268,31 @@ class AdminController extends Controller
                 'email.email'     => 'Enter valid email.'
             ]);
 
-            $query = User::where('mobile',$r->mobile);
-            if(!empty($r->email)) $query->orWhere('email',$r->email);
-            $user = $query->first();
+            $existsUser = User::where(function ($q) use ($r) {
 
-            $exUser = User::where('mobile',$r->mobile)->first();
-            $trashedUser = User::withTrashed()->where('mobile',$r->mobile)->first();
-            if($trashedUser && !$exUser){
-                Session()->flash('info','Mobile associated with soft-deleted account.');
+                    if (!empty($r->email)) {
+                        $q->where('email', $r->email);
+                    }
+
+                    if (!empty($r->mobile)) {
+                        $q->orWhere('mobile', $r->mobile);
+                    }
+
+                })->first();
+
+            if ($existsUser) {
+                if($r->has('api')){
+                    return response()->json([
+                        'success'          => false,
+                        'msg'              => "his email or mobile alrady used.",
+                        'merchant_created' => false,
+                    ]);
+                }
+                Session()->flash('error','This email or mobile alrady used.');
                 return redirect()->back();
             }
-            if($exUser){
-                Session()->flash('info','Mobile already in use.');
-                return redirect()->back();
-            }
 
-            if(!$user){
+            if(!$existsUser){
                 $password = Str::random(8);
                 $user                = new User();
                 $user->name          = $r->name;
@@ -10291,6 +10307,16 @@ class AdminController extends Controller
                 $user->addedby_id = Auth::id();
                 $user->addedby_at = Carbon::now();
                 $user->save();
+            }
+
+            if($r->has('api')){
+                return response()->json([
+                    'success'          => true,
+                    'msg'              => "Merchant registered successfully",
+                    'merchant_created' => true,
+                    'id'               => $user->id,
+                    'name'             => $user->name,
+                ]);
             }
 
             Session()->flash('success','Merchandiser created successfully!');
@@ -10862,7 +10888,6 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
-            // Otherwise, create new buyer
             $password = Str::random(8);
             $user = new User();
             $user->name          = $r->name;
@@ -10874,12 +10899,11 @@ class AdminController extends Controller
             $user->password_show = $password;
             $user->password      = Hash::make($password);
 
-            // Set buyer flags properly
-            $user->setTypes('buyer'); // if you already have setTypes method
+            $user->setTypes('customer'); // if you already have setTypes method
             $user->save();
 
-            Session()->flash('success', 'Buyer registered successfully!');
-            return redirect()->route('admin.buyersAction', ['view', $user->id]);
+            Session()->flash('success', 'Employee registered successfully!');
+            return redirect()->route('admin.usersCustomerAction', ['view', $user->id]);
         }
 
 
@@ -10992,8 +11016,14 @@ class AdminController extends Controller
         // Return view
         $startDate = $r->startDate ? Carbon::parse($r->startDate) : Carbon::now()->startOfMonth();
         $endDate = $r->endDate ? Carbon::parse($r->endDate) : Carbon::now();
+        $designations=Attribute::latest()->where('type',2)->where('status','<>','temp')->get();
+        $departments=Attribute::latest()->where('type',3)->where('status','<>','temp')->get();
+        $roles = Permission::where('status','active')->get();
 
-        return view(adminTheme() . 'users.customers.viewUser', compact('user', 'action', 'startDate', 'endDate'));
+        if( $action == 'view' ){
+            return view(adminTheme() . 'users.customers.viewUser', compact('user', 'action', 'startDate', 'endDate', 'designations','departments', 'roles'));
+        }
+        return view(adminTheme() . 'users.customers.editUser', compact('user', 'action', 'startDate', 'endDate', 'designations','departments', 'roles'));
     }
 
 

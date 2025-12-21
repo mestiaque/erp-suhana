@@ -8,20 +8,27 @@ use App\Traits\ActivityLoggable;
 
 class OrderDetail extends Model
 {
-    use HasFactory;
-    use ActivityLoggable;
+    use HasFactory, ActivityLoggable;
 
     protected $guarded = [];
 
     protected $casts = [
-        'created_date' => 'date',
+        'shipment_date' => 'date',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
     ];
 
+    // -----------------------------
     // Relationships
-
-    public function user()
+    // -----------------------------
+    public function createdBy()
     {
-        return $this->belongsTo(User::class, 'addedby_id');
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function editedBy()
+    {
+        return $this->belongsTo(User::class, 'editedby_id');
     }
 
     public function buyer()
@@ -39,11 +46,11 @@ class OrderDetail extends Model
         return $this->hasMany(OrderDetailItem::class, 'order_detail_id');
     }
 
+ 
+
+    // Optional: fetch items directly (same as items())
     public function getItems()
     {
-        return OrderDetailItem::where('order_detail_id', $this->id)->get();
+        return $this->items()->get();
     }
-
-
-
 }

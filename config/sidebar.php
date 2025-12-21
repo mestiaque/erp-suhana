@@ -121,6 +121,13 @@ return [
                     'permission' => 'proforma_invoice'
                 ],
                 [
+                    'title'      => 'Budget',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/budget/create',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'proforma_invoice'
+                ],
+                [
                     'title'       => 'Reference Data',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'icon_color'  => 'text-warning',
@@ -169,7 +176,7 @@ return [
                     'permission'  => 'production_planning'
                 ],
                 [
-                    'title'       => 'Procurement',
+                    'title'       => 'Procurement (Booking)',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'icon_color'  => 'text-warning',
                     'permission'  => '',
@@ -189,11 +196,40 @@ return [
                             'permission'  => 'knitting_booking'
                         ],
                         [
-                            'title'       => 'Dying',
+                            'title'       => 'Dyeing',
                             'icon'        => 'fa-solid fa-arrow-right',
-                            'route'       => '/admin/procurement/dying-booking',
+                            'route'       => '/admin/procurement/dyeing-booking',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'dying_booking'
+                            'permission'  => 'dyeing_booking'
+                        ],
+                    ]
+                ],
+                [
+                    'title'       => 'Procurement (Recv.)',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => '',
+                    'children'    => [
+                        [
+                            'title'       => 'Yarn',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/yarn-receive',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'yarn_booking'
+                        ],
+                        [
+                            'title'       => 'knitting',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/knitting-receive',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'knitting_booking'
+                        ],
+                        [
+                            'title'       => 'Dyeing',
+                            'icon'        => 'fa-solid fa-arrow-right',
+                            'route'       => '/admin/procurement/dyeing-receive',
+                            'icon_color'  => 'text-warning',
+                            'permission'  => 'dyeing_booking'
                         ],
                     ]
                 ],

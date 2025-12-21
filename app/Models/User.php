@@ -127,6 +127,11 @@ class User extends Authenticatable
         return $this->hasMany(Transaction::class,'user_id')->where('type',2);
     }
 
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'buyer_id', 'id');
+    }
+
     public function salaries(){
         return $this->hasMany(Salary::class,'user_id');
     }
