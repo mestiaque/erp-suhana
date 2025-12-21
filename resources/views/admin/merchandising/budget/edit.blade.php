@@ -15,33 +15,6 @@
         </ol>
     </div>
 
-    @php
-        // Demo data for testing
-        $orders = [
-            (object)['id'=>1,'display_name'=>'0000001','payment_mode'=>'LC','party_name'=>'Customer A','party_type'=>'Retail','styles'=>['All','STYLE001']],
-            (object)['id'=>2,'display_name'=>'0000002','payment_mode'=>'TT','party_name'=>'Customer B','party_type'=>'Wholesale','styles'=>['All','T','4']],
-        ];
-
-        $styles = [
-            (object)['name'=>'All'],
-            (object)['name'=>'STYLE001'],
-        ];
-
-        $budget = $budget ?? null;
-
-        $demoYarns = [
-            (object)['fab_desc'=>'Cotton', 'supplier_name'=>'Supplier A', 'yarn_count'=>'30s', 'unit_price'=>10, 'consumption'=>2, 'w'=>5, 'total_qty'=>20, 'total_cost'=>200, 'pre_cost'=>180],
-        ];
-
-        $demoKnitting = [
-            (object)['fab_desc'=>'Knitting Fabric', 'supplier_name'=>'Supplier K', 'yarn_count'=>'NA', 'unit_price'=>5, 'consumption'=>1, 'w'=>2, 'total_qty'=>50, 'total_cost'=>250, 'pre_cost'=>230],
-        ];
-
-        $demoAccessories = [
-            (object)['accessories_des'=>'Button', 'supplier_name'=>'Acc Supplier', 'unit_price'=>0.5, 'unit_number'=>100, 'consumption'=>1, 'w'=>0, 'total_qty'=>100, 'total_cost'=>50, 'pre_cost'=>45],
-        ];
-    @endphp
-
     <div class="card mb-30">
         <div class="card-body">
             @include(adminTheme().'alerts')
@@ -50,108 +23,146 @@
                 @csrf
 
                 {{-- Header: Order Info --}}
-                <div class="row mb-4">
-                    <div class="col-lg-4">
-                        <label>Select Order</label>
-                        <select name="order_id" id="orderSelect" class="form-control form-control-sm mb-3">
-                            <option value="">Select an Order</option>
-                            @foreach($orders as $order)
-                                <option value="{{ $order->id }}"
-                                    data-payment="{{ $order->payment_mode }}"
-                                    data-party="{{ $order->party_name }}"
-                                    data-type="{{ $order->party_type }}"
-                                    data-styles="{{ implode(',', $order->styles) }}">
-                                    {{ $order->display_name }}
-                                </option>
-                            @endforeach
-                        </select>
+                {{-- ===================== COST SHEET HEADER TABLE ===================== --}}
+                <div class="card mb-4">
+                    <div class="card-body">
 
-                        <table class="table table-bordered table-sm mt-4" style="margin-top: 3rem !important">
+                        <h4 class="text-center fw-bold mb-3">COST SHEET</h4>
+
+                        <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle headerTable">
                             <tbody>
-                                <tr><td style="vertical-align: middle; font-size:14px">Pre-costing Date</td><td class="p-0"><input type="date" name="pre_cost_date" class="form-control form-control-sm"></td></tr>
-                                <tr><td style="vertical-align: middle; font-size:14px">Post-costing Date</td><td class="p-0"><input type="date" name="post_cost_date" class="form-control form-control-sm"></td></tr>
+
+                            <tr>
+                                <th width="10%">BUYER</th>
+                                <td width="30%">
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+
+                                <th width="10%">P.I. No.</th>
+                                <td width="30%">
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+                                <th width="10%" class="text-center">GMTS PICTURE</th>
+                            </tr>
+
+                            <tr>
+                                <th>TOTAL STYLES</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+
+                                <th>TOTAL POs</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+                                <td width="10%" rowspan="5">
+                                    {{-- <img src="" alt="Attactment"> --}}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>ITEM</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+
+                                <th></th>
+                                <td>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>L/C NO.</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm">
+                                </td>
+
+                                <th>L/C DT.</th>
+                                <td>
+                                    <input type="date" class="form-control form-control-sm">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>L/C VALUE</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+
+                                <th>SHIP DATE</th>
+                                <td>
+                                    <input type="date" class="form-control form-control-sm" value="">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>P.I. VALUE</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+                                <th>TOTAL QTY (PCS)</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" value="">
+                                </td>
+                            </tr>
+
                             </tbody>
                         </table>
-                    </div>
-                    <div class="col-lg-4">
+                        </div>
 
-                    </div>
-                    <div class="col-lg-4 text-center">
-                        <table class="table table-sm table-bordered small-table clr-black form-table-sm mini-info-table">
-                            <tbody>
-                                <tr>
-                                    <td class="">Payment Mode</td>
-                                    <td  class="p-0"><input type="text" readonly="" id="payment" class="form-control form-control-sm" placeholder="Payment Mode"></td>
-                                </tr>
-                                <tr>
-                                    <td  class="">Party Name</td>
-                                    <td class="p-0"><input type="text" readonly="" id="party_name" class="form-control form-control-sm" placeholder="Party Name"></td>
-                                </tr>
-                                <tr>
-                                    <td  class="">Type</td>
-                                    <td class="p-0"><input type="text" readonly="" id="party_type" class="form-control form-control-sm" placeholder="Party Type"></td>
-                                </tr>
-                                <tr class="all-hide">
-                                    <td  class="">Color</td>
-                                    <td class="p-0"><input type="text" name="order_info[color]" readonly="" id="color" class="form-control form-control-sm clear" placeholder="Color"></td>
-                                </tr>
-                                <tr class="all-hide">
-                                    <td  class="">Shipment Date</td>
-                                    <td class="p-0"><input type="text" name="order_info[shipment_date]" readonly="" id="shipment_date" class="form-control form-control-sm datepicker clear" placeholder="Shipment Date"></td>
-                                </tr>
-                                <tr>
-                                    <td  class="">Quantity</td>
-                                    <td class="p-0"><input type="text" name="order_info[qty]" readonly="" id="quantity" value="0" class="form-control form-control-sm clear" placeholder="Quantity"></td>
-                                </tr>
-                                <tr>
-                                    <td  class="">Unit Price</td>
-                                    <td class="p-0"><input type="text" name="order_info[unit_price]" readonly="" value="0" id="unit_price" class="form-control form-control-sm clear" placeholder="Unit Price"></td>
-                                </tr>
-                                <tr>
-                                    <td  class="">LC Value</td>
-                                    <td class="p-0"><input type="text" name="order_info[lc]" readonly="" value="0" id="lc" class="form-control form-control-sm clear"></td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
+                {{-- ===================== END HEADER TABLE ===================== --}}
 
-                {{-- Fabric/Yarn Table --}}
+                {{-- /Yarn Table --}}
                 <div class="row mb-4">
                     <div class="col-lg-12">
-                        <h5>Yarn / Fabric</h5>
+                        <h5>Yarn</h5>
                         <div class="table-responsive">
                             <table class="table table-bordered table-sm" id="yarnTable">
                                 <thead>
                                     <tr>
-                                        <th>Description</th><th>Supplier</th><th>Yarn Count</th>
-                                        <th>Unit Price($)</th><th>Consumption(Kg/Dz)</th><th>Wastage%</th>
-                                        <th>Total Qnty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr class="yarnRow">
-                                        <td><input type="text" name="yarn_desc[fab_desc][]" class="form-control form-control-sm"></td>
-                                        <td><input type="text" name="yarn_desc[supplier_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="text" name="yarn_desc[yarn_count][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="yarn_desc[description][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="yarn_desc[supplier][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="yarn_desc[qty][]" class="form-control form-control-sm calc"></td>
                                         <td><input type="number" step="any" name="yarn_desc[unit_price][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="yarn_desc[consumption][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="yarn_desc[w][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="yarn_desc[total_qty][]" class="form-control form-control-sm total_qty"></td>
-                                        <td><input type="number" step="any" name="yarn_desc[total_cost][]" class="form-control form-control-sm total_cost" readonly></td>
-                                        <td><input type="number" step="any" name="yarn_desc[pre_cost][]" class="form-control form-control-sm pre_cost" readonly></td>
-                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow">-</button></td>
+                                        <td><input type="number" step="any" name="yarn_desc[ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="yarn_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="yarn_desc[percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="yarn_desc[company_name][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="yarn_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-danger removeRow">-</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="10"><button type="button" class="btn btn-sm btn-primary" id="addYarnRow">+ Add Yarn</button></td>
+                                        <td colspan="10">
+                                            <button type="button" class="btn btn-sm btn-primary" id="addYarnRow">+ Add Yarn</button>
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
                 </div>
+
 
                 {{-- Knitting Table (Same structure) --}}
                 <div class="row mb-4">
@@ -161,28 +172,39 @@
                             <table class="table table-bordered table-sm" id="knittingTable">
                                 <thead>
                                     <tr>
-                                        <th>Description</th><th>Supplier</th><th>Yarn Count</th>
-                                        <th>Unit Price($)</th><th>Consumption(Kg/Dz)</th><th>Wastage%</th>
-                                        <th>Total Qnty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr class="knitRow">
-                                        <td><input type="text" name="knitting_desc[fab_desc][]" class="form-control form-control-sm"></td>
-                                        <td><input type="text" name="knitting_desc[supplier_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="text" name="knitting_desc[yarn_count][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="knitting_desc[description][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="knitting_desc[supplier][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="knitting_desc[qty][]" class="form-control form-control-sm calc"></td>
                                         <td><input type="number" step="any" name="knitting_desc[unit_price][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="knitting_desc[consumption][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="knitting_desc[w][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="knitting_desc[total_qty][]" class="form-control form-control-sm total_qty"></td>
-                                        <td><input type="number" step="any" name="knitting_desc[total_cost][]" class="form-control form-control-sm total_cost" readonly></td>
-                                        <td><input type="number" step="any" name="knitting_desc[pre_cost][]" class="form-control form-control-sm pre_cost" readonly></td>
-                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow">-</button></td>
+                                        <td><input type="number" step="any" name="knitting_desc[ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="knitting_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="knitting_desc[percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="knitting_desc[company_name][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="knitting_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-danger removeRow">-</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="10"><button type="button" class="btn btn-sm btn-primary" id="addKnitRow">+ Add Knitting</button></td>
+                                        <td colspan="10">
+                                            <button type="button" class="btn btn-sm btn-primary" id="addKnitRow">+ Add Knitting</button>
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -190,7 +212,98 @@
                     </div>
                 </div>
 
-                {{-- Accessories Table --}}
+                {{-- dyeing Table (Same structure) --}}
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <h5>Dyeing</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="dyeingTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="dyeingRow">
+                                        <td>
+                                            <input type="text"
+                                                name="dyeing_desc[description][]"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="text"
+                                                name="dyeing_desc[supplier][]"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any"
+                                                name="dyeing_desc[qty][]"
+                                                class="form-control form-control-sm calc">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any"
+                                                name="dyeing_desc[unit_price][]"
+                                                class="form-control form-control-sm calc">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any"
+                                                name="dyeing_desc[ttl_usd][]"
+                                                class="form-control form-control-sm ttl_usd"
+                                                readonly>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any"
+                                                name="dyeing_desc[item_total][]"
+                                                class="form-control form-control-sm item_total"
+                                                readonly>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any"
+                                                name="dyeing_desc[percent][]"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="text"
+                                                name="dyeing_desc[company_name][]"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="any"
+                                                name="dyeing_desc[payment_value][]"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger removeRow">-</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="10">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary"
+                                                    id="addDyeingRow">
+                                                + Add Dyeing
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- accessoris Table (Same structure) --}}
                 <div class="row mb-4">
                     <div class="col-lg-12">
                         <h5>Accessories</h5>
@@ -198,28 +311,107 @@
                             <table class="table table-bordered table-sm" id="accessoriesTable">
                                 <thead>
                                     <tr>
-                                        <th>Description</th><th>Supplier</th><th>Unit Price($)</th>
-                                        <th>Unit(In Number)</th><th>Consumption(Pc)</th><th>Wastage%</th>
-                                        <th>Total Qnty</th><th>Total Cost</th><th>Pre-Cost%</th><th>Action</th>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="accRow">
-                                        <td><input type="text" name="accessories_desc[accessories_des][]" class="form-control form-control-sm"></td>
-                                        <td><input type="text" name="accessories_desc[supplier_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="number" step="any" name="accessories_desc[unit_price][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="accessories_desc[unit_number][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="accessories_desc[consumption][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="accessories_desc[w][]" class="form-control form-control-sm calc"></td>
-                                        <td><input type="number" step="any" name="accessories_desc[total_qty][]" class="form-control form-control-sm total_qty"></td>
-                                        <td><input type="number" step="any" name="accessories_desc[total_cost][]" class="form-control form-control-sm total_cost" readonly></td>
-                                        <td><input type="number" step="any" name="accessories_desc[pre_cost][]" class="form-control form-control-sm pre_cost" readonly></td>
-                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow">-</button></td>
-                                    </tr>
+
+                                    {{-- Default Accessories --}}
+                                    @php
+                                        $accessories = [
+                                            'BENGAL TAIMS',
+                                            'Main Label',
+                                            'Size Label',
+                                            'Care Label',
+                                            'Hangtag & Price Tag',
+                                            'Sew/Thread',
+                                            'Poly 8 Pcs/Bilster',
+                                            'Woven Tap',
+                                            'Woven Tap',
+                                            'Woven Tap',
+                                            'Woven Tap',
+                                            'Woven Tap',
+                                            '7PLY CTN 80Pcs',
+                                            'Gum/Others',
+                                        ];
+                                    @endphp
+
+                                    @foreach($accessories as $item)
+                                        <tr class="accessoryRow">
+                                            <td>
+                                                <input type="text"
+                                                    name="accessories_desc[description][]"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ $item }}">
+                                            </td>
+                                            <td>
+                                                <input type="text"
+                                                    name="accessories_desc[supplier][]"
+                                                    class="form-control form-control-sm">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any"
+                                                    name="accessories_desc[qty][]"
+                                                    class="form-control form-control-sm calc">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any"
+                                                    name="accessories_desc[unit_price][]"
+                                                    class="form-control form-control-sm calc">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any"
+                                                    name="accessories_desc[ttl_usd][]"
+                                                    class="form-control form-control-sm ttl_usd"
+                                                    readonly>
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any"
+                                                    name="accessories_desc[item_total][]"
+                                                    class="form-control form-control-sm item_total"
+                                                    readonly>
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any"
+                                                    name="accessories_desc[percent][]"
+                                                    class="form-control form-control-sm">
+                                            </td>
+                                            <td>
+                                                <input type="text"
+                                                    name="accessories_desc[company_name][]"
+                                                    class="form-control form-control-sm">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any"
+                                                    name="accessories_desc[payment_value][]"
+                                                    class="form-control form-control-sm">
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger removeRow">-</button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="10"><button type="button" class="btn btn-sm btn-primary" id="addAccRow">+ Add Accessories</button></td>
+                                        <td colspan="10">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary"
+                                                    id="addAccessoriesRow">
+                                                + Add Accessories
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -227,28 +419,328 @@
                     </div>
                 </div>
 
-                {{-- Grand Total --}}
-                <div class="row mb-3">
+                {{-- print Table (Same structure) --}}
+                <div class="row mb-4">
                     <div class="col-lg-12">
-                        <table class="table table-bordered table-sm">
-                            <tbody>
-                                <tr>
-                                    <td colspan="9" class="text-right"><b>Grand Total:</b></td>
-                                    <td>
-                                        <b id="grandTotal">0</b>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <h5>Print & Embroidery</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="printEmbroideryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="printEmbRow">
+                                        <td><input type="text" name="print_emb_desc[description][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="print_emb_desc[supplier][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="print_emb_desc[qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="print_emb_desc[unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="print_emb_desc[ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="print_emb_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="print_emb_desc[percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="print_emb_desc[company_name][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="print_emb_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow">-</button></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="10">
+                                            <button type="button" class="btn btn-sm btn-primary" id="addPrintEmbRow">+ Add Row</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Submit --}}
-                <div class="row mb-3">
-                    <div class="col-lg-12 text-center">
-                        <button type="submit" class="btn btn-primary" disabled title="demo">Save</button>
+                {{-- cm Table (Same structure) --}}
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <h5>CM (Cutting & Making)</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="cmTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="cmRow">
+                                        <td><input type="text" name="cm_desc[description][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="cm_desc[supplier][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="cm_desc[qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="cm_desc[unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="cm_desc[ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="cm_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="cm_desc[percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="cm_desc[company_name][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="cm_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow">-</button></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="10">
+                                            <button type="button" class="btn btn-sm btn-primary" id="addCMRow">+ Add Row</button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                {{-- others Table (Same structure) --}}
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <h5>Miscellaneous / Test</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="testTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price ($)</th>
+                                        <th>TTL US $</th>
+                                        <th>Item Wise Total Value</th>
+                                        <th>%</th>
+                                        <th>Company Name</th>
+                                        <th>Payment Value</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <!-- 1. TEST -->
+                                    <tr class="testRow">
+                                        <td colspan="10">TEST</td>
+                                    </tr>
+                                    <tr class="testRow">
+                                        <td><input type="text" name="test_desc[test][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[test_supplier][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[test_qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[test_unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[test_ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[test_item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[test_percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[test_company][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[test_payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRows d-none">-</button></td>
+                                    </tr>
+
+                                    <!-- 2. Buying Commission (Pcs) -->
+                                    <tr class="testRow">
+                                        <td colspan="10">Buying Commission (Pcs)</td>
+                                    </tr>
+                                    <tr class="testRow">
+                                        <td><input type="number" step="any" name="test_desc[buying_commission][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_supplier][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[buying_commission_company][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[buying_commission_payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRows d-none">-</button></td>
+                                    </tr>
+
+                                    <!-- 3. Local Transportation -->
+                                    <tr class="testRow">
+                                        <td colspan="10">LOCAL TRANSPORTATION</td>
+                                    </tr>
+                                    <tr class="testRow">
+                                        <td><input type="number" step="any" name="test_desc[local_transportation][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_supplier][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[local_transportation_company][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[local_transportation_payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRows d-none">-</button></td>
+                                    </tr>
+
+                                    <!-- 4. Bank & Commercial -->
+                                    <tr class="testRow">
+                                        <td colspan="10">BANK & COMMERCIAL</td>
+                                    </tr>
+                                    <tr class="testRow">
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_supplier][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[bank_commercial_company][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[bank_commercial_payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRows d-none">-</button></td>
+                                    </tr>
+
+                                    <!-- 5. Commission % -->
+                                    <tr class="testRow">
+                                        <td colspan="10">COMMISSION %</td>
+                                    </tr>
+                                    <tr class="testRow">
+                                        <td><input type="number" step="any" name="test_desc[commission_percent][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_supplier][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[commission_percent_company][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[commission_percent_payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRows d-none">-</button></td>
+                                    </tr>
+
+                                    <!-- 6. Freight -->
+                                    <tr class="testRow">
+                                        <td colspan="10">FREIGHT</td>
+                                    </tr>
+                                    <tr class="testRow">
+                                        <td><input type="number" step="any" name="test_desc[freight][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_supplier][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_qty][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_unit_price][]" class="form-control form-control-sm calc"></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_ttl_usd][]" class="form-control form-control-sm ttl_usd" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_item_total][]" class="form-control form-control-sm item_total" readonly></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_percent][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" name="test_desc[freight_company][]" class="form-control form-control-sm"></td>
+                                        <td><input type="number" step="any" name="test_desc[freight_payment_value][]" class="form-control form-control-sm"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRows d-none">-</button></td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <h5>Summary / Total Cost & Payment</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="summaryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Percentage / Note</th>
+                                        <th>Amount (US$)</th>
+                                        <th>Paid Amount (US$)</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <!-- 1. Total Cost / Profit -->
+                                    <tr>
+                                        <td>TOTAL COST / PROFIT</td>
+                                        <td>90%</td>
+                                        <td>68412.43</td>
+                                        <td></td>
+                                        <td>Total Expenditure</td>
+                                    </tr>
+
+                                    <!-- 2. Total Value of Order -->
+                                    <tr>
+                                        <td>TOTAL VALUE OF ORDER</td>
+                                        <td></td>
+                                        <td>76394.28</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <!-- 3. Reservation -->
+                                    <tr>
+                                        <td>Reservation</td>
+                                        <td></td>
+                                        <td>7981.85</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <!-- 4. BBLC / BTB -->
+                                    <tr>
+                                        <td>BTB</td>
+                                        <td>75%</td>
+                                        <td>57295.71</td>
+                                        <td>47989.73</td>
+                                        <td>Yarn, Dyeing, Print & Acces.</td>
+                                    </tr>
+
+                                    <!-- 5. CASH -->
+                                    <tr>
+                                        <td>CASH</td>
+                                        <td>0%</td>
+                                        <td>0.00</td>
+                                        <td>2437.50</td>
+                                        <td>Knitting</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <h5>Production Cost</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="productionCostTable">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Machine/Use</th>
+                                        <th>O/Cost ($)</th>
+                                        <th>Total Cost ($)</th>
+                                        <th>Product/Day</th>
+                                        <th>CM/Doz ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" name="prod_cost[item][]" class="form-control form-control-sm" value="T-Shirt"></td>
+                                        <td><input type="number" step="any" name="prod_cost[machine_use][]" class="form-control form-control-sm" value="21"></td>
+                                        <td><input type="number" step="any" name="prod_cost[ocost][]" class="form-control form-control-sm" value="25.00"></td>
+                                        <td><input type="number" step="any" name="prod_cost[total_cost][]" class="form-control form-control-sm" value="525.00" readonly></td>
+                                        <td><input type="text" name="prod_cost[product_day][]" class="form-control form-control-sm" value="2000 Pcs"></td>
+                                        <td><input type="number" step="any" name="prod_cost[cm_doz][]" class="form-control form-control-sm" value="3.15" readonly></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
 
             </form>
 
@@ -264,6 +756,8 @@
 
 
 @push('js')
+
+
 <script>
 $(document).ready(function(){
 
@@ -462,13 +956,11 @@ $(document).ready(function(){
 
 @push('css')
  <style>
-    .mini-info-table input{
-        background: none !important;
-        border: none;
-    }
-    .mini-info-table td{
+    .headerTable td, .headerTable th{
         vertical-align: middle !important;
-        font-size: 14px;
     }
- </style>
+    .headerTable td{
+        padding: 0px !important;
+    }
+</style>
 @endpush

@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search Order, Buyer, Merchant " class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search " class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -63,13 +63,14 @@
                         <thead>
                             <tr>
                                 <th>SL</th>
-                                <th>Order No</th>
+                                <th>PI No</th>
                                 <th>Buyer</th>
-                                <th>Merchant</th>
+                                <th>Total Order</th>
+                                <th>Total Style</th>
                                 <th>Total Qnty</th>
                                 <th>Total Bill</th>
                                 <th>Status</th>
-                                <th>Created Date</th>
+                                <th>PI Date</th>
                                 <th width="200">Action</th>
                             </tr>
                         </thead>
@@ -78,15 +79,21 @@
                             @forelse($pis as $i=>$pi)
                             <tr>
                                 <td>{{$pis->currentpage()==1?$i+1:$i+($pis->perpage()*($pis->currentpage() - 1))+1}}</td>
-                                <td>{{ $pi->order_no }}</td>
+                                <td>{{ $pi->pi_no }}</td>
 
                                 <td>{{ $pi->buyer?->name ?? '--' }}</td>
 
-                                <td>{{ $pi->merchant?->name ?? '--' }}</td>
+                                @php
+                                    $uniqueOrders = $pi->items->pluck('order_no')->unique()->count();
+                                    $uniqueStyles = $pi->items->pluck('style_no')->unique()->count();
+                                @endphp
+
+                                <td>{{ $uniqueOrders }}</td>
+                                <td>{{ $uniqueStyles }}</td>
 
                                 <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
 
-                                <td>{{ number_format($pi->items->sum('total_price'),2) }}</td>
+                                <td>${{ number_format($pi->items->sum('total_price'),2) }}</td>
 
                                 <td>
                                     <span class="badge

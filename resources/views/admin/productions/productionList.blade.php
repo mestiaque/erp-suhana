@@ -61,15 +61,13 @@
                 <table class="table table-striped table-borderd">
                     <thead>
                         <tr>
-                            <th style="width: 150px">Style No</th>
-                            <th style="width: 150px">Merchant/Buyer</th>
-                            <th style="min-width:200px">Cutting</th>
+                            <th style="width: 200px;min-width: 200px">Style No</th>
+                            <th style="width: 200px;min-width: 200px">Merchant/Buyer</th>
+                            <th style="width: 150px;min-width: 150px">Total Hours</th>
+                            <th style="width: 200px;min-width: 200px">Production Output</th>
                             <th style="min-width:200px">Swetting</th>
-                            <th style="width: 150px">Total Hours</th>
-                            <th style="width: 200px">Packing</th>
-                            <th style="width: 200px">Shippinment</th>
-                            <th style="width: 200px">Plan By/Date</th>
-                            <th style="width: 150px">Action/Status</th>
+                            <th style="min-width:170px">Plan By/Date</th>
+                            <th style="width: 150px;min-width: 150px">Action/Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -77,7 +75,7 @@
                         <tr>
                             <td>
                                 <b>No:</b> {{ $order->style_no}}
-                                <br> <b>Qnty:</b> {{number_format($order->order_qty)}} pcs
+                                <br> <b>Qnty:</b> {{number_format($order->style_qty)}} pcs
                             </td>
                             <td>
                                 <b>M:</b> {{$order->style?->merchant_name}}
@@ -85,24 +83,16 @@
 
                             </td>
                             <td>
-                                <b>S:</b> {{$order->cutting_start?Carbon\Carbon::parse($order->cutting_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->cutting_end?Carbon\Carbon::parse($order->cutting_end)->format('d.m.Y h:i A'):''}}
+                                <b>Total:</b> {{$order->total_working_time}}
+                                <br><b>H/T:</b> {{$order->total_hourly_capacity}} pcs
+                            </td>
+                            <td style="color:green;">
+                                <b>Total:</b> {{$order->sewingOutputs->sum('production')}} pcs
+                                <br><b>Remming:</b> {{$order->style_qty - $order->sewingOutputs->sum('production')}} pcs
                             </td>
                             <td>
                                 <b>S:</b> {{$order->sewing_start?Carbon\Carbon::parse($order->sewing_start)->format('d.m.Y h:i A'):''}}
                                 <br><b>E:</b> {{$order->sewing_end?Carbon\Carbon::parse($order->sewing_end)->format('d.m.Y h:i A'):''}}
-                            </td>
-                            <td>
-                                <b>Total:</b> {{$order->total_working_time}}
-                                <br><b>H/T:</b> {{$order->total_hourly_capacity}} pcs
-                            </td>
-                            <td>
-                                <b>S:</b> {{$order->packing_start?Carbon\Carbon::parse($order->packing_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->packing_end?Carbon\Carbon::parse($order->packing_end)->format('d.m.Y h:i A'):''}}
-                            </td>
-                            <td>
-                                <b>S:</b> {{$order->shippment_start?Carbon\Carbon::parse($order->shippment_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->shippment_end?Carbon\Carbon::parse($order->shippment_end)->format('d.m.Y h:i A'):''}}
                             </td>
                             <td>
                                 <b>By:</b> {{ $order->user?->name }}
@@ -119,7 +109,7 @@
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
                                 @can('production_planning.view')
-                                    <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
+                                    <a href="{{ route('admin.productionAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
                                 @endcan
                             </td>
                         </tr>

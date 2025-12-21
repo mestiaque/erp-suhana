@@ -64,10 +64,7 @@
                 <div class="col-md-12">
                     <ul class="statuslist p-0">
                         <li><a href="{{ route('admin.productionPlanning') }}">All ({{ $totals->total }})</a></li>
-                        <li><a href="{{ route('admin.productionPlanning',['status'=>'pending']) }}">Pending ({{ $totals->pending }})</a></li>
                         <li><a href="{{ route('admin.productionPlanning',['status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
-                        <li><a href="{{ route('admin.productionPlanning',['status'=>'completed']) }}">Completed ({{ $totals->completed }})</a></li>
-                        <li><a href="{{ route('admin.productionPlanning',['status'=>'cancelled']) }}">Cancelled ({{ $totals->cancelled }})</a></li>
                     </ul>
                 </div>
             </div>
@@ -77,14 +74,14 @@
                 <table class="table table-striped table-borderd">
                     <thead>
                         <tr>
-                            <th style="width: 150px">Style No</th>
-                            <th style="width: 150px">Merchant/Buyer</th>
+                            <th style="width: 150px;min-width: 150px">Style No</th>
+                            <th style="width: 150px;min-width: 150px">Merchant/Buyer</th>
                             <th style="min-width:200px">Cutting</th>
                             <th style="min-width:200px">Swetting</th>
-                            <th style="width: 150px">Total Hours</th>
-                            <th style="width: 200px">Packing</th>
-                            <th style="width: 200px">Plan By/Date</th>
-                            <th style="width: 150px">Action/Status</th>
+                            <th style="width: 150px;min-width: 150px">Total Hours</th>
+                            <th style="width: 200px;min-width: 200px">Packing</th>
+                            <th style="width: 160px;min-width: 160px">Plan By/Date</th>
+                            <th style="width: 200px;min-width: 200px">Action/Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,7 +89,7 @@
                         <tr>
                             <td>
                                 <b>No:</b> {{ $order->style_no}}
-                                <br> <b>Qnty:</b> {{number_format($order->order_qty)}} pcs
+                                <br> <b>Qnty:</b> {{number_format($order->style_qty)}} pcs
                             </td>
                             <td>
                                 <b>M:</b> {{$order->style?->merchant_name}}
@@ -120,7 +117,7 @@
                                 <br><b>Date:</b> {{ $order->created_at->format('d.m.Y') }}
                             </td>
                             <td class="text-center">
-                                @if(can('production_planning.view') || can('production_planning.view'))
+                                @if(can('production_planning.view') || can('production_planning.edit') || can('production_planning.delete'))
                                     @can('production_planning.view')
                                     <a href="{{ route('admin.productionPlanningAction',['print',$order->id]) }}" class="btn-custom info mr-1"><i class="fa fa-print"></i></a>
                                     <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
@@ -128,6 +125,11 @@
                                     @can('production_planning.edit')
                                     <a href="{{ route('admin.productionPlanningAction',['edit',$order->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
                                     @endcan
+                                    @if($order->sewingOutputs->sum('production')==0)
+                                    @can('production_planning.delete')
+                                    <a href="{{ route('admin.productionPlanningAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
+                                    @endcan
+                                    @endif
                                 @else
                                 --
                                 @endif

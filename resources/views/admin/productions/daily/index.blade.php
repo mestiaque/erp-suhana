@@ -37,12 +37,25 @@
 
         <div class="card-body">
             @include(adminTheme().'alerts')
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <!-- Search Form -->
+                    <form action="{{ route('admin.dailyProduction') }}">
+                        <div class="row g-2">
+                            <div class="col-md-4 d-flex">
+                                <input type="date" name="startDate" value="{{$startDate->format('Y-m-d')}}" class="form-control me-1" />
+                                <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             @php
                 $maxWorkingTime = $swings->count() ? $swings->pluck('working_hours')->max() : 9;
                 $startHour = 8;
                 $endHour = $startHour + $maxWorkingTime;
-                $today_date = request('startDate') ?? date('Y-m-d');
+                $today_date = $startDate->format('Y-m-d');
             @endphp
 
             <div class="table-responsive data-table">
