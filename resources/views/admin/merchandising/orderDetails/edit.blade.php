@@ -483,7 +483,7 @@ $('select[name="composition"]').on('change', function(){
 });
 
 // Calculate total qty
-$(document).on('keyup input change', 'input[name^="qtys"]', function () { calculateTotalQty(); });
+$(document).on('keyup input change paste cut drop blur', 'input[name^="qtys"]', function () { calculateTotalQty(); });
 
 function calculateTotalQty() {
     let totalQty = 0;
