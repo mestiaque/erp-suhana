@@ -86,7 +86,7 @@
 
                                 <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
 
-                                <td>{{ number_format($pi->items->sum('total_price'),2) }}</td>
+                                <td>${{ number_format($pi->items->sum('total_price'),2) }}</td>
 
                                 <td>
                                     <span class="badge

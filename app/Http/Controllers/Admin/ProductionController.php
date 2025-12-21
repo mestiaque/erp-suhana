@@ -264,6 +264,12 @@ class ProductionController extends Controller
             return redirect()->route('admin.productionPlanningAction', ['view', $plan->id]);
         }
 
+        if($action=='delete'){
+            $plan->sewingLines()->delete();
+            $plan->delete();
+            session()->flash('success', 'Production Plan Deleted');
+            return redirect()->route('admin.productionPlanning');
+        }
         // return $plan->sewingLines;
         $productionStyleNos = ProductionPlanning::pluck('style_no')
             ->filter() // removes null values
@@ -379,46 +385,40 @@ class ProductionController extends Controller
         return view(adminTheme().'productions.productionList',compact('orders','totals'));
     }
 
+    public function productionAction(Request $r, $action, $id = null){
+
+        $plan = ProductionPlanning::find($id);
+        if(!$plan){
+            session()->flash('error', 'Plan Not Found');
+            return redirect()->route('admin.production');
+        }
+
+        if($action=='view'){    
+
+            return view(adminTheme().'productions.productionView',compact('plan'));
+        }
+
+        return back();
+    }
+
     public function dailyProduction(Request $r)
     {
         $search = $r->search;
         $now = now(); // current timestamp
         $nextHour = $now->copy()->addHour(); // now + 1 hour
 
+
+        $startDate = $r->startDate? Carbon::parse($r->startDate) : now();
+
         $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
             ->where('status', '!=', 'completed')
-            ->when($search, function ($q) use ($search) {
-                $q->where('floor_name', 'LIKE', "%{$search}%")
-                ->orWhere('line_name', 'LIKE', "%{$search}%")
-                ->orWhereHas('planning', function ($q) use ($search) {
-                    $q->where('style_no', 'LIKE', "%{$search}%");
-                })
-                ->orWhereHas('planning.style', function ($q) use ($search) {
-                    $q->where('order_no', 'LIKE', "%{$search}%")
-                        ->orWhere('buyer_name', 'LIKE', "%{$search}%");
-                });
-            })
-            ->when($r->startDate || $r->endDate, function ($q) use ($r) {
-                $from = $r->startDate ?: now()->format('Y-m-d');
-                $to   = $r->endDate ?: now()->format('Y-m-d');
-
-                // Apply date filter on outputs
-                $q->whereHas('outputs', function ($q) use ($from, $to) {
-                    $q->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-                });
-            })
             ->whereHas('planning', function ($q) use ($now, $nextHour) {
-                // Filter by exact datetime instead of date only
-                $q->where('status', 'confirmed')
-                // ->where('sewing_start', '<=', $now)
-                // ->where('sewing_end', '>=', $nextHour)
-                ;
+                $q->where('status', 'confirmed');
             })
             ->get()
             ->sortBy('line_name');
 
-        return view(adminTheme().'productions.daily.index', compact('swings'));
+        return view(adminTheme().'productions.daily.index', compact('swings','startDate'));
     }
 
     public function dailyProductionAction(Request $r, $action)

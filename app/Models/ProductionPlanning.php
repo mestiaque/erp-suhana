@@ -41,6 +41,11 @@ class ProductionPlanning extends Model
     {
         return $this->hasMany(ProductionSewing::class, 'planning_id');
     }
+    
+    public function sewingOutputs()
+    {
+        return $this->hasMany(SewingOutput::class, 'planning_id');
+    }
 
     public function floorLines(){
         return Attribute::whereIn(

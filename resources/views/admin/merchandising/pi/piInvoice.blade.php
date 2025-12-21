@@ -399,12 +399,15 @@
                                 @forelse($pi->items as $i=>$item)
 
                                     @php
-                                        // Format shipment date
-                                        $shipmentDate = $item->orderDetails->shipment_date
-                                            ? \Carbon\Carbon::parse($item->orderDetails->shipment_date)->format('d.m.Y')
-                                            : 'N/A';
 
-                                        // Count how many consecutive rows have same shipment date (for rowspan)
+                                        $shipmentDate = 'N/A';
+
+                                        if($item->orderDetails){
+                                            $shipmentDate = $item->orderDetails->shipment_date
+                                                ? \Carbon\Carbon::parse($item->orderDetails->shipment_date)->format('d.m.Y')
+                                                : 'N/A';
+                                        }
+
                                         if(!isset($rowspanTracker[$shipmentDate])) {
                                             $rowspanTracker[$shipmentDate] = $pi->items
                                                 ->slice($i) // remaining items
