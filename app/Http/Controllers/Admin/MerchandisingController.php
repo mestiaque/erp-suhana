@@ -945,7 +945,6 @@ class MerchandisingController extends Controller
 
             return redirect()->route('admin.proformaInvoiceAction', ['edit', $pi->id]);
         }
-
         /* ---------------------------------------------------------------------
         * FIND PROFORMA INVOICE
         * ---------------------------------------------------------------------*/
@@ -980,7 +979,6 @@ class MerchandisingController extends Controller
                 ->select('order_no')
                 ->distinct()
                 ->get();
-
             if ($orders->isEmpty()) {
                 return response()->json(['success' => false]);
             }
@@ -1012,7 +1010,6 @@ class MerchandisingController extends Controller
             }
 
             $html = view(adminTheme().'merchandising.pi.includes.items', [
-                'order' => $orders->first(),
                 'items' => $orders
             ])->render();
 
@@ -1023,26 +1020,28 @@ class MerchandisingController extends Controller
             ]);
         }
 
+
         /* ---------------------------------------------------------------------
         * UPDATE PROFORMA INVOICE
         * ---------------------------------------------------------------------*/
         if ($action === 'update') {
+            // dd($r->all());
             $r->validate([
-                'buyer_id' => 'required|exists:users,id',
-                'order_no' => 'required|string',
-                'status'   => 'required|string',
-                'remarks'  => 'nullable|string',
-                'items'    => 'required|array',
+                // 'buyer_id'            => 'required|exists:users,id',
+                // 'order_no'            => 'nullable|string',
+                'status'              => 'required|string',
+                'remarks'             => 'nullable|string',
+                'items'               => 'required|array',
+                'items.*.order_no'    => 'required|string',
                 'items.*.unit_price'  => 'required|numeric|min:0',
                 'items.*.total_price' => 'required|numeric|min:0',
                 'items.*.order_qty'   => 'required|numeric|min:0',
-                'items.*.uom'   => 'required|',
+                'items.*.uom'         => 'required',
             ]);
 
             DB::transaction(function () use ($r, $pi) {
 
                 // FETCH ORDER & BUYER
-                $order = OrderDetail::where('order_no', $r->order_no)->firstOrFail();
                 $buyer = User::findOrFail($r->buyer_id);
 
                 // CALCULATE TOTALS
@@ -1055,14 +1054,20 @@ class MerchandisingController extends Controller
                     ->mapWithKeys(fn($t) => [$t['key'] => $t['value']])
                     ->toArray();
 
+                $orderNos = collect($r->items)
+                            ->pluck('order_no')
+                            ->unique()
+                            ->values()
+                            ->implode(',');
+
                 // UPDATE MAIN PI
                 $pi->update([
-                    'order_id'      => $order->id,
-                    'order_no'      => $order->order_no,
+                    // 'order_id'      => $order->id,
+                    'order_no' => $orderNos,
                     'buyer_id'      => $buyer->id,
                     'buyer_name'    => $buyer->name,
-                    'merchant_id'   => $order->merchant_id,
-                    'merchant_name' => $order->merchant_name,
+                    // 'merchant_id'   => $order->merchant_id,
+                    // 'merchant_name' => $order->merchant_name,
                     'remarks'       => $r->remarks,
                     'status'        => $r->status,
                     'order_date'    => $r->order_date ?? $pi->order_date,
@@ -1075,6 +1080,7 @@ class MerchandisingController extends Controller
                     'second_beneficiary'      => $r->second_beneficiary ?? null,
                     'second_beneficiary_bank' => $r->second_beneficiary_bank ?? null,
                     'notify_party'            => $r->notify_party ?? null,
+                    'created_at'                 =>$r->created_at ?? $pi->created_at,
                     'total_qty'  => $total_qty,
                     'total_bill' => $total_bill,
                     'edited_by' => auth()->id(),
@@ -1083,10 +1089,12 @@ class MerchandisingController extends Controller
                 // UPDATE OR CREATE ITEMS
                 $keepIds = [];
                 foreach ($r->items as $row) {
+                    $order = OrderDetail::where('order_no', $row['order_no'])->firstOrFail();
                     $item = ProformaInvoiceItem::updateOrCreate(
                         ['id' => $row['id'] ?? null],
                         [
                             'proforma_invoice_id' => $pi->id,
+                            'order_no'    => $order->order_no,
                             'style_no'    => $row['style_no'],
                             'item_name'   => $row['item_name'] ?? null,
                             'color_name'  => $row['color_name'] ?? null,
@@ -1131,14 +1139,19 @@ class MerchandisingController extends Controller
         * ---------------------------------------------------------------------*/
         $piOrder = ProformaInvoice::whereNotNull('order_no')->pluck('order_no')->toArray();
 
-        $orders = OrderDetail::where('status', 'confirmed')
-            ->whereNotIn('order_no', $piOrder)
-            ->get()
-            ->unique('order_no');
+        // $orders = OrderDetail::where('status', 'confirmed')
+        //     ->whereNotIn('order_no', $piOrder)
+        //     ->get()
+        //     ->unique('order_no');
+        $orders = OrderDetail::where('buyer_id', $pi->buyer_id)
+                ->where('status', '<>', 'temp')
+                ->select('order_no')
+                ->distinct()
+                ->get();
 
         $buyers = User::with('orderDetails')
             ->whereHas('orderDetails')
-            ->filterByType('buyer')
+            // ->filterByType('buyer')
             ->whereIn('status', [0,1])
             ->get();
 

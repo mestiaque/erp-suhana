@@ -170,7 +170,7 @@
         </div>
 
         <span style="display: inline-block;padding: 2px 25px;border: 1px solid #ddd;border-radius: 4px;background: #fbfbfb;">
-           Production Planning List
+           Production Planning Inspection
         </span>
     </div>
 
