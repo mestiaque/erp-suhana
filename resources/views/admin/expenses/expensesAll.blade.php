@@ -330,7 +330,7 @@
                         </tr>
                         @endforelse
                     </tbody>
-                    <tfoot style="background: #7c7c7c38;">
+                    {{-- <tfoot style="background: #7c7c7c38;">
                         <tr>
                             <th colspan="6" class="text-right">Total:</th>
                             <th>
@@ -338,7 +338,7 @@
                             </th>
                             <th colspan="4"></th>
                         </tr>
-                    </tfoot>
+                    </tfoot> --}}
                 </table>
                 {{$expenses->links('pagination::bootstrap-4')}}
             </div>

@@ -110,14 +110,14 @@
                                 @can('order_details.view')
                                     <a href="javascript:void(0)" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#viewModal_{{ $order->id }}"><i class="fa fa-eye"></i></a>
                                 @endcan
-                                @if(in_array($order->status,['pending','confirmed']))
+                                {{-- @if(in_array($order->status,['pending','confirmed'])) --}}
                                     @can('order_details.edit')
                                         <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}" class="btn btn-sm btn-success"><i class="bx bx-edit"></i></a>
                                     @endcan
                                     @can('order_details.delete')
                                         <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="bx bx-trash"></i></a>
                                     @endcan
-                                @endif
+                                {{-- @endif --}}
                             </td>
                         </tr>
 

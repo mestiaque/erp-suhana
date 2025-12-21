@@ -38,41 +38,58 @@
                                 @endif
                             </select>
                         @else
-                            <div type="text" value="" class="form-control " readonly>{{ $pi->buyer_id }}</div>
-                            <input type="hidden" hidden value="{{ $pi->buyer_id }}" name="buyer_id" class="form-control d-none" readonly>
+                            <div type="text" value="" class="form-control " readonly>{{ $pi->buyer_name }}</div>
+                            <input type="hidden" hidden value="{{ $pi->buyer_id }}" id="buyer_select" name="buyer_id" data-url="{{ route('admin.proformaInvoiceAction', ['buyer-select', $pi->id]) }}" class="form-control d-none" readonly>
                         @endif
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label>Order Number</label>
-                        @if(is_null($pi->order_no))
-                        <select class="form-control" name="order_no" id="order_no_select"
-                                data-url="{{ route('admin.proformaInvoiceAction', ['po-select', $pi->id]) }}">
-                            <option value="">-- Select Order Number --</option>
-                        </select>
-                        @else
-                            <div type="text" value="" class="form-control " readonly>{{ $pi->order_no }}</div>
-                            <input type="hidden" hidden value="{{ $pi->order_no }}" name="order_no" class="form-control d-none" readonly>
-                        @endif
-                        {{-- <select class="form-control" name="order_no" id="order_no_select"
-                                data-url="{{ route('admin.proformaInvoiceAction', ['po-select', $pi->id]) }}">
-                            <option value="">-- Select Order Number --</option>
-                        </select> --}}
-
+                        <label>Order Numbers</label>
+                        <input type="text" name="" class="order_no_show form-control" value="{{ $pi->order_no ?? '--' }}"  readonly>
+                        <input type="text" name="order_no" class="order_no_show form-control" value="{{ $pi->order_no ?? '--' }}" hidden>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label>Merchant Name</label>
-                        <input type="text" readonly class="form-control merchant_name"  placeholder="--" value="{{ $pi->merchant?->name ?? '' }}">
-                    </div>
                     @include(adminTheme().'merchandising.pi.includes.defHead')
 
                 </div>
 
                 <br>
-                <h5><b>Proforma Invoice Items</b></h5>
-                <div class="cardItems">
-                    @include(adminTheme().'merchandising.pi.includes.items', ['items' => $pi->items ?? []])
+                <h5 class="d-flex align-items-center gap-2 mb-0">
+                    <b>Proforma Invoice Items</b>
+
+                    <select class="form-control form-control-sm" style="width: 400px; margin-left:20px"
+                            name="order_no" placeholder="--select--"
+                            id="order_no_select"
+                            data-url="{{ route('admin.proformaInvoiceAction', ['po-select', $pi->id]) }}">
+                        <option value="">-- Select Order --</option>
+                    </select>
+                    <div id="selectedPos" style="margin-left: 1rem">
+
+                    </div>
+                </h5>
+
+
+
+                <div class="table-responsive" style="min-height: 100px;">
+                    <table class="table table-bordered orderTable">
+                        <thead>
+                            <tr>
+                                <th class="px-2 pb-1" style="width: 20px;">SL</th>
+                                <th class="px-2 pb-1" style="width: 100px;">Order No</th>
+                                <th class="px-2 pb-1" style="width: 100px;">Style No</th>
+                                <th class="px-2 pb-1" style="width: 150px;">Composition</th>
+                                <th class="px-2 pb-1" style="width: 150px;">Fabrication</th>
+                                <th class="px-2 pb-1" style="width: 80px;">GSM</th>
+                                <th class="px-2 pb-1" style="width: 80px;">Qnty</th>
+                                <th class="px-2 pb-1" style="width: 80px;">Unit of Measurement</th>
+                                <th class="px-2 pb-1" style="width: 80px;">Unit Price</th>
+                                <th class="px-2 pb-1" style="width: 80px;">Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="cardItems">
+                            @include(adminTheme().'merchandising.pi.includes.items', ['items' => $pi->items ?? []])
+                        </tbody>
+                    </table>
                 </div>
 
                 @include(adminTheme().'merchandising.pi.includes.terms')
@@ -88,7 +105,26 @@
 
 @push('js')
 <script>
+
 $(document).ready(function() {
+    let selectedOrders = [];
+    let existingOrders = $('.order_no_show').val();
+    let buyer_id = $('#buyer_select').val();
+
+
+    if (buyer_id) {
+        loadBuyer(buyer_id, true);
+    }
+
+    if (existingOrders && existingOrders !== '--') {
+        selectedOrders = existingOrders.split(',').map(o => o.trim());
+        setTimeout(function () {
+            selectedOrders.forEach(orderNo => {
+                $('#order_no_select option[value="' + orderNo + '"]').remove();
+                addOrderBadge(orderNo);
+            });
+        }, 500);
+    }
 
     // === Update single row calculation ===
     function updateItemRow(row) {
@@ -130,39 +166,149 @@ $(document).ready(function() {
     // === Load items when PO changes ===
     $(document).on('change', '#buyer_select', function () {
         let buyer_id = $(this).val();
-        if (!buyer_id) return;
+        loadBuyer(buyer_id);
+    });
 
-        let url = $(this).data('url');
+
+
+    function loadBuyer(buyer_id, autoLoad=false) {
+        if (!buyer_id) return;
+        let $buyer = $('#buyer_select');
+        let url = $buyer.data('url');
+
+        if(autoLoad == false){
+            // reset items table
+            $('.cardItems').html(
+                `<tr class="forced_hide">
+                    <td colspan="10" class="text-center text-muted">No Items Found</td>
+                </tr>`
+            );
+        }
+
+
+        $('.forced_hide').removeClass('d-none');
+
+        // reset order dropdown
+        $('#order_no_select').html('<option value="">-- Select Order --</option>');
 
         $.get(url, { buyer_id: buyer_id }, function (res) {
             if (res.success) {
                 $('#order_no_select').html(res.html);
-                // $('.cardItems').html('');
             } else {
-                alert('No order found for this buyer');
+                // alert('No order found for this buyer');
                 $('#order_no_select').html('<option value="">No order found</option>');
             }
         });
-    });
-
+    }
 
     $(document).on('change', '#order_no_select', function () {
-        let order_no = $(this).val();
+        let $select = $(this);
+        let order_no = $select.val();
         if (!order_no) return;
 
-        let url = $(this).data('url');
+        let url = $select.data('url');
 
         $.get(url, { order_no: order_no }, function (res) {
             if (res.success) {
+
+                selectedOrders.push(order_no);
+
+                $select.find('option[value="' + order_no + '"]').remove();
+
                 $('.merchant_name').val(res.order.merchant_name);
                 $('.order_date').val(res.order.order_date);
-                $('.cardItems').html(res.html);
+
+                $('.cardItems').append(res.html);
+                reIndexItems();
+
+                $('.order_no_show').val(selectedOrders.join(', '));
+                $('.forced_hide').addClass('d-none');
+
+                addOrderBadge(order_no);
                 updateAllItems();
+
             } else {
                 alert('Order not found');
             }
         });
+
+        $select.val('');
     });
+
+
+    function addOrderBadge(orderNo) {
+        if ($('#selectedPos').find('[data-order="' + orderNo + '"]').length) return;
+
+        let badge = `
+            <span class="badge badge-info mr-2 mb-1" data-order="${orderNo}">
+                ${orderNo}
+                <a href="#" class="text-white ml-1 remove-po" data-order="${orderNo}">&times;</a>
+            </span>
+        `;
+        $('#selectedPos').append(badge);
+    }
+
+    $(document).on('click', '.remove-po', function (e) {
+        e.preventDefault();
+
+        let orderNo = $(this).data('order');
+
+        // 🔥 remove related rows (multiple tr possible)
+        $('.itemRow').each(function () {
+            let rowOrderNo = $(this).find('input[name$="[order_no]"]').val();
+            if (rowOrderNo === orderNo) {
+                $(this).remove();
+            }
+        });
+
+        // 🔁 selectedOrders array update
+        selectedOrders = selectedOrders.filter(o => o !== orderNo);
+
+        // update hidden/show input
+        $('.order_no_show').val(selectedOrders.length ? selectedOrders.join(', ') : '--');
+
+        // ❌ remove badge
+        $(this).closest('span').remove();
+
+        // 🔥 dropdown-এ আবার add করো (if not exists)
+        if ($('#order_no_select option[value="' + orderNo + '"]').length === 0) {
+            $('#order_no_select').append(
+                `<option value="${orderNo}">${orderNo}</option>`
+            );
+        }
+
+        // 🔥 সব PO remove হয়ে গেলে
+        if ($('.itemRow').length === 0) {
+            $('.cardItems').html(
+                `<tr class="forced_hide">
+                    <td colspan="10" class="text-center text-muted">No Items Found</td>
+                </tr>`
+            );
+        } else {
+            // reindex only if items exist
+            reIndexItems();
+        }
+    });
+
+    function reIndexItems() {
+        $('.itemRow').each(function (index) {
+
+            // serial
+            $(this).find('td:first').text(index + 1);
+
+            // input/select reindex
+            $(this).find('input, select').each(function () {
+                let name = $(this).attr('name');
+                if (name) {
+                    $(this).attr(
+                        'name',
+                        name.replace(/items\[\d+]/, 'items[' + index + ']')
+                    );
+                }
+            });
+        });
+    }
+
 
 
 });

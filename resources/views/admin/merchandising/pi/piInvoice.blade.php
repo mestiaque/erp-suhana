@@ -424,7 +424,7 @@
                                         <td>{{ $i+1 }}</td>
                                         <td>{{ $item->style_no }}</td>
                                         <td>{{ $item->fabrication }}</td>
-                                        <td>{{ $pi->order_no ?? '--' }}</td>
+                                        <td>{{ $item->order_no ?? '--' }}</td>
                                         <td>--</td>
                                         <td>{{ number_format($item->order_qty) }} {{ $item->uom ?? ''}}</td>
                                         <td>${{ number_format($item->unit_price, 2) }}</td>
