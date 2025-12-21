@@ -23,7 +23,7 @@ class OrderDetail extends Model
     // -----------------------------
     public function createdBy()
     {
-        return $this->belongsTo(User::class, 'addedby_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function editedBy()

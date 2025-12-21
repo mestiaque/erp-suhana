@@ -72,11 +72,6 @@
                             </div>
 
                             <div class="col-md-4 mb-2">
-                                <strong>Created Time</strong>
-                                <div>{{ $order->created_at->format('d.m.Y H:i A') ?? '--' }}</div>
-                            </div>
-
-                            <div class="col-md-4 mb-2">
                                 <strong>Status</strong><br>
                                 @if($order->status=='temp')
                                     <span class="badge badge-secondary">Temp</span>
@@ -89,6 +84,7 @@
                                 @elseif($order->status=='canceled')
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
+                                ({{$order->createdBy?->name}})
                             </div>
                             <div class="col-md-4 mb-2">
                                 <strong>Created Date</strong><br>

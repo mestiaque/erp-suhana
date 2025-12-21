@@ -382,7 +382,6 @@
                                         <th>STYLE</th>
                                         <th>Description</th>
                                         <th>PO Number</th>
-                                        <th>CL</th>
                                         <th>Qnty (PCS/SET)</th>
                                         <th>FOB</th>
                                         <th>Total Value</th>
@@ -425,7 +424,6 @@
                                         <td>{{ $item->style_no }}</td>
                                         <td>{{ $item->fabrication }}</td>
                                         <td>{{ $pi->order_no ?? '--' }}</td>
-                                        <td>--</td>
                                         <td>{{ number_format($item->order_qty) }} {{ $item->uom ?? ''}}</td>
                                         <td>${{ number_format($item->unit_price, 2) }}</td>
                                         <td>${{ number_format($item->total_price, 2) }}</td>
@@ -437,14 +435,15 @@
                                      @php $prevShipmentDate = $shipmentDate; @endphp
                                 @empty
                                     <tr>
-                                        <td colspan="10" class="text-center text-muted">No items found</td>
+                                        <td colspan="9" class="text-center text-muted">No items found</td>
                                     </tr>
                                 @endforelse
                                 </tbody>
 
                                 <tfoot style="font-weight: 600;">
                                     <tr>
-                                        <td colspan="5" class="text-center">Total</td>
+                                        <td colspan="3" ></td>
+                                        <td class="text-center">Total</td>
                                         <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
                                         <td></td>
                                         <td>${{ number_format($pi->items->sum('total_price'),2) }}</td>
@@ -452,7 +451,7 @@
                                         <td colspan=""></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="10" class="text-center">
+                                        <td colspan="9" class="text-center">
                                             <input type="hidden" name="total_amount_input" id="total_amount_input" value="{{ $pi->items->sum('total_price') }}">
                                             In Words - Total Amount (USD) : <span id="total_amount_word"></span>
                                         </td>

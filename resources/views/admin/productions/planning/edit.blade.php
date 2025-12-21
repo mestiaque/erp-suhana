@@ -56,7 +56,7 @@
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-            {{-- @dd($plan->style_no) --}}
+
             <form action="{{ route('admin.productionPlanningAction', ['update', $plan->id]) }}" method="POST">
                 @csrf
                 <div class="row">
@@ -85,7 +85,7 @@
                     </div>
                     <div class="col-md-10">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <div class="card shadow-sm mb-3 flex-fill">
                                     <div class="card-header">
                                         <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">1.Cutting Section</span></h3>
@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <div class="card shadow-sm mb-3 flex-fill">
                                     <div class="card-header">
                                         <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">2.Sewing Section</span></h3>
@@ -135,7 +135,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <div class="card shadow-sm mb-3 flex-fill">
                                     <div class="card-header">
                                         <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">3.Packing Section</span></h3>
@@ -153,31 +153,6 @@
                                                     <th style="padding:5px;">Ending Date</th>
                                                     <td style="padding:1px;">
                                                         <input type="datetime-local" class="form-control form-control-sm updateDate"  value="{{$plan->packing_end?Carbon\Carbon::parse($plan->packing_end)->format('Y-m-d\TH:i'):''}}" data-name="packing_end">
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="card shadow-sm mb-3 flex-fill">
-                                    <div class="card-header">
-                                        <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">4.Shipment Section</span></h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
-                                                <tr>
-                                                    <th style="padding:5px;">Starting Date</th>
-                                                    <td style="padding:1px;">
-                                                        <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->shippment_start?Carbon\Carbon::parse($plan->shippment_start)->format('Y-m-d\TH:i'):''}}" data-name="shippment_start">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th style="padding:5px;">Ending Date</th>
-                                                    <td style="padding:1px;">
-                                                        <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->shippment_end?Carbon\Carbon::parse($plan->shippment_end)->format('Y-m-d\TH:i'):''}}" data-name="shippment_end">
                                                     </td>
                                                 </tr>
                                             </table>

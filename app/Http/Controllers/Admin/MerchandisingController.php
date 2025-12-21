@@ -799,19 +799,7 @@ class MerchandisingController extends Controller
                 $buyer = User::find($r->buyer);
                 $merchant = User::find($r->merchant);
 
-                $orderDetails->update([
-                    'buyer_id'      => $buyer->id,
-                    'buyer_name'    => $buyer->name,
-                    'merchant_id'   => $merchant->id,
-                    'merchant_name' => $merchant->name,
-                    'style_no'      => $r->style_no,
-                    'order_no'      => $r->order_no,
-                    'status'        => $r->status,
-                    'shipment_date' => $r->shipment_date,
-                    'composition'   => $r->composition,
-                    'fabrication'   => $r->fabrication,
-                    'gsm'           => $r->gsm,
-                ]);
+               
 
                 // UPDATE ITEMS
                 $existingIds = [];
@@ -852,6 +840,22 @@ class MerchandisingController extends Controller
                         }
                     }
                 }
+
+                 $orderDetails->update([
+                    'buyer_id'      => $buyer?->id ?? null,
+                    'buyer_name'    => $buyer?->name ?? null,
+                    'merchant_id'   => $merchant?->id ?? null,
+                    'merchant_name' => $merchant?->name ?? null,
+                    'style_no'      => $r->style_no,
+                    'order_no'      => $r->order_no,
+                    'status'        => $r->status,
+                    'shipment_date' => $r->shipment_date,
+                    'composition'   => $r->composition,
+                    'fabrication'   => $r->fabrication,
+                    'gsm'           => $r->gsm,
+                    'total_qty'     => $orderDetails->items()->sum('qty'),
+                ]);
+
 
                 // DELETE REMOVED ITEMS
                 if(count($existingIds)){

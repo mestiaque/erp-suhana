@@ -42,6 +42,7 @@
              <h3>Production Planning</h3>
              <div class="dropdown">
                 @if($plan->status!='temp')
+                <a href="{{ route('admin.productionPlanningAction',['print',$plan->id]) }}" class="btn-custom info mr-1"><i class="fa fa-print"></i></a>
                 @can('production_planning.edit')
                  <a href="{{ route('admin.productionPlanningAction',['edit',$plan->id]) }}" class="btn-custom primary" style="padding:5px 15px;">
                     Edit
@@ -108,23 +109,6 @@
                                         <th style="padding:5px;">Ending Date</th>
                                         <td style="padding:5px;">
                                             {{$plan->packing_end?Carbon\Carbon::parse($plan->packing_end)->format('d.m.Y h:i A'):''}}
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;display:inline-block;margin-bottom:2px;">4.Shipment Section</span>
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <tr>
-                                        <th style="padding:5px;width: 200px;min-width: 200px;">Starting Date</th>
-                                        <td style="padding:5px;min-width: 250px;">
-                                            {{$plan->shippment_start?Carbon\Carbon::parse($plan->shippment_start)->format('d.m.Y h:i A'):''}}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th style="padding:5px;">Ending Date</th>
-                                        <td style="padding:5px;">
-                                            {{$plan->shippment_end?Carbon\Carbon::parse($plan->shippment_end)->format('d.m.Y h:i A'):''}}
                                         </td>
                                     </tr>
                                 </table>

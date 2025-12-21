@@ -202,8 +202,8 @@
                             <tr>
                                 <td><b>Packing</b></td>
                                 <td>{{ $plan->packing_start?->format('d.m.Y H:i A') }} → {{ $plan->packing_end?->format('d.m.Y H:i A') }}</td>
-                                <td><b>Shipment</b></td>
-                                <td>{{ $plan->shippment_start?->format('d.m.Y H:i A') }} → {{ $plan->shippment_end?->format('d.m.Y H:i A') }}</td>
+                                <td><b>Planning By</b></td>
+                                <td>{{ $plan->user?->name }} ({{ $plan->created_at->format('d.m.Y') }})</td>
                             </tr>
                         </table>
 

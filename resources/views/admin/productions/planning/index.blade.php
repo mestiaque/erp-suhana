@@ -15,10 +15,19 @@
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Planning List</h3>
-             <div class="dropdown">
+             <div class="dropdown d-flex">
+                <form action="{{ route('admin.productionPlanning') }}" method="GET" target="_blank" class="d-inline">
+                    <input type="hidden" name="print" value="true">
+                    <input type="hidden" name="startDate" value="{{ request()->startDate }}">
+                    <input type="hidden" name="endDate" value="{{ request()->endDate }}">
+                    <input type="hidden" name="search" value="{{ request()->search }}">
+                    <button type="submit" class="btn btn-info btn-sm mr-1">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                </form>
 
                 @can('production_planning.add')
-                 <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                 <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary mr-1" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Planning
                  </a>
                 @endcan
@@ -74,7 +83,6 @@
                             <th style="min-width:200px">Swetting</th>
                             <th style="width: 150px">Total Hours</th>
                             <th style="width: 200px">Packing</th>
-                            <th style="width: 200px">Shippinment</th>
                             <th style="width: 200px">Plan By/Date</th>
                             <th style="width: 150px">Action/Status</th>
                         </tr>
@@ -106,10 +114,6 @@
                             <td>
                                 <b>S:</b> {{$order->packing_start?Carbon\Carbon::parse($order->packing_start)->format('d.m.Y h:i A'):''}}
                                 <br><b>E:</b> {{$order->packing_end?Carbon\Carbon::parse($order->packing_end)->format('d.m.Y h:i A'):''}}
-                            </td>
-                            <td>
-                                <b>S:</b> {{$order->shippment_start?Carbon\Carbon::parse($order->shippment_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->shippment_end?Carbon\Carbon::parse($order->shippment_end)->format('d.m.Y h:i A'):''}}
                             </td>
                             <td>
                                 <b>By:</b> {{ $order->user?->name }}

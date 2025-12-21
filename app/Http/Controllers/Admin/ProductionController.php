@@ -65,11 +65,56 @@ class ProductionController extends Controller
 
                 // STATUS
                 if ($r->status) {
-                    $q->where('pi_status', $r->status);
+                    $q->where('status', $r->status);
                 }
             })
             ->paginate(25)
             ->appends($r->all());
+
+        if($r->has('print')){
+            $rows = [];
+            $totalOrders = 0;
+            $totalColors = 0;
+
+            foreach ($orders as $order) {
+
+                $items = $order->style?->items ?? collect();
+
+                $itemNames  = $items->pluck('item_name')->unique()->values()->implode(', ');
+                $colors     = $items->pluck('color_name')->unique()->values()->implode(', ');
+                $colorQty   = $items->pluck('qty')->sum();
+
+                foreach ($order->sewingLines as $line) {
+
+                    $rows[] = [
+                        'buyer'        => $order->style?->buyer_name,
+                        'customer'     => $order->style?->buyer_name,
+                        'style_no'     => $order->style_no,
+                        'description'  => $itemNames,
+                        'order_qty'    => number_format($order->style_qty),
+                        'colors'       => $colors,
+                        'color_qty'    => number_format($colorQty),
+                        'line'         => $line->line_name,
+                        'status'       => ucfirst($order->status),
+                        'fabrication'  => $order->fabrication,
+                        'start_time'   => $order->sewing_start
+                                            ? Carbon::parse($order->sewing_start)->format('d M, h:i A')
+                                            : null,
+                        'end_time'     => $order->sewing_end
+                                            ? Carbon::parse($order->sewing_end)->format('d M, h:i A')
+                                            : null,
+                    ];
+                }
+
+                $totalOrders += $order->style_qty;
+                $totalColors += $colorQty;
+            }
+
+            $rows = collect($rows)->sortBy('line')->values();
+
+
+            return view(adminTheme().'productions.planning.printList',compact('totalOrders','totalColors','rows'));
+        }
 
         $totals = ProductionPlanning::whereNotIn('status', ['trash', 'temp'])
             ->selectRaw("COUNT(*) AS total")

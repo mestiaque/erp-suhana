@@ -69,7 +69,7 @@
                         <tr>
                             <th>SL</th>
                             <th>Buyer</th>
-                            <th style="min-width: 150px">Brand / Customer</th>
+                            <th style="min-width: 160px">Brand / Customer</th>
                             <th>Style No</th>
                             <th style="width: 130px;min-width: 130px">Order / PO No</th>
                             <th style="width: 130px;min-width: 130px">Order Qty</th>
@@ -89,7 +89,7 @@
                             <td>{{ $order->company_name ?? '--' }}</td>
                             <td>{{ $order->style_no ?? '--' }}</td>
                             <td>{{ $order->order_no ?? '--' }}</td>
-                            <td>{{ number_format($order->total_qty,2) }}</td>
+                            <td>{{ number_format($order->total_qty) }}</td>
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
                             <td>{{ $order->gsm ?? '--' }}</td>
