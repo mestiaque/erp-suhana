@@ -6,22 +6,31 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Media;
 use App\Models\Order;
+use App\Models\Budget;
 use App\Models\Sample;
 use App\Models\Product;
+use App\Models\BudgetCm;
 use App\Models\Attribute;
+use App\Models\BudgetTest;
+use App\Models\BudgetYarn;
 use App\Models\SampleItem;
 use App\Models\OrderDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
+use App\Models\BudgetDyeing;
 use Illuminate\Http\Request;
+use App\Models\BudgetSummary;
+use App\Models\BudgetKnitting;
 use App\Models\OrderDetailItem;
 use App\Models\ProformaInvoice;
+use App\Models\BudgetAccessories;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProformaInvoiceItem;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use App\Models\BudgetPrintEmbroidery;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -799,7 +808,7 @@ class MerchandisingController extends Controller
                 $buyer = User::find($r->buyer);
                 $merchant = User::find($r->merchant);
 
-               
+
 
                 // UPDATE ITEMS
                 $existingIds = [];
@@ -1491,9 +1500,19 @@ class MerchandisingController extends Controller
             ========================================================= */
             if ($action === 'create') {
 
-                $orders = OrderDetail::whereIn('status',[0,1])->get();
-                $pis    = ProformaInvoice::whereIn('status',[0,1])->get();
-                return view(adminTheme().'merchandising.budget.edit', compact('orders','pis'));
+                $pisAll    = ProformaInvoice::whereIn('status',[0,1])->get();
+                $pis = $pisAll->map(function($pi) {
+                                return [
+                                    'id'           => $pi->id,
+                                    'pi_no'        => $pi->pi_no,
+                                    'buyer_name'   => $pi->buyer_name,
+                                    'total_qty'    => $pi->items->sum('order_qty'),          // sum of all items qty
+                                    'total_bill'   => $pi->items->sum('total_price'),       // sum of all items amount
+                                    'style_count'  => $pi->items->unique('style_no')->count(), // unique style_no count
+                                    'order_count'  => $pi->items->unique('order_no')->count(), // unique order_no count
+                                ];
+                            });
+                return view(adminTheme().'merchandising.budget.edit', compact('pis'));
             }
 
             /* =========================================================
@@ -1552,102 +1571,80 @@ class MerchandisingController extends Controller
             ========================================================= */
             if ($action === 'store') {
 
-                $r->validate([
-                    'order_id' => 'required|exists:order_details,id',
-                    'style_no' => 'required|string|max:255'
+                $data = $r->all();
+
+                // 2️⃣ Store Budget Info
+                $budgetData = $data['budget'];
+                $budget = Budget::create([
+                    'buyer' => $budgetData['buyer'] ?? null,
+                    'pi_no' => $budgetData['pi_no'] ?? null,
+                    'total_styles' => $budgetData['total_styles'] ?? null,
+                    'total_pos' => $budgetData['total_pos'] ?? null,
+                    'item' => $budgetData['item'] ?? null,
+                    'lc_no' => $budgetData['lc_no'] ?? null,
+                    'lc_date' => $budgetData['lc_date'] ?? null,
+                    'lc_value' => $budgetData['lc_value'] ?? null,
+                    'ship_date' => $budgetData['ship_date'] ?? null,
+                    'pi_value' => $budgetData['pi_value'] ?? null,
+                    'total_qty' => $budgetData['total_qty'] ?? null,
                 ]);
 
-                DB::beginTransaction();
-                try {
+                // 3️⃣ Define all description tables
+                $tables = [
+                    'yarn_desc',
+                    'knitting_desc',
+                    'dyeing_desc',
+                    'accessories_desc',
+                    'print_emb_desc',
+                    'cm_desc',
+                    'test_desc'
+                ];
 
-                    $order = OrderDetail::find($r->order_id);
+                // 4️⃣ Loop through each table dynamically
+                foreach($tables as $table){
+                    if(isset($data[$table]) && is_array($data[$table])){
+                        $descData = $data[$table];
 
-                    $budget = Budget::create([
-                        'order_id'        => $order->id,
-                        'order_no'        => $order->order_no,
-                        'style_no'        => $r->style_no,
-                        'buyer_id'        => $order->buyer_id,
-                        'buyer_name'      => $order->buyer_name,
-                        'merchant_id'     => $order->merchant_id,
-                        'merchant_name'   => $order->merchant_name,
-                        'company_name'    => $order->company_name,
+                        // Determine the number of rows (by first array length)
+                        $firstKey = array_key_first($descData);
+                        $rowCount = count($descData[$firstKey]);
 
-                        'total_order_qty' => $order->total_qty,
-                        'shipment_date'   => $order->shipment_date,
+                        for($i = 0; $i < $rowCount; $i++){
+                            $row = [];
+                            foreach($descData as $column => $values){
+                                // Assign value if exists
+                                $row[$column] = $values[$i] ?? null;
+                            }
 
-                        'pre_cost_date'   => $r->pre_cost_date,
-                        'post_cost_date'  => $r->post_cost_date,
-
-                        'status'          => 'draft',
-                        'created_by'      => Auth::id(),
-                    ]);
-
-                    /* ---------- YARNS ---------- */
-                    if ($r->yarn_desc) {
-                        foreach ($r->yarn_desc['fab_desc'] as $i => $v) {
-                            BudgetYarn::create([
-                                'budget_id'       => $budget->id,
-                                'fab_desc'        => $v,
-                                'supplier_name'   => $r->yarn_desc['supplier_name'][$i] ?? null,
-                                'yarn_count'      => $r->yarn_desc['yarn_count'][$i] ?? null,
-                                'unit_price'      => $r->yarn_desc['unit_price'][$i] ?? 0,
-                                'consumption'     => $r->yarn_desc['consumption'][$i] ?? 0,
-                                'wastage_percent' => $r->yarn_desc['w'][$i] ?? 0,
-                                'total_qty'       => $r->yarn_desc['total_qty'][$i] ?? 0,
-                                'total_cost'      => $r->yarn_desc['total_cost'][$i] ?? 0,
-                                'pre_cost_percent'=> $r->yarn_desc['pre_cost'][$i] ?? 0,
-                                'created_by'      => Auth::id(),
+                            // Save dynamically (TestItem model used for all tables)
+                            BudgetTest::create([
+                                'budget_id' => $budget->id,
+                                'category' => $table, // e.g. 'yarn_desc', 'test_desc', etc.
+                                'description' => $row['description'] ?? $row['test'] ?? null,
+                                'supplier' => $row['supplier'] ?? $row['test_supplier'] ?? null,
+                                'qty' => $row['qty'] ?? $row['test_qty'] ?? null,
+                                'unit_price' => $row['unit_price'] ?? $row['test_unit_price'] ?? null,
+                                'ttl_usd' => $row['ttl_usd'] ?? $row['test_ttl_usd'] ?? null,
+                                'item_total' => $row['item_total'] ?? $row['test_item_total'] ?? null,
+                                'percent' => $row['percent'] ?? $row['test_percent'] ?? null,
+                                'company_name' => $row['company_name'] ?? $row['test_company'] ?? null,
+                                'payment_value' => $row['payment_value'] ?? $row['test_payment_value'] ?? null,
                             ]);
                         }
                     }
-
-                    /* ---------- KNITTING ---------- */
-                    if ($r->knitting_desc) {
-                        foreach ($r->knitting_desc['fab_desc'] as $i => $v) {
-                            BudgetKnitting::create([
-                                'budget_id'       => $budget->id,
-                                'fab_desc'        => $v,
-                                'supplier_name'   => $r->knitting_desc['supplier_name'][$i] ?? null,
-                                'yarn_count'      => $r->knitting_desc['yarn_count'][$i] ?? null,
-                                'unit_price'      => $r->knitting_desc['unit_price'][$i] ?? 0,
-                                'consumption'     => $r->knitting_desc['consumption'][$i] ?? 0,
-                                'wastage_percent' => $r->knitting_desc['w'][$i] ?? 0,
-                                'total_qty'       => $r->knitting_desc['total_qty'][$i] ?? 0,
-                                'total_cost'      => $r->knitting_desc['total_cost'][$i] ?? 0,
-                                'pre_cost_percent'=> $r->knitting_desc['pre_cost'][$i] ?? 0,
-                                'created_by'      => Auth::id(),
-                            ]);
-                        }
-                    }
-
-                    /* ---------- ACCESSORIES ---------- */
-                    if ($r->accessories_desc) {
-                        foreach ($r->accessories_desc['accessories_des'] as $i => $v) {
-                            BudgetAccessory::create([
-                                'budget_id'       => $budget->id,
-                                'accessories_desc'=> $v,
-                                'supplier_name'   => $r->accessories_desc['supplier_name'][$i] ?? null,
-                                'unit_price'      => $r->accessories_desc['unit_price'][$i] ?? 0,
-                                'unit_number'     => $r->accessories_desc['unit_number'][$i] ?? 0,
-                                'consumption'     => $r->accessories_desc['consumption'][$i] ?? 0,
-                                'wastage_percent' => $r->accessories_desc['w'][$i] ?? 0,
-                                'total_qty'       => $r->accessories_desc['total_qty'][$i] ?? 0,
-                                'total_cost'      => $r->accessories_desc['total_cost'][$i] ?? 0,
-                                'pre_cost_percent'=> $r->accessories_desc['pre_cost'][$i] ?? 0,
-                                'created_by'      => Auth::id(),
-                            ]);
-                        }
-                    }
-
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollback();
-                    session()->flash('error','Error: '.$e->getMessage());
-                    return back();
                 }
 
-                session()->flash('success','Budget Created Successfully');
-                return redirect()->route('admin.budget.index');
+                // 5️⃣ Optionally store summary & prod_cost if needed
+                // if(isset($data['summary'])){
+                //     Summary::create(array_merge($data['summary'], ['budget_id' => $budget->id]));
+                // }
+
+                // if(isset($data['prod_cost'])){
+                //     ProdCost::create(array_merge($data['prod_cost'], ['budget_id' => $budget->id]));
+                // }
+
+                return redirect()
+                ->route('admin.budgetAction', ['create']);
             }
 
             /* =========================================================
@@ -1708,6 +1705,14 @@ class MerchandisingController extends Controller
             return view(adminTheme().'merchandising.budget.edit', compact('budget'));
         }
 
+        private function saveTableItems($budgetId, $request, $key, $modelClass)
+        {
+            if(isset($request->$key) && is_array($request->$key)){
+                foreach($request->$key as $item){
+                    $modelClass::create(array_merge($item, ['budget_id'=>$budgetId]));
+                }
+            }
+        }
 
 
 }

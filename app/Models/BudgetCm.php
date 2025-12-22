@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BudgetYarn extends Model
+class BudgetCm extends Model
 {
-    protected $table = 'budget_yarn';
+    protected $table = 'budget_cm';
     protected $fillable = [
         'budget_id',
         'description',
