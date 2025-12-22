@@ -144,29 +144,29 @@ class MerchandisingController extends Controller
             ]);
 
             // Check active user
-            $existsUser = User::where(function ($q) use ($r) {
+            // $existsUser = User::where(function ($q) use ($r) {
 
-                    if (!empty($r->email)) {
-                        $q->where('email', $r->email);
-                    }
+            //         if (!empty($r->email)) {
+            //             $q->where('email', $r->email);
+            //         }
 
-                    if (!empty($r->mobile)) {
-                        $q->orWhere('mobile', $r->mobile);
-                    }
+            //         if (!empty($r->mobile)) {
+            //             $q->orWhere('mobile', $r->mobile);
+            //         }
 
-                })->first();
+            //     })->first();
 
-            if ($existsUser) {
-                if($r->has('api')){
-                    return response()->json([
-                        'success'       => false,
-                        'msg'           => "his email or mobile alrady used.",
-                        'buyer_created' => false,
-                    ]);
-                }
-                Session()->flash('error','This email or mobile alrady used.');
-                return redirect()->back();
-            }
+            // if ($existsUser) {
+            //     if($r->has('api')){
+            //         return response()->json([
+            //             'success'       => false,
+            //             'msg'           => "his email or mobile alrady used.",
+            //             'buyer_created' => false,
+            //         ]);
+            //     }
+            //     Session()->flash('error','This email or mobile alrady used.');
+            //     return redirect()->back();
+            // }
 
             // Create new buyer
             $password = Str::random(8);
@@ -719,12 +719,12 @@ class MerchandisingController extends Controller
         }
 
         // LOCKED ORDERS ARE READ ONLY
-        if (!in_array($orderDetails->status, ['temp', 'pending']) &&
-            in_array($action, ['edit', 'delete', 'update-head', 'update-items'])
-        ) {
-            session()->flash('error', 'Order is confirmed & cannot be edited.');
-            return redirect()->route('admin.orderDetails');
-        }
+        // if (!in_array($orderDetails->status, ['temp', 'pending']) &&
+        //     in_array($action, ['edit', 'delete', 'update-head', 'update-items'])
+        // ) {
+        //     session()->flash('error', 'Order is confirmed & cannot be edited.');
+        //     return redirect()->route('admin.orderDetails');
+        // }
 
         /* ---------------------------------------------------------------------
         * UPDATE HEADER
