@@ -46,7 +46,7 @@
                     </div>
                     <div class="col-md-6 d-flex">
                         <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control me-1"
-                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, GSM">
+                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication">
                         <button type="submit" class="btn btn-success btn-sm">Search</button>
                     </div>
                 </div>
@@ -75,7 +75,6 @@
                             <th style="width: 130px;min-width: 130px">Order Qty</th>
                             <th style="width: 140px;min-width: 140px">Shipment Date</th>
                             <th>Fabrication</th>
-                            <th>GSM</th>
                             <th>Remarks</th>
                             <th>Status</th>
                             <th style="width: 140px;min-width: 140px">Action</th>
@@ -92,7 +91,6 @@
                             <td>{{ number_format($order->total_qty) }}</td>
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
-                            <td>{{ $order->gsm ?? '--' }}</td>
                             <td>{{ $order->remarks ?? '--' }}</td>
                             <td>
                                 @php

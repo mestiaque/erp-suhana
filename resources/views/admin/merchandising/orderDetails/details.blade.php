@@ -61,15 +61,6 @@
                                 <strong>Fabrication</strong>
                                 <div>{{ $order->fabrication ?? '--' }}</div>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <strong>Composition</strong>
-                                <div>{{ $order->composition ?? '--' }}</div>
-                            </div>
-
-                            <div class="col-md-4 mb-2">
-                                <strong>GSM</strong>
-                                <div>{{ $order->gsm ?? '--' }}</div>
-                            </div>
 
                             <div class="col-md-4 mb-2">
                                 <strong>Status</strong><br>
@@ -84,11 +75,12 @@
                                 @elseif($order->status=='canceled')
                                     <span class="badge badge-danger">Cancelled</span>
                                 @endif
-                                ({{$order->createdBy?->name}})
+
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <strong>Created Date</strong><br>
+                            <div class="col-md-12 mb-2">
+                                <strong>Created Info</strong><br>
                                 {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d.m.Y h:i A') : '--' }}
+                                ({{$order->createdBy?->name}})
                             </div>
 
                             <div class="col-md-12 mt-2">
@@ -113,6 +105,7 @@
                                     <th>SL</th>
                                     <th>Item Name</th>
                                     <th>Composition</th>
+                                    <th>GSM</th>
                                     <th>Color Name</th>
                                     <th>Qnty</th>
                                 </tr>
@@ -122,7 +115,8 @@
                                     <tr>
                                         <td>{{ $ii + 1 }}</td>
                                         <td>{{ $item->item_name ?? '--' }}</td>
-                                        <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
+                                        <td>{{ $item->composition ?? '--' }}</td>
+                                        <td>{{ $item->gsm ?? '--' }}</td>
                                         <td>{{ $item->color_name ?? '--' }}</td>
                                         <td>{{ number_format($item->qty) }}</td>
                                     </tr>

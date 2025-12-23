@@ -123,26 +123,8 @@
 
                 <div class="invoice-container invoice-inner">
 
-                    <div class="invoice-header">
+                    <div class="invoice-header" >
                         <div style="text-align:center;">
-                            {{-- <h2 style="" class="company-title">
-                                <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 60px; margin-right: 1rem;">
-                                   {{general()->title}}
-                            </h2>
-                            <p style="color: coral;margin-top: -1.3rem;    margin-bottom: 5px;">(100%Export Oriented Garments Manufacturing Factory)</p>
-                            <p style="margin-top: -10px; margin-bottom:2px">
-                                {!!general()->address_one!!}
-                            </p>
-                            <p style="margin-top: -10px; margin-bottom:2px">
-                                <span style="color: #0000ff8c">
-                                    <b>Phone:</b> {{general()->mobile}}
-                                    <b>Email:</b> {{general()->email}}
-                                </span>
-                            </p> --}}
-
-
-
-
                             <div style="width:100%; display:table; table-layout:fixed; margin-bottom:5px">
                                 <div style="display:table-row;">
 
@@ -181,6 +163,31 @@
                             <h6 style="margin:2px;margin-top:5px;"><b>PROFORMA INVOICE</b> </h6>
                         </div>
                     </div>
+
+
+                        <div class="text-center mb-2" style="display:none">
+                            <div class="row text-left">
+                                <div class="col-1 psss-0">
+                                    <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 44px;">
+                                </div>
+                                <div class="col-8 p-0" style="text-align: left; font-size:16px">
+                                    <p style="text-align: center; font-size: 40px; font-family: serif; line-height: 39px;">
+                                        {{general()->title}}
+                                    </p>
+                                </div>
+                                <div class="col-3 p-0" style="text-align: left">
+
+                                    {!!general()->address_one!!}<br>
+                                    <b>Phone:</b> {{general()->mobile}}
+                                    <br>
+                                    <b>Email:</b> {{general()->email}}<br>
+                                </div>
+                            </div>
+
+                                <span style="display: inline-block;padding: 2px 25px;border: 1px solid #ddd;border-radius: 4px;background: #fbfbfb;">
+                                    Order Details
+                                </span>
+                            </div>
                     <div>
                         <div class="row d-none" style="margin:0px">
                             <div class="col-8" style="padding:0px;">

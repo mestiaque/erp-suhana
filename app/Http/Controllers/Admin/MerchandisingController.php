@@ -664,6 +664,7 @@ class MerchandisingController extends Controller
                 if ($field == 'color_name') {
                     $item->color_name = $value ?: null;
                 }
+
                 if ($field == 'qty') {
                     $item->qty = $value ?: 0;
                 }
@@ -787,19 +788,19 @@ class MerchandisingController extends Controller
         if ($action === 'update') {
 
             $r->validate([
-                'buyer'      => 'required|exists:users,id',
-                'merchant'   => 'required|exists:users,id',
-                'style_no'   => 'required|string|max:255',
-                'order_no'   => 'required|string|max:255',
-                'status'     => 'required|string|max:50',
+                'buyer'         => 'required|exists:users,id',
+                'merchant'      => 'required|exists:users,id',
+                'style_no'      => 'required|string|max:255',
+                'order_no'      => 'required|string|max:255',
+                'status'        => 'required|string|max:50',
                 'shipment_date' => 'nullable|date',
-                'composition'   => 'nullable|string|max:255',
                 'fabrication'   => 'nullable|string|max:255',
-                'gsm'           => 'nullable|string|max:50',
-
-                // ITEM VALIDATION
-                'colors.*' => 'nullable|string|max:100',
-                'qtys.*'   => 'nullable|numeric|min:0',
+                  // ITEM VALIDATION
+                'item_name.*'   => 'nullable|string|max:255',
+                'colors.*'      => 'required|string|max:100',
+                'qtys.*'        => 'required|numeric|min:0',
+                'gsm.*'         => 'required|string',
+                'compositions.*'=> 'required|string',
             ]);
 
             DB::beginTransaction();
@@ -808,66 +809,64 @@ class MerchandisingController extends Controller
                 $buyer = User::find($r->buyer);
                 $merchant = User::find($r->merchant);
 
-
-
-                // UPDATE ITEMS
                 $existingIds = [];
                 if ($r->colors) {
                     foreach ($r->colors as $itemId => $color) {
-                        $qty = $r->qtys[$itemId] ?? 0;
+
+                        $qty         = $r->qtys[$itemId] ?? 0;
+                        $gsm         = $r->gsm[$itemId] ?? null;
+                        $composition = $r->compositions[$itemId] ?? null;
+                        $itemName    = $r->item_name[$itemId] ?? null;
+
                         if (!$color && !$qty) continue;
 
+                        $data = [
+                            'item_name'      => $itemName,
+                            'color_name'     => $color,
+                            'qty'            => $qty,
+                            'gsm'            => $gsm,
+                            'composition'    => $composition,
+                            'order_no'       => $orderDetails->order_no,
+                            'style_no'       => $orderDetails->style_no,
+                            'fabrication'    => $orderDetails->fabrication,
+                            'shipment_date'  => $orderDetails->shipment_date,
+                        ];
+
+                        // UPDATE EXISTING
                         if (is_numeric($itemId)) {
                             $item = OrderDetailItem::where('id', $itemId)
                                 ->where('order_detail_id', $orderDetails->id)
                                 ->first();
+
                             if ($item) {
-                                $item->update([
-                                    'color_name' => $color,
-                                    'qty'        => $qty,
-                                    'order_no'   => $orderDetails->order_no,
-                                    'style_no'   => $orderDetails->style_no,
-                                    'composition' => $orderDetails->composition,
-                                    'fabrication' => $orderDetails->fabrication,
-                                    'gsm'         => $orderDetails->gsm,
-                                    'shipment_date' => $orderDetails->shipment_date,
-                                ]);
+                                $item->update($data);
                                 $existingIds[] = $item->id;
                             }
-                        } else {
-                            $item = $orderDetails->items()->create([
-                                'color_name'    => $color,
-                                'qty'           => $qty,
-                                'order_no'      => $orderDetails->order_no,
-                                'style_no'      => $orderDetails->style_no,
-                                'composition'   => $orderDetails->composition,
-                                'fabrication'   => $orderDetails->fabrication,
-                                'gsm'           => $orderDetails->gsm,
-                                'shipment_date' => $orderDetails->shipment_date,
-                            ]);
+                        }
+                        // CREATE NEW
+                        else {
+                            $item = $orderDetails->items()->create($data);
                             $existingIds[] = $item->id;
                         }
                     }
                 }
 
-                 $orderDetails->update([
-                    'buyer_id'      => $buyer?->id ?? null,
-                    'buyer_name'    => $buyer?->name ?? null,
-                    'merchant_id'   => $merchant?->id ?? null,
-                    'merchant_name' => $merchant?->name ?? null,
+                // UPDATE HEADER
+                $orderDetails->update([
+                    'buyer_id'      => $buyer?->id,
+                    'buyer_name'    => $buyer?->name,
+                    'merchant_id'   => $merchant?->id,
+                    'merchant_name' => $merchant?->name,
                     'style_no'      => $r->style_no,
                     'order_no'      => $r->order_no,
                     'status'        => $r->status,
                     'shipment_date' => $r->shipment_date,
-                    'composition'   => $r->composition,
                     'fabrication'   => $r->fabrication,
-                    'gsm'           => $r->gsm,
                     'total_qty'     => $orderDetails->items()->sum('qty'),
                 ]);
 
-
                 // DELETE REMOVED ITEMS
-                if(count($existingIds)){
+                if (count($existingIds)) {
                     OrderDetailItem::where('order_detail_id', $orderDetails->id)
                         ->whereNotIn('id', $existingIds)
                         ->delete();

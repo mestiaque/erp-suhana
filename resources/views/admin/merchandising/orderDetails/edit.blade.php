@@ -166,22 +166,6 @@
                                required>
                     </div>
 
-                    <!-- Composition -->
-                    <div class="col-md-6 mb-2">
-                        <label>Composition *</label>
-                        <select name="composition" class="form-control updateHead"
-                                data-name="composition"
-                                data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
-                                required>
-                            <option value="">-- Select Composition --</option>
-                            @foreach($compositions as $comp)
-                                <option value="{{ $comp }}" {{ $orderDetails->composition == $comp ? 'selected':'' }}>
-                                    {{ $comp }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <!-- Fabrication -->
                     <div class="col-md-6 mb-2">
                         <label>Fabrication *</label>
@@ -196,16 +180,6 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-
-                    <!-- GSM -->
-                    <div class="col-md-6 mb-2">
-                        <label>GSM *</label>
-                        <input type="text" name="gsm" class="form-control updateHead" placeholder="GSM"
-                               value="{{ $orderDetails->gsm }}"
-                               data-name="gsm"
-                               data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
-                               required>
                     </div>
 
                     <!-- Status -->
@@ -238,6 +212,7 @@
                             <tr>
                                 <th style="width:20%">Item</th>
                                 <th style="width:25%">Composition</th>
+                                <th style="width:15%">GSM</th>
                                 <th style="width:25%">Color Name</th>
                                 <th style="width:15%">Qnty</th>
                                 <th style="width:5%"></th>
@@ -275,6 +250,14 @@
                                         </select>
                                     </td>
 
+                                    <td>
+                                        <input type="text" name="gsm[{{ $item->id }}]" class="form-control updateItem" placeholder="GSM"
+                                            value="{{ $item->gsm }}"
+                                            data-name="gsm"
+                                            data-url="{{ route('admin.orderDetailsAction',['update-item',$item->id]) }}"
+                                            required>
+                                    </td>
+
                                     {{-- COLOR --}}
                                     <td>
                                         <input type="text"
@@ -309,6 +292,19 @@
                             @endforeach
                         @endif
                         </tbody>
+                        <tfoot style="font-weight: 600">
+                            <tr>
+                                <td colspan="4" style="vertical-align: middle" class="text-right">Total Qnty : </td>
+                                <td>
+                                        <input type="number" name="total_qty" class="form-control total_qty updateHead" style="font-weight: 600; background:none; border:none"
+                                        value="{{ $orderDetails->total_qty }}" readonly
+                                        data-name="total_qty"
+                                        data-url="{{ route('admin.orderDetailsAction',['update-head',$orderDetails->id]) }}"
+                                        required>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 
@@ -365,15 +361,21 @@ $("#addColorRow").click(function () {
                     <td>
                         <select name="compositions[${res.id}]"
                             class="form-control updateItem color-composition"
-                            data-name="composition"
+                            data-name="composition" required
                             data-url="${updateUrl}">
                             ${compOptions}
                         </select>
                     </td>
                     <td>
+                        <input type="text" name="gsm[${res.id}]" class="form-control updateItem" placeholder="GSM"
+                            data-name="gsm"
+                            data-url="${updateUrl}"
+                            required>
+                    </td>
+                    <td>
                         <input type="text" name="colors[${res.id}]"
                             class="form-control updateItem"
-                            data-name="color_name"
+                            data-name="color_name" required
                             data-url="${updateUrl}"
                             placeholder="Color">
                     </td>
