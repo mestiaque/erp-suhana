@@ -503,7 +503,7 @@
                     </div>
 
 
-                    <div style="margin-top: 3.5rem">
+                    <div style="margin-top: 3.5rem ;page-break-inside: avoid;  break-inside: avoid;">
                         <div style="width:100%; display: table; table-layout: fixed;">
                            <div style="display: table-row;">
                                <div style="display: table-cell; width:33.33%; padding:10px; ">

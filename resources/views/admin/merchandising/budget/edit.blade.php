@@ -32,23 +32,28 @@
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered align-middle headerTable">
                                 <tbody>
-
+{{-- @dd($budget->pi_no) --}}
                                     <tr>
                                         <th width="10%">P.I. No.</th>
                                         <td width="30%">
-                                        <select name="budget[pi_no]" id="pi_id" class="form-control form-control-sm">
-                                            <option value=""> -- Select PI -- </option>
-                                            @foreach ($pis as $pi)
-                                                <option value="{{ $pi['id'] }}"
-                                                        data-pi-json='@json($pi, JSON_HEX_APOS | JSON_HEX_QUOT)'>
-                                                    {{ $pi['pi_no'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        @if($budget && $budget->pi_no)
+                                            <input type="hidden" name="budget[pi_no]" value="{{ $budget->pi_no }}">
+                                            <input type="text" class="form-control form-control-sm" value="{{ $budget->pi_no ?? '' }}" readonly>
+                                        @else
+                                            <select name="budget[pi_no]" id="pi_id" class="form-control form-control-sm">
+                                                <option value=""> -- Select PI -- </option>
+                                                @foreach ($pis as $pi)
+                                                    <option value="{{ $pi['id'] }}"
+                                                            data-pi-json='@json($pi, JSON_HEX_APOS | JSON_HEX_QUOT)'>
+                                                        {{ $pi['pi_no'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @endif
                                         </td>
                                         <th width="10%">BUYER</th>
                                         <td width="30%">
-                                            <input type="text" name="budget[buyer]" class="form-control form-control-sm buyer_name" value="" readonly>
+                                            <input type="text" name="budget[buyer]" class="form-control form-control-sm buyer_name" value="{{ $budget->buyer ?? '' }}" readonly>
                                         </td>
 
                                         <th width="10%" class="text-center">GMTS PICTURE</th>
@@ -57,12 +62,12 @@
                                     <tr>
                                         <th>TOTAL STYLES</th>
                                         <td>
-                                            <input type="text" name="budget[total_styles]" class="form-control form-control-sm style_count" value="" readonly>
+                                            <input type="text" name="budget[total_styles]" class="form-control form-control-sm style_count" value="{{ $budget->total_styles ?? '' }}" readonly>
                                         </td>
 
                                         <th>TOTAL POs</th>
                                         <td>
-                                            <input type="text" name="budget[total_pos]" class="form-control form-control-sm order_count" value="" readonly>
+                                            <input type="text" name="budget[total_pos]" class="form-control form-control-sm order_count" value="{{ $budget->total_pos ?? '' }}" readonly>
                                         </td>
 
                                         <td width="10%" rowspan="5">
@@ -106,12 +111,12 @@
                                     <tr>
                                         <th>P.I. VALUE</th>
                                         <td>
-                                            <input type="number" name="budget[pi_value]" class="form-control form-control-sm pi_value" id="pi-value" value="0.00" readonly>
+                                            <input type="number" name="budget[pi_value]" class="form-control form-control-sm pi_value" id="pi-value" value="{{ $budget->pi_value ?? 0.00 }}" readonly>
                                         </td>
 
                                         <th>TOTAL QTY (PCS)</th>
                                         <td>
-                                            <input type="number" name="budget[total_qty]" class="form-control form-control-sm total_qty" value="0" readonly>
+                                            <input type="number" name="budget[total_qty]" class="form-control form-control-sm total_qty" value="{{ $budget->total_qty ?? 0 }}" readonly>
                                         </td>
                                     </tr>
 
@@ -153,7 +158,7 @@
                                         <td><input type="number" step="any" name="yarn_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
                                         <td><input type="number" step="any" name="yarn_desc[percent][]" class="form-control form-control-sm" readonly></td>
                                         <td><input type="text" name="yarn_desc[company_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="number" step="any" name="yarn_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" step="any" name="yarn_desc[payment_value][]" class="form-control form-control-sm"></td>
                                         <td class="text-center">
                                             <button type="button" class="btn btn-sm btn-danger removeRow"><i class="fas fa-times"></i></button>
                                         </td>
@@ -202,7 +207,7 @@
                                         <td><input type="number" step="any" name="knitting_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
                                         <td><input type="number" step="any" name="knitting_desc[percent][]" class="form-control form-control-sm" readonly></td>
                                         <td><input type="text" name="knitting_desc[company_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="number" step="any" name="knitting_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" step="any" name="knitting_desc[payment_value][]" class="form-control form-control-sm"></td>
                                         <td class="text-center">
                                             <button type="button" class="btn btn-sm btn-danger removeRow"><i class="fas fa-times"></i></button>
                                         </td>
@@ -285,7 +290,7 @@
                                                 class="form-control form-control-sm">
                                         </td>
                                         <td>
-                                            <input type="number" step="any"
+                                            <input type="text" step="any"
                                                 name="dyeing_desc[payment_value][]"
                                                 class="form-control form-control-sm">
                                         </td>
@@ -395,7 +400,7 @@
                                                     class="form-control form-control-sm">
                                             </td>
                                             <td>
-                                                <input type="number" step="any"
+                                                <input type="text" step="any"
                                                     name="accessories_desc[payment_value][]"
                                                     class="form-control form-control-sm">
                                             </td>
@@ -449,7 +454,7 @@
                                         <td><input type="number" step="any" name="print_emb_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
                                         <td><input type="number" step="any" name="print_emb_desc[percent][]" class="form-control form-control-sm" readonly></td>
                                         <td><input type="text" name="print_emb_desc[company_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="number" step="any" name="print_emb_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" step="any" name="print_emb_desc[payment_value][]" class="form-control form-control-sm"></td>
                                         <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow"><i class="fas fa-times"></i></button></td>
                                     </tr>
                                 </tbody>
@@ -495,7 +500,7 @@
                                         <td><input type="number" step="any" name="cm_desc[item_total][]" class="form-control form-control-sm item_total" readonly></td>
                                         <td><input type="number" step="any" name="cm_desc[percent][]" class="form-control form-control-sm" readonly></td>
                                         <td><input type="text" name="cm_desc[company_name][]" class="form-control form-control-sm"></td>
-                                        <td><input type="number" step="any" name="cm_desc[payment_value][]" class="form-control form-control-sm"></td>
+                                        <td><input type="text" step="any" name="cm_desc[payment_value][]" class="form-control form-control-sm"></td>
                                         <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow"><i class="fas fa-times"></i></button></td>
                                     </tr>
                                 </tbody>

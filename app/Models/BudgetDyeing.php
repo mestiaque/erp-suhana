@@ -8,18 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BudgetDyeing extends Model
 {
     protected $table = 'budget_dyeing';
-    protected $fillable = [
-        'budget_id',
-        'description',
-        'supplier',
-        'qty',
-        'unit_price',
-        'ttl_usd',
-        'item_total',
-        'percent',
-        'company_name',
-        'payment_value',
-    ];
+    protected $guarded = [];
+
 
     public function budget(): BelongsTo
     {

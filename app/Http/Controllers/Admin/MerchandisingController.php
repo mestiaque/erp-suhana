@@ -1523,127 +1523,56 @@ class MerchandisingController extends Controller
                     session()->flash('error','Budget Not Found');
                     return redirect()->route('admin.budget.index');
                 }
-
-                // locked protection
-                if (!in_array($budget->status,['draft','revised']) &&
-                    in_array($action,['edit','update','delete'])) {
-                    session()->flash('error','Approved budget cannot be modified');
-                    return redirect()->route('admin.budget.index');
-                }
-            }
-
-            /* =========================================================
-            | GET STYLE (WHEN PI SELECTED)
-            ========================================================= */
-            if ($action === 'get-style') {
-
-                $pi = ProformaInvoice::find($r->pi_id);
-                if (!$pi) return response()->json([]);
-
-                $styles = ProformaInvoiceItem::where('proforma_invoice_id',$pi->id)
-                            ->pluck('style_no')
-                            ->unique()
-                            ->values();
-
-                return response()->json($styles);
-            }
-
-            /* =========================================================
-            | GET DATA (WHEN STYLE SELECTED)
-            ========================================================= */
-            if ($action === 'get-data') {
-
-                $piId  = $r->pi_id;
-                $style = $r->style_no;
-
-                $items = ProformaInvoiceItem::where('proforma_invoice_id',$piId)
-                            ->where('style_no',$style)
-                            ->get();
-
-                return response()->json([
-                    'items' => $items
-                ]);
             }
 
             /* =========================================================
             | STORE (SAVE NEW BUDGET)
             ========================================================= */
             if ($action === 'store') {
+                DB::beginTransaction();
 
-                $data = $r->all();
+                try {
+                    $data = $r->all();
 
-                // 2️⃣ Store Budget Info
-                $budgetData = $data['budget'];
-                $budget = Budget::create([
-                    'buyer' => $budgetData['buyer'] ?? null,
-                    'pi_no' => $budgetData['pi_no'] ?? null,
-                    'total_styles' => $budgetData['total_styles'] ?? null,
-                    'total_pos' => $budgetData['total_pos'] ?? null,
-                    'item' => $budgetData['item'] ?? null,
-                    'lc_no' => $budgetData['lc_no'] ?? null,
-                    'lc_date' => $budgetData['lc_date'] ?? null,
-                    'lc_value' => $budgetData['lc_value'] ?? null,
-                    'ship_date' => $budgetData['ship_date'] ?? null,
-                    'pi_value' => $budgetData['pi_value'] ?? null,
-                    'total_qty' => $budgetData['total_qty'] ?? null,
-                ]);
+                    $budgetData = $data['budget'];
+                    $pi = ProformaInvoice::find($budgetData['pi_no']);
 
-                // 3️⃣ Define all description tables
-                $tables = [
-                    'yarn_desc',
-                    'knitting_desc',
-                    'dyeing_desc',
-                    'accessories_desc',
-                    'print_emb_desc',
-                    'cm_desc',
-                    'test_desc'
-                ];
+                    $budget = Budget::create([
+                        'pi_id' => $pi ? $pi->id : null,
+                        'pi_no' => $pi ? $pi->pi_no : $budgetData['pi_no'] ?? null,
+                        'buyer' => $budgetData['buyer'] ?? null,
+                        'total_po' => $budgetData['total_pos'] ?? null,
+                        'total_style' => $budgetData['total_styles'] ?? null,
+                        'item' => $budgetData['item'] ?? null,
+                        'lc_no' => $budgetData['lc_no'] ?? null,
+                        'lc_value' => $budgetData['lc_value'] ?? null,
+                        'lc_date' => $budgetData['lc_date'] ?? null,
+                        'shipment_date' => $budgetData['ship_date'] ?? null,
+                        'pi_value' => $budgetData['pi_value'] ?? null,
+                        'total_qty' => $budgetData['total_qty'] ?? null,
+                        'created_at' => now(),
+                        'created_by' => auth()->user()->id ?? null,
+                    ]);
 
-                // 4️⃣ Loop through each table dynamically
-                foreach($tables as $table){
-                    if(isset($data[$table]) && is_array($data[$table])){
-                        $descData = $data[$table];
+                    // Save budget sections
+                    $this->saveBudgetSection($budget, $data['yarn_desc'], \App\Models\BudgetYarn::class);
+                    $this->saveBudgetSection($budget, $data['knitting_desc'], \App\Models\BudgetKnitting::class);
+                    $this->saveBudgetSection($budget, $data['dyeing_desc'], \App\Models\BudgetDyeing::class);
+                    $this->saveBudgetSection($budget, $data['accessories_desc'], \App\Models\BudgetAccessory::class);
+                    $this->saveBudgetSection($budget, $data['print_emb_desc'], \App\Models\BudgetPrintEmbroidery::class);
+                    $this->saveBudgetSection($budget, $data['cm_desc'], \App\Models\BudgetCm::class);
+                    $this->saveBudgetSection($budget, $data['test_desc'], \App\Models\BudgetTest::class);
 
-                        // Determine the number of rows (by first array length)
-                        $firstKey = array_key_first($descData);
-                        $rowCount = count($descData[$firstKey]);
+                    DB::commit();
 
-                        for($i = 0; $i < $rowCount; $i++){
-                            $row = [];
-                            foreach($descData as $column => $values){
-                                // Assign value if exists
-                                $row[$column] = $values[$i] ?? null;
-                            }
-
-                            // Save dynamically (TestItem model used for all tables)
-                            BudgetTest::create([
-                                'budget_id' => $budget->id,
-                                'category' => $table, // e.g. 'yarn_desc', 'test_desc', etc.
-                                'description' => $row['description'] ?? $row['test'] ?? null,
-                                'supplier' => $row['supplier'] ?? $row['test_supplier'] ?? null,
-                                'qty' => $row['qty'] ?? $row['test_qty'] ?? null,
-                                'unit_price' => $row['unit_price'] ?? $row['test_unit_price'] ?? null,
-                                'ttl_usd' => $row['ttl_usd'] ?? $row['test_ttl_usd'] ?? null,
-                                'item_total' => $row['item_total'] ?? $row['test_item_total'] ?? null,
-                                'percent' => $row['percent'] ?? $row['test_percent'] ?? null,
-                                'company_name' => $row['company_name'] ?? $row['test_company'] ?? null,
-                                'payment_value' => $row['payment_value'] ?? $row['test_payment_value'] ?? null,
-                            ]);
-                        }
-                    }
+                    return redirect()->route('admin.budgetAction', ['create'])
+                                    ->with('success', 'Budget saved successfully!');
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    return redirect()->back()
+                                    ->with('error', 'Failed to save budget: ' . $e->getMessage())
+                                    ->withInput();
                 }
-
-                // 5️⃣ Optionally store summary & prod_cost if needed
-                // if(isset($data['summary'])){
-                //     Summary::create(array_merge($data['summary'], ['budget_id' => $budget->id]));
-                // }
-
-                // if(isset($data['prod_cost'])){
-                //     ProdCost::create(array_merge($data['prod_cost'], ['budget_id' => $budget->id]));
-                // }
-
-                return redirect()
-                ->route('admin.budgetAction', ['create']);
             }
 
             /* =========================================================
@@ -1652,34 +1581,50 @@ class MerchandisingController extends Controller
             if ($action === 'update') {
 
                 DB::beginTransaction();
-                try {
 
+                try {
                     $budget->update([
                         'pre_cost_date'  => $r->pre_cost_date,
                         'post_cost_date' => $r->post_cost_date,
                         'remarks'        => $r->remarks,
                         'status'         => $r->status,
-                        'updated_by'     => Auth::id(),
+                        'updated_by'     => auth()->id(),
+                        'updated_at'     => now(),
                     ]);
 
-                    // Simple strategy: delete & reinsert
+                    // Delete old sections safely
                     $budget->yarns()->delete();
                     $budget->knittings()->delete();
+                    $budget->dyeings()->delete();
                     $budget->accessories()->delete();
+                    $budget->printEmbroidery()->delete();
+                    $budget->cms()->delete();
+                    $budget->tests()->delete();
 
-                    $r->merge(['_store' => true]);
-                    $this->budgetAction($r,'store');
+                    // Reinsert updated sections using saveBudgetSection
+                    $this->saveBudgetSection($budget, $r->yarn_desc ?? [], \App\Models\BudgetYarn::class);
+                    $this->saveBudgetSection($budget, $r->knitting_desc ?? [], \App\Models\BudgetKnitting::class);
+                    $this->saveBudgetSection($budget, $r->dyeing_desc ?? [], \App\Models\BudgetDyeing::class);
+                    $this->saveBudgetSection($budget, $r->accessories_desc ?? [], \App\Models\BudgetAccessory::class);
+                    $this->saveBudgetSection($budget, $r->print_emb_desc ?? [], \App\Models\BudgetPrintEmbroidery::class);
+                    $this->saveBudgetSection($budget, $r->cm_desc ?? [], \App\Models\BudgetCm::class);
+                    $this->saveBudgetSection($budget, $r->test_desc ?? [], \App\Models\BudgetTest::class);
 
                     DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollback();
-                    session()->flash('error',$e->getMessage());
-                    return back();
-                }
 
-                session()->flash('success','Budget Updated Successfully');
-                return redirect()->route('admin.budget.index');
+                    return redirect()->route('admin.budget.index')
+                                    ->with('success', 'Budget updated successfully!');
+                } catch (\Exception $e) {
+                    DB::rollBack();
+
+                    \Log::error('Budget update error: ' . $e->getMessage());
+
+                    return redirect()->back()
+                                    ->with('error', 'Failed to update budget: ' . $e->getMessage())
+                                    ->withInput();
+                }
             }
+
 
             /* =========================================================
             | DELETE
@@ -1704,12 +1649,30 @@ class MerchandisingController extends Controller
             return view(adminTheme().'merchandising.budget.edit', compact('budget'));
         }
 
-        private function saveTableItems($budgetId, $request, $key, $modelClass)
+
+        protected function saveBudgetSection($budget, array $sectionData, string $modelClass, string $budgetKey = 'budget_id', bool $deleteOld = true)
         {
-            if(isset($request->$key) && is_array($request->$key)){
-                foreach($request->$key as $item){
-                    $modelClass::create(array_merge($item, ['budget_id'=>$budgetId]));
-                }
+            if ($deleteOld) {
+                $modelClass::where($budgetKey, $budget->id)->delete();
+            }
+
+            if (empty($sectionData['description'])) {
+                return;
+            }
+
+            foreach ($sectionData['description'] as $index => $description) {
+                $modelClass::create([
+                    $budgetKey => $budget->id,
+                    'description' => $description,
+                    'supplier' => $sectionData['supplier'][$index] ?? null,
+                    'qty' => $sectionData['qty'][$index] ?? null,
+                    'unit_price' => $sectionData['unit_price'][$index] ?? null,
+                    'ttl_usd' => $sectionData['ttl_usd'][$index] ?? null,
+                    'item_total' => $sectionData['item_total'][$index] ?? null,
+                    'percent' => $sectionData['percent'][$index] ?? null,
+                    'company_name' => $sectionData['company_name'][$index] ?? null,
+                    'payment_value' => $sectionData['payment_value'][$index] ?? null,
+                ]);
             }
         }
 
