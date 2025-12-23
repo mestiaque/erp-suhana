@@ -28,8 +28,13 @@ class ProformaInvoiceItem extends Model
 
     public function orderDetails()
     {
-        return $this->belongsTo(OrderDetail::class,'style_no','style_no');
+        return $this->belongsTo(OrderDetail::class,'style_no','style_no', 'order_no', 'order_no');
     }
 
+    public function getActucalOrder()
+    {
+        $order = OrderDetail::where('order_no', $this->order_no)->where('style_no', $this->style_no)->first();
+        return $order;
+    }
 
 }
