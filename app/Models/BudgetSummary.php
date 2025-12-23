@@ -5,20 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BudgetYarn extends Model
+class BudgetSummary extends Model
 {
-    protected $table = 'budget_yarn';
+    protected $table = 'budget_summary';
     protected $fillable = [
         'budget_id',
-        'description',
-        'supplier',
-        'qty',
-        'unit_price',
-        'ttl_usd',
-        'item_total',
-        'percent',
-        'company_name',
-        'payment_value',
+        'total_expenditure',
+        'percent_of_total',
+        'reservation',
+        'btb_percent',
+        'btb_value',
+        'cash_percent',
+        'cash_value',
     ];
 
     public function budget(): BelongsTo

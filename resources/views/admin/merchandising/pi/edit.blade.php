@@ -77,9 +77,7 @@
                                 <th class="px-2 pb-1" style="width: 20px;">SL</th>
                                 <th class="px-2 pb-1" style="width: 100px;">Order No</th>
                                 <th class="px-2 pb-1" style="width: 100px;">Style No</th>
-                                <th class="px-2 pb-1" style="width: 150px;">Composition</th>
                                 <th class="px-2 pb-1" style="width: 150px;">Fabrication</th>
-                                <th class="px-2 pb-1" style="width: 80px;">GSM</th>
                                 <th class="px-2 pb-1" style="width: 80px;">Qnty</th>
                                 <th class="px-2 pb-1" style="width: 80px;">Unit of Measurement</th>
                                 <th class="px-2 pb-1" style="width: 80px;">Unit Price</th>
@@ -180,7 +178,7 @@ $(document).ready(function() {
             // reset items table
             $('.cardItems').html(
                 `<tr class="forced_hide">
-                    <td colspan="10" class="text-center text-muted">No Items Found</td>
+                    <td colspan="8" class="text-center text-muted">No Items Found</td>
                 </tr>`
             );
         }
@@ -281,7 +279,7 @@ $(document).ready(function() {
         if ($('.itemRow').length === 0) {
             $('.cardItems').html(
                 `<tr class="forced_hide">
-                    <td colspan="10" class="text-center text-muted">No Items Found</td>
+                    <td colspan="8" class="text-center text-muted">No Items Found</td>
                 </tr>`
             );
         } else {

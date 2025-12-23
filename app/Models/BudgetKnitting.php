@@ -3,52 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BudgetKnitting extends Model
 {
-    use SoftDeletes;
-
-    protected $table = 'budget_knittings';
-
+    protected $table = 'budget_knitting';
     protected $fillable = [
         'budget_id',
-        'fab_desc',
-        'supplier_name',
-        'yarn_count',
-
+        'description',
+        'supplier',
+        'qty',
         'unit_price',
-        'consumption',
-        'wastage_percent',
-
-        'total_qty',
-        'total_cost',
-        'pre_cost_percent',
-
-        'created_by',
-        'updated_by',
-        'deleted_by',
+        'ttl_usd',
+        'item_total',
+        'percent',
+        'company_name',
+        'payment_value',
     ];
 
-    public function budget()
+    public function budget(): BelongsTo
     {
-        return $this->belongsTo(Budget::class);
+        return $this->belongsTo(Budget::class, 'budget_id');
     }
-
-    protected static function booted()
-    {
-        static::creating(function ($model) {
-            $model->created_by = auth()->id();
-        });
-
-        static::updating(function ($model) {
-            $model->updated_by = auth()->id();
-        });
-
-        static::deleting(function ($model) {
-            $model->deleted_by = auth()->id();
-            $model->save();
-        });
-    }
-
 }

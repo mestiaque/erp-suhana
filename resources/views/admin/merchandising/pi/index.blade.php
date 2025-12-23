@@ -120,15 +120,11 @@
                                         @endcan
 
                                         @can('proforma_invoice.edit')
-                                            @if($pi->status=='pending')
                                             <a href="{{ route('admin.proformaInvoiceAction',['edit',$pi->id]) }}" class="btn-custom success">
                                                 <i class="bx bx-edit"></i>
                                             </a>
-                                            @endif
                                             @can('proforma_invoice.delete')
-                                                @if($pi->status=='pending')
                                                 <a href="{{ route('admin.proformaInvoiceAction',['delete',$pi->id]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger"><i class="bx bx-trash"></i></a>
-                                                @endif
                                             @endcan
                                         @endcan
                                     @else -- @endcan
