@@ -84,18 +84,12 @@
                             <td>{{ $row->getBookingNo() }}</td>
                             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</td>
                             <td>
-                                @php
-                                    $pi = App\Models\ProformaInvoice::findOrFail($row->pi_id);
-                                @endphp
-
-                                {{ $pi?->buyer_name ?? '--' }}</td>
+                                {{ $row->pi?->buyer_name ?? '--' }}
+                            </td>
                             <td class="text-center">{{ $row->total_items }}</td>
                             <td class="text-center">{{ $row->total_req_qty }}</td>
                             <td>
-                                @php
-                                    $createdBy = App\Models\User::findOrFail($row->created_by);
-                                @endphp
-                                {{ $createdBy?->name ?? '-' }}
+                                {{ $row->createdBy?->name ?? '-' }}
                             </td>
                             <td>
                                 <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->booking_no }}">
