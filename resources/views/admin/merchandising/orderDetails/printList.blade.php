@@ -156,12 +156,12 @@
             <div class="col-1 psss-0">
                 <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 44px;">
             </div>
-            <div class="col-7 p-0" style="text-align: left; font-size:20px">
+            <div class="col-8 p-0" style="text-align: left; font-size:16px">
                 <p style="text-align: center; font-size: 40px; font-family: serif; line-height: 39px;">
                     {{general()->title}}
                 </p>
             </div>
-            <div class="col-4 p-0" style="text-align: center">
+            <div class="col-3 p-0" style="text-align: left">
 
                 {!!general()->address_one!!}<br>
                 <b>Phone:</b> {{general()->mobile}}
@@ -225,9 +225,9 @@
                         <td>{{ $order->style_no ?? '--' }}</td>
                         <td>{{ $order->order_no ?? '--' }}</td>
                         <td>{{ $order->shipment_date ? \Carbon\Carbon::parse($order->shipment_date)->format('d.m.Y') : '--' }}</td>
-                        <td>{{ $item->composition ?? $order->composition ?? '--' }}</td>
+                        <td>{{ $item->composition ?? '--' }}</td>
                         <td>{{ $order->fabrication ?? '--' }}</td>
-                        <td>{{ $order->gsm ?? '--' }}</td>
+                        <td>{{ $item->gsm ?? '--' }}</td>
                         <td>{{ $item->color_name ?? '--' }}</td>
                         <td class="text-right">{{ number_format($item->qty) }}</td>
 

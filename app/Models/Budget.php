@@ -7,42 +7,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Budget extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
 
-    protected $fillable = [
-        'order_id',
-        'order_no',
-        'style_no',
-
-        'buyer_id',
-        'buyer_name',
-        'merchant_id',
-        'merchant_name',
-        'company_name',
-
-        'total_order_qty',
-        'order_unit_price',
-        'order_total_value',
-
-        'pre_cost_date',
-        'post_cost_date',
-        'shipment_date',
-
-        'total_yarn_cost',
-        'total_knitting_cost',
-        'total_accessories_cost',
-        'grand_total_cost',
-
-        'profit_amount',
-        'profit_percent',
-
-        'status',
-        'remarks',
-
-        'created_by',
-        'updated_by',
-        'deleted_by',
-    ];
+    protected $guarded = [];
 
     /* ===============================
      | RELATIONS
@@ -92,10 +59,10 @@ class Budget extends Model
             $model->updated_by = auth()->id();
         });
 
-        static::deleting(function ($model) {
-            $model->deleted_by = auth()->id();
-            $model->save();
-        });
+        // static::deleting(function ($model) {
+        //     $model->deleted_by = auth()->id();
+        //     $model->save();
+        // });
     }
 
 }
