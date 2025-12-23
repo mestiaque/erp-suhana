@@ -32,11 +32,10 @@
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered align-middle headerTable">
                                 <tbody>
-{{-- @dd($budget->pi_no) --}}
                                     <tr>
                                         <th width="10%">P.I. No.</th>
                                         <td width="30%">
-                                        @if($budget && $budget->pi_no)
+                                        @if(isset($budget) && $budget->pi_no)
                                             <input type="hidden" name="budget[pi_no]" value="{{ $budget->pi_no }}">
                                             <input type="text" class="form-control form-control-sm" value="{{ $budget->pi_no ?? '' }}" readonly>
                                         @else
@@ -744,7 +743,7 @@
                 {{-- Submit --}}
                 <div class="row mb-3">
                     <div class="col-lg-12 text-center">
-                        <button type="submit" class="btn btn-primary" title="demo">Save</button>
+                        <button type="submit" class="btn btn-primary" title="demo" hidden>Save</button>
                     </div>
                 </div>
 
