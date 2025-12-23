@@ -391,10 +391,10 @@
                                     <tr>
                                         <th style="width: 1.5rem">SN</th>
                                         <th style="width: 3rem">STYLE</th>
-                                        <th style="width: 6rem">Description</th>
+                                        <th style="width: 7rem">Description</th>
                                         <th style="width: 6rem">Fabrication</th>
                                         <th style="width: 8rem">Composition</th>
-                                        <th style="width: 4rem">GSM</th>
+                                        <th style="width: 3rem">GSM</th>
                                         <th style="width: 4rem">PO Number</th>
                                         <th style="width: 4rem">Qnty ({{ $pi->items->pluck('uom')->unique()->implode(', ') }})</th>
                                         <th style="width: 3rem">FOB</th>
