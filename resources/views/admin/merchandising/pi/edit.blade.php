@@ -261,10 +261,11 @@ $(document).ready(function() {
         });
 
         // 🔁 selectedOrders array update
-        selectedOrders = selectedOrders.filter(o => o !== orderNo);
+        selectedOrders = selectedOrders.filter(o => String(o) !== String(orderNo));
 
-        // update hidden/show input
-        $('.order_no_show').val(selectedOrders.length ? selectedOrders.join(', ') : '--');
+        // ✅ order number show update
+        $('.order_no_show').val(selectedOrders.join(', '));
+
 
         // ❌ remove badge
         $(this).closest('span').remove();
