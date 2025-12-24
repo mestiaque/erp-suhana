@@ -3,7 +3,7 @@
                             <tr class="itemRow" data-item="{{ $item->id }}">
                                 <td class="p-1 text-center">{{ $i+1 }}</td>
                                 <td class="p-1">
-                                    <input type="text" class="form-control form-control-sm" name="items[{{ $i }}][order_no]" value="{{ $item->order_no }}" readonly>
+                                    <input type="text" class="form-control form-control-sm itemRowOrderNo" name="items[{{ $i }}][order_no]" value="{{ $item->order_no }}" readonly>
                                 </td>
                                 <td class="p-1">
                                     <input type="text" class="form-control form-control-sm" name="items[{{ $i }}][style_no]" value="{{ $item->style_no }}" readonly>
