@@ -253,7 +253,8 @@ $(document).ready(function() {
 
         // 🔥 remove related rows (multiple tr possible)
         $('.itemRow').each(function () {
-            let rowOrderNo = $(this).find('input[name$="[order_no]"]').val();
+            let rowOrderNo = $(this).find('.itemRowOrderNo').val();
+            console.log(rowOrderNo, orderNo);
             if (rowOrderNo === orderNo) {
                 $(this).remove();
             }
