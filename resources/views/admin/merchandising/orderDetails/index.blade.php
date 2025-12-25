@@ -52,6 +52,64 @@
                 </div>
             </form>
 
+            <div class="row g-3"> <!-- g-3 adds gutter between cards -->
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
+                        <div style="font-size:30px;">👕</div>
+                        <div style="font-weight:bold;">Total</div>
+                        <div class="text-success">Qty: {{ $totalOrderQty }}</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
+                        <div style="font-size:30px;">🧵</div>
+                        <div style="font-weight:bold;">Sewing Out</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
+                        <div style="font-size:30px;">📦</div>
+                        <div style="font-weight:bold;">Packing</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
+                        <div style="font-size:30px;">🚚</div>
+                        <div style="font-weight:bold;">Shipped</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
+                        <div style="font-size:30px;">✂️</div>
+                        <div style="font-weight:bold;">Cutting</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
+                        <div style="font-size:30px;">🎨</div>
+                        <div style="font-weight:bold;">Print & Embroidery</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+            </div>
+
             <div class="row mb-0">
                 <div class="col-md-12">
                     <ul class="statuslist p-0 mb-0">
@@ -135,7 +193,31 @@
 @endsection
 
 @push('css')
+<style>
+    .custom-card {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease-in-out; /* অ্যানিমেশন স্মুথ করবে */
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 
+/* হোভার ইফেক্ট */
+.custom-card:hover {
+    transform: translateY(-8px); /* কার্ডটি উপরে উঠবে */
+    box-shadow: 0 12px 20px rgba(0,0,0,0.1); /* শ্যাডো বাড়বে */
+    border-color: #007bff; /* বর্ডারের রঙ নীল হবে */
+}
+
+/* আইকন হোভার করলে বড় হবে */
+.custom-card:hover .card-icon {
+    transform: scale(1.2);
+    transition: transform 0.3s ease;
+}
+</style>
 @endpush
 
 @push('js')

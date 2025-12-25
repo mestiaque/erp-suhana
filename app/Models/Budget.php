@@ -20,7 +20,7 @@ class Budget extends Model
         return $this->belongsTo(OrderDetail::class, 'order_id');
     }
 
-    public function yarns()
+   public function yarns()
     {
         return $this->hasMany(BudgetYarn::class);
     }
@@ -34,6 +34,45 @@ class Budget extends Model
     {
         return $this->hasMany(BudgetAccessory::class);
     }
+
+    public function dyeings()
+    {
+        return $this->hasMany(BudgetDyeing::class);
+    }
+
+    public function printEmbroidery()
+    {
+        return $this->hasMany(BudgetPrintEmbroidery::class);
+    }
+
+    public function cms()
+    {
+        return $this->hasMany(BudgetCm::class);
+    }
+
+    public function tests()
+    {
+        return $this->hasMany(BudgetTest::class);
+    }
+
+    public function summary()
+    {
+        return $this->hasOne(BudgetSummary::class);
+    }
+
+    public function productionCosts()
+    {
+        return $this->hasOne(BudgetProductionCost::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+
+
+
 
     /* ===============================
      | SCOPES (OPTIONAL)

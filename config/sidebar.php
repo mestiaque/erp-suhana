@@ -123,9 +123,9 @@ return [
                 [
                     'title'      => 'Budget',
                     'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/budget/create',
+                    'route'      => '/admin/budget',
                     'icon_color' => 'text-warning',
-                    'permission' => 'proforma_invoice'
+                    'permission' => 'budget'
                 ],
                 [
                     'title'       => 'Reference Data',

@@ -90,7 +90,7 @@
                         <input type="date" value="{{$to->format('Y-m-d')}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
                     </div>
                 </div>
-                <div class="col-md-3 mb-1">
+                {{-- <div class="col-md-3 mb-1">
                     <div class="form-group">
                         <label>Employee</label>
                         <select class="select2" name="employee_id" data-placeholder="Select Employee">
@@ -99,6 +99,12 @@
                             <option value="{{$user->id}}" {{request()->employee_id==$user->id?'selected':''}}>{{$user->name}}</option>
                             @endforeach
                         </select>
+                    </div>
+                </div> --}}
+                <div class="col-md-3 mb-1">
+                    <div class="form-group">
+                        <label>Employee</label>
+                        <input type="text" name="employee" id="" checked class="form-control" value="{{request()->employee}}" placeholder="Employee">
                     </div>
                 </div>
                 <div class="col-md-3 mb-1">
@@ -114,7 +120,7 @@
                 </div>
                 <div class="col-md-2 mb-1">
                     <label>Action</label> <br>
-                    <button type="submit" class="btn btn-success btn-sm btn-block">Search</button>
+                    <button type="submit" class="btn btn-success btn-block">Search</button>
                 </div>
             </div>
         </form>
