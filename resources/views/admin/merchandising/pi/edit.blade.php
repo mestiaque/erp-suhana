@@ -124,7 +124,7 @@ $(document).ready(function() {
         }, 500);
     }
 
-    // === Update single row calculation ===
+    // == Update single row calculation ==
     function updateItemRow(row) {
         let qty = parseFloat(row.find('.qty').val()) || 0;
         let unitPrice = parseFloat(row.find('input[name*="[unit_price]"]').val()) || 0;
@@ -136,7 +136,7 @@ $(document).ready(function() {
 
     }
 
-    // === Update all rows and summary ===
+    // == Update all rows and summary ==
     function updateAllItems() {
         let totalQty = 0;
         let totalAmount = 0;
@@ -153,15 +153,15 @@ $(document).ready(function() {
         $('.totalAmount').text(totalAmount.toFixed(2));
     }
 
-    // === Initial calculation on page load ===
+    // == Initial calculation on page load ==
     updateAllItems();
 
-    // === Trigger recalculation when any relevant input changes ===
+    // == Trigger recalculation when any relevant input changes ==
     $(document).on('input change', '.updateItem, .qty', function() {
         updateAllItems();
     });
 
-    // === Load items when PO changes ===
+    // == Load items when PO changes ==
     $(document).on('change', '#buyer_select', function () {
         let buyer_id = $(this).val();
         loadBuyer(buyer_id);
@@ -253,30 +253,32 @@ $(document).ready(function() {
 
         // 🔥 remove related rows (multiple tr possible)
         $('.itemRow').each(function () {
-            let rowOrderNo = $(this).find('input[name$="[order_no]"]').val();
-            if (rowOrderNo === orderNo) {
+            let rowOrderNo = $(this).find('.itemRowOrderNo').val();
+            console.log(rowOrderNo, orderNo);
+            if (rowOrderNo == orderNo) {
                 $(this).remove();
             }
         });
 
         // 🔁 selectedOrders array update
-        selectedOrders = selectedOrders.filter(o => o !== orderNo);
+        selectedOrders = selectedOrders.filter(o => String(o) !== String(orderNo));
 
-        // update hidden/show input
-        $('.order_no_show').val(selectedOrders.length ? selectedOrders.join(', ') : '--');
+        // ✅ order number show update
+        $('.order_no_show').val(selectedOrders.join(', '));
+
 
         // ❌ remove badge
         $(this).closest('span').remove();
 
         // 🔥 dropdown-এ আবার add করো (if not exists)
-        if ($('#order_no_select option[value="' + orderNo + '"]').length === 0) {
+        if ($('#order_no_select option[value="' + orderNo + '"]').length == 0) {
             $('#order_no_select').append(
                 `<option value="${orderNo}">${orderNo}</option>`
             );
         }
 
         // 🔥 সব PO remove হয়ে গেলে
-        if ($('.itemRow').length === 0) {
+        if ($('.itemRow').length == 0) {
             $('.cardItems').html(
                 `<tr class="forced_hide">
                     <td colspan="8" class="text-center text-muted">No Items Found</td>

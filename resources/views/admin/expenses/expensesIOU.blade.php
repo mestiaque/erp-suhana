@@ -171,7 +171,7 @@
                                 @else All
                                 @endcan
                             </th>
-                            <th style="min-width: 100px;">Date</th>
+                            <th style="min-width: 100px;">I.O.U Date</th>
                             <th style="min-width: 100px;">Company</th>
                             <th style="min-width: 100px;">Receiver</th>
                             <th style="min-width: 120px;">Employee</th>
@@ -186,7 +186,7 @@
                     <tbody>
                         @foreach($expenseIou as $i=>$Iou)
                         @php
-                            $isOlderThan2Days = $Iou->created_at->lt(\Carbon\Carbon::now()->subDays(2));
+                            $isOlderThan2Days = $Iou->created_at->lt(\Carbon\Carbon::now()->subDays(7));
                         @endphp
                         <tr @if($isOlderThan2Days) style="background-color: #ffebeb;" @endif>
                             <td>

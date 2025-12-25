@@ -179,6 +179,17 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'budget' => [
+                'label'       => 'Budget',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
 
         ],
         'Production Management' =>[

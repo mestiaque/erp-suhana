@@ -113,10 +113,14 @@
                     }
                     table th, td{
                         padding: 2px !important;
+                        vertical-align: middle !important;
                     }
                     @media print {
                         .invoice-box {
                             box-shadow: none;
+                        }
+                        .title{
+                            font-size: 40px !important;
                         }
                     }
                 </style>
@@ -136,8 +140,8 @@
                                     </div>
 
                                     <!-- TITLE : 50% -->
-                                    <div style="display:table-cell; width:50%; vertical-align:top; text-align:center;">
-                                        <div style="font-size:40px; font-weight:800; color:#0047ab; font-family:'Times New Roman', Times, serif; height:4rem">
+                                    <div style="display:table-cell; width:70%; vertical-align:top; text-align:center;">
+                                        <div style="font-size:30px; font-weight:800; color:#0047ab; font-family:'Times New Roman', Times, serif; height:4rem" class="title">
                                             {{ general()->title }}
                                         </div>
                                         <div style="font-size:12px; color:coral; margin-top:-12px;">
@@ -146,7 +150,7 @@
                                     </div>
 
                                     <!-- ADDRESS : 40% -->
-                                    <div style="display:table-cell; width:40%; vertical-align:middle; font-size:12px;">
+                                    <div style="display:table-cell; width:20%; vertical-align:middle; font-size:12px; text-align:left;">
                                         <div>
                                             {!! general()->address_one !!}
                                         </div>
@@ -385,15 +389,18 @@
                             <table class="table table-bordered invoice-table">
                                 <thead>
                                     <tr>
-                                        <th>SN</th>
-                                        <th>STYLE</th>
-                                        <th>Description</th>
-                                        <th>PO Number</th>
-                                        <th>Qnty (PCS/SET)</th>
-                                        <th>FOB</th>
-                                        <th>Total Value</th>
-                                        <th>Buyer Del. Date</th>
-                                        <th>Remarks</th>
+                                        <th style="width: 1.5rem">SN</th>
+                                        <th style="width: 3rem">STYLE</th>
+                                        <th style="width: 7rem">Description</th>
+                                        <th style="width: 6rem">Fabrication</th>
+                                        <th style="width: 8rem">Composition</th>
+                                        <th style="width: 3rem">GSM</th>
+                                        <th style="width: 4rem">PO Number</th>
+                                        <th style="width: 4rem">Qnty ({{ $pi->items->pluck('uom')->unique()->implode(', ') }})</th>
+                                        <th style="width: 3rem">FOB</th>
+                                        <th style="width: 3rem">Total Value</th>
+                                        <th style="width: 3rem">Del. Date</th>
+                                        <th style="width: 5rem">Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -406,7 +413,6 @@
                                 @forelse($pi->items as $i=>$item)
 
                                     @php
-
                                         $shipmentDate = 'N/A';
 
                                         if($item->orderDetails){
@@ -432,9 +438,12 @@
                                     <tr>
                                         <td>{{ $i+1 }}</td>
                                         <td>{{ $item->style_no }}</td>
+                                        <td>{{ ($item->getActucalOrder()->items->pluck('item_name')->unique()->implode(', ')) }}</td>
                                         <td>{{ $item->fabrication }}</td>
+                                        <td>{{ ($item->getActucalOrder()->items->pluck('composition')->unique()->implode(', ')) }}</td>
+                                        <td>{{ ($item->getActucalOrder()->items->pluck('gsm')->unique()->implode(', ')) }}</td>
                                         <td>{{ $item->order_no ?? '--' }}</td>
-                                        <td>{{ number_format($item->order_qty) }} {{ $item->uom ?? ''}}</td>
+                                        <td>{{ number_format($item->order_qty) }}</td>
                                         <td>${{ number_format($item->unit_price, 2) }}</td>
                                         <td>${{ number_format($item->total_price, 2) }}</td>
                                         @if($prevShipmentDate !== $shipmentDate)
@@ -445,14 +454,14 @@
                                      @php $prevShipmentDate = $shipmentDate; @endphp
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center text-muted">No items found</td>
+                                        <td colspan="12" class="text-center text-muted">No items found</td>
                                     </tr>
                                 @endforelse
                                 </tbody>
 
                                 <tfoot style="font-weight: 600;">
                                     <tr>
-                                        <td colspan="3" ></td>
+                                        <td colspan="6" ></td>
                                         <td class="text-center">Total</td>
                                         <td>{{ number_format($pi->items->sum('order_qty')) }}</td>
                                         <td></td>
@@ -461,7 +470,7 @@
                                         <td colspan=""></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9" class="text-center">
+                                        <td colspan="12" class="text-center">
                                             <input type="hidden" name="total_amount_input" id="total_amount_input" value="{{ $pi->items->sum('total_price') }}">
                                             In Words - Total Amount (USD) : <span id="total_amount_word"></span>
                                         </td>
