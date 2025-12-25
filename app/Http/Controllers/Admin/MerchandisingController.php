@@ -1616,7 +1616,13 @@ class MerchandisingController extends Controller
                 $data = $r->all();
 
                 $budgetData = $data['budget'];
+                if (!isset($r->budget['pi_no']) || empty($r->budget['pi_no'])) {
+                    throw new \Exception('Budget PI No is required.');
+                }
                 $pi = ProformaInvoice::find($budgetData['pi_no']);
+                if (!$pi) {
+                    throw new \Exception('Associated Proforma Invoice not found.');
+                }
 
                 $budget = Budget::create([
                     'pi_id' => $pi ? $pi->id : null,
@@ -1648,7 +1654,7 @@ class MerchandisingController extends Controller
 
                 DB::commit();
 
-                return redirect()->route('admin.budgetAction', ['create'])
+                return redirect()->route('admin.budgetAction', ['view', $budget->id])
                                 ->with('success', 'Budget saved successfully!');
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -1689,10 +1695,9 @@ class MerchandisingController extends Controller
 
                 DB::commit();
 
-                return redirect()->back()->with('success', 'Budget updated successfully!');
+                return redirect()->route('admin.budgetAction', ['view', $budget->id])->with('success', 'Budget updated successfully!');
             } catch (\Exception $e) {
                 DB::rollBack();
-                dd($e);
                 return redirect()->back()->with('error', 'Failed to update budget: ' . $e->getMessage())->withInput();
             }
         }
