@@ -3988,7 +3988,7 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
-        $expenseIou =ExpenseIou::latest()->whereNotIn('status', ['temp', 'completed'])
+        $expenseIou =ExpenseIou::whereNotIn('status', ['temp', 'completed'])
                     ->where(function($q) use ($r) {
 
                               if($r->search){
@@ -4057,6 +4057,7 @@ class AdminController extends Controller
                             }
 
                         })
+                        ->orderBy('id','desc')
                         ->get();
         $paymentMethods =Attribute::where('type',9)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
         $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
@@ -4320,8 +4321,15 @@ class AdminController extends Controller
                     $q->where('branch_id',$r->branch_id);
                 }
 
-                if($r->employee_id){
-                    $q->where('user_id',$r->employee_id);
+                if ($r->employee) {
+                    $q->where(function($sub) use ($r) {
+                        // Search by direct employee_id column
+                        $sub->where('employee_id', 'like', '%' . $r->employee . '%')
+                            // OR search by name in the employeeUser relationship
+                            ->orWhereHas('employeeUser', function($query) use ($r) {
+                                $query->where('name', 'like', '%' . $r->employee . '%');
+                            });
+                    });
                 }
             })
             ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)

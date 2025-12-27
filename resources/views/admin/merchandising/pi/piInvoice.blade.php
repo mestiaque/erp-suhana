@@ -140,7 +140,7 @@
                                     </div>
 
                                     <!-- TITLE : 50% -->
-                                    <div style="display:table-cell; width:50%; vertical-align:top; text-align:center;">
+                                    <div style="display:table-cell; width:70%; vertical-align:top; text-align:center;">
                                         <div style="font-size:30px; font-weight:800; color:#0047ab; font-family:'Times New Roman', Times, serif; height:4rem" class="title">
                                             {{ general()->title }}
                                         </div>
@@ -150,7 +150,7 @@
                                     </div>
 
                                     <!-- ADDRESS : 40% -->
-                                    <div style="display:table-cell; width:40%; vertical-align:middle; font-size:12px;">
+                                    <div style="display:table-cell; width:20%; vertical-align:middle; font-size:12px; text-align:left;">
                                         <div>
                                             {!! general()->address_one !!}
                                         </div>
