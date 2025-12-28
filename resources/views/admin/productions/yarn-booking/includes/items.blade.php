@@ -72,7 +72,7 @@
                                             </select>
                                         </td>
                                         <td width="35%">
-                                            <input type="number"
+                                            <input type="number" step="0.1"
                                                    name="items[{{ $i }}][yarn_qty][]"
                                                    class="form-control form-control-sm yarn-qty"
                                                    value="{{ $y['qty'] }}"
@@ -97,7 +97,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="number"
+                                        <input type="number" step="0.1"
                                                name="items[{{ $i }}][yarn_qty][]"
                                                class="form-control form-control-sm yarn-qty"
                                                value="0"
@@ -116,7 +116,7 @@
 
                     {{-- Total Qnty --}}
                     <td>
-                        <input type="number"
+                        <input type="number" step="0.1"
                                name="items[{{ $i }}][requisition_qty]"
                                class="form-control form-control-sm total-qty"
                                value="{{ $item->required_qty }}"

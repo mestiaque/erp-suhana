@@ -65,4 +65,20 @@ class YarnBooking extends Model
     {
         return $this->belongsTo(ProformaInvoice::class,'pi_id');
     }
+
+    public function getYarnDetailsAttribute()
+    {
+        $details = [];
+        $yarnCounts = explode(',', $this->yarn_count);
+        $requiredQtys = explode(',', $this->required_qty);
+
+        foreach ($yarnCounts as $index => $count) {
+            $details[] = [
+                'count' => trim($count),
+                'qty' => isset($requiredQtys[$index]) ? (int)trim($requiredQtys[$index]) : 0,
+            ];
+        }
+
+        return $details;
+    }
 }

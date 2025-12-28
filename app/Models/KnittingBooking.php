@@ -11,19 +11,7 @@ class KnittingBooking extends Model
 
     protected $table = 'knitting_bookings';
 
-    protected $fillable = [
-        'pi_id',
-        'booking_no',
-        'style',
-        'fabric_type',
-        'required_qty',
-        'expected_delivery',
-        'remarks',
-        'created_by',
-        'updated_by',
-        'deleted_by',
-        'status'
-    ];
+    protected $guarded = [];
 
     protected $dates = [
         'expected_delivery',

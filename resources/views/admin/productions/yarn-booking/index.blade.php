@@ -87,7 +87,7 @@
                             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</td>
                             <td>{{ $row->supplier ?? '-' }}</td>
                             <td class="text-center">{{ $row->total_items }}</td>
-                            <td class="text-center">{{ $row->total_req_qty }}</td>
+                            <td class="text-center">{{ $row->total_req_qty }} KG</td>
                             <td>
                                 @php
                                     $createdBy = App\Models\User::findOrFail($row->created_by);

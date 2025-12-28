@@ -1,136 +1,123 @@
-@php
-    $yarnOptions = [];
-    for($x = 16; $x <= 40; $x += 2){
-        $yarnOptions[] = $x.'/2';
-    }
-@endphp
-
-<div class="table-responsive">
+{{-- <div class="table-responsive">
     <table class="table table-bordered table-sm m-0">
         <thead>
-            <tr>
+            <tr class="bg-light">
                 <th width="5%">SL</th>
                 <th width="10%">Style</th>
-                <th width="25%">Fabrication</th>
-                <th width="45%">Yarn Count Wise Qnty</th>
-                <th width="15%">Total Req Qnty</th>
+                <th width="20%">Fabrication</th>
+                <th width="50%">Yarn Count Wise Quantity (Receive)</th>
+                <th width="15%">Row Total</th>
             </tr>
         </thead>
         <tbody>
-
-        @if($items && count($items) > 0)
-            @foreach($items as $i => $item)
-
-                @php
-                    $yarns = [];
-                    if (!empty($item->yarn_count)) {
-                        $yarns = json_decode($item->yarn_count, true) ?? [];
-                    }
-                @endphp
-
-                <tr>
-                    <td class="text-center">{{ $i+1 }}</td>
-
-                    <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
-                    <input type="hidden" name="items[{{ $i }}][booking_no]" value="{{ $item->booking_no }}">
-
-                    <td>
-                        <input type="text"
-                               class="form-control form-control-sm"
-                               value="{{ $item->style ?? $item->style_no }}"
-                               readonly>
-                        <input type="hidden" name="items[{{ $i }}][style_no]" value="{{ $item->style ?? $item->style_no }}">
-                    </td>
-
-                    <td>
-                        <input type="text"
-                               class="form-control form-control-sm"
-                               value="{{ $item->fabric_type ?? $item->fabrication }}"
-                               readonly>
-                        <input type="hidden" name="items[{{ $i }}][fabrication]" value="{{ $item->fabric_type ?? $item->fabrication }}">
-                    </td>
-
-                    {{-- Yarn Count + Qnty --}}
-                    <td>
-                        <table class="table table-bordered table-sm yarn-sub-table mb-0">
-                            <tbody class="yarnBody">
-
-                            @if(count($yarns) > 0)
-                                @foreach($yarns as $y)
-                                    <tr class="yarn-row">
-                                        <td width="45%">
-                                            <select name="items[{{ $i }}][yarn_count][]"
-                                                    class="form-control form-control-sm yarn-count-select"
-                                                    required>
-                                                <option value="">-- Select Yarn Count --</option>
-                                                @foreach($yarnOptions as $option)
-                                                    <option value="{{ $option }}"
-                                                        {{ $y['count']==$option?'selected':'' }}>
-                                                        {{ $option }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td width="35%">
-                                            <input type="number"
-                                                   name="items[{{ $i }}][yarn_qty][]"
-                                                   class="form-control form-control-sm yarn-qty"
-                                                   value="{{ $y['qty'] }}"
-                                                   min="">
-                                        </td>
-                                        <td width="20%" class="text-center">
-                                            <button type="button" class="btn btn-success btn-sm addRow">+</button>
-                                            <button type="button" class="btn btn-danger btn-sm removeRow">-</button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            @else
-                                <tr class="yarn-row">
-                                    <td>
-                                        <select name="items[{{ $i }}][yarn_count][]"
-                                                class="form-control form-control-sm yarn-count-select"
-                                                required>
-                                            <option value="">-- Select Yarn Count --</option>
-                                            @foreach($yarnOptions as $option)
-                                                <option value="{{ $option }}">{{ $option }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="number"
-                                               name="items[{{ $i }}][yarn_qty][]"
-                                               class="form-control form-control-sm yarn-qty"
-                                               value="0"
-                                               min="0">
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-success btn-sm addRow">+</button>
-                                        <button type="button" class="btn btn-danger btn-sm removeRow">-</button>
-                                    </td>
-                                </tr>
-                            @endif
-
-                            </tbody>
-                        </table>
-                    </td>
-
-                    {{-- Total Qnty --}}
-                    <td>
-                        <input type="number"
-                               name="items[{{ $i }}][requisition_qty]"
-                               class="form-control form-control-sm total-qty"
-                               value="{{ $item->required_qty }}"
-                               readonly>
-                    </td>
-                </tr>
-
-            @endforeach
-        @else
+        @forelse($items as $i => $item)
+            @php
+                // বুকিং টেবিলের yarn_count কলামে থাকা JSON ডাটা
+                $yarns = json_decode($item->yarn_count, true) ?? [];
+            @endphp
             <tr>
-                <td colspan="5" class="text-center text-muted">No Yarn Items Found</td>
-            </tr>
-        @endif
+                <td class="text-center">{{ $i + 1 }}</td>
+                <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
 
+                <td>{{ $item->style }}</td>
+                <td>{{ $item->fabric_type }}</td>
+                <td>
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody class="yarnBody">
+                        @foreach($yarns as $y)
+                            <tr>
+                                <td width="50%">
+                                    <input type="text" name="items[{{ $i }}][yarn_count][]"
+                                           value="{{ $y['count'] }}" class="form-control form-control-sm bg-light" readonly>
+                                </td>
+                                <td>
+                                    <input type="number" step="any" name="items[{{ $i }}][yarn_receive_qty][]"
+                                           placeholder="Qty for {{ $y['count'] }}"
+                                           class="form-control form-control-sm yarn-recv" min="0">
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </td>
+
+                <td>
+                    <input type="number" name="items[{{ $i }}][receive_qty]"
+                           class="form-control form-control-sm total-qty" value="{{ $item->receive_qty ?? 0 }}" readonly>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="5" class="text-center">No Booking Items Found</td>
+            </tr>
+        @endforelse
+        </tbody>
+    </table>
+</div> --}}
+<div class="table-responsive">
+    <table class="table table-bordered table-sm m-0">
+        <thead>
+            <tr class="bg-light">
+                <th width="5%">SL</th>
+                <th width="10%">Style</th>
+                <th width="20%">Fabrication</th>
+                <th width="50%">Yarn Count Wise Quantity (Receive)</th>
+                <th width="15%">Row Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        @forelse($items as $i => $item)
+            @php
+                // বুকিং টেবিলের yarn_count JSON ডাটা
+                $yarns = json_decode($item->yarn_count, true) ?? [];
+                $rowTotal = 0; // এডিট মোডের জন্য রো টোটাল হিসাব রাখার ভেরিয়েবল
+            @endphp
+            <tr>
+                <td class="text-center">{{ $i + 1 }}</td>
+                <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
+
+                <td>{{ $item->style }}</td>
+                <td>{{ $item->fabric_type }}</td>
+                <td>
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody class="yarnBody">
+                        @foreach($yarns as $y)
+                            @php
+                                // এডিট মোড হলে ওই নির্দিষ্ট কাউন্টের আগের ভ্যালুটা ধরা
+                                $currentCountQty = 0;
+                                if(isset($item->current_receive_data) && isset($item->current_receive_data[$y['count']])) {
+                                    $currentCountQty = $item->current_receive_data[$y['count']];
+                                    $rowTotal += $currentCountQty; // রো টোটালে যোগ করা
+                                }
+                            @endphp
+                            <tr>
+                                <td width="50%">
+                                    <input type="text" name="items[{{ $i }}][yarn_count][]"
+                                           value="{{ $y['count'] }}" class="form-control form-control-sm bg-light" readonly>
+                                </td>
+                                <td>
+                                    <input type="number" step="any" name="items[{{ $i }}][yarn_receive_qty][]"
+                                           placeholder="Qty for {{ $y['count'] }}"
+                                           value="{{ $currentCountQty > 0 ? $currentCountQty : '' }}"
+                                           class="form-control form-control-sm yarn-recv" min="0">
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </td>
+
+                <td>
+                    <input type="number" name="items[{{ $i }}][receive_qty]"
+                           class="form-control form-control-sm total-qty"
+                           value="{{ $rowTotal > 0 ? number_format($rowTotal, 2, '.', '') : '0.00' }}" readonly>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="5" class="text-center">No Booking Items Found</td>
+            </tr>
+        @endforelse
         </tbody>
     </table>
 </div>

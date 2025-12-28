@@ -1,65 +1,80 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Yarn Booking Edit') }}</title>
+<title>{{ websiteTitle($receive ? 'Edit Yarn Receive' : 'New Yarn Receive') }}</title>
 @endsection
 
 @section('contents')
 <div class="flex-grow-1">
     <div class="breadcrumb-area">
-        <h1>Edit Yarn Booking</h1>
+        <h1>{{ $receive ? 'Edit' : 'New' }} Yarn Receive</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
-            <li class="item"><a href="{{ route('admin.yarnBooking') }}">Yarn Bookings</a></li>
-            <li class="item">Edit Yarn Booking</li>
+            <li class="item"><a href="{{ route('admin.yarnReceive') }}">Yarn Receives</a></li>
+            <li class="item">{{ $receive ? 'Edit' : 'Create' }}</li>
         </ol>
     </div>
 
     <div class="card mb-30">
         <div class="card-body">
             @include(adminTheme().'alerts')
-            <form action="{{ route('admin.yarnBookingAction', ['update', $booking->booking_no ?? 0]) }}" method="POST">
+
+            {{-- Action URL: Update হলে receive_no পাস হবে, নতুবা 0 --}}
+            <form action="{{ route('admin.yarnReceiveAction', ['update', $receive->receive_no ?? 0]) }}" method="POST">
                 @csrf
+                {{-- এডিট মোডের জন্য হিডেন রিসিভ নম্বর --}}
+                <input type="hidden" name="receive_no" value="{{ $receive->receive_no ?? '' }}">
+                {{-- AJAX থেকে প্রাপ্ত বুকিং নম্বর রাখার জন্য --}}
+                <input type="hidden" name="booking_no" id="hidden_booking_no" value="{{ $receive->booking_no ?? '' }}">
 
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <label>PI Number</label>
-                        <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.yarnBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
-                            <option value="">-- Select PI Number --</option>
+                        <label>Select PI Number</label>
+                        <select class="form-control" name="pi_id" id="pi_receive_select"
+                                data-url="{{ route('admin.yarnReceiveAction', 'pi-select') }}" required>
+                            <option value="">-- Select PI --</option>
                             @foreach($pis as $pi)
-                                <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
+                                <option value="{{ $pi->id }}" {{ (isset($receive) && $items->first()->pi_id == $pi->id) ? 'selected' : '' }}>
+                                    {{ $pi->pi_no }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
+
                     <div class="col-md-3 mb-3">
-                        <label>Buyer Name</label>
-                        <input type="text" readonly class="form-control buyer_name" value="{{ $booking->pi->buyer?->name ?? '' }}">
+                        <label>Receive Date</label>
+                        <input type="date" name="receive_date" class="form-control" value="{{ $receive->receive_date ?? date('Y-m-d') }}" required>
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label>Supplier</label>
-                        <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required>
+                        <input type="text" name="supplier" id="supplier_name" class="form-control" value="{{ $receive->supplier ?? '' }}" readonly>
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label>Status</label>
-                        <select name="status" class="form-control" required>
-                            <option value="pending" {{ $booking?->status=='pending'?'selected':'' }}>Pending</option>
-                            <option value="confirmed" {{ $booking?->status=='confirmed'?'selected':'' }}>Confirmed</option>
-                            <option value="approved" {{ $booking?->status=='approved'?'selected':'' }}>Approved</option>
-                            <option value="cancel" {{ $booking?->status=='cancel'?'selected':'' }}>Cancel</option>
-                        </select>
+                        <label>Chalan No</label>
+                        <input type="text" name="chalan_no" class="form-control" value="{{ $receive->chalan_no ?? '' }}" placeholder="Enter Chalan Number">
                     </div>
                 </div>
 
+                {{-- <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label>Buyer Name</label>
+                        <input type="text" id="buyer_name" class="form-control" value="{{ $receive->booking->buyer_name ?? '' }}" readonly>
+                    </div>
+                </div> --}}
+
                 <br>
-                <h5><b>Yarn Booking Items</b></h5>
-                <div class="cardItems">
-                    @include(adminTheme().'productions.yarn-booking.includes.items', ['items' => $items ?? []])
+                <h5><b>Yarn Receive Items</b></h5>
+
+                <div class="table-responsive mt-3" id="receive_items_body">
+                    @include(adminTheme().'productions.yarn-receive.includes.items', ['items' => $items])
                 </div>
 
                 <br>
-                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Yarn Booking</button>
+                <button type="submit" class="btn btn-success d-nonex">
+                    <i class="bx bx-check"></i> {{ $receive ? 'Update' : 'Save' }} Yarn Receive
+                </button>
             </form>
         </div>
     </div>
@@ -67,110 +82,57 @@
 @endsection
 
 @push('js')
-
 <script>
-
 $(document).ready(function() {
-
-    // ----------------------------
-    // PI Number change
-    // ----------------------------
-    $('#pi_select').change(function() {
-        let pi_no = $(this).val();
-        if (!pi_no) return;
-
+    // PI সিলেক্ট করলে ডাটা লোড করার লজিক
+    $('#pi_receive_select').on('change', function() {
+        let pi_id = $(this).val();
         let url = $(this).data('url');
-        $.get(url, { pi_no: pi_no }, function(res) {
-            if(res.success){
-                $('.buyer_name').val(res.order.buyer_name);
-                $('.cardItems').html(res.html);
-            } else {
-                alert('PI not found');
-                $('.cardItems').html('<tr><td colspan="7" class="text-center">No items found</td></tr>');
+
+        if (!pi_id) {
+            $('#receive_items_body').html('<tr><td colspan="5" class="text-center">Please select a PI to load items</td></tr>');
+            return;
+        }
+
+        // লোডার দেখানো (ঐচ্ছিক)
+        $('#receive_items_body').html('<tr><td colspan="5" class="text-center">Loading items...</td></tr>');
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: { pi_id: pi_id },
+            success: function(res) {
+                if (res.success) {
+                    $('#receive_items_body').html(res.html);
+                    $('#supplier_name').val(res.supplier);
+                    $('#buyer_name').val(res.buyer_name);
+                    $('#hidden_booking_no').val(res.booking_no);
+                    $('button[type="submit"]').removeClass('d-none');
+                } else {
+                    alert(res.message || 'Error loading data');
+                    $('#receive_items_body').html('<tr><td colspan="5" class="text-center text-danger">No booking found for this PI</td></tr>');
+                }
+            },
+            error: function() {
+                alert('Server error occurred');
             }
         });
     });
 
-    // ----------------------------
-    // Calculate total qty for an item
-    // ----------------------------
-    function calculateItemTotal($itemRow) {
+    $(document).on('input', '.yarn-recv', function() {
+        let $subTable = $(this).closest('.yarnBody'); // সাব টেবিলের বডি ধরলাম
         let total = 0;
-        $itemRow.find('.yarn-qty').each(function() {
-            total += parseFloat($(this).val()) || 0;
+
+        // ওই সাব-টেবিলের সব yarn-recv যোগ করা
+        $subTable.find('.yarn-recv').each(function() {
+            let val = parseFloat($(this).val()) || 0;
+            total += val;
         });
-        $itemRow.find('.total-qty').val(total);
-    }
 
-    // ----------------------------
-    // On quantity change
-    // ----------------------------
-    $(document).on('input', '.yarn-qty', function() {
-        let $yarnRow = $(this).closest('.yarnBody').closest('tr'); // outer item row
-        calculateItemTotal($yarnRow);
+        // মেইন টেবিলের row খুঁজে total-qty তে ভ্যালু বসানো
+        // $(this).closest('tr').parent().closest('tr') ব্যবহার করে মেইন রো তে যাওয়া যায়
+        $(this).closest('table').closest('tr').find('.total-qty').val(total.toFixed(2));
     });
-
-    // ----------------------------
-    // Add new yarn row
-    // ----------------------------
-    $(document).on('click', '.addRow', function() {
-        let $row = $(this).closest('.yarn-row');
-        let $clone = $row.clone();
-
-        // reset values
-        $clone.find('select').prop('selectedIndex', 0);
-        $clone.find('.yarn-qty').val(0);
-
-        $row.closest('.yarnBody').append($clone);
-    });
-
-    // ----------------------------
-    // Remove yarn row
-    // ----------------------------
-    $(document).on('click', '.removeRow', function() {
-        let $tbody = $(this).closest('.yarnBody');
-        if ($tbody.find('.yarn-row').length > 1) {
-            $(this).closest('.yarn-row').remove();
-
-            // recalc total for the remaining rows
-            let $itemRow = $tbody.closest('tr');
-            calculateItemTotal($itemRow);
-        }
-    });
-
-    // ----------------------------
-    // Initial total calculation on page load
-    // ----------------------------
-    $('.cardItems tr').each(function() {
-        let $itemRow = $(this);
-        if ($itemRow.find('.total-qty').length) {
-            calculateItemTotal($itemRow);
-        }
-    });
-
 });
-
 </script>
-
-
-<script>
-document.addEventListener('focus', function(e) {
-    // Focus event for any number input
-    if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
-        if (e.target.value == 0) e.target.value = '';
-    }
-}, true); // use capture so focus triggers on delegation
-
-document.addEventListener('blur', function(e) {
-    // Blur event for any number input
-    if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
-        if (e.target.value === '') e.target.value = 0;
-    }
-}, true);
-</script>
-
-
-
 @endpush
-
-

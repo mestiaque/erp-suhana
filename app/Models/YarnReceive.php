@@ -7,21 +7,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class YarnReceive extends Model
 {
-    use SoftDeletes;
 
     protected $table = 'yarn_receives';
 
-    protected $fillable = [
-        'booking_id',
-        'received_qty',
-        'receive_date',
-        'qc_status',
-        'warehouse_location',
-        'remarks',
-        'created_by',
-        'updated_by',
-        'deleted_by'
-    ];
+    protected $guarded = [];
 
     protected $dates = [
         'receive_date',
@@ -33,6 +22,27 @@ class YarnReceive extends Model
     // Relationship
     public function booking()
     {
-        return $this->belongsTo(YarnBooking::class, 'booking_id');
+        return $this->belongsTo(YarnBooking::class, 'booking_item_id');
+    }
+
+    public function pi()
+    {
+        return $this->belongsTo(ProformaInvoice::class, 'pi_id');
+    }
+
+    public function bookingRow()
+    {
+        return $this->belongsTo(YarnBooking::class, 'booking_item_id');
+    }
+
+    public function getBookingNo()
+    {
+        $length = 8;
+        return str_pad($this->booking_no, $length, '0', STR_PAD_LEFT);
+    }
+    public function getRecvNo()
+    {
+        $length = 8;
+        return str_pad($this->receive_no, $length, '0', STR_PAD_LEFT);
     }
 }

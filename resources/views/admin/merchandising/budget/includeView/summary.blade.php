@@ -2,8 +2,8 @@
 <table class="table table-bordered table-sm" id="summaryTable">
     <tbody>
         <!-- 1. Total Value of Order -->
-        <tr>
-            <th class="vm">TOTAL VALUE OF ORDER</th>
+        <tr class="bot">
+            <th class="vm bol">TOTAL VALUE OF ORDER</th>
             <td>
                 {{ $budget->total_qty ?? 0 }}
             </td>
@@ -20,7 +20,7 @@
 
         <!-- 2. Reservation -->
         <tr>
-            <th colspan="3" class="text-right vm">Reservation</th>
+            <th colspan="3" class="text-right vm bol">Reservation</th>
             <td colspan="2">
                 {{-- Logic usually: PI Value - Total Expenditure --}}
                 {{ ($budget->total_qty ?? 0) - ($budget->summary->total_expenditure ?? 0) }}
@@ -29,7 +29,7 @@
 
         <!-- 3. BTB -->
         <tr>
-            <td>BTB</td>
+            <td class="bol">BTB</td>
             <td class="btb_percent_cell" style="vertical-align: middle">
                 {{ $budget->summary->btb_percent ?? 0 }}% = {{ $budget->summary->btb_value ?? 0 }}
             </td>
@@ -41,8 +41,8 @@
         </tr>
 
         <!-- 4. CASH -->
-        <tr>
-            <td class="vm">CASH</td>
+        <tr class="bob">
+            <td class="vm bol">CASH</td>
             <td class="cash_percent_cell">
                 {{ $budget->summary->cash_percent ?? 0 }}% = {{ $budget->summary->cash_value ?? 0 }}
             </td>
@@ -55,23 +55,23 @@
     <p style="font-size:10px">Production Cost</p>
     <table class="table table-bordered table-sm" id="productionCostTable">
         <thead>
-            <tr>
-                <th>Item</th>
+            <tr class="bot">
+                <th class="bol">Item</th>
                 <th>Machine/Use</th>
                 <th>O/Cost ($)</th>
                 <th>Total Cost ($)</th>
                 <th>Product/Day</th>
-                <th>CM/Doz ($)</th>
+                <th class="bor">CM/Doz ($)</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>{{ $budget->productionCosts->item ?? '' }}</td>
+            <tr class="bob">
+                <td class="bol">{{ $budget->productionCosts->item ?? '' }}</td>
                 <td>{{ $budget->productionCosts->machine_use ?? '' }}</td>
                 <td>{{ $budget->productionCosts->ocost ?? '' }}</td>
                 <td>{{ $budget->productionCosts->total_cost ?? '' }}</td>
                 <td>{{ $budget->productionCosts->product_day ?? '' }}</td>
-                <td>{{ $budget->productionCosts->cm_doz ?? '' }}</td>
+                <td class="bor">{{ $budget->productionCosts->cm_doz ?? '' }}</td>
             </tr>
         </tbody>
     </table>

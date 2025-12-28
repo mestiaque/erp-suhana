@@ -86,8 +86,8 @@
                             <td>
                                 {{ $row->pi?->buyer_name ?? '--' }}
                             </td>
-                            <td class="text-center">{{ $row->total_items }}</td>
-                            <td class="text-center">{{ $row->total_req_qty }}</td>
+                            <td class="text-center">{{ $row->total_items_count }}</td>
+                            <td class="text-center">{{ $row->total_booking_qty }}</td>
                             <td>
                                 {{ $row->createdBy?->name ?? '-' }}
                             </td>

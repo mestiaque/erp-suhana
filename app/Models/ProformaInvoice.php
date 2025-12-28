@@ -47,5 +47,10 @@ class ProformaInvoice extends Model
         return $this->hasMany(ProformaInvoiceItem::class, 'proforma_invoice_id');
     }
 
+    public function yarnBookings()
+    {
+        return $this->hasMany(YarnBooking::class, 'pi_id', 'id');
+    }
+
 
 }

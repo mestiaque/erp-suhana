@@ -42,7 +42,7 @@
         }
 
         table th, table td {
-            border: 1px solid #dee2e6 !important;
+            border: 1px solid #dee2e6;
             padding: 4px 6px;
             vertical-align: middle !important;
         }
@@ -79,6 +79,19 @@
             font-size: 24px;
             margin-top: -35px;
             color: #1a3d0a;
+        }
+
+        .bol{
+            border-left: 1px solid #000 !important;
+        }
+        .bor{
+            border-right: 1px solid #000 !important;
+        }
+        .bot{
+            border-top: 1px solid #000 !important;
+        }
+        .bob{
+            border-bottom: 1px solid #000 !important;
         }
 
 

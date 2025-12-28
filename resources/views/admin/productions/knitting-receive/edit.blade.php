@@ -1,65 +1,73 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Knitting Booking Edit') }}</title>
+<title>{{ websiteTitle($receive ? 'Edit Knitting Receive' : 'New Knitting Receive') }}</title>
 @endsection
 
 @section('contents')
 <div class="flex-grow-1">
     <div class="breadcrumb-area">
-        <h1>Edit Knitting Booking</h1>
+        <h1>{{ $receive ? 'Edit' : 'New' }} Knitting Receive</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
-            <li class="item"><a href="{{ route('admin.knittingBooking') }}">Knitting Bookings</a></li>
-            <li class="item">Edit Knitting Booking</li>
+            <li class="item"><a href="{{ route('admin.knittingReceive') }}">Knitting Receives</a></li>
+            <li class="item">Edit</li>
         </ol>
     </div>
 
     <div class="card mb-30">
         <div class="card-body">
             @include(adminTheme().'alerts')
-            <form action="{{ route('admin.knittingBookingAction', ['update', $booking->booking_no ?? 0]) }}" method="POST">
+
+            <form action="{{ route('admin.knittingReceiveAction', ['update', $receive->receive_no ?? 0]) }}" method="POST">
                 @csrf
+                @if($receive)
+                    <input type="hidden" name="receive_no" value="{{ $receive->receive_no }}">
+                @endif
 
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <label>PI Number</label>
-                        <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.knittingBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
-                            <option value="">-- Select PI Number --</option>
+                        <label>Select PI Number</label>
+                        <select class="form-control" name="pi_id" id="pi_receive_select"
+                                data-url="{{ route('admin.knittingReceiveAction', 'knit-booking-select') }}" required>
+                            <option value="">-- Select PI --</option>
                             @foreach($pis as $pi)
-                                <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
+                                <option value="{{ $pi->id }}" {{ ($receive && $receive->pi_id == $pi->id) ? 'selected' : '' }}>
+                                    {{ $pi->pi_no }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
+
                     <div class="col-md-3 mb-3">
-                        <label>Buyer Name</label>
-                        <input type="text" readonly class="form-control buyer_name" value="{{ $booking->pi->buyer?->name ?? '' }}">
+                        <label>Receive Date</label>
+                        <input type="date" name="receive_date" class="form-control" value="{{ $receive->receive_date ?? date('Y-m-d') }}" required>
                     </div>
 
-                    {{-- <div class="col-md-3 mb-3">
-                        <label>Supplier</label>
-                        <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required>
-                    </div> --}}
+                    <div class="col-md-3 mb-3">
+                        <label>Chalan No</label>
+                        <input type="text" name="chalan_no" class="form-control" value="{{ $receive->chalan_no ?? '' }}" placeholder="Enter Chalan No" required>
+                    </div>
 
                     <div class="col-md-3 mb-3">
-                        <label>Status</label>
-                        <select name="status" class="form-control" required>
-                            <option value="pending" {{ $booking?->status=='pending'?'selected':'' }}>Pending</option>
-                            <option value="confirmed" {{ $booking?->status=='confirmed'?'selected':'' }}>Confirmed</option>
-                            <option value="approved" {{ $booking?->status=='approved'?'selected':'' }}>Approved</option>
-                            <option value="cancel" {{ $booking?->status=='cancel'?'selected':'' }}>Cancel</option>
-                        </select>
+                        <label>Knitting Booking No</label>
+                        <input type="text" name="" id="knit_booking_no_display" class="form-control bg-light" value="{{ $receive->knit_booking_no ?? '' }}" readonly>
+                        <input type="hidden" name="knit_booking_no" id="knit_booking_no_input" value="{{ $receive->knit_booking_no ?? '' }}">
                     </div>
                 </div>
 
                 <br>
-                <h5><b>Knitting Booking Items</b></h5>
-                <div class="cardItems">
-                    @include(adminTheme().'productions.knitting-booking.includes.items', ['items' => $items ?? []])
+                <h5><b>Fabric Receive Items</b></h5>
+                <div id="receive_items_area">
+                    @include(adminTheme().'productions.knitting-receive.includes.items', ['items' => $items])
                 </div>
 
                 <br>
-                <button type="submit" class="btn btn-success"><i class="bx bx-check"></i> Update Knitting Booking</button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bx bx-check"></i> {{ $receive ? 'Update' : 'Save' }} Receive Record
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -67,44 +75,35 @@
 @endsection
 
 @push('js')
-
 <script>
-
 $(document).ready(function() {
-
-    // ----------------------------
-    // PI Number change
-    // ----------------------------
-    $('#pi_select').change(function() {
-        let pi_no = $(this).val();
-        if (!pi_no) return;
-
+    $('#pi_receive_select').on('change', function() {
+        let pi_id = $(this).val();
         let url = $(this).data('url');
-        $.get(url, { pi_no: pi_no }, function(res) {
-            if(res.success){
-                $('.buyer_name').val(res.order.buyer_name);
-                $('.cardItems').html(res.html);
-            } else {
-                alert('PI not found');
-                $('.cardItems').html('<tr><td colspan="7" class="text-center">No items found</td></tr>');
+
+        if (!pi_id) {
+            $('#receive_items_area').html('');
+            return;
+        }
+
+        $('#receive_items_area').html('<div class="text-center py-3">Loading items...</div>');
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: { pi_id: pi_id },
+            success: function(res) {
+                if (res.success) {
+                    $('#receive_items_area').html(res.html);
+                    $('#knit_booking_no_display').val(res.knit_booking_no_show);
+                    $('#knit_booking_no_input').val(res.knit_booking_no);
+                } else {
+                    alert(res.message);
+                    $('#receive_items_area').html('');
+                }
             }
         });
     });
-
-
-
 });
-
 </script>
-
-
-<script>
-
-
-</script>
-
-
-
 @endpush
-
-
