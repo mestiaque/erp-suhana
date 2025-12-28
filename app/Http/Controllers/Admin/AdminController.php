@@ -10831,6 +10831,7 @@ class AdminController extends Controller
     // Users Customer Action (Create, Edit, Update, Password, Soft Delete, Restore, Force Delete)
     public function usersCustomerAction(Request $r, $action, $id = null)
     {
+        $authId = auth()->id();
         // RESTORE SOFT DELETED USER
         if ($action == 'restore') {
             $user = User::onlyTrashed()->find($id);
@@ -10845,6 +10846,10 @@ class AdminController extends Controller
 
         // FORCE DELETE USER
         if ($action == 'force-delete') {
+            if ($id == $authId) {
+                Session()->flash('error', 'You cannot force delete yourself!');
+                return redirect()->back();
+            }
             $user = User::onlyTrashed()->find($id);
             if ($user) {
                 $userFiles = Media::where('src_type', 6)->where('src_id', $user->id)->get();
@@ -10975,8 +10980,11 @@ class AdminController extends Controller
                 'status' => $r->status ? true : false,
                 'login_status' => $r->login_status ? true : false,
             ]);
-            
-            $user->permission_id = $r->role; 
+
+            // নিজের আইডি না হলে রিকোয়েস্টের রোল নেবে, আর নিজের আইডি হলে আগের রোলটাই রেখে দিবে
+            $user->permission_id = ($user->id !== $authId) ? $r->role : $user->permission_id;
+
+            // এরপর সেভ করুন
             $user->save();
 
             if ($r->password) {
@@ -11018,6 +11026,11 @@ class AdminController extends Controller
 
         // SOFT DELETE
         if ($action == 'delete') {
+
+            if ($user->id == $authId) {
+                Session()->flash('error', 'You cannot delete your own account!');
+                return redirect()->back();
+            }
             $user->deleted_by = auth()->id();
             $user->save();
             $user->delete();
