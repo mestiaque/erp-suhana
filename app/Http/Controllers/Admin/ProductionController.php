@@ -1435,7 +1435,26 @@ class ProductionController extends Controller
             ]);
         }
 
-        // Delete & Edit logic follows the same pattern as Yarn Receive...
+        if ($action == 'delete' && $id) {
+            // ১. ওই নির্দিষ্ট receive_no এর সব আইটেম খুঁজে বের করা
+            $receives = KnittingReceive::where('receive_no', $id)->get();
+
+            if ($receives->isEmpty()) {
+                return redirect()->back()->with('error', 'Receive record not found.');
+            }
+
+            // ২. লুপ চালিয়ে প্রতিটি আইটেমের ওজন KnittingBooking টেবিল থেকে কমিয়ে দেওয়া
+            foreach ($receives as $row) {
+                // Produced Qty অ্যাডজাস্টমেন্ট
+                KnittingBooking::where('id', $row->knit_id)->decrement('produced_qty', $row->weight);
+            }
+
+            // ৩. রিসিভ টেবিল থেকে এই চালানের সব ডাটা ডিলিট করা
+            KnittingReceive::where('receive_no', $id)->delete();
+
+            session()->flash('success', 'Knitting Receive Record Deleted Successfully and Booking Balance Updated.');
+            return redirect()->route('admin.knittingReceive');
+        }
     }
 
 }
