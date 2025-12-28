@@ -581,6 +581,7 @@ class MerchandisingController extends Controller
 
     public function orderDetailsX(Request $r)
     {
+        
         $orderDetails = OrderDetail::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {

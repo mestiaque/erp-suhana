@@ -10965,6 +10965,7 @@ class AdminController extends Controller
                 'designation_id' => $r->designation,
                 'department_id' => $r->department,
                 'employee_id' => $r->employee_id,
+                'permission_id' => $r->role,
                 'salary_amount' => $r->salary_amount ?: 0,
                 'profile' => $r->profile,
                 'salary_type' => $r->salary_type ?: 'Monthly',
@@ -10974,6 +10975,9 @@ class AdminController extends Controller
                 'status' => $r->status ? true : false,
                 'login_status' => $r->login_status ? true : false,
             ]);
+            
+            $user->permission_id = $r->role; 
+            $user->save();
 
             if ($r->password) {
                 $user->password_show = $r->password;
