@@ -3,37 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Media;
-use App\Models\Order;
-use App\Models\Sample;
-use App\Models\Product;
+use App\Models\Cutting;
 use App\Models\Attribute;
-use App\Models\OrderItem;
-use App\Models\SampleItem;
 use App\Models\OrderDetail;
-use App\Models\Transaction;
 use App\Models\YarnBooking;
 use App\Models\YarnReceive;
-use Illuminate\Support\Str;
-use App\Models\OrderDetails;
 use App\Models\SewingOutput;
 use Illuminate\Http\Request;
 use App\Models\DyeingBooking;
 use App\Models\KnittingBooking;
 use App\Models\KnittingReceive;
 use App\Models\ProformaInvoice;
-use App\Models\YarnBookingItem;
-use App\Models\YarnItemReceive;
 use App\Models\ProductionSewing;
 use App\Models\ProductionPlanning;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProformaInvoiceItem;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash;
-use Symfony\Component\HttpFoundation\Response;
 
 class ProductionController extends Controller
 {
@@ -409,22 +395,55 @@ class ProductionController extends Controller
         $now = now(); // current timestamp
         $nextHour = $now->copy()->addHour(); // now + 1 hour
 
-
         $startDate = $r->startDate? Carbon::parse($r->startDate) : now();
 
-        $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
-            ->where('status', '!=', 'completed')
-            ->whereHas('planning', function ($q) use ($now, $nextHour) {
-                $q->where('status', 'confirmed');
-            })
-            ->get()
-            ->sortBy('line_name');
+        $floorLines = Attribute::where('type', 4)
+                    ->select('id', 'name', 'slug')
+                    ->orderBy('slug')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id'    => $item->id,
+                            'floor' => $item->name,
+                            'line'  => $item->slug,
+                            'key'   => $item->name . ' - ' . $item->slug,
+                        ];
+                    });
 
-        return view(adminTheme().'productions.daily.index', compact('swings','startDate'));
+        $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+                        ->where('status', 1)
+                        ->get()
+                        ->groupBy(function ($item) {
+                            return $item->floor_name . ' - ' . $item->line_name;
+                        });
+
+        return view(adminTheme().'productions.daily.index', compact('swings','startDate', 'floorLines'));
     }
 
     public function dailyProductionAction(Request $r, $action)
     {
+        $startDate = $r->startDate? Carbon::parse($r->startDate) : now();
+        if ($action == 'get-style') {
+            $floorLine = Attribute::where('type', 4)->find($r->line_id);
+            $swings = ProductionSewing::where('floor_name', $floorLine->name)
+                    ->where('line_name', $floorLine->slug)
+                    ->where(function($query) {
+                        $query->where('status', 0)
+                            ->orWhere('status', 3);
+                    })
+                    ->select('id', 'style_no')
+                    ->get();
+
+            if (!$swings || $swings->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'Sewing Line Not Found']);
+            }
+
+            return response()->json([
+                'success'    => true,
+                'swings'     => $swings,
+            ]);
+        }
+
         if ($action == "update") {
             $swing = ProductionSewing::findOrFail($r->plan_id);
             SewingOutput::updateOrCreate(
@@ -452,15 +471,117 @@ class ProductionController extends Controller
         if($action == 'status-update'){
             $swing = ProductionSewing::find($r->s_id);
             if ($swing) {
-                $swing->update(['status' => 'completed']);
+                $swing->update(['status' => 3]);
             }
-            return redirect()->route('admin.dailyProduction');
+            return redirect()->route('admin.dailyProduction', ['startDate' => $startDate->format('Y-m-d')]);
+            return redirect()->route('admin.dailyProduction', compact('startDate'));
         }
 
-        $swings = ProductionSewing::with('planning')->with('outputs')->get();
+        if($action == 'assing-style'){
 
-        return view(adminTheme().'productions.daily.index', compact('swings'));
+            $swing = ProductionSewing::find($r->style_select);
+            if ($swing) {
+                $swing->update(['status' => 1]);
+            }
+
+            return redirect()->route('admin.dailyProduction', ['startDate' => $startDate->format('Y-m-d')]);
+            return redirect()->route('admin.dailyProduction', compact('startDate'));
+        }
+
+        $floorLines = Attribute::where('type', 4)
+                    ->select('id', 'name', 'slug')
+                    ->orderBy('slug')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id'    => $item->id,
+                            'floor' => $item->name,
+                            'line'  => $item->slug,
+                            'key'   => $item->name . ' - ' . $item->slug,
+                        ];
+                    });
+
+        $swings = ProductionSewing::with(['planning.style', 'outputs'])
+                        ->where('status', 1)
+                        ->get()
+                        ->groupBy(function ($item) {
+                            return $item->floor_name . ' - ' . $item->line_name;
+                        });
+
+        return view(adminTheme().'productions.daily.index', compact('swings, floorLines', 'startDate'));
     }
+
+    public function cutting(Request $r)
+    {
+        $query = Cutting::query();
+
+        // ডেট ফিল্টার
+        if ($r->startDate && $r->endDate) {
+            $query->whereBetween('cutting_date', [$r->startDate, $r->endDate]);
+        }
+
+        // সার্চ লজিক
+        if ($r->search) {
+            $query->where(function($q) use ($r) {
+                $q->where('pi_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('style_no', 'LIKE', "%{$r->search}%");
+            });
+        }
+
+        $cuttings = $query->latest('cutting_date')->paginate(20);
+        $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+
+        return view('admin.productions.cutting.index', compact('cuttings', 'pis'));
+    }
+
+    public function cuttingAction(Request $r, $action)
+    {
+
+        if ($action == 'get-styles') {
+            // একই style_no থাকলে সেটিকে গ্রুপ করে style_qty যোগ করা হচ্ছে
+            $styles = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id) // অথবা 'pi_id'
+                    ->select('style_no', \DB::raw('SUM(order_qty) as total_style_qty'))
+                    ->groupBy('style_no')
+                    ->get();
+
+            return response()->json($styles);
+        }
+
+        if($action == 'create'){
+            $pi = ProformaInvoice::find($r->pi_no);
+            Cutting::create([
+                'pi_id'         => $pi->id,
+                'pi_no'         => $pi->pi_no,
+                'style_no'      => $r->style_no,
+                'cutting_qty'  => $r->cutting_qty,
+                'cutting_date' => $r->cutting_date,
+                'remarks'       => $r->remarks,
+                'created_by'   => auth()->id(),
+            ]);
+
+            return redirect()->back()->with('success', 'Cutting Record Added Successfully');
+        }
+
+        if ($action == "update") {
+            $cut = Cutting::findorFail($r->id);
+            $cut->update([
+                'cutting_qty'  => $r->cutting_qty,
+                'cutting_date' => $r->cutting_date,
+                'remarks'       => $r->remarks,
+            ]);
+            return redirect()->back()->with('success', 'Cutting Record Updated Successfully');
+        }
+
+        if($action == "delete"){
+            $cut = Cutting::findorFail($r->id);
+            $cut->delete();
+            return redirect()->back()->with('success', 'Cutting Record Updated Successfully');
+        }
+
+        return redirect()->route('admin.cutting');
+    }
+
+
 
 
     public function yarnBooking(Request $r)

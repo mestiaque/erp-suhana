@@ -8,6 +8,7 @@ use App\Models\Media;
 use App\Models\Order;
 use App\Models\Budget;
 use App\Models\Sample;
+use App\Models\Cutting;
 use App\Models\Product;
 use App\Models\BudgetCm;
 use App\Models\Attribute;
@@ -18,6 +19,7 @@ use App\Models\OrderDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use App\Models\BudgetDyeing;
+use App\Models\SewingOutput;
 use Illuminate\Http\Request;
 use App\Models\BudgetSummary;
 use App\Models\BudgetKnitting;
@@ -581,7 +583,7 @@ class MerchandisingController extends Controller
 
     public function orderDetailsX(Request $r)
     {
-        
+
         $orderDetails = OrderDetail::orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
@@ -710,7 +712,77 @@ class MerchandisingController extends Controller
             ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
             ->first();
 
-        $data = compact('orderDetails', 'totals', 'totalOrderQty');
+        $styles = OrderDetail::whereNotIn('status', ['trash', 'temp'])
+                    ->distinct()
+                    ->pluck('style_no')
+                    ->toArray(); // নিশ্চিত করুন এটি একটি অ্যারে
+
+        $sewingOutputs = SewingOutput::query()
+            // Join এর বদলে LeftJoin ব্যবহার করুন যাতে ডাটা ম্যাচ না করলেও SewingOutput গুলো আসে
+            ->leftJoin('production_plannings', 'sewing_outputs.planning_id', '=', 'production_plannings.id')
+            ->whereIn('sewing_outputs.style_no', $styles)
+            ->select(
+                'sewing_outputs.style_no',
+                DB::raw('SUM(sewing_outputs.production) as actual_production'),
+                // style_qty যদি নাল থাকে তবে সেটিকে ০ হিসেবে ট্রিট করা
+                DB::raw('IFNULL(MAX(production_plannings.style_qty), 0) as allowed_qty')
+            )
+            ->groupBy('sewing_outputs.style_no')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                // যদি allowed_qty ০ হয় (অর্থাৎ প্ল্যানিং টেবিল থেকে ডাটা পায়নি),
+                // তবে আমরা অরিজিনাল প্রোডাকশনই দেখাবো (অথবা আপনার লজিক অনুযায়ী পরিবর্তন করতে পারেন)
+                $allowed = $item->allowed_qty > 0 ? $item->allowed_qty : 999999999;
+
+                $totalOutput = ($item->actual_production > $allowed)
+                            ? $allowed
+                            : $item->actual_production;
+
+                return [
+                    $item->style_no => [
+                        'style_no' => $item->style_no,
+                        'total_qty' => $totalOutput,
+                        'actual' => $item->actual_production,
+                        'allowed' => $item->allowed_qty
+                    ]
+                ];
+            });
+
+        $grandTotalSewingOutput = $sewingOutputs->sum(function ($item) {
+            return $item['total_qty'];
+        });
+
+
+        $cuttingSummary = Cutting::query()
+            ->leftJoin('proforma_invoice_items', function($join) {
+                $join->on('cuttings.style_no', '=', 'proforma_invoice_items.style_no')
+                    ->on('cuttings.pi_id', '=', 'proforma_invoice_items.proforma_invoice_id');
+            })
+            ->select(
+                'cuttings.style_no',
+                'cuttings.pi_id',
+                DB::raw('SUM(cuttings.cutting_qty) as actual_cut'),
+                DB::raw('IFNULL(MAX(proforma_invoice_items.order_qty), 0) as allowed_qty')
+            )
+            ->groupBy('cuttings.style_no', 'cuttings.pi_id')
+            ->get()
+            ->map(function ($item) {
+                // যদি allowed_qty ০ হয় (অর্থাৎ PI আইটেমে ডাটা নেই), তবে অরিজিনাল কাটিংই দেখাবে
+                $allowed = $item->allowed_qty > 0 ? $item->allowed_qty : 999999999;
+
+                // যদি একচুয়াল কাটিং অর্ডারের চেয়ে বেশি হয়, তবে অর্ডার কোয়ান্টিটি (Allowed) নিবে
+                $cappedCut = ($item->actual_cut > $allowed) ? $allowed : $item->actual_cut;
+
+                return [
+                    'capped_val' => $cappedCut
+                ];
+            });
+
+        // ২. গ্র্যান্ড টোটাল বের করা (Capped Output)
+        $grandTotalCuttingOutput = $cuttingSummary->sum('capped_val');
+
+
+        $data = compact('orderDetails', 'totals', 'totalOrderQty', 'grandTotalSewingOutput', 'grandTotalCuttingOutput');
 
         if($r->has('print')){
             return view(adminTheme().'merchandising.orderDetails.printList', $data);

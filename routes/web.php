@@ -170,6 +170,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
     Route::get('/production-list',[ProductionController::class,'production'])->name('production');
     Route::any('/production-list/{action}/{id?}',[ProductionController::class,'productionAction'])->name('productionAction');
+    Route::get('/cutting',[ProductionController::class,'cutting'])->name('cutting');
+    Route::any('/cutting/{action}/{id?}',[ProductionController::class,'cuttingAction'])->name('cuttingAction');
 
     //Buyer Order Management
     Route::get('/products',[OrderController::class,'products'])->name('products');

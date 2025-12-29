@@ -226,6 +226,17 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'cutting' => [
+                'label'       => 'Cutting List',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'yarn_booking' => [
                 'label'       => 'Yarn (Procurement)',
                 'permissions' => [

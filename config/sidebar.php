@@ -247,6 +247,13 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'daily_production'
                 ],
+                [
+                    'title'      => 'Cutting',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/cutting',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'cutting'
+                ],
 
             ]
         ],

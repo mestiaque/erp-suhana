@@ -58,7 +58,7 @@
                     <div class="custom-card" style="">
                         <div style="font-size:30px;">👕</div>
                         <div style="font-weight:bold;">Total</div>
-                        <div class="text-success">Qty: {{ $totalOrderQty }}</div>
+                        <div class="text-success">Qty: {{ number_format($totalOrderQty) }}</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
                 </div>
@@ -67,8 +67,8 @@
                     <div class="custom-card" style="">
                         <div style="font-size:30px;">✂️</div>
                         <div style="font-weight:bold;">Cutting</div>
-                        <div class="text-success">Qty: 0</div>
-                        <div class="text-danger">Balance: 0</div>
+                        <div class="text-success">Qty: {{ number_format($grandTotalCuttingOutput) }}</div>
+                        <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalCuttingOutput) }}</div>
                     </div>
                 </div>
 
@@ -76,8 +76,8 @@
                     <div class="custom-card" style="">
                         <div style="font-size:30px;">🧵</div>
                         <div style="font-weight:bold;">Sewing Output</div>
-                        <div class="text-success">Qty: 0</div>
-                        <div class="text-danger">Balance: 0</div>
+                        <div class="text-success">Qty: {{ number_format($grandTotalSewingOutput) }}</div>
+                        <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalSewingOutput) }}</div>
                     </div>
                 </div>
 
