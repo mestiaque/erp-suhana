@@ -78,8 +78,8 @@
                                 <br> <b>Qnty:</b> {{number_format($order->style_qty)}} pcs
                             </td>
                             <td>
-                                <b>M:</b> {{$order->style?->merchant_name}}
-                                <br><b>B:</b> {{$order->style?->buyer_name}}
+                                <b>M:</b> {{$order->getPiStyle()?->merchant_name}}
+                                <br><b>B:</b> {{$order->getPiStyle()?->buyer_name}}
 
                             </td>
                             <td>

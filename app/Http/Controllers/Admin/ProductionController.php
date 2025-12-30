@@ -164,11 +164,16 @@ class ProductionController extends Controller
         }
 
         if ($action == 'update') {
-
-            $plan->style_no      = $r->style_no;
+            if ($r->pi_style_data) {
+                $parts = explode('|', $r->pi_style_data);
+                $plan->pi_id    = $parts[0] ?? null;
+                $plan->pi_no    = $parts[1] ?? null;
+                $plan->style_no = $parts[2] ?? null;
+            }
             $plan->style_qty     = $r->style_qty ?: 0;
             $plan->extra_time    = $r->extra_time ?: 0;
             $plan->sewing_end    = $r->sewing_end;
+            $plan->working_hours = $r->totalHour;
             $plan->status        = 'confirmed';
             $plan->save();
 
@@ -199,7 +204,6 @@ class ProductionController extends Controller
             INSERT / UPDATE FLOORS
             ----------------------------*/
             foreach ($selectedFloorData as $floor) {
-
                 $floorLine = Attribute::where('type', 4)
                             ->where('slug', $floor['line'])
                             ->first();
@@ -264,10 +268,26 @@ class ProductionController extends Controller
             ->map(fn($val) => trim($val)) // removes extra spaces
             ->toArray();
 
-        $styles = OrderDetail::where('status', 'confirmed')
-            ->whereNotIn('style_no', $productionStyleNos)
-            ->orderBy('id', 'desc')
-            ->get();
+
+
+
+
+
+        $styles = ProformaInvoiceItem::join('proforma_invoices', 'proforma_invoice_items.proforma_invoice_id', '=', 'proforma_invoices.id')
+            ->select(
+                'proforma_invoices.id as pi_id',
+                'proforma_invoices.pi_no',
+                'proforma_invoice_items.style_no',
+                \DB::raw('SUM(proforma_invoice_items.order_qty) as total_style_qty')
+            )
+            ->groupBy('proforma_invoices.id', 'proforma_invoices.pi_no', 'proforma_invoice_items.style_no')
+            ->get()
+            ->map(function($item) {
+                // ব্লেড ফাইলে সহজে দেখানোর জন্য একটি কাস্টম নাম (Label) তৈরি করা
+                $item->display_name = $item->pi_no . " | " . $item->style_no . " (" . number_format($item->total_style_qty) . ")";
+                return $item;
+            });
+
 
 
         if($action == 'print'){

@@ -174,19 +174,17 @@
                             <hr style="border-bottom: 1px solid #2125298c;margin: 1px; ">
                             <h6 style="margin:2px;margin:5px 0;"><b>PRODUCTION VIEW</b> </h6>
                             <h6>Style No: {{ $plan->style_no }}</h6>
-                            <h6>Buyer Name: {{$plan->style?->buyer_name}}</h6>
+                            <h6>Buyer Name: {{$plan->getPiStyle()?->buyer_name}}</h6>
                         </div>
                     </div>
 
                     <div>
 
-                        
-                        
                         <div class="row">
                             <div class="col-4">
                                 <div class="section-title">Planning</div>
                                 <ul class="info-list p-0" style="list-style:none;">
-                                    <li><strong>Merchandiser:</strong> {{ $plan->style?->merchant_name }}</li>
+                                    <li><strong>Merchandiser:</strong> {{ $plan->getPiStyle()?->merchant_name }}</li>
                                     <li><strong>Style No:</strong> {{ $plan->style_no }}</li>
                                     <li><strong>Order Quantity:</strong> {{ number_format($plan->style_qty) }} pcs</li>
                                     <li><strong>Total Working Hours:</strong> {{ $plan->total_working_time }}</li>

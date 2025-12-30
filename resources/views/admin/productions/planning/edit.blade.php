@@ -56,7 +56,6 @@
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-
             <form action="{{ route('admin.productionPlanningAction', ['update', $plan->id]) }}" method="POST">
                 @csrf
                 <div class="row">
@@ -65,21 +64,30 @@
                             @if($plan->style_no)
                             <input type="hidden" name="{{ $plan->style_no ? 'style_no': '' }}" value="{{ $plan->style_no ? $plan->style_no : '' }}">
                             <select class="form-control form-control-sm mb-2 styleSelect" name="style_no" disabled >
-                                <option value="{{$plan->style_no}}" selected data-buyer="{{$plan->style?->buyer_name}}"  data-merchandiser="{{$plan->style?->merchant_name}}"  data-qty="{{$plan->style?->total_qty ?? 0}}" >{{$plan->style_no}}</option>
+                                <option value="{{$plan->style_no}}" selected data-buyer="{{$plan->getPiStyle()?->buyer_name}}"  data-merchandiser="{{$plan->getPiStyle()?->merchant_name}}"  data-qty="{{$plan->style_qty ?? 0}}" >{{$plan->pi_no . ' | ' . $plan->style_no}}</option>
                             </select>
                             @else
-                            <select class="form-control form-control-sm mb-2 styleSelect" name="style_no">
-                                <option value="">Select</option>
+                            <select class="form-control form-control-sm mb-2 styleSelect select2" name="pi_style_data">
+                                <option value="">Select PI - Style (Qty)</option>
                                 @foreach($styles as $style)
-                                <option value="{{$style->style_no}}" {{$style->style_no==$plan->style_no?'selected':''}} data-buyer="{{$style->buyer_name}}"  data-merchandiser="{{$style->merchant_name}}"  data-qty="{{$style->total_qty}}" >{{$style->style_no}}</option>
+                                @php
+                                    // সব ডাটা একসাথে ভ্যালু হিসেবে তৈরি করা
+                                    $value = $style->pi_id . '|' . $style->pi_no . '|' . $style->style_no;
+                                @endphp
+                                <option value="{{ $value }}"
+                                    {{ $style->style_no == $plan->style_no ? 'selected' : '' }}
+                                    data-qty="{{ $style->total_style_qty }}">
+                                    {{ $style->pi_no }} - {{ $style->style_no }} ({{ number_format($style->total_style_qty) }})
+                                </option>
                                 @endforeach
                             </select>
                             @endif
                             <p>
-                                <input type="hidden" name="style_qty" value="{{$plan->style?->total_qty ?? 0}}" class="style_qty">
-                                Order Qnty :<b class="styleQty">{{number_format($plan->style?->total_qty ?? 0)}} Pcs</b> <br>
-                                Buyer :<b class="styleBuyer">{{$plan->style?->buyer_name}}</b> <br>
-                                Merchandiser :<b class="styleMerchant">{{$plan->style?->merchant_name}}</b> <br>
+                                {{-- @dd($plan) --}}
+                                <input type="hidden" name="style_qty" value="{{$plan->style_qty ?? 0}}" class="style_qty">
+                                Order Qnty :<b class="styleQty">{{number_format($plan->style_qty ?? 0)}} Pcs</b> <br>
+                                Buyer :<b class="styleBuyer">{{$plan->getPiStyle()?->buyer_name}}</b> <br>
+                                Merchandiser :<b class="styleMerchant">{{$plan->getPiStyle()?->merchant_name}}</b> <br>
                             </p>
                         </div>
                     </div>
@@ -229,6 +237,7 @@
                                                             Total Hours:<b class="totalTime"></b> <br>
                                                             Hourly Target :<b class="hourTarget"></b> <br>
                                                             Per Day/Hours :<b class="totalHour" data-hour="10">10h</b> <br>
+                                                            <input type="hidden" name="totalHour" class="totalHourInput">
                                                             P. End:<b class="EndOfDate"></b> <br>
                                                         </p>
                                                     </td>
@@ -296,6 +305,7 @@
         function calculateProduction() {
             // Start date and quantity
             let startDate = $(".sewingStarDate").val();
+            console.log(startDate)
             let qty = Number($(".styleSelect option:selected").data("qty"));
             if (!startDate || !qty) return;
 
@@ -318,6 +328,7 @@
 
             $(".hourTarget").text(totalCapacity + " pcs");
             $(".totalHour").text(Math.floor(totalDailyMinutes/60) + "h");
+            $(".totalHourInput").val(Math.floor(totalDailyMinutes/60));
 
             // Total minutes needed to finish the order
             let totalMinutes = Math.round((qty / totalCapacity) * 60);
@@ -398,13 +409,13 @@
 .style-info {
     position: relative; /* default অবস্থায় relative থাকে */
     transition: all 0.3s ease; /* smooth transition */
+    /* border: 1px solid #4caf50; */
+    /* box-shadow: 0 2px 6px rgba(0,0,0,0.1); */
 }
-.style-info.sticky {
+.style-info.stickyx {
     position: fixed;
     top: 10rem;
     padding: 2px;
-    border: 1px solid #4caf50;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     z-index: 1000;
 }
 </style>
