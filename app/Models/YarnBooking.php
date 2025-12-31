@@ -14,6 +14,7 @@ class YarnBooking extends Model
     protected $fillable = [
         'pi_id',
         'booking_no',
+        'order_no',
         'style',
         'fabric_type',
         'yarn_count',
@@ -45,9 +46,15 @@ class YarnBooking extends Model
         return $this->hasMany(YarnDelivery::class, 'booking_id');
     }
 
+    // public function receives()
+    // {
+    //     return $this->hasMany(YarnReceive::class, 'booking_id');
+    // }
+
     public function receives()
     {
-        return $this->hasMany(YarnReceive::class, 'booking_id');
+        // আপনার টেবিল অনুযায়ী কলামের নাম 'booking_no' হলে:
+        return $this->hasMany(YarnReceive::class, 'booking_no', 'booking_no');
     }
 
     public function getBookingNo()
@@ -64,6 +71,10 @@ class YarnBooking extends Model
     public function pi()
     {
         return $this->belongsTo(ProformaInvoice::class,'pi_id');
+    }
+
+    public function getOrderItem(){
+        return OrderDetailItem::where('order_no', $this->order_no)->where('style_no', $this->style)->first();
     }
 
     public function getYarnDetailsAttribute()

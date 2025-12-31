@@ -12,9 +12,12 @@
             </tr>
         </thead>
         <tbody>
+            {{-- @dd($items) --}}
             @foreach($items as $i => $item)
+            {{-- @dd($item->getOrderItem()) --}}
+
                 @php
-                    $orderItem = $item->pi->order->items->where('style_no', $item->style)->first();
+                    $orderItem = $item->getOrderItem();
                     $gsm = $item->gsm ?? ($orderItem->gsm ?? '');
                     $fabric = $item->fabric_type ?? ($orderItem->fabrication ?? '');
                 @endphp

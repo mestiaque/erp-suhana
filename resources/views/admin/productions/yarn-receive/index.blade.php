@@ -75,7 +75,7 @@
                             <td class="text-center"><b>{{ number_format($row->total_receive_qty, 2) }} KG</b></td>
                             <td class="text-center d-flex justify-content-center">
 
-                                <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->booking_no }}">
+                                <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->receive_no }}">
                                     <i class="fa fa-eye"></i>
                                 </a>
                                 <a href="{{ route('admin.yarnReceiveAction',['edit',$row->receive_no]) }}" class="btn-custom success mr-1">

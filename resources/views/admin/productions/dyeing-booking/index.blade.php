@@ -53,7 +53,7 @@
                         <div class="input-group">
                             <input type="text" name="search"
                                    value="{{ request()->search ?? '' }}"
-                                   placeholder="Search Buyer, Pi No, Booking No, Fabrication"
+                                   placeholder="Search Buyer, Pi No, Booking No"
                                    class="form-control">
 
                             <button class="btn btn-success btn-sm rounded-0">Search</button>
@@ -70,6 +70,7 @@
                         <tr>
                             <th style="width: 60px">SL</th>
                             <th>Booking No</th>
+                            <th>PI No</th>
                             <th>Booking Date</th>
                             <th>Buyer</th>
                             <th>Total Items</th>
@@ -84,13 +85,14 @@
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
                             <td>{{ $row->getBookingNo() }}</td>
+                            <td>{{ $row->pi->pi_no }}</td>
                             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</td>
                             <td>{{ $row->buyer_name ?? '-' }}</td>
-                            <td class="text-center">{{ $row->total_items }}</td>
-                            <td class="text-center">{{ $row->total_req_qty }}</td>
+                            <td class="text-center">{{ number_format($row->total_items_count, 2) }}</td>
+                            <td class="text-center">{{ number_format($row->total_booking_qty, 2) }} Kgs</td>
                             <td>
                                 @php
-                                    $createdBy = App\Models\User::findOrFail($row->created_by);
+                                    $createdBy = $row->created_by ? App\Models\User::find($row->created_by) : null;
                                 @endphp
                                 {{ $createdBy?->name ?? '-' }}
                             </td>

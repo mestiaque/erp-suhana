@@ -57,7 +57,7 @@
 <div class="table-responsive">
     <table class="table table-bordered table-sm m-0">
         <thead>
-            <tr class="bg-light">
+            <tr class="bg-ligsht">
                 <th width="5%">SL</th>
                 <th width="10%">Style</th>
                 <th width="20%">Fabrication</th>

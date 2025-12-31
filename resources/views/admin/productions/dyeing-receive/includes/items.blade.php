@@ -1,72 +1,39 @@
 <div class="table-responsive">
     <table class="table table-bordered table-sm m-0">
-        <thead>
+        <thead class="bg-lisght">
             <tr>
-                <th width="5%">SL</th>
-                <th width="10%">Style</th>
-                <th width="25%">Fabrication</th>
-                <th width="25%">Composition</th>
-                <th width="25%">Color</th>
-                <th width="15%">Req Qnty</th>
+                <th>Style</th>
+                <th>Fabrication</th>
+                <th>Color</th>
+                <th>Booking Qty</th>
+                <th>Current Receive (KG)</th>
             </tr>
         </thead>
         <tbody>
-
-        @if($items && count($items) > 0)
-            @php $sl = 1; @endphp
-            @foreach($items as $i => $item)
-
-            <tr>
-                <td class="text-center">{{ $sl++ }}</td>
-
-                <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
-                <input type="hidden" name="items[{{ $i }}][booking_no]" value="{{ $item->booking_no }}">
-                <input type="hidden" name="items[{{ $i }}][order_no]" value="{{ $item->order_no }}">
-
+        @foreach($items as $i => $item)
+            @php
+                $style = $item->style_no ?? $item->style;
+                $color = $item->color_name ?? $item->color;
+            @endphp
+            <tr class="">
+                <td>{{ $style }}</td>
+                <td>{{ $item->fabric_type }}</td>
+                <td>{{ $color }}</td>
+                <td>{{ $item->required_qty ?? $item->bookingItem->required_qty }}</td>
                 <td>
-                    <input type="text"
-                           class="form-control form-control-sm"
-                           value="{{ $item->style_no ?? $item->style }}"
-                           readonly>
-                    <input type="hidden" name="items[{{ $i }}][style_no]" value="{{ $item->style_no ?? $item->style }}">
-                </td>
-                <td>
-                    <input type="text"
-                           class="form-control form-control-sm"
-                           value="{{ $item->orderDetails->fabrication ?? $item->fabric_type }}"
-                           readonly>
-                    <input type="hidden" name="items[{{ $i }}][fabrication]" value="{{ $item->orderDetails->fabrication ?? $item->fabric_type }}">
-                </td>
-                <td>
-                    <input type="text"
-                           class="form-control form-control-sm"
-                           value="{{ $item->composition ?? $item->composition }}"
-                           readonly>
-                    <input type="hidden" name="items[{{ $i }}][composition]" value="{{ $item->orderDetails->composition ?? $item->composition }}">
-                </td>
-                <td>
-                    <input type="text"
-                           class="form-control form-control-sm"
-                           value="{{ $item->color_name ?? $item->color }}"
-                           readonly>
-                    <input type="hidden" name="items[{{ $i }}][color]" value="{{ $item->color_name ?? $item->color }}">
-                </td>
-
-                <td>
-                    <input type="number"
-                           name="items[{{ $i }}][requisition_qty]"
-                           class="form-control form-control-sm total-qty"
-                           value="{{ $item->qty ?? $item->required_qty }}">
+                    @if(isset($receive) && $action == 'update')
+                    <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
+                    <input type="number" step="0.01" name="items[{{ $i }}][receive_qty]" class="form-control form-control-sm" value="{{ $item->receive_qty }}" required>
+                    @else
+                        {{-- ক্রিয়েট মোড --}}
+                        <input type="hidden" name="items[{{ $i }}][style]" value="{{ $style }}">
+                        <input type="hidden" name="items[{{ $i }}][color]" value="{{ $color }}">
+                        <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
+                        <input type="number" step="0.01" name="items[{{ $i }}][receive_qty]" class="form-control form-control-sm" value="0">
+                    @endif
                 </td>
             </tr>
-
-            @endforeach
-        @else
-            <tr>
-                <td colspan="5" class="text-center text-muted">No Dyeing Items Found</td>
-            </tr>
-        @endif
-
+        @endforeach
         </tbody>
     </table>
 </div>

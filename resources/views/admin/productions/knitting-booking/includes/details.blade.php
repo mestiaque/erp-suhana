@@ -33,7 +33,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted d-block">Booking Date</small>
-                                <strong>{{ \Carbon\Carbon::parse($row->created_at)->format('d M, Y') }}</strong>
+                                <strong>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</strong>
                             </div>
                         </div>
                     </div>

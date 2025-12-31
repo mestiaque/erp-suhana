@@ -27,12 +27,12 @@
                         $yarns = json_decode($item->yarn_count, true) ?? [];
                     }
                 @endphp
-
                 <tr>
                     <td class="text-center">{{ $i+1 }}</td>
 
                     <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
                     <input type="hidden" name="items[{{ $i }}][booking_no]" value="{{ $item->booking_no }}">
+                    <input type="hidden" name="items[{{ $i }}][order_no]" value="{{ $item->order_no }}">
 
                     <td>
                         <input type="text"

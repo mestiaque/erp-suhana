@@ -97,7 +97,7 @@
             <!-- Modal Footer -->
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" onclick="window.print()"><i class="bx bx-printer"></i> Print</button>
+                {{-- <button type="button" class="btn btn-success" onclick="window.print()"><i class="bx bx-printer"></i> Print</button> --}}
             </div>
 
         </div>

@@ -11,6 +11,7 @@ use App\Models\YarnReceive;
 use App\Models\SewingOutput;
 use Illuminate\Http\Request;
 use App\Models\DyeingBooking;
+use App\Models\DyeingReceive;
 use App\Models\KnittingBooking;
 use App\Models\KnittingReceive;
 use App\Models\ProformaInvoice;
@@ -663,7 +664,6 @@ class ProductionController extends Controller
         // UPDATE / STORE YARN BOOKING
         // -------------------------------
         if ($action == 'update') {
-
             $r->validate([
                 'pi_id' => 'required|exists:proforma_invoices,id',
                 'items.*.fabrication' => 'required|string',
@@ -708,6 +708,7 @@ class ProductionController extends Controller
                     [
                         'pi_id'         => $pi->id,
                         'booking_no'    => $bookingNo,
+                        'order_no'    => $item['order_no'],
                         'buyer_name'    => $pi->buyer_name ?? null,
                         'fabric_type'   => $item['fabrication'],
                         'style'         => $item['style_no'],
@@ -759,213 +760,6 @@ class ProductionController extends Controller
         $bookings = YarnBooking::all();
         return view(adminTheme() . 'productions.yarn-booking.index', compact('bookings'));
     }
-
-    public function dyeingBooking(Request $r)
-    {
-        $query = DyeingBooking::query();
-
-        // ----------------------------
-        // SEARCH (Booking No, PI No, Style, Fabric Type, Color)
-        // ----------------------------
-        if ($r->search) {
-            $search = $r->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('booking_no', 'like', "%$search%")
-                  ->orWhere('pi_id', 'like', "%$search%")
-                  ->orWhere('style', 'like', "%$search%")
-                  ->orWhere('fabric_type', 'like', "%$search%")
-                  ->orWhere('color', 'like', "%$search%");
-            });
-        }
-
-        // ----------------------------
-        // DATE RANGE FILTER
-        // ----------------------------
-        if ($r->startDate) {
-            $query->whereDate('created_at', '>=', $r->startDate);
-        }
-
-        if ($r->endDate) {
-            $query->whereDate('created_at', '<=', $r->endDate);
-        }
-
-        // ----------------------------
-        // GROUP BY booking_no / pi_id with required columns
-        // ----------------------------
-        $bookings = $query->select(
-                            'pi_id',
-                            'booking_no',
-                            DB::raw('MAX(style) as style'),
-                            DB::raw('MAX(fabric_type) as fabric_type'),
-                            DB::raw('MAX(color) as color'),
-                            DB::raw('MAX(shade) as shade'),
-                            DB::raw('MAX(expected_delivery) as expected_delivery'),
-                            DB::raw('MAX(buyer_name) as buyer_name'),
-                            DB::raw('MAX(remarks) as remarks'),
-                            DB::raw('SUM(required_qty) as total_req_qty'),
-                            DB::raw('COUNT(id) as total_items'),
-                            DB::raw('MAX(created_by) as created_by'),
-                            DB::raw('MAX(updated_by) as updated_by'),
-                            DB::raw('MAX(deleted_by) as deleted_by'),
-                            DB::raw('MAX(status) as status')
-                        )
-                        ->groupBy('pi_id', 'booking_no')
-                        ->orderBy('booking_no', 'DESC')
-                        ->paginate(10); // pagination
-
-        return view(adminTheme() . 'productions.dyeing-booking.index', compact('bookings'));
-    }
-
-    public function dyeingBookingAction(Request $r, $action, $id = null)
-    {
-        // -------------------------------
-        // CREATE NEW DYEING BOOKING
-        // -------------------------------
-        if ($action == 'create') {
-            $pis = ProformaInvoice::whereNotNull('pi_no')->get();
-            return view(adminTheme() . 'productions.dyeing-booking.edit', [
-                'pis' => $pis,
-                'items' => [],
-                'booking' => null,
-                'action' => 'create'
-            ]);
-        }
-
-        // -------------------------------
-        // EDIT PAGE
-        // -------------------------------
-        if ($action == 'edit' && $id) { // id = booking no
-
-            $items = DyeingBooking::where('booking_no', $id)->get();
-            $booking = $items->first();
-            $pis = ProformaInvoice::whereNotNull('pi_no')->get();
-            $action = 'update';
-            return view(adminTheme() . 'productions.dyeing-booking.edit', compact('pis', 'items', 'booking','action'));
-        }
-
-        // -------------------------------
-        // UPDATE / STORE DYEING BOOKING
-        // -------------------------------
-
-        if ($action === 'update'){
-            // Validate request
-            $r->validate([
-                'pi_id' => 'required|exists:proforma_invoices,id',
-                'status' => 'required|string',
-                // 'booking_no' => 'required|string', // hidden input
-                'items' => 'required|array',
-                'items.*.style_no' => 'required|string',
-                'items.*.fabrication' => 'required|string',
-                'items.*.composition' => 'required|string',
-                'items.*.color' => 'required|string',
-                'items.*.requisition_qty' => 'required|numeric',
-            ]);
-
-            $pi = ProformaInvoice::findOrFail($r->pi_id);
-
-            $newBookingNo = DyeingBooking::max('booking_no') + 1;
-
-            foreach ($r->items as $item) {
-                if ($r->action === 'create') {
-                    // Create new DyeingBooking
-                    DyeingBooking::create([
-                        'booking_no'        => $newBookingNo,
-                        'pi_id'             => $pi->id,
-                        'style'             => $item['style_no'],
-                        'fabric_type'       => $item['fabrication'],
-                        'composition'       => $item['composition'],
-                        'color'             => $item['color'],
-                        'required_qty'      => $item['requisition_qty'],
-                        'buyer_name'        => $r->buyer_name ?? null,
-                        'expected_delivery' => $r->expected_delivery ?? null,
-                        'remarks'           => $r->remarks ?? null,
-                        'status'            => $r->status,
-                        'created_by'        => auth()->id(),
-                        'updated_by'        => auth()->id(),
-                    ]);
-                }
-
-                if ($r->action === 'update') {
-                    // Only update existing records (no create)
-                    $booking = DyeingBooking::where('booking_no', $item['booking_no'])
-                        ->where('style', $item['style_no'])
-                        ->where('color', $item['color'])
-                        ->first();
-
-                    if ($booking) {
-                        $booking->update([
-                            'pi_id'             => $pi->id,
-                            'required_qty'      => $item['requisition_qty'],
-                            'expected_delivery' => $r->expected_delivery ?? null,
-                            'buyer_name'        => $r->buyer_name ?? null,
-                            'remarks'           => $r->remarks ?? null,
-                            'status'            => $r->status,
-                            'updated_by'        => auth()->id(),
-                        ]);
-                    }
-                }
-            }
-
-            session()->flash(
-                'success',
-                $r->action === 'create'
-                    ? 'Dyeing Booking Created Successfully'
-                    : 'Dyeing Booking Updated Successfully'
-            );
-
-            return redirect()->route('admin.dyeingBooking');
-        }
-
-        // -------------------------------
-        // DELETE
-        // -------------------------------
-        if ($action == 'delete') {
-            DyeingBooking::where('booking_no', $id)->delete();
-            session()->flash('success', 'Dyeing Booking Deleted Successfully');
-            return redirect()->route('admin.dyeingBooking');
-        }
-
-        // -------------------------------
-        // AJAX: PI SELECT
-        // -------------------------------
-        if ($action == 'pi-select') {
-            $pi = ProformaInvoice::find($r->pi_no);
-            if (!$pi || $pi->items->count() < 1) {
-                return response()->json([
-                    'success' => false,
-                    'html'    => '<tr><td colspan="6" class="text-center">No items found</td></tr>'
-                ]);
-            }
-
-                $items = $pi->items
-                    ->flatMap(function ($item) {
-                        return optional($item->orderDetails)->items ?? collect();
-                    });
-
-                if ($items->count() < 1) {
-                    return response()->json([
-                        'success' => false,
-                        'html' => '<tr><td colspan="6" class="text-center">No items found</td></tr>'
-                    ]);
-                }
-
-            $html = view(adminTheme().'productions.dyeing-booking.includes.items', [
-                'pi'     => $pi,
-                'items'  => $items,
-                'action' => 'create'
-            ])->render();
-
-            return response()->json(['success' => true, 'html' => $html, 'order' => $pi]);
-        }
-
-
-        // -------------------------------
-        // LIST ALL DYEING BOOKINGS
-        // -------------------------------
-        $bookings = DyeingBooking::all();
-        return view(adminTheme() . 'productions.dyeing-booking.index', compact('bookings'));
-    }
-
 
     public function yarnReceive(Request $r)
     {
@@ -1164,65 +958,6 @@ class ProductionController extends Controller
 
 
 
-
-    public function dyeingReceive(Request $r)
-    {
-        return view(adminTheme() . 'productions.dyeing-receive.index');
-
-        $query = DyeingBooking::query();
-
-        // ----------------------------
-        // SEARCH (Booking No, PI No, Style, Fabric Type, Color)
-        // ----------------------------
-        if ($r->search) {
-            $search = $r->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('booking_no', 'like', "%$search%")
-                  ->orWhere('pi_id', 'like', "%$search%")
-                  ->orWhere('style', 'like', "%$search%")
-                  ->orWhere('fabric_type', 'like', "%$search%")
-                  ->orWhere('color', 'like', "%$search%");
-            });
-        }
-
-        // ----------------------------
-        // DATE RANGE FILTER
-        // ----------------------------
-        if ($r->startDate) {
-            $query->whereDate('created_at', '>=', $r->startDate);
-        }
-
-        if ($r->endDate) {
-            $query->whereDate('created_at', '<=', $r->endDate);
-        }
-
-        // ----------------------------
-        // GROUP BY booking_no / pi_id with required columns
-        // ----------------------------
-        $bookings = $query->select(
-                            'pi_id',
-                            'booking_no',
-                            DB::raw('MAX(style) as style'),
-                            DB::raw('MAX(fabric_type) as fabric_type'),
-                            DB::raw('MAX(color) as color'),
-                            DB::raw('MAX(shade) as shade'),
-                            DB::raw('MAX(expected_delivery) as expected_delivery'),
-                            DB::raw('MAX(buyer_name) as buyer_name'),
-                            DB::raw('MAX(remarks) as remarks'),
-                            DB::raw('SUM(required_qty) as total_req_qty'),
-                            DB::raw('COUNT(id) as total_items'),
-                            DB::raw('MAX(created_by) as created_by'),
-                            DB::raw('MAX(updated_by) as updated_by'),
-                            DB::raw('MAX(deleted_by) as deleted_by'),
-                            DB::raw('MAX(status) as status')
-                        )
-                        ->groupBy('pi_id', 'booking_no')
-                        ->orderBy('booking_no', 'DESC')
-                        ->paginate(10); // pagination
-
-        return view(adminTheme() . 'productions.dyeing-receive.index', compact('bookings'));
-    }
-
     public function knittingBooking(Request $r)
     {
         // ১. কুয়েরি শুরু (PI রিলেশনসহ Eager Load করা হয়েছে)
@@ -1378,6 +1113,7 @@ class ProductionController extends Controller
             $yarnBookings = \App\Models\YarnBooking::where('pi_id', $r->pi_id)
                             ->with(['pi.order.items'])
                             ->get();
+
 
             if ($yarnBookings->isEmpty()) {
                 return response()->json(['success' => false, 'message' => 'No Yarn Booking found!']);
@@ -1577,6 +1313,413 @@ class ProductionController extends Controller
             return redirect()->route('admin.knittingReceive');
         }
     }
+
+
+    public function dyeingBooking(Request $r)
+    {
+        // ১. রিলেশনসহ কুয়েরি শুরু
+        $query = DyeingBooking::with(['pi']);
+
+        // ২. সার্চ লজিক
+        if ($r->search) {
+            $search = $r->search;
+            // জিরো বাদ দিয়ে শুধুমাত্র সংখ্যা বের করা (যেমন: 00001 থেকে 1)
+            $cleanSearch = ltrim($search, '0');
+
+            $query->where(function($q) use ($search, $cleanSearch) {
+                $q->where('booking_no', 'LIKE', "%{$search}%")
+                // ডাটাবেসের জিরো বাদ দিয়ে সার্চ (ইস্যু ২ সমাধান)
+                ->orWhereRaw("TRIM(LEADING '0' FROM booking_no) LIKE ?", ["%{$cleanSearch}%"])
+                ->orWhere('style', 'LIKE', "%{$search}%")
+                ->orWhere('buyer_name', 'LIKE', "%{$search}%")
+                ->orWhereHas('pi', function ($q_pi) use ($search) {
+                    $q_pi->where('pi_no', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // ৩. ডেট ফিল্টার
+        if ($r->startDate) {
+            $query->whereDate('created_at', '>=', $r->startDate);
+        }
+        if ($r->endDate) {
+            $query->whereDate('created_at', '<=', $r->endDate);
+        }
+
+        // ৪. গ্রুপ বাই লজিক (ইস্যু ১ এর জন্য pi_id যুক্ত করা হয়েছে)
+        $bookings = $query->select(
+                                'booking_no',
+                                DB::raw('MAX(pi_id) as pi_id'), // PI ID নিতে হবে
+                                DB::raw('MAX(style) as style'),
+                                DB::raw('MAX(buyer_name) as buyer_name'),
+                                DB::raw('MAX(status) as status'),
+                                DB::raw('SUM(required_qty) as total_booking_qty'),
+                                DB::raw('COUNT(id) as total_items_count'),
+                                DB::raw('MAX(created_by) as created_by'),
+                                DB::raw('MAX(created_at) as created_at')
+                            )
+                            ->groupBy('booking_no')
+                            ->orderBy('created_at', 'DESC')
+                            ->paginate(20);
+
+        $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+
+        return view(adminTheme() . 'productions.dyeing-booking.index', compact('bookings', 'pis'));
+    }
+
+    public function dyeingBookingAction(Request $r, $action, $id = null)
+    {
+        // -------------------------------
+        // CREATE NEW DYEING BOOKING
+        // -------------------------------
+        if ($action == 'create') {
+            $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+            return view(adminTheme() . 'productions.dyeing-booking.edit', [
+                'pis' => $pis,
+                'items' => [],
+                'booking' => null,
+                'action' => 'create'
+            ]);
+        }
+
+        // -------------------------------
+        // EDIT PAGE
+        // -------------------------------
+        if ($action == 'edit' && $id) { // id = booking no
+
+            $items = DyeingBooking::where('booking_no', $id)->get();
+            $booking = $items->first();
+            $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+            $action = 'update';
+            return view(adminTheme() . 'productions.dyeing-booking.edit', compact('pis', 'items', 'booking','action'));
+        }
+
+        // -------------------------------
+        // UPDATE / STORE DYEING BOOKING
+        // -------------------------------
+
+        if ($action === 'update'){
+            // Validate request
+            $r->validate([
+                'pi_id' => 'required|exists:proforma_invoices,id',
+                'status' => 'required|string',
+                // 'booking_no' => 'required|string', // hidden input
+                'items' => 'required|array',
+                'items.*.style_no' => 'required|string',
+                'items.*.fabrication' => 'required|string',
+                'items.*.composition' => 'required|string',
+                'items.*.color' => 'required|string',
+                'items.*.requisition_qty' => 'required|numeric',
+            ]);
+
+            $pi = ProformaInvoice::findOrFail($r->pi_id);
+
+            $newBookingNo = DyeingBooking::max('booking_no') + 1;
+            foreach ($r->items as $item) {
+                if ($r->action === 'create') {
+                    // Create new DyeingBooking
+                    DyeingBooking::create([
+                        'booking_no'        => $newBookingNo,
+                        'pi_id'             => $pi->id,
+                        'style'             => $item['style_no'],
+                        'fabric_type'       => $item['fabrication'],
+                        'composition'       => $item['composition'],
+                        'color'             => $item['color'],
+                        'required_qty'      => $item['requisition_qty'],
+                        'buyer_name'        => $r->buyer_name ?? null,
+                        'expected_delivery' => $r->expected_delivery ?? null,
+                        'remarks'           => $r->remarks ?? null,
+                        'status'            => $r->status,
+                        'created_by'        => auth()->id(),
+                        'updated_by'        => auth()->id(),
+                    ]);
+                }
+
+                if ($r->action === 'update') {
+                    // Only update existing records (no create)
+                    $booking = DyeingBooking::where('booking_no', $item['booking_no'])
+                        ->where('style', $item['style_no'])
+                        ->where('color', $item['color'])
+                        ->first();
+
+                    if ($booking) {
+                        $booking->update([
+                            'pi_id'             => $pi->id,
+                            'required_qty'      => $item['requisition_qty'],
+                            'expected_delivery' => $r->expected_delivery ?? null,
+                            'buyer_name'        => $r->buyer_name ?? null,
+                            'remarks'           => $r->remarks ?? null,
+                            'status'            => $r->status,
+                            'updated_by'        => auth()->id(),
+                        ]);
+                    }
+                }
+            }
+
+            session()->flash(
+                'success',
+                $r->action === 'create'
+                    ? 'Dyeing Booking Created Successfully'
+                    : 'Dyeing Booking Updated Successfully'
+            );
+
+            return redirect()->route('admin.dyeingBooking');
+        }
+
+        // -------------------------------
+        // DELETE
+        // -------------------------------
+        if ($action == 'delete') {
+            DyeingBooking::where('booking_no', $id)->delete();
+            session()->flash('success', 'Dyeing Booking Deleted Successfully');
+            return redirect()->route('admin.dyeingBooking');
+        }
+
+        // -------------------------------
+        // AJAX: PI SELECT
+        // -------------------------------
+        if ($action == 'pi-select') {
+            $pi = ProformaInvoice::find($r->pi_no);
+
+            if (!$pi || $pi->items->count() < 1) {
+                return response()->json([
+                    'success' => false,
+                    'html'    => '<tr><td colspan="6" class="text-center">No items found</td></tr>'
+                ]);
+            }
+
+            $items = $pi->items->flatMap(function ($piItem) {
+                return $piItem->detailItems();
+            });
+
+
+            if ($items->count() < 1) {
+                return response()->json([
+                    'success' => false,
+                    'html' => '<tr><td colspan="6" class="text-center">No items found</td></tr>'
+                ]);
+            }
+
+            $html = view(adminTheme().'productions.dyeing-booking.includes.items', [
+                'pi'     => $pi,
+                'items'  => $items,
+                'action' => 'create'
+            ])->render();
+
+            return response()->json(['success' => true, 'html' => $html, 'order' => $pi]);
+        }
+
+
+        // -------------------------------
+        // LIST ALL DYEING BOOKINGS
+        // -------------------------------
+        $bookings = DyeingBooking::all();
+        return view(adminTheme() . 'productions.dyeing-booking.index', compact('bookings'));
+    }
+
+    public function dyeingReceive(Request $r)
+    {
+        // ১. কুয়েরি শুরু (PI এবং Creator রিলেশনসহ Eager Load করা হয়েছে)
+        $query = DyeingReceive::with(['pi']);
+
+        // ২. সার্চ লজিক (Receive No, Booking No, Style, PI No দিয়ে সার্চ)
+        if ($r->search) {
+            $search = $r->search;
+            $cleanSearch = ltrim($search, '0');
+
+            $query->where(function($q) use ($search, $cleanSearch) {
+                $q->where('receive_no', 'LIKE', "%{$search}%")
+                ->orWhere('booking_no', 'LIKE', "%{$search}%")
+                ->orWhereRaw("TRIM(LEADING '0' FROM booking_no) LIKE ?", ["%{$cleanSearch}%"])
+                ->orWhere('style', 'LIKE', "%{$search}%")
+                ->orWhere('challan_no', 'LIKE', "%{$search}%")
+                ->orWhereHas('pi', function ($q_pi) use ($search) {
+                    $q_pi->where('pi_no', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // ৩. ডেট ফিল্টার (রিসিভ ডেট অনুযায়ী)
+        if ($r->startDate) {
+            $query->whereDate('receive_date', '>=', $r->startDate);
+        }
+        if ($r->endDate) {
+            $query->whereDate('receive_date', '<=', $r->endDate);
+        }
+
+        // ৪. গ্রুপ বাই লজিক (receive_no অনুযায়ী সামারি করা হয়েছে)
+        $bookings = $query->select(
+                                'receive_no',
+                                'booking_no', // একই চালানে সাধারণত একটিই বুকিং থাকে
+                                DB::raw('MAX(id) as id'), // অ্যাকশনের জন্য লেটেস্ট আইডি
+                                DB::raw('MAX(pi_id) as pi_id'),
+                                DB::raw('MAX(receive_date) as receive_date'),
+                                DB::raw('MAX(challan_no) as challan_no'),
+                                DB::raw('SUM(receive_qty) as total_rcv_qty'),
+                                DB::raw('COUNT(id) as total_items'),
+                                DB::raw('MAX(created_by) as created_by'),
+                                DB::raw('MAX(created_at) as created_at')
+                            )
+                            ->groupBy('receive_no', 'booking_no')
+                            ->orderBy('created_at', 'DESC')
+                            ->paginate(20);
+
+        return view(adminTheme() . 'productions.dyeing-receive.index', compact('bookings'));
+    }
+
+    public function dyeingReceiveAction(Request $r, $action, $id = null)
+    {
+        // ১. CREATE PAGE (শুধুমাত্র পেজ দেখাবে)
+        if ($action == 'create') {
+            $pis = ProformaInvoice::whereNotNull('pi_no')
+                    ->whereHas('dyeingBookings')
+                    ->get();
+
+            return view(adminTheme() . 'productions.dyeing-receive.edit', [
+                'pis' => $pis,
+                'items' => [],
+                'receive' => null,
+                'action' => 'store' // ফর্ম সাবমিট হবে store অ্যাকশনে
+            ]);
+        }
+
+        // ২. STORE (নতুন ডাটা সেভ করা)
+        if ($action == 'store') {
+            $r->validate([
+                'booking_no' => 'required',
+                'receive_date' => 'required|date',
+                'items' => 'required|array',
+            ]);
+
+            DB::beginTransaction();
+            try {
+                $receiveNo = (DyeingReceive::max('receive_no') ?? 0) + 1;
+                foreach ($r->items as $item) {
+                    $booking = DyeingBooking::where('booking_no', $r->booking_no)->first();
+                    if (isset($item['receive_qty']) && $item['receive_qty'] > 0) {
+                        DyeingReceive::create([
+                            'receive_no'   => $receiveNo,
+                            'booking_no'   => $r->booking_no,
+                            'pi_id'        => $r->pi_id,
+                            'booking_item_id' => $item['id'],
+                            'style'        => $item['style'],
+                            'color'        => $item['color'],
+                            'receive_qty'  => $item['receive_qty'],
+                            'fabric_type'  => $booking->fabric_type,
+                            'composition'  => $booking->composition,
+                            'challan_no'   => $r->challan_no,
+                            'receive_date' => $r->receive_date,
+                            'remarks'      => $r->remarks,
+                            'created_by'   => auth()->id(),
+                        ]);
+
+                        DyeingBooking::where('booking_no', $r->booking_no)
+                            ->where('style', $item['style'])
+                            ->where('color', $item['color'])
+                            ->increment('received_qty', $item['receive_qty']);
+                    }
+                }
+                DB::commit();
+                session()->flash('success', 'Dyeing Items Received Successfully');
+                return redirect()->route('admin.dyeingReceive');
+            } catch (\Exception $e) {
+                DB::rollback();
+                return back()->with('error', 'Error: ' . $e->getMessage());
+            }
+        }
+
+        // ৩. EDIT PAGE
+        if ($action == 'edit' && $id) {
+            // এখানে $id হলো DyeingReceive টেবিলের Primary ID
+            $receive = DyeingReceive::where('receive_no', $id)->first();
+            $items = DyeingReceive::where('receive_no', $id)->get();
+            $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+
+            return view(adminTheme() . 'productions.dyeing-receive.edit', [
+                'receive' => $receive,
+                'items'   => $items,
+                'pis'     => $pis,
+                'action'  => 'update'
+            ]);
+        }
+
+        // ৪. UPDATE
+        if ($action == 'update' && $id) {
+
+            $oldItems = DyeingReceive::where('receive_no', $id)->get();
+
+            DB::beginTransaction();
+            try {
+
+                // 1️⃣ rollback old receive qty
+                foreach ($oldItems as $old) {
+                    DyeingBooking::where('id', $old->booking_item_id)
+                        ->decrement('received_qty', $old->receive_qty);
+                }
+
+                // 2️⃣ update receive & add new qty
+                foreach ($r->items as $it) {
+                    $receive = DyeingReceive::findOrFail($it['id']);
+
+                    $receive->update([
+                        'receive_qty'  => $it['receive_qty'],
+                        'challan_no'   => $r->challan_no,
+                        'receive_date' => $r->receive_date,
+                        'remarks'      => $r->remarks,
+                        'updated_by'   => auth()->id(),
+                    ]);
+
+                    DyeingBooking::where('id', $receive->booking_item_id)
+                        ->increment('received_qty', $it['receive_qty']);
+                }
+
+                DB::commit();
+                return redirect()
+                    ->route('admin.dyeingReceive')
+                    ->with('success', 'Updated Successfully');
+
+            } catch (\Exception $e) {
+                dd($e);
+                DB::rollback();
+                return back()->with('error', $e->getMessage());
+            }
+        }
+
+        // ৫. AJAX: PI SELECT
+        if ($action == 'pi-select') {
+            $items = DyeingBooking::where('pi_id', $r->pi_id)->get();
+            if ($items->count() < 1) return response()->json(['success' => false]);
+            // dd($items);
+
+            $html = view(adminTheme().'productions.dyeing-receive.includes.items', [
+                'items'  => $items,
+                'action' => 'create'
+            ])->render();
+
+            return response()->json([
+                'success'    => true,
+                'html'       => $html,
+                'booking_no' => $items->first()->getBookingNo(),
+                'buyer'      => $items->first()->pi->buyer->name ?? $items->first()->buyer_name
+            ]);
+        }
+
+        // ৬. DELETE
+        if ($action == 'delete') {
+            $receive = DyeingReceive::findOrFail($id);
+            DyeingBooking::where('booking_no', $receive->booking_no)
+                ->where('style', $receive->style)
+                ->where('color', $receive->color)
+                ->decrement('received_qty', $receive->receive_qty);
+
+            $receive->delete();
+            return back()->with('success', 'Record Deleted');
+        }
+    }
+
+
+
+
 
 }
 

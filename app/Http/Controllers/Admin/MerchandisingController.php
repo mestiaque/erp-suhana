@@ -581,75 +581,6 @@ class MerchandisingController extends Controller
         return view(adminTheme().'merchandising.samples.edit', compact('sample','items', 'buyers', 'merchandisers'));
     }
 
-    public function orderDetailsX(Request $r)
-    {
-
-        $orderDetails = OrderDetail::orderBy('id', 'desc')
-            ->where('status', '<>', 'temp')
-            ->where(function($q) use ($r) {
-
-                // SEARCH
-                if ($r->search) {
-                    $search = $r->search;
-                    $q->where(function($qq) use ($search) {
-                        $qq->where('id', 'LIKE', "%{$search}%")
-                            ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                            ->orWhere('style_no', 'LIKE', "%{$search}%")
-                            ->orWhere('company_name', 'LIKE', "%{$search}%")
-                            ->orWhere('invoice_no', 'LIKE', "%{$search}%")
-                            ->orWhere('order_no', 'LIKE', "%{$search}%")
-                            ->orWhere('composition', 'LIKE', "%{$search}%")
-                            ->orWhere('fabrication', 'LIKE', "%{$search}%")
-                            ->orWhere('gsm', 'LIKE', "%{$search}%")
-                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
-                    });
-                }
-
-                // DATE RANGE
-                if ($r->startDate || $r->endDate) {
-                    $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to   = $r->endDate ?: now()->format('Y-m-d');
-
-                    $q->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-                }
-
-                if ($r->shipmentStartDate || $r->shipmentEndDate) {
-                    $sfrom = $r->shipmentStartDate ?: now()->format('Y-m-d');
-                    $sto   = $r->shipmentEndDate ?: now()->format('Y-m-d');
-
-                    $q->whereDate('shipment_date', '>=', $sfrom)
-                    ->whereDate('shipment_date', '<=', $sto);
-                }
-
-                // STATUS
-                if ($r->status) {
-                    $q->where('status', $r->status);
-                } else {
-                    $q->where('status', '<>', 'trash');
-                }
-
-            })
-            ->paginate(25)
-            ->appends($r->all());
-
-        // TOTAL COUNTS
-        $totals = OrderDetail::whereNotIn('status', ['trash', 'temp'])
-            ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
-            ->first();
-
-        if($r->has('print')){
-            return view(adminTheme().'merchandising.orderDetails.printList', compact('orderDetails', 'totals'));
-        } else {
-            return view(adminTheme().'merchandising.orderDetails.index', compact('orderDetails', 'totals'));
-        }
-    }
-
-
     public function orderDetails(Request $r)
     {
         // ১. বেস কুয়েরি তৈরি করুন (যাতে ফিল্টারগুলো সবখানে সমানভাবে কাজ করে)
@@ -1420,6 +1351,18 @@ class MerchandisingController extends Controller
     }
 
 
+    public function fabricStatus($id = 1) // ডিফল্ট ১ ধরা হয়েছে
+    {
+        dd(1);
+        $pi = ProformaInvoice::with([
+            'buyer',
+            'items',
+            'yarnBookings',
+            'dyeingBookings'
+        ])->findOrFail($id);
+
+        return view(adminTheme().'merchandising.booking.status', compact('pi'));
+    }
 
     public function booking(Request $r)
     {
