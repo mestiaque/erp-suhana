@@ -151,7 +151,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/booking/{action}/{id?}',[MerchandisingController::class,'bookingAction'])->name('bookingAction');
     Route::get('/budget',[MerchandisingController::class,'budget'])->name('budget');
     Route::any('/budget/{action}/{id?}',[MerchandisingController::class,'budgetAction'])->name('budgetAction');
-    Route::get('/fabric-status',[MerchandisingController::class,'fabricStatus'])->name('fabricStatus');
+    Route::get('/fabric-status/{id}',[MerchandisingController::class,'fabricStatus'])->name('fabricStatus');
 
 
     Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');

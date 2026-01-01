@@ -1350,18 +1350,46 @@ class MerchandisingController extends Controller
         return view(adminTheme().'merchandising.masterData.'.$view, compact('data','report'));
     }
 
-
-    public function fabricStatus($id = 1) // ডিফল্ট ১ ধরা হয়েছে
+    public function fabricStatus($piId, Request $r)
     {
-        dd(1);
+        $id = $piId;
+        // Eager Loading এর মাধ্যমে রিলেটেড সব ডেটা একবারেই নিয়ে আসা
         $pi = ProformaInvoice::with([
             'buyer',
             'items',
-            'yarnBookings',
+            'yarnBookings.receives', // Yarn Booking and its receives
             'dyeingBookings'
-        ])->findOrFail($id);
+        ])->find($piId);
 
-        return view(adminTheme().'merchandising.booking.status', compact('pi'));
+        if(is_null($pi)) return redirect()->back()->with('errors', 'P.I. Fabric status not found');
+
+        // ম্যানুয়ালি মডেল ব্যবহার করে রিলেটেড রিসিভগুলো সংগ্রহ করা (যেহেতু অনেক ক্ষেত্রে সরাসরি রিলেশন নেই)
+        $yarnReceivesSum = \App\Models\YarnReceive::where('pi_id', $piId)->sum('receive_qty');
+
+        $knittingBookings = \App\Models\KnittingBooking::where('pi_id', $piId)->get();
+        $knittingReceivesSum = \App\Models\KnittingReceive::where('pi_id', $piId)->sum('weight');
+
+        $dyeingReceivesSum = \App\Models\DyeingReceive::where('pi_id', $piId)->sum('receive_qty');
+
+        if ($r->has('print')) {
+            return view(adminTheme().'merchandising.booking.statusPrint', compact(
+                'pi',
+                'yarnReceivesSum',
+                'knittingBookings',
+                'knittingReceivesSum',
+                'dyeingReceivesSum',
+                'id'
+            ));
+        }else{
+            return view(adminTheme().'merchandising.booking.statusShow', compact(
+                'pi',
+                'yarnReceivesSum',
+                'knittingBookings',
+                'knittingReceivesSum',
+                'dyeingReceivesSum',
+                'id'
+            ));
+        }
     }
 
     public function booking(Request $r)

@@ -3,12 +3,14 @@ order_detail_items : order_detail_id	color_name	composition	order_no	style_no	qt
 proforma_invoices : order_id	order_no	buyer_id	buyer_name	merchant_id	merchant_name	total_qty	total_bill	total_commission	pi_no	order_date	advising_bank	terms	status	remarks	addedby_id	editedby_id	created_at	updated_at	applicant	applicant_bank	first_beneficiary	first_beneficiary_bank	second_beneficiary	second_beneficiary_bank	notify_party
 proforma_invoice_items : proforma_invoice_id	order_no	composition	fabrication	gsm	shipment_date	style_no	color_name	order_qty	unit_price	total_price	commission	total_commission	commission_type	status	addedby_id	editedby_id	created_at	updated_at	item_name	uom
 
-yarn_bookings : booking_no	pi_id	style	fabric_type	yarn_count(multiple count with qty as json)	yarn_type	required_qty	received_qty	supplier	expected_delivery remarks
-yarn_receives : receive_no	pi_id booking_no booking_item_id	receive_date	supplier	chalan_no	chalan_no	yarn_count	lot_no	receive_qty remarks
-knitting_bookings : booking_no	pi_id	yarn_booking_no	yarn_booking_id	style	fabric_type	yarn_count	gsm	dia	stitch_length	booking_qty	produced_qty	knitting_unit
-knitting_receives : receive_no receive_date	 pi_id	 knit_booking_no knit_id	 roll_qty	 weight chalan_no remarks
-dyeing_bookings : pi_id	booking_no	style	fabric_type	composition	color	shade	required_qty	received_qty	buyer_name	expected_delivery	remarks
-dyeing_receives : receive_no	booking_no	booking_item_id	pi_id	style	fabric_type	composition	color	receive_qty	challan_no	receive_date	remarks
+yarn_bookings : id	booking_no	pi_id	order_no	style	fabric_type	yarn_count	yarn_type	required_qty	received_qty	supplier	expected_delivery	remarks
+yarn_receives : id	receive_no	pi_id	booking_no	booking_item_id	receive_date	supplier	chalan_no	chalan_no?	yarn_count	lot_no	receive_qty	remarks
+
+knitting_bookings : id	booking_no	pi_id	yarn_booking_no	yarn_booking_id	style	fabric_type	yarn_count	gsm	dia	stitch_length	booking_qty	produced_qty	knitting_unit
+knitting_receives : id	receive_no	receive_date	pi_id	knit_booking_no	knit_id	roll_qty	weight	chalan_no	remarks
+
+dyeing_bookings : id	pi_id	booking_no	style	fabric_type	composition	color	shade	required_qty	received_qty	buyer_name	expected_delivery	remarks
+dyeing_receives : id	receive_no	booking_no	booking_item_id	pi_id	style	fabric_type	composition	color	receive_qty	challan_no	receive_date	remarks
 
 
 amar prottekta jaygay pi wise booking and receives ar 1 table diyei manage koresi, orthat groupby pi_id korle paoa jabe
@@ -112,3 +114,447 @@ amar prottekta jaygay pi wise booking and receives ar 1 table diyei manage kores
             amar oigula table diye eita dynamic kore dao jototuku para jay
 
             sathe function o baniye dio
+
+
+
+           <div class="table-responsive">
+                <table class="table table-bordered table-sm text-center" style="font-size: 0.75rem; vertical-align: middle;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th rowspan="2" style="width: 3%">SL</th>
+                            <th rowspan="2" style="width: 8%">BUYER</th>
+                            <th rowspan="2" style="width: 8%">PI NO</th>
+                            <th rowspan="2" style="width: 10%">FABRICATION</th>
+                            <th rowspan="2" style="width: 7%">COLOR</th>
+                            <th rowspan="2" style="width: 6%">YARN COUNT</th>
+                            <th rowspan="2" colspan="2" style="width: 8%">YARN BOOKING</th>
+                            <th rowspan="2" style="width: 7%">INHOUSE YARN</th>
+                            <th rowspan="2" style="width: 8%">KNITTING FACTORY</th>
+                            <th colspan="3">GREY RECEIVE FOR DYEING</th>
+                            <th rowspan="2" style="width: 7%">DYEING FACTORY</th>
+                            <th colspan="4">DYEING TO FINISHED FAB I/H</th>
+                            <th rowspan="2" style="width: 10%">REMARKS</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 6%">TO YARN DELI</th>
+                            <th style="width: 5%">PROCESS LOSS (%)</th>
+                            <th style="width: 6%">GREY RECEIVE</th>
+                            <th style="width: 6%">TOTAL DYEING</th>
+                            <th style="width: 5%">DYEING BALANCE</th>
+                            <th style="width: 5%">GREY FINISH</th>
+                            <th style="width: 5%">DYE LOSS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // --- ১. ইয়ার্ন কাউন্ট লজিক (JSON ডিকোডিং) ---
+                            $uniqueYarnCounts = collect();
+                            foreach($pi->yarnBookings as $yb) {
+                                $countsArray = json_decode($yb->yarn_count, true);
+                                if (is_array($countsArray)) {
+                                    foreach ($countsArray as $item) {
+                                        if (!empty($item['count'])) {
+                                            $uniqueYarnCounts->push(trim($item['count']));
+                                        }
+                                    }
+                                }
+                            }
+                            $yarnCountStr = $uniqueYarnCounts->unique()->implode(', ');
+
+                            // --- ২. ডাইং কালার ও রিসিভ লজিক ---
+                            $dyeingReceives = \App\Models\DyeingReceive::where('pi_id', $pi->id)->get();
+                            $dyeingColors = $dyeingReceives->pluck('color')->unique()->filter();
+                            $dyeingReceivesSum = $dyeingReceives->sum('receive_qty');
+
+                            // --- ৩. ফেব্রিকেশন ---
+                            $fabricationStr = $pi->items->unique('fabrication')->map(function($i){
+                                return $i->fabrication . ($i->gsm ? ' ' . $i->gsm . ' GSM' : '');
+                            })->implode(', ');
+
+                            // --- ৪. ক্যালকুলেশন ---
+                            $totalYarnReq = $pi->yarnBookings->sum('required_qty');
+                            $totalKnitReq = $knittingBookings->sum('booking_qty');
+
+                            $knitProcessLossQty = $totalKnitReq - $knittingReceivesSum;
+                            $knitProcessLossPerc = $totalKnitReq > 0 ? ($knitProcessLossQty / $totalKnitReq) * 100 : 0;
+
+                            $totalDyeingReq = $pi->dyeingBookings->sum('required_qty');
+                            $dyeingBalance = $totalDyeingReq - $dyeingReceivesSum;
+                            $dyeProcessLoss = $knittingReceivesSum - $dyeingReceivesSum;
+                        @endphp
+
+                        <tr>
+                            <td>1</td>
+                            <td>{{ $pi->buyer->buyer_name ?? ($pi->buyer->name ?? $pi->buyer_name) }}</td>
+                            <td>{{ $pi->pi_no }}</td>
+                            <td>{{ $fabricationStr }}</td>
+
+                            {{-- কালার কলাম (রিসিভ টেবিল থেকে সব কালার) --}}
+                            <td class="text-left">
+                                @foreach($dyeingColors as $color)
+                                    • {{ $color }} <br>
+                                @endforeach
+                                @if($dyeingColors->isEmpty()) N/A @endif
+                            </td>
+
+                            <td>{{ $yarnCountStr ?: 'N/A' }}</td>
+
+                            {{-- YARN BOOKING --}}
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($yarnReceivesSum, 2) }}</td>
+
+                            {{-- KNITTING FACTORY --}}
+                            <td>
+                                {{ $knittingBookings->pluck('knitting_unit')->unique()->filter()->implode(', ') ?: 'N/A' }}
+                            </td>
+
+                            {{-- GREY RECEIVE FOR DYEING --}}
+                            <td>{{ number_format($totalKnitReq, 2) }}</td>
+                            <td>{{ number_format($knitProcessLossPerc, 2) }}%</td>
+                            <td>{{ number_format($knittingReceivesSum, 2) }}</td>
+
+                            {{-- DYEING FACTORY --}}
+                            <td>
+                                {{ $pi->dyeingBookings->pluck('remarks')->unique()->filter()->implode(', ') ?: 'N/A' }}
+                            </td>
+
+                            {{-- DYEING TO FINISHED --}}
+                            <td>{{ number_format($totalDyeingReq, 2) }}</td>
+                            <td>{{ number_format($dyeingBalance, 2) }}</td>
+                            <td>{{ number_format($dyeingReceivesSum, 2) }}</td>
+                            <td>{{ number_format($dyeProcessLoss, 2) }}</td>
+
+                            <td>{{ $pi->remarks }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="font-weight-bold bg-light">
+                        <tr>
+                            <td colspan="6" class="text-right">TOTAL</td>
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($yarnReceivesSum, 2) }}</td>
+                            <td></td>
+                            <td>{{ number_format($totalKnitReq, 2) }}</td>
+                            <td></td>
+                            <td>{{ number_format($knittingReceivesSum, 2) }}</td>
+                            <td></td>
+                            <td>{{ number_format($totalDyeingReq, 2) }}</td>
+                            <td>{{ number_format($dyeingBalance, 2) }}</td>
+                            <td>{{ number_format($dyeingReceivesSum, 2) }}</td>
+                            <td>{{ number_format($dyeProcessLoss, 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm text-center" style="font-size: 0.75rem; vertical-align: middle;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th rowspan="2" style="width: 3%">SL</th>
+                            <th rowspan="2" style="width: 8%">BUYER</th>
+                            <th rowspan="2" style="width: 8%">PI NO</th>
+                            <th rowspan="2" style="width: 12%">FABRICATION</th>
+                            <th rowspan="2" style="width: 7%">COLOR</th>
+                            <th rowspan="2" style="width: 8%">YARN COUNT</th>
+                            <th rowspan="2" colspan="2" style="width: 10%">YARN BOOKING</th>
+                            <th rowspan="2" style="width: 7%">INHOUSE YARN</th>
+                            <th rowspan="2" style="width: 8%">KNITTING FACTORY</th>
+                            <th colspan="3">GREY RECEIVE FOR DYEING</th>
+                            <th rowspan="2" style="width: 8%">DYEING FACTORY</th>
+                            <th colspan="4">DYEING TO FINISHED FAB I/H</th>
+                            <th rowspan="2" style="width: 10%">REMARKS</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 6%">TO YARN DELI</th>
+                            <th style="width: 5%">PROCESS LOSS (%)</th>
+                            <th style="width: 6%">GREY RECEIVE</th>
+                            <th style="width: 6%">TOTAL DYEING</th>
+                            <th style="width: 5%">DYEING BALANCE</th>
+                            <th style="width: 5%">GREY FINISH</th>
+                            <th style="width: 5%">DYE LOSS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // ১. ইয়ার্ন কাউন্ট ও ফেব্রিকেশন (ডেটা সেট অনুযায়ী)
+                            $uniqueYarnCounts = collect();
+                            foreach($pi->yarnBookings as $yb) {
+                                $countsArray = json_decode($yb->yarn_count, true);
+                                if (is_array($countsArray)) {
+                                    foreach ($countsArray as $item) {
+                                        if (!empty($item['count'])) $uniqueYarnCounts->push(trim($item['count']));
+                                    }
+                                }
+                            }
+                            $yarnCountStr = $uniqueYarnCounts->unique()->implode(', ');
+
+                            $fabrication = $pi->yarnBookings->pluck('fabric_type')->unique()->implode(', ');
+
+                            // ২. কালার ও রিসিভ (ডেটা সেট: BLACK, NAVY, GREEN, CAMEL)
+                            $dyeingReceives = \App\Models\DyeingReceive::where('pi_id', $pi->id)->get();
+                            $dyeingColors = $dyeingReceives->pluck('color')->unique()->filter();
+                            $dyeingReceivesSum = $dyeingReceives->sum('receive_qty');
+
+                            // ৩. ক্যালকুলেশন (ডেটা অনুযায়ী)
+                            $totalYarnReq = $pi->yarnBookings->sum('required_qty'); // ৩০০০ + ৭০০০ = ১০০০০
+                            $totalYarnRecv = \App\Models\YarnReceive::where('pi_id', $pi->id)->sum('receive_qty'); // ৫০০+১০০০+১৫০০+২০০০ = ৫০০০
+
+                            $totalKnitReq = \App\Models\KnittingBooking::where('pi_id', $pi->id)->sum('booking_qty'); // ৩০০০ + ৭০০০ = ১০০০০
+                            $totalKnitRecv = \App\Models\KnittingReceive::where('pi_id', $pi->id)->sum('weight'); // ২০০০ + ৫০০০ = ৭০০০
+
+                            $knitLossPerc = $totalKnitReq > 0 ? (($totalKnitReq - $totalKnitRecv) / $totalKnitReq) * 100 : 0;
+
+                            $totalDyeingReq = $pi->dyeingBookings->sum('required_qty'); // ৭০০.০০
+                            $dyeingBalance = $totalDyeingReq - $dyeingReceivesSum; // ৭০০ - ৬২০ = ৮০
+                            $dyeProcessLoss = $totalKnitRecv - $dyeingReceivesSum; // ৭০০০ - ৬২০ = ৬৩৮০
+                        @endphp
+
+                        <tr>
+                            <td>1</td>
+                            {{-- BUYER: HIRAKI --}}
+                            <td>{{ $pi->dyeingBookings->first()->buyer_name ?? ($pi->buyer->buyer_name ?? $pi->buyer_name) }}</td>
+                            <td>{{ $pi->pi_no }}</td>
+                            <td>{{ $fabrication ?: 'French Terry' }}</td>
+
+                            {{-- COLOR: BLACK, NAVY, GREEN, CAMEL --}}
+                            <td class="text-left" style="line-height: 1.2;">
+                                @foreach($dyeingColors as $color)
+                                    <span style="font-size: 10px;">• {{ $color }}</span><br>
+                                @endforeach
+                            </td>
+
+                            {{-- YARN COUNT: 16/2, 18/2, 20/2, 22/2 --}}
+                            <td>{{ $yarnCountStr }}</td>
+
+                            {{-- YARN BOOKING --}}
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+
+                            {{-- INHOUSE YARN --}}
+                            <td>{{ number_format($totalYarnRecv, 2) }}</td>
+
+                            {{-- KNITTING FACTORY --}}
+                            <td>{{ \App\Models\KnittingBooking::where('pi_id', $pi->id)->pluck('knitting_unit')->unique()->filter()->implode(', ') ?: 'FACTORY' }}</td>
+
+                            {{-- GREY RECEIVE FOR DYEING --}}
+                            <td>{{ number_format($totalKnitReq, 2) }}</td>
+                            <td>{{ number_format($knitLossPerc, 2) }}%</td>
+                            <td>{{ number_format($totalKnitRecv, 2) }}</td>
+
+                            {{-- DYEING FACTORY --}}
+                            <td>{{ $pi->dyeingBookings->pluck('remarks')->unique()->filter()->implode(', ') ?: 'DYEING UNIT' }}</td>
+
+                            {{-- DYEING TO FINISHED --}}
+                            <td>{{ number_format($totalDyeingReq, 2) }}</td>
+                            <td>{{ number_format($dyeingBalance, 2) }}</td>
+                            <td>{{ number_format($dyeingReceivesSum, 2) }}</td>
+                            <td>{{ number_format($dyeProcessLoss, 2) }}</td>
+
+                            <td>{{ $pi->remarks }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="font-weight-bold bg-light">
+                        <tr>
+                            <td colspan="6" class="text-right">TOTAL</td>
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+                            <td>{{ number_format($totalYarnRecv, 2) }}</td>
+                            <td></td>
+                            <td>{{ number_format($totalKnitReq, 2) }}</td>
+                            <td></td>
+                            <td>{{ number_format($totalKnitRecv, 2) }}</td>
+                            <td></td>
+                            <td>{{ number_format($totalDyeingReq, 2) }}</td>
+                            <td>{{ number_format($dyeingBalance, 2) }}</td>
+                            <td>{{ number_format($dyeingReceivesSum, 2) }}</td>
+                            <td>{{ number_format($dyeProcessLoss, 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm text-center align-middle" style="min-width: 2000px;">
+                    <caption class="text-center fw-bold caption-top">ANR FASHION WEAR LIMITED</caption>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">SL</th>
+                            <th rowspan="2">BUYER</th>
+                            <th rowspan="2">PI NO</th>
+                            <th rowspan="2">FABRICATION</th>
+                            <th rowspan="2">COLOR</th>
+                            <th rowspan="2">YARN COUNT</th>
+                            <th rowspan="2">YARN BOOKING</th>
+                            <th rowspan="2">INHOUSE YARN</th>
+                            <th rowspan="2">KNITTING FACTORY</th>
+                            <th rowspan="2">TO YARN DELI KNITTING</th>
+                            <th rowspan="2">GREY RECEIVE FOR DYEING</th>
+                            <th rowspan="2">GREY RECEIVE BAL</th>
+                            <th rowspan="2">KNITTING PROCE 55 LOSS (%)</th>
+                            <th rowspan="2">DYEING FACTORY</th>
+                            <th rowspan="2">GREY DELIVERY</th>
+                            <th rowspan="2">GREY DELIVERY BAL</th>
+                            <th rowspan="2">TOTAL DYEING</th>
+                            <th rowspan="2">DYEING BALANCE</th>
+
+                            <th colspan="2">DYEING TO FINISHED FAB I/H</th>
+                            <th rowspan="2">DYE PROCE 55 LOSS (N)</th>
+                            <th rowspan="2">REMARKS</th>
+                        </tr>
+                        <tr>
+                            <th>GREY</th>
+                            <th>FINISH</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // ১. ইয়ার্ন কাউন্ট ও ফেব্রিকেশন সংগ্রহ
+                            $uniqueYarnCounts = collect();
+                            foreach($pi->yarnBookings as $yb) {
+                                $countsArray = json_decode($yb->yarn_count, true);
+                                if (is_array($countsArray)) {
+                                    foreach ($countsArray as $item) {
+                                        if (!empty($item['count'])) $uniqueYarnCounts->push(trim($item['count']));
+                                    }
+                                }
+                            }
+                            $yarnCountStr = $uniqueYarnCounts->unique()->implode(', ');
+                            $fabrication = $pi->yarnBookings->pluck('fabric_type')->unique()->implode(', ');
+
+                            // ২. ডাইং রিসিভ ও কালার লজিক
+                            $dyeingReceives = \App\Models\DyeingReceive::where('pi_id', $pi->id)->get();
+                            $dyeingColors = $dyeingReceives->pluck('color')->unique()->filter();
+                            $totalDyeingFinishRecv = $dyeingReceives->sum('receive_qty'); // Finish Fabric Receive
+
+                            // ৩. ক্যালকুলেশন (PI #25 এর ডাটা অনুযায়ী)
+                            $totalYarnReq = $pi->yarnBookings->sum('required_qty');
+                            $totalYarnRecv = \App\Models\YarnReceive::where('pi_id', $pi->id)->sum('receive_qty');
+
+                            $totalKnitReq = \App\Models\KnittingBooking::where('pi_id', $pi->id)->sum('booking_qty');
+                            $totalGreyRecv = \App\Models\KnittingReceive::where('pi_id', $pi->id)->sum('weight');
+
+                            $knitLossPerc = $totalKnitReq > 0 ? (($totalKnitReq - $totalGreyRecv) / $totalKnitReq) * 100 : 0;
+
+                            $totalDyeingReq = $pi->dyeingBookings->sum('required_qty');
+                            $dyeingBalance = $totalDyeingReq - $totalDyeingFinishRecv;
+                        @endphp
+
+                        <tr>
+                            <td>1</td>
+                            {{-- BUYER --}}
+                            <td>{{ $pi->dyeingBookings->first()->buyer_name ?? ($pi->buyer->buyer_name ?? $pi->buyer_name) }}</td>
+
+                            {{-- PI NO --}}
+                            <td>{{ $pi->pi_no }}</td>
+
+                            {{-- FABRICATION --}}
+                            <td>{{ $fabrication ?: '--' }}</td>
+
+                            {{-- COLOR --}}
+                            <td class="text-left">
+                                {{ count($dyeingColors) }} COLORS
+                            </td>
+
+                            {{-- YARN COUNT --}}
+                            <td>{{ $yarnCountStr ?: '--' }}</td>
+
+                            {{-- YARN BOOKING --}}
+                            <td>{{ number_format($totalYarnReq, 2) }}</td>
+
+                            {{-- INHOUSE YARN --}}
+                            <td>{{ number_format($totalYarnRecv, 2) }}</td>
+
+                            {{-- KNITTING FACTORY --}}
+                            <td>{{ \App\Models\KnittingBooking::where('pi_id', $pi->id)->pluck('knitting_unit')->unique()->filter()->implode(', ') ?: '--' }}</td>
+
+                            {{-- TO YARN DELI KNITTING --}}
+                            <td>{{ number_format($totalKnitReq, 2) }}</td>
+
+                            {{-- GREY RECEIVE FOR DYEING --}}
+                            <td>{{ number_format($totalGreyRecv, 2) }}</td>
+
+                            {{-- GREY RECEIVE BAL --}}
+                            <td>{{ number_format($totalKnitReq - $totalGreyRecv, 2) }}</td>
+
+                            {{-- KNITTING PROCESS LOSS (%) --}}
+                            <td>{{ number_format($knitLossPerc, 2) }}%</td>
+
+                            {{-- DYEING FACTORY --}}
+                            <td>{{ $pi->dyeingBookings->pluck('remarks')->unique()->filter()->implode(', ') ?: '--' }}</td>
+
+                            {{-- GREY DELIVERY --}}
+                            <td>--</td>
+
+                            {{-- GREY DELIVERY BAL --}}
+                            <td>--</td>
+
+                            {{-- TOTAL DYEING (Required) --}}
+                            <td>{{ number_format($totalDyeingReq, 2) }}</td>
+
+                            {{-- DYEING BALANCE --}}
+                            <td>{{ number_format($dyeingBalance, 2) }}</td>
+
+                            {{-- DYEING TO FINISHED FAB I/H (GREY) --}}
+                            <td>--</td>
+
+                            {{-- DYEING TO FINISHED FAB I/H (FINISH) --}}
+                            <td>{{ number_format($totalDyeingFinishRecv, 2) }}</td>
+
+                            {{-- DYE PROCESS LOSS (N) --}}
+                            <td>{{ number_format($totalGreyRecv - $totalDyeingFinishRecv, 2) }}</td>
+
+                            {{-- REMARKS --}}
+                            <td>{{ $pi->remarks ?: '--' }}</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+
+
+......................................................................................................
+
+yarn_bookings:
+id	booking_no	pi_id	order_no	style	fabric_type	    yarn_count                                               	required_qty	supplier
+12	1	        25	    25001158	A56784	French Terry	[{"count":"16\/2","qty":1000},{"count":"18\/2","qty":2000}]	3000.00     	YB SUPPLYER
+13	1	        25	    25001161	A57147	French Terry	[{"count":"20\/2","qty":3000},{"count":"22\/2","qty":4000}]	7000.00	    	YB SUPPLYER
+
+yarn_receives
+id	receive_no	pi_id	booking_no	booking_item_id	receive_date	supplier	    chalan_no	yarn_count	receive_qty
+11	1	        25	    1	        12	            2026-01-01	    YB SUPPLYER	    YC907452	16/2	    500.00
+12	1	        25	    1	        12	            2026-01-01	    YB SUPPLYER	    YC907452	18/2	    1000.00
+13	1	        25	    1	        13	            2026-01-01	    YB SUPPLYER	    YC907452	20/2	    1500.00
+14	1	        25	    1	        13	            2026-01-01	    YB SUPPLYER	    YC907452	22/2	    2000.00
+
+
+knitting_bookings:
+id	booking_no	pi_id	yarn_booking_no	yarn_booking_id	style	fabric_type 	dia		booking_qty
+8	1	        25	    1	            12	            A56784	French Terry	Dia1	3000.00
+9	1	        25	    1	            13	            A57147	French Terry	Dia2	7000.00
+
+knitting_receives:
+id	receive_no	receive_date	pi_id	knit_booking_no	knit_id	roll_qty	weight	chalan_no
+5	1	        2026-01-01	    25	    1	            8	    1	        2000.00	KC204545
+6	1	        2026-01-01	    25	    1	            9	    1	        5000.00	KC204545
+
+dyeing_bookings:
+id	pi_id	booking_no	style	fabric_type	    composition	    color		required_qty	buyer_name
+19	25	    1	        A56784	French Terry	100%Cotton	    BLACK		100.00      	HIRAKI
+20	25	    1	        A56784	French Terry	100%Cotton	    NAVY		100.00      	HIRAKI
+21	25	    1	        A56784	French Terry	100%Cotton	    GREEN		100.00      	HIRAKI
+22	25	    1	        A56784	French Terry	100%Cotton	    CAMEL		100.00      	HIRAKI
+23	25	    1	        A57147	French Terry	100%Cotton	    BLACK		100.00      	HIRAKI
+24	25	    1	        A57147	French Terry	100%Cotton	    NAVY		100.00      	HIRAKI
+25	25	    1	        A57147	French Terry	100%Cotton	    GREEN		100.00      	HIRAKI
+
+dyeing_receives:
+id	receive_no	booking_no	booking_item_id	pi_id	style	fabric_type	    composition	    color	receive_qty	challan_no
+42	1	        1	        19	            25	    A56784	French Terry	100%Cotton	    BLACK	80.00	    DY349752
+43	1	        1	        20	            25	    A56784	French Terry	100%Cotton	    NAVY	90.00	    DY349752
+44	1	        1	        21	            25	    A56784	French Terry	100%Cotton	    GREEN	90.00	    DY349752
+45	1	        1	        22	            25	    A56784	French Terry	100%Cotton	    CAMEL	80.00	    DY349752
+46	1	        1	        23	            25	    A57147	French Terry	100%Cotton	    BLACK	90.00	    DY349752
+47	1	        1	        24	            25	    A57147	French Terry	100%Cotton	    NAVY	90.00	    DY349752
+48	1	        1	        25	            25	    A57147	French Terry	100%Cotton	    GREEN	100.00	    DY349752

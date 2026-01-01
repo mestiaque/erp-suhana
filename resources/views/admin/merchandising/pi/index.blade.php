@@ -109,6 +109,9 @@
                                 <td>{{ $pi->created_at->format('d.m.Y') }}</td>
 
                                 <td class="text-center">
+                                    <a href="{{ route('admin.fabricStatus',$pi->id) }}" class="btn-custom yellow">
+                                        <i class="fa-solid fa-chart-simple"></i>
+                                    </a>
                                     @if(can('proforma_invoice.view') || can('proforma_invoice.view') || can('proforma_invoice.view'))
                                         @can('proforma_invoice.view')
                                         {{-- <a href="{{ route('admin.proformaInvoiceAction',['view',$pi->id]) }}" class="btn-custom yellow">
@@ -128,6 +131,7 @@
                                             @endcan
                                         @endcan
                                     @else -- @endcan
+
                                 </td>
                             </tr>
                             @empty

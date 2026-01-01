@@ -32,14 +32,14 @@ class ProformaInvoice extends Model
         return $this->belongsTo(User::class, 'buyer_id');
     }
 
-    public function order()
-    {
-        return $this->belongsTo(OrderDetail::class,'order_no','order_no');
-    }
-
     public function merchant()
     {
         return $this->belongsTo(User::class, 'merchant_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(OrderDetail::class, 'order_no', 'order_no');
     }
 
     public function items()
@@ -52,9 +52,29 @@ class ProformaInvoice extends Model
         return $this->hasMany(YarnBooking::class, 'pi_id', 'id');
     }
 
+    public function yarnReceives()
+    {
+        return $this->hasMany(YarnReceive::class, 'pi_id', 'id');
+    }
+
     public function dyeingBookings()
     {
         return $this->hasMany(DyeingBooking::class, 'pi_id', 'id');
+    }
+
+    public function dyeingReceives()
+    {
+        return $this->hasMany(DyeingReceive::class, 'pi_id', 'id');
+    }
+
+    public function knittingBookings()
+    {
+        return $this->hasMany(KnittingBooking::class, 'pi_id', 'id');
+    }
+
+    public function knittingReceives()
+    {
+        return $this->hasMany(KnittingReceive::class, 'pi_id', 'id');
     }
 
 }

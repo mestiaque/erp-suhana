@@ -1400,6 +1400,7 @@ class ProductionController extends Controller
 
         if ($action === 'update'){
             // Validate request
+            // dd($r->all());
             $r->validate([
                 'pi_id' => 'required|exists:proforma_invoices,id',
                 'status' => 'required|string',
@@ -1436,11 +1437,9 @@ class ProductionController extends Controller
                 }
 
                 if ($r->action === 'update') {
+                    // dd($r->all());
                     // Only update existing records (no create)
-                    $booking = DyeingBooking::where('booking_no', $item['booking_no'])
-                        ->where('style', $item['style_no'])
-                        ->where('color', $item['color'])
-                        ->first();
+                    $booking = DyeingBooking::find($item['id']);
 
                     if ($booking) {
                         $booking->update([
@@ -1567,8 +1566,9 @@ class ProductionController extends Controller
         return view(adminTheme() . 'productions.dyeing-receive.index', compact('bookings'));
     }
 
-    public function dyeingReceiveAction(Request $r, $action, $id = null)
+    public function dyeingReceiveActionX(Request $r, $action, $id = null)
     {
+        // dd($r->all());
         // ১. CREATE PAGE (শুধুমাত্র পেজ দেখাবে)
         if ($action == 'create') {
             $pis = ProformaInvoice::whereNotNull('pi_no')
@@ -1585,10 +1585,11 @@ class ProductionController extends Controller
 
         // ২. STORE (নতুন ডাটা সেভ করা)
         if ($action == 'store') {
+            dd($r->all());
             $r->validate([
-                'booking_no' => 'required',
-                'receive_date' => 'required|date',
-                'items' => 'required|array',
+                // 'booking_no' => 'required',
+                // 'receive_date' => 'required|date',
+                // 'items' => 'required|array',
             ]);
 
             DB::beginTransaction();
@@ -1716,6 +1717,190 @@ class ProductionController extends Controller
             return back()->with('success', 'Record Deleted');
         }
     }
+
+
+    public function dyeingReceiveAction(Request $r, $action, $id = null)
+{
+    /* ===============================
+        1. CREATE PAGE
+    ================================*/
+    if ($action === 'create') {
+
+        $pis = ProformaInvoice::whereNotNull('pi_no')
+            ->whereHas('dyeingBookings')
+            ->get();
+
+        return view(adminTheme().'productions.dyeing-receive.edit', [
+            'pis'     => $pis,
+            'items'   => [],
+            'receive' => null,
+            'action'  => 'store',
+        ]);
+    }
+
+    /* ===============================
+        2. STORE
+    ================================*/
+    if ($action === 'store') {
+        $r->validate([
+            'pi_id'        => 'required',
+            'booking_no'   => 'required',
+            'receive_date' => 'required|date',
+            'items'        => 'required|array',
+        ]);
+
+        DB::beginTransaction();
+        try {
+
+            $receiveNo = (DyeingReceive::max('receive_no') ?? 0) + 1;
+
+            $booking = DyeingBooking::where('booking_no', $r->booking_no)->firstOrFail();
+
+            foreach ($r->items as $item) {
+
+                if (!isset($item['receive_qty']) || $item['receive_qty'] <= 0) {
+                    continue;
+                }
+
+                DyeingReceive::create([
+                    'receive_no'       => $receiveNo,
+                    'booking_no'       => $r->booking_no,
+                    'pi_id'            => $r->pi_id,
+                    'booking_item_id'  => $item['id'],
+                    'style'            => $item['style'],
+                    'color'            => $item['color'],
+                    'receive_qty'      => $item['receive_qty'],
+                    'fabric_type'      => $booking->fabric_type,
+                    'composition'      => $booking->composition,
+                    'challan_no'       => $r->challan_no,
+                    'receive_date'     => $r->receive_date,
+                    'remarks'          => $r->remarks,
+                    'created_by'       => auth()->id(),
+                ]);
+
+                DyeingBooking::where('id', $item['id'])
+                    ->increment('received_qty', $item['receive_qty']);
+            }
+
+            DB::commit();
+            return redirect()
+                ->route('admin.dyeingReceive')
+                ->with('success', 'Dyeing Items Received Successfully');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /* ===============================
+        3. EDIT PAGE
+    ================================*/
+    if ($action === 'edit' && $id) {
+
+        $receive = DyeingReceive::where('receive_no', $id)->firstOrFail();
+        $items   = DyeingReceive::where('receive_no', $id)->get();
+        $pis     = ProformaInvoice::whereNotNull('pi_no')->get();
+
+        return view(adminTheme().'productions.dyeing-receive.edit', [
+            'receive' => $receive,
+            'items'   => $items,
+            'pis'     => $pis,
+            'action'  => 'update',
+        ]);
+    }
+
+    /* ===============================
+        4. UPDATE
+    ================================*/
+    if ($action === 'update' && $id) {
+
+        $r->validate([
+            'receive_date' => 'required|date',
+            'items'        => 'required|array',
+        ]);
+
+        DB::beginTransaction();
+        try {
+
+            $oldItems = DyeingReceive::where('receive_no', $id)->get();
+
+            // rollback old qty
+            foreach ($oldItems as $old) {
+                DyeingBooking::where('id', $old->booking_item_id)
+                    ->decrement('received_qty', $old->receive_qty);
+            }
+
+            // update & re-add
+            foreach ($r->items as $it) {
+
+                $receive = DyeingReceive::findOrFail($it['id']);
+
+                $receive->update([
+                    'receive_qty'  => $it['receive_qty'],
+                    'challan_no'   => $r->challan_no,
+                    'receive_date' => $r->receive_date,
+                    'remarks'      => $r->remarks,
+                    'updated_by'   => auth()->id(),
+                ]);
+
+                DyeingBooking::where('id', $receive->booking_item_id)
+                    ->increment('received_qty', $it['receive_qty']);
+            }
+
+            DB::commit();
+            return redirect()
+                ->route('admin.dyeingReceive')
+                ->with('success', 'Updated Successfully');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /* ===============================
+        5. AJAX: PI SELECT
+    ================================*/
+    if ($action === 'pi-select') {
+
+        $items = DyeingBooking::where('pi_id', $r->pi_id)->get();
+
+        if ($items->isEmpty()) {
+            return response()->json(['success' => false]);
+        }
+
+        $html = view(
+            adminTheme().'productions.dyeing-receive.includes.items',
+            ['items' => $items, 'action' => 'create']
+        )->render();
+
+        return response()->json([
+            'success'         => true,
+            'html'            => $html,
+            'booking_no'      => $items->first()->booking_no,
+            'booking_no_show' => $items->first()->getBookingNo(),
+            'buyer'           => $items->first()->pi->buyer->name ?? '',
+        ]);
+    }
+
+    /* ===============================
+        6. DELETE (GROUP)
+    ================================*/
+    if ($action === 'delete' && $id) {
+
+        $receives = DyeingReceive::where('receive_no', $id)->get();
+
+        foreach ($receives as $receive) {
+            DyeingBooking::where('id', $receive->booking_item_id)
+                ->decrement('received_qty', $receive->receive_qty);
+
+            $receive->delete();
+        }
+
+        return back()->with('success', 'Receive Deleted Successfully');
+    }
+}
 
 
 

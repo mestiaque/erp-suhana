@@ -24,12 +24,17 @@
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label>PI Number</label>
-                        <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.dyeingBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
-                            <option value="">-- Select PI Number --</option>
-                            @foreach($pis as $pi)
-                                <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
-                            @endforeach
-                        </select>
+                        @if(isset($booking) && $action == 'update')
+                            <input type="text" class="form-control" value="{{ $booking?->pi?->pi_no ?? '' }}" readonly>
+                            <input type="hidden" class="form-control" name="pi_id" value="{{ $booking?->pi_id }}" hidden>
+                        @else
+                            <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.dyeingBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
+                                <option value="">-- Select PI Number --</option>
+                                @foreach($pis as $pi)
+                                    <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>Buyer Name</label>
