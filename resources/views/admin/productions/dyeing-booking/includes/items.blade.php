@@ -56,14 +56,14 @@
                     <input type="number"
                            name="items[{{ $i }}][requisition_qty]"
                            class="form-control form-control-sm total-qty"
-                           value="{{ $item->qty ?? $item->required_qty }}">
+                           value="{{  $item->required_qty ?? 0 }}">
                 </td>
             </tr>
 
             @endforeach
         @else
             <tr>
-                <td colspan="5" class="text-center text-muted">No Dyeing Items Found</td>
+                <td colspan="6" class="text-center text-muted">No Dyeing Items Found</td>
             </tr>
         @endif
 
