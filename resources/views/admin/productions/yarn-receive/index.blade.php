@@ -54,6 +54,7 @@
                         <tr class="">
                             <th style="width: 50px">SL</th>
                             <th>Receive No</th>
+                            <th>PI No</th>
                             <th>Receive Date</th>
                             <th>Chalan No</th>
                             <th>Booking No</th>
@@ -68,6 +69,7 @@
                         <tr>
                             <td class="text-center">{{ $receives->firstItem() + $i }}</td>
                             <td class="text-center"><b>{{ $row->getRecvNo() }}</b></td>
+                            <td class="text-center">{{ $row->pi->pi_no }}</td>
                             <td class="text-center">{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</td>
                             <td class="text-center">{{ $row->chalan_no ?? '-' }}</td>
                             <td class="text-center">{{ $row->getBookingNo() }}</td>

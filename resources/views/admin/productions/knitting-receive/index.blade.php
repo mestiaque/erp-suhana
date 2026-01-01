@@ -54,6 +54,7 @@
                         <tr class=" text-center">
                             <th style="width: 60px">SL</th>
                             <th>Receive No</th>
+                            <th>PI No</th>
                             <th>Date</th>
                             <th>Chalan No</th>
                             <th>Booking No</th>
@@ -69,6 +70,7 @@
                         <tr>
                             <td class="text-center">{{ $receives->firstItem() + $i }}</td>
                             <td class="text-center"><b>{{ $row->getRecvNo() }}</b></td>
+                            <td class="text-center"><b>{{ $row?->pi?->pi_no }}</b></td>
                             <td class="text-center">{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</td>
                             <td class="text-center">{{ $row->chalan_no ?? '-' }}</td>
                             <td class="text-center text-">{{ $row->getKBookingNo() }}</td>
@@ -90,7 +92,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-3">No Knitting Receive Found</td>
+                            <td colspan="10" class="text-center text-muted py-3">No Knitting Receive Found</td>
                         </tr>
                         @endforelse
                     </tbody>
