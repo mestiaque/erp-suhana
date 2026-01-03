@@ -6,7 +6,7 @@
 
             <!-- Modal Header -->
             <div class="modal-header bg-success text-white py-2">
-                <h5 class="modal-title bg-white">Yarn Receive Details #{{ $row->getRecvNo() }}</h5>
+                <h5 class="modal-title text-white">Yarn Receive Details #{{ $row->getRecvNo() }}</h5>
                 <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
