@@ -5,7 +5,7 @@
 
             <!-- Modal Header -->
             <div class="modal-header bg-success text-white py-2">
-                <h5 class="modal-title">Knitting Receive Details #{{ $row->getRecvNo() }}</h5>
+                <h5 class="modal-title text-white">Knitting Receive Details #{{ $row->getRecvNo() }}</h5>
                 <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -16,31 +16,35 @@
                 <div class="card bg-light border-0 mb-4">
                     <div class="card-body p-3">
                         <div class="row">
-                            <div class="col-md-3 border-right">
-                                <small class="text-muted d-block">Buyer Name</small>
-                                <strong>{{ $row->pi->buyer_name ?? '--' }}</strong>
-                            </div>
-                            <div class="col-md-3 border-right">
+                            <div class="col-md-2 border-right">
                                 <small class="text-muted d-block">PI Number</small>
                                 <strong>{{ $row->pi->pi_no ?? '--' }}</strong>
                             </div>
-                            <div class="col-md-3 border-right">
+                            <div class="col-md-2 border-right">
+                                <small class="text-muted d-block">Booking No</small>
+                                <strong>{{ $row->getKBookingNo() ?? '--' }}</strong>
+                            </div>
+                            <div class="col-md-2 border-right">
+                                <small class="text-muted d-block">Buyer Name</small>
+                                <strong>{{ $row->pi->buyer_name ?? '--' }}</strong>
+                            </div>
+                            <div class="col-md-2 border-right">
                                 <small class="text-muted d-block">Chalan / Ref No</small>
                                 <strong>{{ $row->chalan_no ?? '--' }}</strong>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <small class="text-muted d-block">Receive Date</small>
-                                <strong>{{ \Carbon\Carbon::parse($row->receive_date)->format('d M, Y') }}</strong>
+                                <strong>{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</strong>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Received Fabric Items Table -->
-                <h6 class="mb-3 font-weight-bold text-success"><i class="bx bx-package"></i> Received Fabric Items</h6>
+                <h5 class="mb-3 font-weight-bold text-"><i class="bx bx-package"></i> Received Fabric Items</h5>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="bg-secondary text-white text-center">
+                    <table class="table table-sm table-bordered table-hover">
+                        <thead class=" text-center">
                             <tr>
                                 <th width="5%">SL</th>
                                 <th width="15%">Style No</th>
@@ -48,7 +52,6 @@
                                 <th width="10%">Dia</th>
                                 <th width="10%">Total Rolls</th>
                                 <th width="15%">Receive Qnty (KG)</th>
-                                <th width="15%">Booking Ref</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,21 +75,19 @@
                                     <td>{{ $knitRow->fabric_type ?? '--' }}</td>
                                     <td class="text-center"><span class="badge badge-light border">{{ $knitRow->dia ?? 'N/A' }}</span></td>
                                     <td class="text-center font-weight-bold">{{ $item->roll_qty }}</td>
-                                    <td class="text-right font-weight-bold text-success">{{ number_format($item->weight, 2) }} KG</td>
-                                    <td class="text-center text-muted small">{{ $item->getKBookingNo() }}</td>
+                                    <td class="text-right font-weight-bold text-successs">{{ number_format($item->weight, 2) }} KG</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted">No items found in this receive record.</td>
+                                    <td colspan="6" class="text-center text-muted">No items found in this receive record.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot class="bg-light font-weight-bold">
                             <tr>
                                 <td colspan="4" class="text-right">Total Summary:</td>
-                                <td class="text-center text-primary">{{ $totalRolls }} Rolls</td>
-                                <td class="text-right text-success" style="font-size: 16px;">{{ number_format($totalWeight, 2) }} KG</td>
-                                <td></td>
+                                <td class="text-center text-primsary">{{ $totalRolls }} Rolls</td>
+                                <td class="text-right text-successs" style="font-size: 16px;">{{ number_format($totalWeight, 2) }} KG</td>
                             </tr>
                         </tfoot>
                     </table>

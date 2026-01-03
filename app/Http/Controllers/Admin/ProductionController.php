@@ -587,18 +587,25 @@ class ProductionController extends Controller
 
     public function yarnBooking(Request $r)
     {
-        $query = YarnBooking::query();
+        $query = YarnBooking::with('pi');
 
         // ----------------------------
         // SEARCH (Buyer Name, Booking No, PI No, Fabrication)
         // ----------------------------
         if ($r->search) {
             $search = $r->search;
+
             $query->where(function ($q) use ($search) {
-                $q->where('buyer_name', 'like', "%$search%")
-                ->orWhere('booking_no', 'like', "%$search%")
-                ->orWhere('pi_id', 'like', "%$search%")
-                ->orWhere('fabric_type', 'like', "%$search%");
+                $q->whereRaw(
+                    "CAST(booking_no AS UNSIGNED) = ?",
+                    [(int) $search]
+                )
+                ->orWhere('supplier', 'like', "%{$search}%")
+                ->orWhere('fabric_type', 'like', "%{$search}%");
+            })
+            ->orWhereHas('pi', function ($q_pi) use ($search) {
+                $q_pi->where('buyer_name', 'like', "%{$search}%")
+                    ->orWhere('pi_no', 'like', "%{$search}%");
             });
         }
 
@@ -763,45 +770,78 @@ class ProductionController extends Controller
 
     public function yarnReceive(Request $r)
     {
-        // ১. কুয়েরি শুরু (Eager Loading সহ যাতে ডাটা দ্রুত আসে)
         $query = YarnReceive::with(['bookingRow', 'bookingRow.pi']);
 
-        // ২. ফিল্টারিং (Receive No অথবা Chalan No দিয়ে সার্চ)
+        // ----------------------------
+        // SEARCH (receive_no, booking_no, chalan_no, supplier, pi_no)
+        // ----------------------------
         if ($r->search) {
             $search = $r->search;
+
             $query->where(function ($q) use ($search) {
-                $q->where('receive_no', 'like', "%$search%")
-                ->orWhere('chalan_no', 'like', "%$search%")
-                ->orWhere('booking_no', 'like', "%$search%");
+
+                // receive_no: ignore left 0
+                $q->whereRaw(
+                    "LPAD(receive_no, CHAR_LENGTH(?), '0') LIKE ?",
+                    [$search, "%{$search}%"]
+                )
+
+                // booking_no: ignore left 0
+                ->orWhereRaw(
+                    "LPAD(booking_no, CHAR_LENGTH(?), '0') LIKE ?",
+                    [$search, "%{$search}%"]
+                )
+
+                // other normal fields
+                ->orWhere('chalan_no', 'like', "%{$search}%")
+                ->orWhere('supplier', 'like', "%{$search}%")
+
+                // pi relation search
+                ->orWhereHas('bookingRow.pi', function ($q_pi) use ($search) {
+                    $q_pi->where('pi_no', 'like', "%{$search}%");
+                });
             });
         }
 
-        // ৩. ডেট রেঞ্জ ফিল্টার
+        // ----------------------------
+        // DATE RANGE FILTER
+        // ----------------------------
         if ($r->startDate) {
             $query->whereDate('receive_date', '>=', $r->startDate);
         }
+
         if ($r->endDate) {
             $query->whereDate('receive_date', '<=', $r->endDate);
         }
 
-        // ৪. গ্রুপ বাই লজিক (Receive No অনুযায়ী সামারি দেখানো)
+        // ----------------------------
+        // GROUP BY RECEIVE NO (SUMMARY)
+        // ----------------------------
         $receives = $query->select(
-                            'receive_no',
-                            'pi_id',
-                            'booking_no',
-                            'receive_date',
-                            'chalan_no',
-                            'supplier',
-                            DB::raw('SUM(receive_qty) as total_receive_qty'),
-                            DB::raw('COUNT(id) as total_items_count'),
-                            DB::raw('MAX(created_at) as created_at')
-                        )
-                        ->groupBy('receive_no', 'pi_id', 'booking_no', 'receive_date', 'chalan_no', 'supplier')
-                        ->orderBy('created_at', 'DESC')
-                        ->paginate(10);
-            // dd($receives);
+                'receive_no',
+                'pi_id',
+                'booking_no',
+                'receive_date',
+                'chalan_no',
+                'supplier',
+                DB::raw('SUM(receive_qty) as total_receive_qty'),
+                DB::raw('COUNT(id) as total_items_count'),
+                DB::raw('MAX(created_at) as created_at')
+            )
+            ->groupBy(
+                'receive_no',
+                'pi_id',
+                'booking_no',
+                'receive_date',
+                'chalan_no',
+                'supplier'
+            )
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
+
         return view(adminTheme() . 'productions.yarn-receive.index', compact('receives'));
     }
+
 
     public function yarnReceiveAction(Request $r, $action, $id = null)
     {
@@ -966,13 +1006,23 @@ class ProductionController extends Controller
         // ২. সার্চ ফিল্টার (Knit Booking No, Yarn Booking No, PI No, Fabric Type দিয়ে সার্চ)
         if ($r->search) {
             $search = $r->search;
+
             $query->where(function ($q) use ($search) {
-                $q->where('booking_no', 'like', "%$search%")
-                ->orWhere('yarn_booking_no', 'like', "%$search%")
-                ->orWhere('fabric_type', 'like', "%$search%")
-                // PI No দিয়ে সার্চ করতে চাইলে জয়েন করতে হবে বা রিলেশন ব্যবহার করতে হবে
+
+                // booking_no: left zero ignore (string based)
+                $q->whereRaw(
+                    "LPAD(booking_no, CHAR_LENGTH(?), '0') LIKE ?",
+                    [$search, "%{$search}%"]
+                )
+
+                // normal fields
+                ->orWhere('yarn_booking_no', 'like', "%{$search}%")
+                ->orWhere('fabric_type', 'like', "%{$search}%")
+
+                // PI relation search
                 ->orWhereHas('pi', function ($q_pi) use ($search) {
-                    $q_pi->where('pi_no', 'like', "%$search%");
+                    $q_pi->where('buyer_name', 'like', "%{$search}%")
+                        ->orWhere('pi_no', 'like', "%{$search}%");
                 });
             });
         }
@@ -1171,22 +1221,45 @@ class ProductionController extends Controller
         }
     }
 
+
     public function knittingReceive(Request $r)
     {
-        // ১. কুয়েরি শুরু (PI রিলেশনসহ)
         $query = KnittingReceive::with(['pi']);
 
-        // ২. সার্চ ফিল্টার
+        // ----------------------------
+        // SEARCH (receive_no, knit_booking_no, chalan_no, PI No, Buyer)
+        // ----------------------------
         if ($r->search) {
             $search = $r->search;
+
             $query->where(function ($q) use ($search) {
-                $q->where('receive_no', 'like', "%$search%")
-                ->orWhere('chalan_no', 'like', "%$search%")
-                ->orWhere('knit_booking_no', 'like', "%$search%");
+
+                // receive_no: ignore left zeros
+                $q->whereRaw(
+                    "LPAD(receive_no, CHAR_LENGTH(?), '0') LIKE ?",
+                    [$search, "%{$search}%"]
+                )
+
+                // knit_booking_no: ignore left zeros
+                ->orWhereRaw(
+                    "LPAD(knit_booking_no, CHAR_LENGTH(?), '0') LIKE ?",
+                    [$search, "%{$search}%"]
+                )
+
+                // other normal fields
+                ->orWhere('chalan_no', 'like', "%{$search}%")
+
+                // PI relation search
+                ->orWhereHas('pi', function ($q_pi) use ($search) {
+                    $q_pi->where('pi_no', 'like', "%{$search}%")
+                        ->orWhere('buyer_name', 'like', "%{$search}%");
+                });
             });
         }
 
-        // ৩. ডেট রেঞ্জ ফিল্টার
+        // ----------------------------
+        // DATE RANGE FILTER
+        // ----------------------------
         if ($r->startDate) {
             $query->whereDate('receive_date', '>=', $r->startDate);
         }
@@ -1194,21 +1267,23 @@ class ProductionController extends Controller
             $query->whereDate('receive_date', '<=', $r->endDate);
         }
 
-        // ৪. গ্রুপ বাই লজিক (নিখুঁত করার জন্য শুধুমাত্র receive_no দিয়ে গ্রুপ করা হলো)
+        // ----------------------------
+        // GROUP BY receive_no
+        // ----------------------------
         $receives = $query->select(
-                                'receive_no',
-                                \DB::raw('MAX(pi_id) as pi_id'),
-                                \DB::raw('MAX(knit_booking_no) as knit_booking_no'),
-                                \DB::raw('MAX(receive_date) as receive_date'),
-                                \DB::raw('MAX(chalan_no) as chalan_no'),
-                                \DB::raw('SUM(weight) as total_weight'),
-                                \DB::raw('SUM(roll_qty) as total_rolls'),
-                                \DB::raw('COUNT(id) as total_items_count'),
-                                \DB::raw('MAX(created_at) as created_at')
-                            )
-                            ->groupBy('receive_no')
-                            ->orderBy('created_at', 'DESC')
-                            ->paginate(10);
+                'receive_no',
+                \DB::raw('MAX(pi_id) as pi_id'),
+                \DB::raw('MAX(knit_booking_no) as knit_booking_no'),
+                \DB::raw('MAX(receive_date) as receive_date'),
+                \DB::raw('MAX(chalan_no) as chalan_no'),
+                \DB::raw('SUM(weight) as total_weight'),
+                \DB::raw('SUM(roll_qty) as total_rolls'),
+                \DB::raw('COUNT(id) as total_items_count'),
+                \DB::raw('MAX(created_at) as created_at')
+            )
+            ->groupBy('receive_no')
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
 
         return view(adminTheme() . 'productions.knitting-receive.index', compact('receives'));
     }
@@ -1266,21 +1341,24 @@ class ProductionController extends Controller
 
 
         if ($action == 'edit' && $id) {
-            // ১. রিসিভ ডাটা আনা
+            // 1. Fetch all receive rows
             $recvItems = KnittingReceive::where('receive_no', $id)->get();
+            // dd($recvItems);
             $receive = $recvItems->first();
 
-            if (!$receive) return redirect()->back()->with('error', 'Receive record not found.');
+            if (!$receive) {
+                return redirect()->back()->with('error', 'Receive record not found.');
+            }
 
-            // ২. ওই PI এর সব নিটিং বুকিং আইটেম আনা
+            // 2. Fetch all knitting bookings for this PI
             $knitItems = KnittingBooking::where('pi_id', $receive->pi_id)->get();
 
-            // ৩. ম্যাপ করা (কোন আইটেমে কতটুকু রিসিভ হয়েছে)
+            // 3. Map saved receive values
             foreach ($knitItems as $item) {
                 $savedRow = $recvItems->where('knit_id', $item->id)->first();
                 if ($savedRow) {
                     $item->current_roll_qty = $savedRow->roll_qty;
-                    $item->current_weight = $savedRow->weight;
+                    $item->current_weight   = $savedRow->weight;
                 }
             }
 
@@ -1353,6 +1431,7 @@ class ProductionController extends Controller
                                 DB::raw('MAX(style) as style'),
                                 DB::raw('MAX(buyer_name) as buyer_name'),
                                 DB::raw('MAX(status) as status'),
+                                DB::raw('MAX(dyeing_unit) as dyeing_unit'),
                                 DB::raw('SUM(required_qty) as total_booking_qty'),
                                 DB::raw('COUNT(id) as total_items_count'),
                                 DB::raw('MAX(created_by) as created_by'),
@@ -1430,6 +1509,7 @@ class ProductionController extends Controller
                         'buyer_name'        => $r->buyer_name ?? null,
                         'expected_delivery' => $r->expected_delivery ?? null,
                         'remarks'           => $r->remarks ?? null,
+                        'dyeing_unit'       => $r->dyeing_unit ?? null,
                         'status'            => $r->status,
                         'created_by'        => auth()->id(),
                         'updated_by'        => auth()->id(),
@@ -1448,6 +1528,7 @@ class ProductionController extends Controller
                             'expected_delivery' => $r->expected_delivery ?? null,
                             'buyer_name'        => $r->buyer_name ?? null,
                             'remarks'           => $r->remarks ?? null,
+                            'dyeing_unit'       => $r->dyeing_unit ?? null,
                             'status'            => $r->status,
                             'updated_by'        => auth()->id(),
                         ]);
@@ -1516,7 +1597,7 @@ class ProductionController extends Controller
         return view(adminTheme() . 'productions.dyeing-booking.index', compact('bookings'));
     }
 
-    public function dyeingReceive(Request $r)
+    public function dyeingReceiveX(Request $r)
     {
         // ১. কুয়েরি শুরু (PI এবং Creator রিলেশনসহ Eager Load করা হয়েছে)
         $query = DyeingReceive::with(['pi']);
@@ -1565,101 +1646,175 @@ class ProductionController extends Controller
 
         return view(adminTheme() . 'productions.dyeing-receive.index', compact('bookings'));
     }
+    public function dyeingReceive(Request $r)
+{
+    // ১. কুয়েরি শুরু (PI রিলেশনসহ Eager Load)
+    $query = DyeingReceive::with(['pi']);
 
-    public function dyeingReceiveActionX(Request $r, $action, $id = null)
+    // ২. সার্চ লজিক
+    if ($r->search) {
+        $search = $r->search;
+        $cleanSearch = ltrim($search, '0'); // left zero ignore for booking_no
+
+        $query->where(function($q) use ($search, $cleanSearch) {
+            $q->where('receive_no', 'LIKE', "%{$search}%")
+              ->orWhere('booking_no', 'LIKE', "%{$search}%")
+              ->orWhereRaw("TRIM(LEADING '0' FROM booking_no) LIKE ?", ["%{$cleanSearch}%"])
+              ->orWhere('style', 'LIKE', "%{$search}%")
+              ->orWhere('challan_no', 'LIKE', "%{$search}%") // challan search
+
+              // relation: buyer_name & pi_no
+              ->orWhereHas('pi', function ($q_pi) use ($search) {
+                  $q_pi->where('pi_no', 'LIKE', "%{$search}%")
+                        ->orWhere('buyer_name', 'LIKE', "%{$search}%");
+              });
+        });
+    }
+
+    // ৩. ডেট রেঞ্জ ফিল্টার
+    if ($r->startDate) {
+        $query->whereDate('receive_date', '>=', $r->startDate);
+    }
+    if ($r->endDate) {
+        $query->whereDate('receive_date', '<=', $r->endDate);
+    }
+
+    // ৪. গ্রুপ বাই লজিক
+    $bookings = $query->select(
+            'receive_no',
+            'booking_no',
+            DB::raw('MAX(id) as id'),
+            DB::raw('MAX(pi_id) as pi_id'),
+            DB::raw('MAX(receive_date) as receive_date'),
+            DB::raw('MAX(challan_no) as challan_no'),
+            DB::raw('SUM(receive_qty) as total_rcv_qty'),
+            DB::raw('COUNT(id) as total_items'),
+            DB::raw('MAX(created_by) as created_by'),
+            DB::raw('MAX(created_at) as created_at')
+        )
+        ->groupBy('receive_no', 'booking_no')
+        ->orderBy('created_at', 'DESC')
+        ->paginate(20);
+
+    return view(adminTheme() . 'productions.dyeing-receive.index', compact('bookings'));
+}
+
+
+    public function dyeingReceiveAction(Request $r, $action, $id = null)
     {
-        // dd($r->all());
-        // ১. CREATE PAGE (শুধুমাত্র পেজ দেখাবে)
-        if ($action == 'create') {
-            $pis = ProformaInvoice::whereNotNull('pi_no')
-                    ->whereHas('dyeingBookings')
-                    ->get();
+        /* ===============================
+            1. CREATE PAGE
+        ================================*/
+        if ($action === 'create') {
 
-            return view(adminTheme() . 'productions.dyeing-receive.edit', [
-                'pis' => $pis,
-                'items' => [],
+            $pis = ProformaInvoice::whereNotNull('pi_no')
+                ->whereHas('dyeingBookings')
+                ->get();
+
+            return view(adminTheme().'productions.dyeing-receive.edit', [
+                'pis'     => $pis,
+                'items'   => [],
                 'receive' => null,
-                'action' => 'store' // ফর্ম সাবমিট হবে store অ্যাকশনে
+                'action'  => 'store',
             ]);
         }
 
-        // ২. STORE (নতুন ডাটা সেভ করা)
-        if ($action == 'store') {
-            dd($r->all());
+        /* ===============================
+            2. STORE
+        ================================*/
+        if ($action === 'store') {
             $r->validate([
-                // 'booking_no' => 'required',
-                // 'receive_date' => 'required|date',
-                // 'items' => 'required|array',
+                'pi_id'        => 'required',
+                'booking_no'   => 'required',
+                'receive_date' => 'required|date',
+                'items'        => 'required|array',
             ]);
 
             DB::beginTransaction();
             try {
-                $receiveNo = (DyeingReceive::max('receive_no') ?? 0) + 1;
-                foreach ($r->items as $item) {
-                    $booking = DyeingBooking::where('booking_no', $r->booking_no)->first();
-                    if (isset($item['receive_qty']) && $item['receive_qty'] > 0) {
-                        DyeingReceive::create([
-                            'receive_no'   => $receiveNo,
-                            'booking_no'   => $r->booking_no,
-                            'pi_id'        => $r->pi_id,
-                            'booking_item_id' => $item['id'],
-                            'style'        => $item['style'],
-                            'color'        => $item['color'],
-                            'receive_qty'  => $item['receive_qty'],
-                            'fabric_type'  => $booking->fabric_type,
-                            'composition'  => $booking->composition,
-                            'challan_no'   => $r->challan_no,
-                            'receive_date' => $r->receive_date,
-                            'remarks'      => $r->remarks,
-                            'created_by'   => auth()->id(),
-                        ]);
 
-                        DyeingBooking::where('booking_no', $r->booking_no)
-                            ->where('style', $item['style'])
-                            ->where('color', $item['color'])
-                            ->increment('received_qty', $item['receive_qty']);
+                $receiveNo = (DyeingReceive::max('receive_no') ?? 0) + 1;
+
+                $booking = DyeingBooking::where('booking_no', $r->booking_no)->firstOrFail();
+
+                foreach ($r->items as $item) {
+
+                    if (!isset($item['receive_qty']) || $item['receive_qty'] <= 0) {
+                        continue;
                     }
+
+                    DyeingReceive::create([
+                        'receive_no'       => $receiveNo,
+                        'booking_no'       => $r->booking_no,
+                        'pi_id'            => $r->pi_id,
+                        'booking_item_id'  => $item['id'],
+                        'style'            => $item['style'],
+                        'color'            => $item['color'],
+                        'receive_qty'      => $item['receive_qty'],
+                        'fabric_type'      => $booking->fabric_type,
+                        'composition'      => $booking->composition,
+                        'challan_no'       => $r->challan_no,
+                        'receive_date'     => $r->receive_date,
+                        'remarks'          => $r->remarks,
+                        'created_by'       => auth()->id(),
+                    ]);
+
+                    DyeingBooking::where('id', $item['id'])
+                        ->increment('received_qty', $item['receive_qty']);
                 }
+
                 DB::commit();
-                session()->flash('success', 'Dyeing Items Received Successfully');
-                return redirect()->route('admin.dyeingReceive');
+                return redirect()
+                    ->route('admin.dyeingReceive')
+                    ->with('success', 'Dyeing Items Received Successfully');
+
             } catch (\Exception $e) {
                 DB::rollback();
-                return back()->with('error', 'Error: ' . $e->getMessage());
+                return back()->with('error', $e->getMessage());
             }
         }
 
-        // ৩. EDIT PAGE
-        if ($action == 'edit' && $id) {
-            // এখানে $id হলো DyeingReceive টেবিলের Primary ID
-            $receive = DyeingReceive::where('receive_no', $id)->first();
-            $items = DyeingReceive::where('receive_no', $id)->get();
-            $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+        /* ===============================
+            3. EDIT PAGE
+        ================================*/
+        if ($action === 'edit' && $id) {
 
-            return view(adminTheme() . 'productions.dyeing-receive.edit', [
+            $receive = DyeingReceive::where('receive_no', $id)->firstOrFail();
+            $items   = DyeingReceive::where('receive_no', $id)->get();
+            $pis     = ProformaInvoice::whereNotNull('pi_no')->get();
+
+            return view(adminTheme().'productions.dyeing-receive.edit', [
                 'receive' => $receive,
                 'items'   => $items,
                 'pis'     => $pis,
-                'action'  => 'update'
+                'action'  => 'update',
             ]);
         }
 
-        // ৪. UPDATE
-        if ($action == 'update' && $id) {
+        /* ===============================
+            4. UPDATE
+        ================================*/
+        if ($action === 'update' && $id) {
 
-            $oldItems = DyeingReceive::where('receive_no', $id)->get();
+            $r->validate([
+                'receive_date' => 'required|date',
+                'items'        => 'required|array',
+            ]);
 
             DB::beginTransaction();
             try {
 
-                // 1️⃣ rollback old receive qty
+                $oldItems = DyeingReceive::where('receive_no', $id)->get();
+
+                // rollback old qty
                 foreach ($oldItems as $old) {
                     DyeingBooking::where('id', $old->booking_item_id)
                         ->decrement('received_qty', $old->receive_qty);
                 }
 
-                // 2️⃣ update receive & add new qty
+                // update & re-add
                 foreach ($r->items as $it) {
+
                     $receive = DyeingReceive::findOrFail($it['id']);
 
                     $receive->update([
@@ -1680,227 +1835,53 @@ class ProductionController extends Controller
                     ->with('success', 'Updated Successfully');
 
             } catch (\Exception $e) {
-                dd($e);
                 DB::rollback();
                 return back()->with('error', $e->getMessage());
             }
         }
 
-        // ৫. AJAX: PI SELECT
-        if ($action == 'pi-select') {
-            $items = DyeingBooking::where('pi_id', $r->pi_id)->get();
-            if ($items->count() < 1) return response()->json(['success' => false]);
-            // dd($items);
+        /* ===============================
+            5. AJAX: PI SELECT
+        ================================*/
+        if ($action === 'pi-select') {
 
-            $html = view(adminTheme().'productions.dyeing-receive.includes.items', [
-                'items'  => $items,
-                'action' => 'create'
-            ])->render();
+            $items = DyeingBooking::where('pi_id', $r->pi_id)->get();
+
+            if ($items->isEmpty()) {
+                return response()->json(['success' => false]);
+            }
+
+            $html = view(
+                adminTheme().'productions.dyeing-receive.includes.items',
+                ['items' => $items, 'action' => 'create']
+            )->render();
 
             return response()->json([
-                'success'    => true,
-                'html'       => $html,
-                'booking_no' => $items->first()->getBookingNo(),
-                'buyer'      => $items->first()->pi->buyer->name ?? $items->first()->buyer_name
+                'success'         => true,
+                'html'            => $html,
+                'booking_no'      => $items->first()->booking_no,
+                'booking_no_show' => $items->first()->getBookingNo(),
+                'buyer'           => $items->first()->pi->buyer->name ?? '',
             ]);
         }
 
-        // ৬. DELETE
-        if ($action == 'delete') {
-            $receive = DyeingReceive::findOrFail($id);
-            DyeingBooking::where('booking_no', $receive->booking_no)
-                ->where('style', $receive->style)
-                ->where('color', $receive->color)
-                ->decrement('received_qty', $receive->receive_qty);
+        /* ===============================
+            6. DELETE (GROUP)
+        ================================*/
+        if ($action === 'delete' && $id) {
 
-            $receive->delete();
-            return back()->with('success', 'Record Deleted');
-        }
-    }
+            $receives = DyeingReceive::where('receive_no', $id)->get();
 
-
-    public function dyeingReceiveAction(Request $r, $action, $id = null)
-{
-    /* ===============================
-        1. CREATE PAGE
-    ================================*/
-    if ($action === 'create') {
-
-        $pis = ProformaInvoice::whereNotNull('pi_no')
-            ->whereHas('dyeingBookings')
-            ->get();
-
-        return view(adminTheme().'productions.dyeing-receive.edit', [
-            'pis'     => $pis,
-            'items'   => [],
-            'receive' => null,
-            'action'  => 'store',
-        ]);
-    }
-
-    /* ===============================
-        2. STORE
-    ================================*/
-    if ($action === 'store') {
-        $r->validate([
-            'pi_id'        => 'required',
-            'booking_no'   => 'required',
-            'receive_date' => 'required|date',
-            'items'        => 'required|array',
-        ]);
-
-        DB::beginTransaction();
-        try {
-
-            $receiveNo = (DyeingReceive::max('receive_no') ?? 0) + 1;
-
-            $booking = DyeingBooking::where('booking_no', $r->booking_no)->firstOrFail();
-
-            foreach ($r->items as $item) {
-
-                if (!isset($item['receive_qty']) || $item['receive_qty'] <= 0) {
-                    continue;
-                }
-
-                DyeingReceive::create([
-                    'receive_no'       => $receiveNo,
-                    'booking_no'       => $r->booking_no,
-                    'pi_id'            => $r->pi_id,
-                    'booking_item_id'  => $item['id'],
-                    'style'            => $item['style'],
-                    'color'            => $item['color'],
-                    'receive_qty'      => $item['receive_qty'],
-                    'fabric_type'      => $booking->fabric_type,
-                    'composition'      => $booking->composition,
-                    'challan_no'       => $r->challan_no,
-                    'receive_date'     => $r->receive_date,
-                    'remarks'          => $r->remarks,
-                    'created_by'       => auth()->id(),
-                ]);
-
-                DyeingBooking::where('id', $item['id'])
-                    ->increment('received_qty', $item['receive_qty']);
-            }
-
-            DB::commit();
-            return redirect()
-                ->route('admin.dyeingReceive')
-                ->with('success', 'Dyeing Items Received Successfully');
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', $e->getMessage());
-        }
-    }
-
-    /* ===============================
-        3. EDIT PAGE
-    ================================*/
-    if ($action === 'edit' && $id) {
-
-        $receive = DyeingReceive::where('receive_no', $id)->firstOrFail();
-        $items   = DyeingReceive::where('receive_no', $id)->get();
-        $pis     = ProformaInvoice::whereNotNull('pi_no')->get();
-
-        return view(adminTheme().'productions.dyeing-receive.edit', [
-            'receive' => $receive,
-            'items'   => $items,
-            'pis'     => $pis,
-            'action'  => 'update',
-        ]);
-    }
-
-    /* ===============================
-        4. UPDATE
-    ================================*/
-    if ($action === 'update' && $id) {
-
-        $r->validate([
-            'receive_date' => 'required|date',
-            'items'        => 'required|array',
-        ]);
-
-        DB::beginTransaction();
-        try {
-
-            $oldItems = DyeingReceive::where('receive_no', $id)->get();
-
-            // rollback old qty
-            foreach ($oldItems as $old) {
-                DyeingBooking::where('id', $old->booking_item_id)
-                    ->decrement('received_qty', $old->receive_qty);
-            }
-
-            // update & re-add
-            foreach ($r->items as $it) {
-
-                $receive = DyeingReceive::findOrFail($it['id']);
-
-                $receive->update([
-                    'receive_qty'  => $it['receive_qty'],
-                    'challan_no'   => $r->challan_no,
-                    'receive_date' => $r->receive_date,
-                    'remarks'      => $r->remarks,
-                    'updated_by'   => auth()->id(),
-                ]);
-
+            foreach ($receives as $receive) {
                 DyeingBooking::where('id', $receive->booking_item_id)
-                    ->increment('received_qty', $it['receive_qty']);
+                    ->decrement('received_qty', $receive->receive_qty);
+
+                $receive->delete();
             }
 
-            DB::commit();
-            return redirect()
-                ->route('admin.dyeingReceive')
-                ->with('success', 'Updated Successfully');
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', $e->getMessage());
+            return back()->with('success', 'Receive Deleted Successfully');
         }
     }
-
-    /* ===============================
-        5. AJAX: PI SELECT
-    ================================*/
-    if ($action === 'pi-select') {
-
-        $items = DyeingBooking::where('pi_id', $r->pi_id)->get();
-
-        if ($items->isEmpty()) {
-            return response()->json(['success' => false]);
-        }
-
-        $html = view(
-            adminTheme().'productions.dyeing-receive.includes.items',
-            ['items' => $items, 'action' => 'create']
-        )->render();
-
-        return response()->json([
-            'success'         => true,
-            'html'            => $html,
-            'booking_no'      => $items->first()->booking_no,
-            'booking_no_show' => $items->first()->getBookingNo(),
-            'buyer'           => $items->first()->pi->buyer->name ?? '',
-        ]);
-    }
-
-    /* ===============================
-        6. DELETE (GROUP)
-    ================================*/
-    if ($action === 'delete' && $id) {
-
-        $receives = DyeingReceive::where('receive_no', $id)->get();
-
-        foreach ($receives as $receive) {
-            DyeingBooking::where('id', $receive->booking_item_id)
-                ->decrement('received_qty', $receive->receive_qty);
-
-            $receive->delete();
-        }
-
-        return back()->with('success', 'Receive Deleted Successfully');
-    }
-}
 
 
 

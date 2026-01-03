@@ -69,8 +69,8 @@
                     <thead>
                         <tr>
                             <th style="width: 60px">SL</th>
-                            <th>Booking No</th>
                             <th>PI No</th>
+                            <th>Booking No</th>
                             <th>Booking Date</th>
                             <th>Buyer</th>
                             <th>Total Items</th>
@@ -84,8 +84,8 @@
                         @forelse ($bookings as $i => $row)
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
-                            <td>{{ $row->getBookingNo() }}</td>
                             <td>{{ $row->pi->pi_no }}</td>
+                            <td>{{ $row->getBookingNo() }}</td>
                             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</td>
                             <td>{{ $row->buyer_name ?? '-' }}</td>
                             <td class="text-center">{{ number_format($row->total_items_count, 2) }}</td>

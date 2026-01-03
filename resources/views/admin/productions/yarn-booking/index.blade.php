@@ -53,7 +53,7 @@
                         <div class="input-group">
                             <input type="text" name="search"
                                    value="{{ request()->search ?? '' }}"
-                                   placeholder="Search Buyer, Pi No, Booking No, Fabrication"
+                                   placeholder="Search Buyer, Pi No, Booking No, Supplier"
                                    class="form-control">
 
                             <button class="btn btn-success btn-sm rounded-0">Search</button>
@@ -69,8 +69,8 @@
                     <thead>
                         <tr>
                             <th style="width: 60px">SL</th>
-                            <th>Booking No</th>
                             <th>PI No</th>
+                            <th>Booking No</th>
                             <th>Booking Date</th>
                             <th>Supplier</th>
                             <th>Total Items</th>
@@ -84,8 +84,8 @@
                         @forelse ($bookings as $i => $row)
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
-                            <td>{{ $row->getBookingNo() }}</td>
                             <td>{{ $row?->pi?->pi_no }}</td>
+                            <td>{{ $row->getBookingNo() }}</td>
                             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</td>
                             <td>{{ $row->supplier ?? '-' }}</td>
                             <td class="text-center">{{ $row->total_items }}</td>

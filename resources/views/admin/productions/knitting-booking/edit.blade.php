@@ -54,7 +54,7 @@
                                value="{{ $booking->knitting_unit ?? '' }}" placeholder="Enter Factory Name">
                     </div>
 
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-3 mb-3 d-none">
                         <label>Status</label>
                         <select name="status" class="form-control" required>
                             <option value="pending" {{ ($booking && $booking->status == 'pending') ? 'selected' : '' }}>Pending</option>
@@ -74,8 +74,8 @@
                 </div>
 
                 <br>
-                <div class="text-right">
-                    <button type="submit" class="btn btn-success btn-lg">
+                <div class="text-">
+                    <button type="submit" class="btn btn-success">
                         <i class="bx bx-check"></i> {{ $booking ? 'Update' : 'Save' }} Knitting Booking
                     </button>
                 </div>

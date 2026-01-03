@@ -41,7 +41,7 @@
                         <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required>
                     </div>
 
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-3 mb-3 d-none">
                         <label>Status</label>
                         <select name="status" class="form-control" required>
                             <option value="pending" {{ $booking?->status=='pending'?'selected':'' }}>Pending</option>

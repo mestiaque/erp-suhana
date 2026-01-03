@@ -1,6 +1,6 @@
 <div class="table-responsive">
     <table class="table table-bordered table-sm m-0">
-        <thead class="bg-light">
+        <thead class="bg-">
             <tr>
                 <th>Style</th>
                 <th>Fabrication</th>

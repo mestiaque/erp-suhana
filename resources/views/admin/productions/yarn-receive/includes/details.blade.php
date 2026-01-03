@@ -17,19 +17,23 @@
                 <div class="card bg-light border-0 mb-4">
                     <div class="card-body p-3">
                         <div class="row">
-                            <div class="col-md-3 border-right">
+                            <div class="col-md-2 border-right">
+                                <small class="text-muted d-block">PI No</small>
+                                <strong class="text-primarsy">{{ $row->pi->pi_no }}</strong>
+                            </div>
+                            <div class="col-md-2 border-right">
+                                <small class="text-muted d-block">Booking No</small>
+                                <strong class="text-primarsy">{{ $row->getBookingNo() }}</strong>
+                            </div>
+                            <div class="col-md-2 border-right">
                                 <small class="text-muted d-block">Receive No</small>
                                 <strong>{{ $row->getRecvNo() }}</strong>
                             </div>
-                            <div class="col-md-3 border-right">
-                                <small class="text-muted d-block">Booking No</small>
-                                <strong class="text-primary">{{ $row->getBookingNo() }}</strong>
-                            </div>
-                            <div class="col-md-3 border-right">
+                            <div class="col-md-2 border-right">
                                 <small class="text-muted d-block">Supplier</small>
                                 <strong>{{ $row->supplier ?? '--' }}</strong>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <small class="text-muted d-block">Receive Date</small>
                                 <strong>{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</strong>
                             </div>
@@ -40,8 +44,8 @@
                 <!-- Received Items Table -->
                 <h5 class="mb-3"><i class="bx bx-package"></i> Received Yarn Items</h5>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-sm">
-                        <thead class="bg-success text-white">
+                    <table class="table table-bordered  table-striped table-sm">
+                        <thead class="">
                             <tr>
                                 <th width="5%" class="text-center">SL</th>
                                 <th width="15%">Style</th>
@@ -89,7 +93,7 @@
                                                     <td class="pl-3 py-1" width="50%">
                                                         <span class="badge badge-info" style="font-size: 12px;">{{ $detail->yarn_count }}</span>
                                                     </td>
-                                                    <td class="text-right pr-3 py-1 text-success" width="50%">
+                                                    <td class="text-right pr-3 py-1 text-successs" width="50%">
                                                         {{ number_format($detail->receive_qty, 2) }} KG
                                                     </td>
                                                 </tr>
@@ -111,7 +115,7 @@
                         <tfoot class="bg-light font-weight-bold">
                             <tr>
                                 <td colspan="4" class="text-right">Grand Total:</td>
-                                <td class="text-right text-success" style="font-size: 1.1rem;">
+                                <td class="text-right text-successs" style="font-size: 1.1rem;">
                                     {{ number_format($grandTotalRecv, 2) }} KG
                                 </td>
                             </tr>

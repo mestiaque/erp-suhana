@@ -4,8 +4,8 @@
         <div class="modal-content">
 
             <!-- Modal Header -->
-            <div class="modal-header bg-primary text-white py-2">
-                <h5 class="modal-title">Dyeing Receive Details #{{ $row->getReceiveNo() }}</h5>
+            <div class="modal-header bg-success text-white py-2">
+                <h5 class="modal-title text-white">Dyeing Receive Details #{{ $row->getReceiveNo() }}</h5>
                 <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -37,11 +37,11 @@
                 </div>
 
                 <!-- Receive Items Table -->
-                <h6 class="mb-3 font-weight-bold text-primary">
+                <h5 class="mb-3 font-weight-bold text-">
                     <i class="bx bx-package"></i> Received Fabric Items Summary
-                </h6>
+                </h5>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-sm table-bordered table-hover">
                         <thead class="bg-secondary text-white text-center">
                             <tr>
                                 <th width="5%">SL</th>
@@ -85,7 +85,7 @@
                         <tfoot class="bg-light font-weight-bold">
                             <tr>
                                 <td colspan="5" class="text-right">Grand Total Received:</td>
-                                <td class="text-right text-success">{{ number_format($totalRcvQty, 2) }} KG</td>
+                                <td class="text-right font-weight-bold text-successs">{{ number_format($totalRcvQty, 2) }} KG</td>
                             </tr>
                         </tfoot>
                     </table>

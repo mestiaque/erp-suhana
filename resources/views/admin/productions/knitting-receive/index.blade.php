@@ -53,12 +53,12 @@
                     <thead>
                         <tr class=" text-center">
                             <th style="width: 60px">SL</th>
-                            <th>Receive No</th>
                             <th>PI No</th>
-                            <th>Date</th>
-                            <th>Chalan No</th>
                             <th>Booking No</th>
+                            <th>Receive No</th>
+                            <th>Chalan No</th>
                             <th>Buyer</th>
+                            <th>Date</th>
                             <th>Rolls</th>
                             <th>Total Weight</th>
                             <th style="width: 150px">Action</th>
@@ -69,12 +69,12 @@
                         @forelse ($receives as $i => $row)
                         <tr>
                             <td class="text-center">{{ $receives->firstItem() + $i }}</td>
-                            <td class="text-center"><b>{{ $row->getRecvNo() }}</b></td>
                             <td class="text-center"><b>{{ $row?->pi?->pi_no }}</b></td>
-                            <td class="text-center">{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</td>
-                            <td class="text-center">{{ $row->chalan_no ?? '-' }}</td>
                             <td class="text-center text-">{{ $row->getKBookingNo() }}</td>
+                            <td class="text-center"><b>{{ $row->getRecvNo() }}</b></td>
+                            <td class="text-center">{{ $row->chalan_no ?? '-' }}</td>
                             <td>{{ $row->pi->buyer_name ?? '--' }}</td>
+                            <td class="text-center">{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</td>
                             <td class="text-center">{{ $row->total_rolls }}</td>
                             <td class="text-center font-weight-bold">{{ number_format($row->total_weight, 2) }} KG</td>
                             <td class="text-center d-flex justify-content-center">

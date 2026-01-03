@@ -1,3 +1,4 @@
+
 <div class="table-responsive">
     <table class="table table-bordered table-sm">
         <thead class=" text-center">
@@ -24,7 +25,6 @@
                     <td class="text-center">{{ number_format($item->booking_qty, 2) }} KG</td>
 
                     <input type="hidden" name="items[{{$i}}][knit_id]" value="{{ $item->id }}">
-
                     <td>
                         <input type="number" name="items[{{$i}}][roll_qty]"
                                value="{{ $rollQty }}"

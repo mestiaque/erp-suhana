@@ -278,13 +278,16 @@
                         <td>{{ number_format($knitLossPerc, 2) }}%</td>
 
                         {{-- DYEING FACTORY --}}
-                        <td>{{ $pi->dyeingBookings->pluck('remarks')->unique()->filter()->implode(', ') ?: '--' }}</td>
+                        {{-- <td>{{ $pi->dyeingBookings->pluck('remarks')->unique()->filter()->implode(', ') ?: '--' }}</td> --}}
+                        <td>{{ \App\Models\DyeingBooking::where('pi_id', $pi->id)->pluck('dyeing_unit')->unique()->filter()->implode(', ') ?: '--' }}</td>
+
 
                         {{-- GREY DELIVERY (নিটিং রিসিভকেই গ্রে ডেলিভারি ধরা হয়েছে) --}}
                         <td>{{ number_format($totalGreyRecv, 2) }}</td>
 
                         {{-- GREY DELIVERY BAL (ধরে নেওয়া হয়েছে ডেলিভারি ব্যালেন্স নেই) --}}
-                        <td>0.00</td>
+                        {{-- <td>0.00</td> --}}
+                        <td>{{ number_format($totalKnitReq - $totalGreyRecv, 2) }}</td>
 
                         {{-- TOTAL DYEING (Required Qty) --}}
                         <td>{{ number_format($totalDyeingReq, 2) }}</td>
@@ -298,8 +301,15 @@
                         {{-- DYEING TO FINISHED FAB I/H (FINISH Output) --}}
                         <td>{{ number_format($totalDyeingFinishRecv, 2) }}</td>
 
-                        {{-- DYE PROCESS LOSS (N) (Grey - Finish) --}}
-                        <td>{{ number_format($totalGreyRecv - $totalDyeingFinishRecv, 2) }}</td>
+                        {{-- DYE PROCESS LOSS (%) (Grey to Finish Loss Percentage) --}}
+                        <td>
+                            @php
+                                $dyeLossQty = $totalGreyRecv - $totalDyeingFinishRecv;
+                                $dyeLossPerc = $totalGreyRecv > 0 ? ($dyeLossQty / $totalGreyRecv) * 100 : 0;
+                            @endphp
+                            {{ number_format($dyeLossPerc, 2) }}%
+                        </td>
+
 
                         {{-- REMARKS --}}
                         <td>{{ $pi->remarks ?: '--' }}</td>
@@ -308,21 +318,65 @@
                 <tfoot class="font-weight-bold bg-light">
                     <tr>
                         <td colspan="6" class="text-right">TOTAL</td>
+
+                        {{-- YARN BOOKING --}}
                         <td>{{ number_format($totalYarnReq, 2) }}</td>
+
+                        {{-- INHOUSE YARN --}}
                         <td>{{ number_format($totalYarnRecv, 2) }}</td>
+
+                        {{-- KNITTING FACTORY (খালি থাকবে) --}}
                         <td></td>
+
+                        {{-- TO YARN DELI KNITTING --}}
                         <td>{{ number_format($totalKnitReq, 2) }}</td>
+
+                        {{-- GREY RECEIVE FOR DYEING --}}
                         <td>{{ number_format($totalGreyRecv, 2) }}</td>
+
+                        {{-- GREY RECEIVE BAL (বুকিং - রিসিভ) --}}
                         <td>{{ number_format($totalKnitReq - $totalGreyRecv, 2) }}</td>
+
+                        {{-- KNITTING PROCESS LOSS % (খালি থাকবে) --}}
+                        <td>
+                            @php
+                                $totalKnitLossQty = $totalKnitReq - $totalGreyRecv;
+                                $totalKnitLossPerc = $totalKnitReq > 0 ? ($totalKnitLossQty / $totalKnitReq) * 100 : 0;
+                            @endphp
+                            {{ number_format($totalKnitLossPerc, 2) }}%
+                        </td>
+
+                        {{-- DYEING FACTORY (খালি থাকবে) --}}
                         <td></td>
-                        <td></td>
+
+                        {{-- GREY DELIVERY --}}
                         <td>{{ number_format($totalGreyRecv, 2) }}</td>
-                        <td>0.00</td>
+
+                        {{-- GREY DELIVERY BAL (বডি অনুযায়ী এটি বুকিং - রিসিভ হবে) --}}
+                        <td>{{ number_format($totalKnitReq - $totalGreyRecv, 2) }}</td>
+
+                        {{-- TOTAL DYEING (Required) --}}
                         <td>{{ number_format($totalDyeingReq, 2) }}</td>
+
+                        {{-- DYEING BALANCE (Required - Finish) --}}
                         <td>{{ number_format($dyeingBalance, 2) }}</td>
+
+                        {{-- DYEING TO FINISHED FAB I/H (GREY Input) --}}
                         <td>{{ number_format($totalGreyRecv, 2) }}</td>
+
+                        {{-- DYEING TO FINISHED FAB I/H (FINISH Output) --}}
                         <td>{{ number_format($totalDyeingFinishRecv, 2) }}</td>
-                        <td>{{ number_format($totalGreyRecv - $totalDyeingFinishRecv, 2) }}</td>
+
+                        {{-- DYE PROCESS LOSS (%) --}}
+                        <td>
+                            @php
+                                $totalDyeLossQty = $totalGreyRecv - $totalDyeingFinishRecv;
+                                $totalDyeLossPerc = $totalGreyRecv > 0 ? ($totalDyeLossQty / $totalGreyRecv) * 100 : 0;
+                            @endphp
+                            {{ number_format($totalDyeLossPerc, 2) }}%
+                        </td>
+
+                        {{-- REMARKS --}}
                         <td></td>
                     </tr>
                 </tfoot>

@@ -47,6 +47,12 @@
                     </div> --}}
 
                     <div class="col-md-3 mb-3">
+                        <label>Dyeing Unit/Factory</label>
+                        <input type="text" name="dyeing_unit" class="form-control"
+                               value="{{ $booking->dyeing_unit ?? '' }}" placeholder="Enter Factory Name">
+                    </div>
+
+                    <div class="col-md-3 mb-3 d-none">
                         <label>Status</label>
                         <select name="status" class="form-control" required>
                             <option value="pending" {{ $booking?->status=='pending'?'selected':'' }}>Pending</option>

@@ -53,11 +53,11 @@
                     <thead>
                         <tr class="">
                             <th style="width: 50px">SL</th>
-                            <th>Receive No</th>
                             <th>PI No</th>
+                            <th>Booking No</th>
+                            <th>Receive No</th>
                             <th>Receive Date</th>
                             <th>Chalan No</th>
-                            <th>Booking No</th>
                             <th>Supplier</th>
                             <th>Total Recv Qnty</th>
                             <th style="width: 150px">Action</th>
@@ -68,11 +68,11 @@
                         @forelse ($receives as $i => $row)
                         <tr>
                             <td class="text-center">{{ $receives->firstItem() + $i }}</td>
-                            <td class="text-center"><b>{{ $row->getRecvNo() }}</b></td>
                             <td class="text-center">{{ $row->pi->pi_no }}</td>
+                            <td class="text-center">{{ $row->getBookingNo() }}</td>
+                            <td class="text-center"><b>{{ $row->getRecvNo() }}</b></td>
                             <td class="text-center">{{ \Carbon\Carbon::parse($row->receive_date)->format('d.m.Y') }}</td>
                             <td class="text-center">{{ $row->chalan_no ?? '-' }}</td>
-                            <td class="text-center">{{ $row->getBookingNo() }}</td>
                             <td>{{ $row->supplier ?? '-' }}</td>
                             <td class="text-center"><b>{{ number_format($row->total_receive_qty, 2) }} KG</b></td>
                             <td class="text-center d-flex justify-content-center">
@@ -90,7 +90,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">No Yarn Receive Found</td>
+                            <td colspan="9" class="text-center text-muted py-4">No Yarn Receive Found</td>
                         </tr>
                         @endforelse
                     </tbody>
