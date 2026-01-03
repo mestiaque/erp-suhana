@@ -38,7 +38,7 @@
 
                 <!-- Receive Items Table -->
                 <h5 class="mb-3 font-weight-bold text-">
-                    <i class="bx bx-package"></i> Received Fabric Items Summary
+                    <i class="bx bx-package"></i> Received Dyeing Items
                 </h5>
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered table-hover">
