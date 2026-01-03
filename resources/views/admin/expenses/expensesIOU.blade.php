@@ -74,65 +74,49 @@
     <div class="card-body">
         @include(adminTheme().'alerts')
 
-        <div class="row">
-            <div class="col-lg-10 col-md-8">
-                <form action="{{route('admin.expensesIOU')}}">
-                    <div class="row">
+<div class="row align-items-center mb-4">
+    <!-- Search Section -->
+    <div class="col-md-7">
+        <form action="{{route('admin.expensesIOU')}}" method="GET">
+            <div class="input-group shadow-sm">
+                <input type="text"
+                       name="search"
+                       value="{{request()->search}}"
+                       class="form-control border-secondary"
+                       placeholder="Search by name..."
+                       style="border-radius: 5px 0 0 5px;">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-success px-4" style="border-radius: 0 5px 5px 0;">
+                        <i class="fa fa-search mr-1"></i> Search
+                    </button>
+                </div>
+                @if(request()->search)
+                    <a href="{{route('admin.expensesIOU')}}" class="btn btn-outline-danger ml-2 rounded">Clear</a>
+                @endif
+            </div>
+        </form>
+    </div>
 
-                        <div class="col-md-4 mb-2">
-                            <div class="input-group">
-                                <input type="date" name="startDate" value="{{request()->startDate}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                                <input type="date" name="endDate" value="{{request()->endDate}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <select name="quick_filter" class="form-control">
-                                <option value="">-- Select Filter --</option>
-                                <option value="all" {{ request()->quick_filter=='today'?'selected':'' }}>All Records</option>
-                                <option value="today" {{ request()->quick_filter=='today'?'selected':'' }}>Today</option>
-                                <option value="yesterday" {{ request()->quick_filter=='yesterday'?'selected':'' }}>Yesterday</option>
-                                <option value="over_2_days" {{ request()->quick_filter=='over_2_days'?'selected':'' }}>Older than 2 Days</option>
-                                <option value="over_7_days" {{ request()->quick_filter=='over_7_days'?'selected':'' }}>Older than 7 Days</option>
-                                <option value="over_1_month" {{ request()->quick_filter=='over_1_month'?'selected':'' }}>Older than 1 Month</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5 mb-2">
-                            <div class="input-group">
-                                <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Name">
-                                <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            {{-- <div class="col-lg-3 col-md-6">
-                <div class="stats-card-box">
-                    <div class="icon-box">
+    <!-- Stats Card Section -->
+    <div class="col-md-3 offset-2" >
+        <div class="card border-0 shadow-sm bg-light p-0">
+            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px;">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                     </div>
-                    <span class="sub-title">Today I.O.U</span>
-                    <h3>{{$report['today_expenses']}}</h3>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stats-card-box">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <div>
+                        <p class="text-muted mb-0 small font-weight-bold">TOTAL AMOUNT</p>
+                        <h4 class="mb-0 font-weight-bold text-dark">
+                            {{ number_format($expenseIou->sum('amount'), 2) }}
+                        </h4>
                     </div>
-                    <span class="sub-title">This Month</span>
-                    <h3>{{$report['monthly_expenses']}}</h3>
-                </div>
-            </div> --}}
-            <div class="col-lg-2 col-md-12">
-                <div class="stats-card-box">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
-                    </div>
-                    <span class="sub-title">Total Amount</span>
-                    <h3>{{ number_format($expenseIou->sum('amount'),2) }}</h3>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
         <form action="{{route('admin.expensesIOU')}}">
             <div class="row">
                 <div class="col-md-4 mb-2">

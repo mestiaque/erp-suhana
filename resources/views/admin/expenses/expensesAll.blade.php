@@ -76,140 +76,125 @@
     <div class="card-body">
         @include(adminTheme().'alerts')
 
-        <div class="row d-none">
-            <div class="col-lg-6 col-md-6">
-
-                <form action="{{route('admin.expenses')}}">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Serial No">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="input-group">
-                                <input type="date" name="startDate" value="{{request()->startDate ?? $to }}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                                <input type="date" name="endDate" value="{{request()->endDate ?? $from}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
+        <div class="row g-3 mb-4">
+            <!-- Row 1: Search / Filter Form -->
+            <div class="col-12">
+                <div class="card border-0 p-0 mb-2">
+                    <div class="card-body p-0">
+                        <form action="{{ route('admin.expenses') }}" method="GET" class="row g-2 align-items-center">
+                            <!-- Search by Serial -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa fa-hashtag text-muted"></i></span>
+                                    <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Serial No">
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="input-group">
-                                <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
-                                    <option value="">Select Expense Type</option>
-                                    @foreach($expenseTypes as $expenseType)
-                                    <option value="{{$expenseType->id}}" {{request()->expense_type==$expenseType->id?'selected':''}}>{{$expenseType->name}}</option>
+
+                            <!-- Date Range -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa fa-calendar-alt text-muted"></i></span>
+                                    <input type="date" name="startDate" value="{{request()->startDate ?? $from}}" class="form-control">
+                                    <input type="date" name="endDate" value="{{request()->endDate ?? $to}}" class="form-control">
+                                </div>
+                            </div>
+
+                            <!-- Expense Type -->
+                            <div class="col-lg-3 col-md-6">
+                                <select class="form-control select2" name="expense_type">
+                                    <option value="">All Expense Types</option>
+                                    @foreach($expenseTypes as $type)
+                                        <option value="{{$type->id}}" {{request()->expense_type == $type->id ? 'selected' : ''}}>{{$type->name}}</option>
                                     @endforeach
                                 </select>
-                                <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="col-lg-2 col-md-6">
+                                <div class="d-flex gap-1">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fa fa-search me-1"></i> Search
+                                    </button>
+                                    @if(request()->anyFilled(['search', 'startDate', 'endDate', 'expense_type']))
+                                        <a href="{{ route('admin.expenses') }}" class="btn btn-light border">Reset</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Summary Cards -->
+            <div class="col-12">
+                <div class="row g-3">
+                    <!-- Today -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle bg-primary-soft text-primary d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px; background: #e7f1ff;">
+                                    <i class="fa-solid fa-calendar-day"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small font-weight-bold">TODAY</div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ $report['today_expenses'] }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-            <div class="col-lg-2 col-md-6">
-                <div class="stats-card-box">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
+
+                    <!-- Month -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle bg-success-soft text-success d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px; background: #e8f5e9;">
+                                    <i class="fa-solid fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small font-weight-bold">THIS MONTH</div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ $report['monthly_expenses'] }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="sub-title">Today Expense</span>
-                    <h3>{{$report['today_expenses']}}</h3>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-6">
-                <div class="stats-card-box">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
+
+                    <!-- Date Filter Result -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle bg-warning-soft text-warning d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px; background: #fffde7;">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small font-weight-bold">
+                                        {{ \Carbon\Carbon::parse($from)->format('d.m.Y') }} - {{ \Carbon\Carbon::parse($to)->format('d.m.Y') }}
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ $report['filtered_expenses'] ?? 0 }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="sub-title">This Month</span>
-                    <h3>{{$report['monthly_expenses']}}</h3>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-6">
-                <div class="stats-card-box">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-calendar-check"></i>
+
+                    <!-- Filtered Total (New) -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm bg-">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="rounded-circle bg-light text-info d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px;">
+                                    <i class="fa-solid fa-filter"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small font-weight-bold">SEARCH TOTAL</div>
+                                    <div class="h5 mb-0 font-weight-bold text-dark">{{ $report['filtered_total'] ?? 0 }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="sub-title">Filtered Total</span>
-                    <h3>{{ $report['filtered_expenses'] ?? 0 }}</h3>
                 </div>
             </div>
-
         </div>
 
-<div class="row g-3 mb-4">
 
-    <!-- Search / Filter Form -->
-    <div class="col-lg-6 col-md-12">
-        <form action="{{ route('admin.expenses') }}" class="row gx-2 gy-2 align-items-end">
 
-            <!-- Search by Serial No -->
-            <div class="col-md-12 mb-3">
-                <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Search Serial No">
-            </div>
-
-            <!-- Date Range -->
-            <div class="col-md-6 mb-3">
-                <div class="input-group">
-                    <input type="date" name="startDate" value="{{request()->startDate ?? $to }}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                    <input type="date" name="endDate" value="{{request()->endDate ?? $from}}"  class="form-control {{$errors->has('endDate')?'error':''}}" />
-                </div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="input-group">
-                    <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
-                        <option value="">Select Expense Type</option>
-                        @foreach($expenseTypes as $expenseType)
-                        <option value="{{$expenseType->id}}" {{request()->expense_type==$expenseType->id?'selected':''}}>{{$expenseType->name}}</option>
-                        @endforeach
-                    </select>
-                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                </div>
-            </div>
-
-        </form>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="col-lg-2 col-md-4">
-        <div class="card text-center shadow-sm border-0 py-1">
-            <div class="card-body py-0">
-                <div class="mb-2">
-                    <i class="fa-solid fa-calendar-day fa-2x text-primary"></i>
-                </div>
-                <div class="text-muted small">Today Expense</div>
-                <div class="h5 fw-bold mt-1">{{ $report['today_expenses'] }}</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 col-md-4">
-        <div class="card text-center shadow-sm border-0 py-1">
-            <div class="card-body py-0">
-                <div class="mb-2">
-                    <i class="fa-solid fa-calendar fa-2x text-success"></i>
-                </div>
-                <div class="text-muted small">This Month</div>
-                <div class="h5 fw-bold mt-1">{{ $report['monthly_expenses'] }}</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 col-md-4">
-        <div class="card text-center shadow-sm border-0 py-1">
-            <div class="card-body py-0">
-                <div class="mb-2">
-                    <i class="fa-solid fa-calendar-check fa-2x text-warning"></i>
-                </div>
-                <div class="text-muted small">
-                    {{ \Carbon\Carbon::parse($from)->format('d.m.Y') }}
-                    -
-                    {{ isset($to) ? \Carbon\Carbon::parse($to)->format('d.m.Y') : '' }}
-                </div>
-
-                <div class="h5 fw-bold mt-1">{{ $report['filtered_expenses'] ?? 0 }}</div>
-            </div>
-        </div>
-    </div>
-
-</div>
 
 
         <form action="{{route('admin.expenses')}}">

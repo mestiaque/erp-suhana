@@ -3424,7 +3424,6 @@ class AdminController extends Controller
 
     public function expenses(Request $r){
 
-
         $this->from = $from =$r->startDate ?? Carbon::now()->format('Y-m-d');
         $this->to = $to =$r->endDate ?? Carbon::now()->format('Y-m-d');
 
@@ -3473,30 +3472,36 @@ class AdminController extends Controller
             return redirect()->back();
         }
 
-        $expenses =Expense::latest()->where('status','<>','temp')
-                    ->where(function($q) use ($r) {
+        // base query for filters
+        $query = Expense::where('status', '<>', 'temp')
+                        ->where(function($q) use ($r) {
+                            if($r->search){
+                                $search = ltrim($r->search, '0');
+                                $q->where('id', 'LIKE', '%' . $search . '%');
+                            }
+                            if($r->status){
+                                $q->where('status', $r->status);
+                            }
+                            if($r->expense_type){
+                                $q->where('category_id', $r->expense_type);
+                            }
+                            $q->whereDate('created_at', '>=', $this->from)
+                            ->whereDate('created_at', '<=', $this->to);
+                        });
 
-                              if($r->search){
-                                    $search = ltrim($r->search, '0');
-                                  $q->where('id','LIKE','%'.$search.'%');
-                              }
+        // Pagination er age total sum ber kora (Current Filter onujayi)
+        $totalFilteredAmount = $query->sum('amount');
 
-                              if($r->status){
-                                 $q->where('status',$r->status);
-                              }
-                              if($r->expense_type){
-                                 $q->where('category_id',$r->expense_type);
-                              }
-
-                              $q->whereDate('created_at','>=',$this->from)->whereDate('created_at','<=',$this->to);
-
-                        })
-                        ->paginate(25)->appends([
-                          'search'=>$r->search,
-                          'status'=>$r->status,
-                          'startDate' => $r->startDate,
-                          'endDate' => $r->endDate,
-                        ]);
+        // Ekhon pagination kora
+        $expenses = $query->latest()
+                            ->paginate(25)
+                            ->appends([
+                                'search' => $r->search,
+                                'status' => $r->status,
+                                'startDate' => $r->startDate,
+                                'endDate' => $r->endDate,
+                                'expense_type' => $r->expense_type,
+                            ]);
 
         $report = [
                 'today_expenses' => numberFormat(
@@ -3520,6 +3525,7 @@ class AdminController extends Controller
                         ->sum('amount'),
                     2
                 ),
+                'filtered_total' => numberFormat($totalFilteredAmount, 2),
             ];
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
@@ -3942,7 +3948,6 @@ class AdminController extends Controller
     }
 
     public function expensesIOU(Request $r){
-
         // Filter Action Start
             if($r->action){
 
