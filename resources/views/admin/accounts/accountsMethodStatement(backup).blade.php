@@ -83,7 +83,7 @@
                     $types = [
                         0 => 'Sales',
                         1 => 'Deposit',
-                        3 => 'Supplier Bill',
+                        3 => 'Creditor Bill',
                         4 => 'Transfer Balance',
                         5 => 'Expense',
                         6 => 'Withdrawal',
@@ -122,7 +122,7 @@
                                                 @elseif($tran->type == 1)
                                                     <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{ $tran->account->name ?? 'N/A' }}
                                                 @elseif($tran->type == 3)
-                                                    {{ $tran->purchase ? 'Invoice: '.$tran->purchase->order_no.' - Supplier: '.$tran->purchase->supplier_name : 'N/A' }}
+                                                    {{ $tran->purchase ? 'Invoice: '.$tran->purchase->order_no.' - Creditor: '.$tran->purchase->supplier_name : 'N/A' }}
                                                 @elseif($tran->type == 4)
                                                     Transfer
                                                 @elseif($tran->type == 5)

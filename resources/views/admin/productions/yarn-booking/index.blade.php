@@ -53,7 +53,7 @@
                         <div class="input-group">
                             <input type="text" name="search"
                                    value="{{ request()->search ?? '' }}"
-                                   placeholder="Search Buyer, Pi No, Booking No, Supplier"
+                                   placeholder="Search Buyer, Pi No, Booking No, Creditor"
                                    class="form-control">
 
                             <button class="btn btn-success btn-sm rounded-0">Search</button>
@@ -72,7 +72,7 @@
                             <th>PI No</th>
                             <th>Booking No</th>
                             <th>Booking Date</th>
-                            <th>Supplier</th>
+                            <th>Creditor</th>
                             <th>Total Items</th>
                             <th>Total Req. Qnty</th>
                             <th>Added By</th>

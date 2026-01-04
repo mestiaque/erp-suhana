@@ -34,7 +34,7 @@
                         <div class="col-md-6 d-flex">
                             <div class="card shadow-sm mb-3 flex-fill">
                                 <div class="e">
-                                    <h5 class="mb-0">Supplier Info</h5>
+                                    <h5 class="mb-0">Creditor Info</h5>
                                     <hr>
                                 </div>
                                 <div class="card-body">

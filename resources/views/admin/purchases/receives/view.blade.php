@@ -104,8 +104,8 @@
                     <div class="company-info">
                         <p><b>Branch:</b> {{ $receive->branch?->name ?? 'N/A' }}</p>
                         <p><b>Address:</b> {{ $receive->branch?->description ?? 'N/A' }}</p>
-                        <p><b>Supplier Name:</b> {{ $receive->purchase?->name ?? '' }}</p>
-                        <p><b>Supplier Company:</b> {{ $receive->purchase?->company_name ?? '' }}</p>
+                        <p><b>Creditor Name:</b> {{ $receive->purchase?->name ?? '' }}</p>
+                        <p><b>Creditor Company:</b> {{ $receive->purchase?->company_name ?? '' }}</p>
                         <p><b>Address:</b> {{  $receive->purchase?->supplier_address ?? '' }}</p>
                     </div>
                     <div class="receive-info">

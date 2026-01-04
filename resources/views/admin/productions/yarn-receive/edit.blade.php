@@ -47,7 +47,7 @@
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label>Supplier</label>
+                        <label>Creditor</label>
                         <input type="text" name="supplier" id="supplier_name" class="form-control" value="{{ $receive->supplier ?? '' }}" readonly>
                     </div>
 

@@ -58,7 +58,7 @@
                             <th>Receive No</th>
                             <th>Receive Date</th>
                             <th>Chalan No</th>
-                            <th>Supplier</th>
+                            <th>Creditor</th>
                             <th>Total Recv Qnty</th>
                             <th style="width: 150px">Action</th>
                         </tr>

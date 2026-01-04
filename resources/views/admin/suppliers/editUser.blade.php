@@ -1,6 +1,6 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('Supplier Profile')}}</title>
+<title>{{websiteTitle('Creditor Profile')}}</title>
 @endsection
 
 @push('css')
@@ -23,7 +23,7 @@
         <li class="item">
             <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
         </li>
-        <li class="item"><a href="{{route('admin.suppliers')}}">Supplier List</a></li>
+        <li class="item"><a href="{{route('admin.suppliers')}}">Creditor List</a></li>
         <li class="item">Profile</li>
     </ol>
 </div>
@@ -63,7 +63,7 @@
 
                             <div class="row">
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="name">Supplier Name* </label>
+                                    <label for="name">Creditor Name* </label>
                                     <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
                                     @if ($errors->has('name'))
                                     <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
