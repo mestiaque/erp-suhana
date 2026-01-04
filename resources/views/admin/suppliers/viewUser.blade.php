@@ -237,7 +237,7 @@
 
                                 <div class="mb-2">
                                     <label>Select Account</label>
-                                    <select name="account_id" class="form-control" >
+                                    <select name="account_id" class="form-control" required>
                                         <option value="">Select Account</option>
                                         @foreach($accountMethods as $acc)
                                             <option value="{{ $acc->id }}">{{$acc->name}} - BDT {{priceFormat($acc->amount)}}</option>
