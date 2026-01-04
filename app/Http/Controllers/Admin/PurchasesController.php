@@ -802,7 +802,7 @@ class PurchasesController extends Controller
         if ($action == 'view') {
             $orders = $user->orders()->where('status', 'approved')->paginate(10);
             $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
-            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->where('addedby_id', Auth::id())->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
             return view(adminTheme().'suppliers.viewUser', compact('user','orders','transactions','accountMethods','paymentMethods'));
         }
