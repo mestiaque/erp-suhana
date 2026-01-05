@@ -206,7 +206,7 @@
 	 	<form action="{{route('admin.suppliersAction','create')}}" method="post">
 	   		@csrf
 	   <div class="modal-header">
-		 <h4 class="modal-title">Add Supplier</h4>
+		 <h4 class="modal-title">Add Creditor</h4>
 		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		   <span aria-hidden="true">&times; </span>
 		 </button>
@@ -214,7 +214,7 @@
 	   <div class="modal-body">
             <div class="row">
                 <div class="col-md-6 form-group">
-                    <label for="name">Supplier Name* </label>
+                    <label for="name">Creditor Name* </label>
                     <div class="controls">
                         <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
                         @if ($errors->has('name'))
@@ -248,7 +248,7 @@
 	   </div>
 	   <div class="modal-footer">
 		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-		 <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Supplier</button>
+		 <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Creditor</button>
 	   </div>
 	   </form>
 	 </div>

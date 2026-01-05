@@ -18,7 +18,7 @@ table.table a {
     color: #035415;
     background-color: #17e64642;
 }
-    
+
 </style>
 @endpush
 
@@ -95,7 +95,7 @@ table.table a {
                             <tr>
                                 <th style="min-width: 50px;">SL</th>
                                 <th style="min-width: 150px;">Order No</th>
-                                <th style="min-width: 150px;">Supplier</th>
+                                <th style="min-width: 150px;">Creditor</th>
                                 <th style="min-width: 200px;">Created By</th>
                                 <th style="min-width: 150px;">Items</th>
                                 <th style="min-width: 150px;">Bill Amount</th>

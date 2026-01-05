@@ -756,7 +756,7 @@ class PurchasesController extends Controller
             $user->setTypes('supplier');
             $user->save();
 
-            Session()->flash('success', 'Supplier registered successfully!');
+            Session()->flash('success', 'Creditor registered successfully!');
             return redirect()->route('admin.suppliersAction', ['view', $user->id]);
         }
         /* ================= CREATE END ================= */
@@ -766,11 +766,11 @@ class PurchasesController extends Controller
         if ($action == 'restore') {
             $user = User::onlyTrashed()->filterByType('supplier')->find($id);
             if (!$user) {
-                Session()->flash('error', 'Supplier not found in trash.');
+                Session()->flash('error', 'Creditor not found in trash.');
                 return redirect()->route('admin.suppliers', ['view' => 'deleted']);
             }
             $user->restore();
-            Session()->flash('success', 'Supplier restored successfully!');
+            Session()->flash('success', 'Creditor restored successfully!');
             return redirect()->route('admin.suppliers');
         }
 
@@ -778,7 +778,7 @@ class PurchasesController extends Controller
         if ($action == 'delete') {
             $user = User::filterByType('supplier')->find($id);
             if (!$user) {
-                Session()->flash('error', 'Supplier not found.');
+                Session()->flash('error', 'Creditor not found.');
                 return redirect()->route('admin.suppliers');
             }
 
@@ -787,14 +787,14 @@ class PurchasesController extends Controller
             $user->deleted_by = Auth::id();
             $user->save();
 
-            Session()->flash('success', 'Supplier soft-deleted successfully!');
+            Session()->flash('success', 'Creditor soft-deleted successfully!');
             return redirect()->route('admin.suppliers');
         }
 
         /* ================= FIND SUPPLIER ================= */
         $user = User::filterByType('supplier')->whereIn('status', [0,1])->find($id);
         if (!$user && $action != 'create') {
-            Session()->flash('error', 'Supplier not found.');
+            Session()->flash('error', 'Creditor not found.');
             return redirect()->route('admin.suppliers');
         }
 
@@ -802,7 +802,7 @@ class PurchasesController extends Controller
         if ($action == 'view') {
             $orders = $user->orders()->where('status', 'approved')->paginate(10);
             $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
-            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->where('addedby_id', Auth::id())->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
             return view(adminTheme().'suppliers.viewUser', compact('user','orders','transactions','accountMethods','paymentMethods'));
         }
@@ -838,7 +838,7 @@ class PurchasesController extends Controller
             $user->setTypes('supplier');
             $user->save();
 
-            Session()->flash('success','Supplier updated successfully!');
+            Session()->flash('success','Creditor updated successfully!');
             return redirect()->back();
         }
 
@@ -1049,7 +1049,7 @@ class PurchasesController extends Controller
 
         // ADD COMPANY
         if ($action == 'add-supplier') {
-            $supplier = Supplier::find($r->supplier_id);
+            $supplier = Creditor::find($r->supplier_id);
             if ($supplier) {
                 $order->supplier_id = $supplier->id;
                 $order->save();
@@ -1144,7 +1144,7 @@ class PurchasesController extends Controller
 
             $supplier =User::where('supplier',true)->find($r->supplier_id);
             if(!$supplier){
-              session()->flash('error', 'Supplier are not found');
+              session()->flash('error', 'Creditor are not found');
               return back();
             }
 

@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label>Supplier</label>
+                        <label>Creditor</label>
                         <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required>
                     </div>
 

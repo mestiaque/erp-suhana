@@ -4,7 +4,7 @@
             <th class="bol bot bob">SL/No.</th>
             <th class="bol bot bob">ITEM</th>
             <th class="bol bot bob">Description</th>
-            <th class="bol bot bob">Supplier</th>
+            <th class="bol bot bob">Creditor</th>
             <th class="bol bot bob">Qty</th>
             <th class="bol bot bob">Unit Price ($)</th>
             <th class="bol bot bob">TTL US $</th>

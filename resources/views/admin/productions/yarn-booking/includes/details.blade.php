@@ -24,7 +24,7 @@
                                 <strong>{{ $booking->pi->buyer_name ?? '--' }}</strong>
                             </div>
                             <div class="col-md-3 border-right">
-                                <small class="text-muted d-block">Supplier</small>
+                                <small class="text-muted d-block">Creditor</small>
                                 <strong>{{ $booking->supplier ?? '--' }}</strong>
                             </div>
                             <div class="col-md-3">

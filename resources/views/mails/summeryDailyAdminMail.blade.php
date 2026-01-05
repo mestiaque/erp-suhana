@@ -80,7 +80,7 @@
                         <td style="border:1px solid #dddddd; padding:8px;">
                             @if($tran->type==0) Sales
                             @elseif($tran->type==1) Deposit
-                            @elseif($tran->type==3) Supplier Bill
+                            @elseif($tran->type==3) Creditor Bill
                             @elseif($tran->type==4) Transfer
                             @elseif($tran->type==5) Expense
                             @elseif($tran->type==6) Withdrawal
@@ -110,7 +110,7 @@
 
                             @elseif($tran->type==3 && $tran->purchase)
                                 <b>Invoice:</b> {{ $tran->purchase->order_no }} -
-                                <b>Supplier:</b> {{ $tran->purchase->supplier_name }}
+                                <b>Creditor:</b> {{ $tran->purchase->supplier_name }}
 
                             @else
                                 {{ $tran->transection_id }}
@@ -173,7 +173,7 @@
 <!-- FOOTER -->
 <div style="padding:10px; margin:10px 0; border-top:1px solid #ededed; text-align:center;">
     You received this email as a registered user of
-    <a href="{{route('index')}}">{{general()->website}}</a>.  
+    <a href="{{route('index')}}">{{general()->website}}</a>.
     <a href="{{route('index')}}">Unsubscribe</a>
 </div>
 

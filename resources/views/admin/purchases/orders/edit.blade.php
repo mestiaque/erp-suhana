@@ -78,7 +78,7 @@
                 @csrf
                 <div class="row ">
                     <div class="col-md-3 mb-3">
-                        <label>Company /Supplier*</label>
+                        <label>Company /Creditor*</label>
                         <select id="supplier_id" name="supplier_id" class="form-control" required>
                             <option value="">Select Company</option>
                             @foreach($suppliers as $s)
@@ -235,7 +235,7 @@
             success: function(res){
                 if(res.view){
                     // $('.cardItems').html(res.view);
-                   
+
                 }
             },
             error: function(){

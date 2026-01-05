@@ -123,7 +123,7 @@
 
                                             @if($tran->purchase)
                                                <b>Invoice:</b> {{$tran->purchase->order_no}}
-                                               <b>Supplier:</b> {{$tran->purchase->supplier_name}}
+                                               <b>Creditor:</b> {{$tran->purchase->supplier_name}}
                                             @else
                                             <span>N/A</span>
                                             @endif
@@ -140,7 +140,7 @@
                                             @elseif($tran->type==1)
                                                 Deposit
                                             @elseif($tran->type==3)
-                                                Supplier Bill
+                                                Creditor Bill
                                             @elseif($tran->type==4)
                                                 Transfer Balance
                                             @elseif($tran->type==5)

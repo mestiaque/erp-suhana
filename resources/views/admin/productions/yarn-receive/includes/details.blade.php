@@ -30,7 +30,7 @@
                                 <strong>{{ $row->getRecvNo() }}</strong>
                             </div>
                             <div class="col-md-2 border-right">
-                                <small class="text-muted d-block">Supplier</small>
+                                <small class="text-muted d-block">Creditor</small>
                                 <strong>{{ $row->supplier ?? '--' }}</strong>
                             </div>
                             <div class="col-md-2">

@@ -1,6 +1,6 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('Supplier Profile')}}</title>
+<title>{{websiteTitle('Creditor Profile')}}</title>
 @endsection
 
 @push('css')
@@ -25,7 +25,7 @@
             <li class="item">
                 <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
             </li>
-            <li class="item"><a href="{{route('admin.suppliers')}}">Supplier List</a></li>
+            <li class="item"><a href="{{route('admin.suppliers')}}">Creditor List</a></li>
             <li class="item">Profile</li>
         </ol>
     </div>

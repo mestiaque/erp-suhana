@@ -66,7 +66,7 @@ return [
                     'permission'  => 'purchases_damage_returns'
                 ],
                 [
-                    'title'       => 'Supplier Ledgers',
+                    'title'       => 'Creditor Ledgers',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/suppliers-ladgers',
                     'icon_color'  => 'text-primary',
