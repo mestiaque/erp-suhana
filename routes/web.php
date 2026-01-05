@@ -146,6 +146,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     //Production
     Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
+    Route::get('/floor-planning',[ProductionController::class,'floorPlanning'])->name('floorPlanning');
+    Route::any('/floor-planning/{action}/{id?}',[ProductionController::class,'floorPlanningAction'])->name('floorPlanningAction');
 
     Route::get('/booking',[MerchandisingController::class,'booking'])->name('booking');
     Route::any('/booking/{action}/{id?}',[MerchandisingController::class,'bookingAction'])->name('bookingAction');
@@ -167,6 +169,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/procurement/knitting-receive/{action}/{id?}',[ProductionController::class,'knittingReceiveAction'])->name('knittingReceiveAction');
     Route::get('/procurement/dyeing-receive',[ProductionController::class,'dyeingReceive'])->name('dyeingReceive');
     Route::any('/procurement/dyeing-receive/{action}/{id?}',[ProductionController::class,'dyeingReceiveAction'])->name('dyeingReceiveAction');
+
+    Route::any('/procurement/pi-wise-fabric-status',[ProductionController::class,'piWiseFabricStatus'])->name('piWiseFabricStatus');
 
     Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');

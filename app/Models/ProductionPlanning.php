@@ -37,11 +37,16 @@ class ProductionPlanning extends Model
         return $this->belongsTo(OrderDetail::class,'style_no','style_no');
     }
 
+    public function orderDetailItems()
+    {
+        return $this->belongsTo(OrderDetail::class,'order_no','order_no');
+    }
+
     public function sewingLines()
     {
         return $this->hasMany(ProductionSewing::class, 'planning_id');
     }
-    
+
     public function sewingOutputs()
     {
         return $this->hasMany(SewingOutput::class, 'planning_id');

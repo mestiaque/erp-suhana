@@ -1,30 +1,21 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Master Planning List') }}</title>
+<title>{{ websiteTitle('Floor Planning List') }}</title>
 @endsection
 
 @section('contents')
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Master Planning List</h3>
+             <h3>Floor Planning List</h3>
              <div class="dropdown d-flex">
-                @can('production_planning.add')
-                 <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary mr-1" style="padding:5px 15px;">
-                     <i class="bx bx-plus"></i> Add Planning
-                 </a>
-                @endcan
-
-                 <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
-                     <i class="bx bx-rotate-left"></i>
-                 </a>
              </div>
         </div>
 
         <div class="card-body">
             @include(adminTheme().'alerts')
-            <form action="{{ route('admin.productionPlanning') }}">
+            <form action="{{ route('admin.floorPlanning') }}">
                 <div class="row mb-2">
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
@@ -40,16 +31,6 @@
                     </div>
                 </div>
             </form>
-
-            <!-- Status Filter -->
-            <div class="row mb-0">
-                <div class="col-md-12">
-                    <ul class="statuslist p-0 m-0">
-                        <li><a href="{{ route('admin.productionPlanning') }}">All ({{ $totals->total }})</a></li>
-                        <li><a href="{{ route('admin.productionPlanning',['status'=>'approved']) }}">Approved ({{ $totals->approved }})</a></li>
-                    </ul>
-                </div>
-            </div>
 
             <div class="table-responsive">
                 <table class="table table-striped table-bordered">
@@ -113,23 +94,15 @@
                                 @endif
                             </td>
                             <td>
-                                @if(can('production_planning.view') || can('production_planning.edit') || can('production_planning.delete') || can('production_planning.approve'))
-                                    @can('production_planning.view')
-                                        <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#masterPlanModal_{{ $plan->id }}">
+                                @if(can('floor_planning.view') || can('floor_planning.edit'))
+                                    @can('floor_planning.view')
+                                        <a href="{{ route('admin.floorPlanningAction',['view',$plan->id]) }}" class="btn-custom yellow mr-1" >
                                             <i class="fa fa-eye"></i>
                                         </a>
                                     @endcan
-                                    @if($plan->status !== 'approved')
-                                        @can('production_planning.edit')
-                                            <a href="{{ route('admin.productionPlanningAction',['edit',$plan->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
+                                        @can('floor_planning.edit')
+                                            <a href="{{ route('admin.floorPlanningAction',['edit',$plan->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
                                         @endcan
-                                        @can('production_planning.delete')
-                                            <a href="{{ route('admin.productionPlanningAction',['delete',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
-                                        @endcan
-                                        @can('production_planning.approve')
-                                            <a href="{{ route('admin.productionPlanningAction',['approve',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom success mr-1"><i class="bx bx-check"></i></a>
-                                        @endcan
-                                    @endif
                                 @else
                                 --
                                 @endif

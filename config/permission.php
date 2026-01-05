@@ -192,9 +192,22 @@ return [
             ],
 
         ],
+
         'Production Management' =>[
             'production_planning' => [
-                'label'       => 'Production Planning',
+                'label'       => 'Master Planning',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'approve' => 'Approve',
+                    'all'    => 'All',
+                ],
+            ],
+            'floor_planning' => [
+                'label'       => 'Floor Planning',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -267,6 +280,14 @@ return [
                     'edit'   => 'Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'pi_wise_fabric_status' => [
+                'label'       => 'Status',
+                'permissions' => [
+                    'list'   => 'List',
+                    'view'   => 'View',
                     'all'    => 'All',
                 ],
             ],

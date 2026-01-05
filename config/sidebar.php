@@ -163,20 +163,13 @@ return [
     [
         'group_title' => '',
         [
-            'title'      => 'Production Planning',
+            'title'      => 'Procurement',
             'icon'       => 'fa-solid fa-layer-group',
             'icon_color' => 'text-primary',
             'permission' => '',
             'children'   => [
                 [
-                    'title'       => 'Planning',
-                    'icon'        => 'fa-solid fa-arrow-right',
-                    'route'       => '/admin/production-planning',
-                    'icon_color'  => 'text-warning',
-                    'permission'  => 'production_planning'
-                ],
-                [
-                    'title'       => 'Procurement (Booking)',
+                    'title'       => 'Booking',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'icon_color'  => 'text-warning',
                     'permission'  => '',
@@ -205,7 +198,7 @@ return [
                     ]
                 ],
                 [
-                    'title'       => 'Procurement (Recv.)',
+                    'title'       => 'Receiving',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'icon_color'  => 'text-warning',
                     'permission'  => '',
@@ -234,18 +227,38 @@ return [
                     ]
                 ],
                 [
-                    'title'      => 'Production List',
+                    'title'      => 'Status',
                     'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/production-list',
-                    'icon_color' => 'text-warning',
-                    'permission' => 'production_list'
+                    'route'      => '/admin/procurement/pi-wise-fabric-status',
+                    'icon_color' => '',
+                    'permission' => 'pi_wise_fabric_status'
+                ],
+
+            ]
+        ],
+    ],
+
+    [
+        'group_title' => '',
+        [
+            'title'      => 'Production',
+            'icon'       => 'fa-solid fa-layer-group',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Master Plan',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/production-planning',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'production_planning'
                 ],
                 [
-                    'title'      => 'Daily Production',
+                    'title'      => 'Floor Plan',
                     'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/daily-production',
+                    'route'      => '/admin/floor-planning',
                     'icon_color' => 'text-warning',
-                    'permission' => 'daily_production'
+                    'permission' => 'floor_planning'
                 ],
                 [
                     'title'      => 'Cutting',
@@ -254,6 +267,14 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'cutting'
                 ],
+                [
+                    'title'      => 'Sweing',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/daily-production',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'daily_production'
+                ],
+
 
             ]
         ],

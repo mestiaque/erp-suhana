@@ -26,7 +26,7 @@ class ProductionSewing extends Model
 
 
     public function planning() {
-        return $this->belongsTo(ProductionPlanning::class, 'style_no', 'style_no');
+        return $this->belongsTo(ProductionPlanning::class, 'planning_id', 'id');
     }
 
     // Example helper

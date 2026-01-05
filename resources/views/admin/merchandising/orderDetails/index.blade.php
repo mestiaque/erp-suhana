@@ -65,6 +65,15 @@
 
                 <div class="col-12 col-md-2">
                     <div class="custom-card" style="">
+                        <div style="font-size:30px;">🎨</div>
+                        <div style="font-weight:bold;">Print & Embroidery</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <div class="custom-card" style="">
                         <div style="font-size:30px;">✂️</div>
                         <div style="font-weight:bold;">Cutting</div>
                         <div class="text-success">Qty: {{ number_format($grandTotalCuttingOutput) }}</div>
@@ -94,15 +103,6 @@
                     <div class="custom-card" style="">
                         <div style="font-size:30px;">🚚</div>
                         <div style="font-weight:bold;">Shipped</div>
-                        <div class="text-success">Qty: 0</div>
-                        <div class="text-danger">Balance: 0</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-2">
-                    <div class="custom-card" style="">
-                        <div style="font-size:30px;">🎨</div>
-                        <div style="font-weight:bold;">Print & Embroidery</div>
                         <div class="text-success">Qty: 0</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>

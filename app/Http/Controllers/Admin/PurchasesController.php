@@ -905,7 +905,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'suppliers.supplierLadgers', compact('ledgerEntries', 'supplier', 'suppliers'));
     }
 
-    
+
 
     public function purchasesReports(Request $r){
 
@@ -1512,7 +1512,7 @@ class PurchasesController extends Controller
 
             $purchase = PurchaseOrder::findOrFail($id);
             $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
-            $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
+            $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('src_id', $purchase->id)->where('type', 3)->latest()->get();
 
             return view(adminTheme().'purchases.bill-payments.view', compact('purchase', 'paymentMethods', 'accountMethods', 'transactions'));

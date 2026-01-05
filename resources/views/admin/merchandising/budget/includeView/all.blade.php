@@ -123,8 +123,10 @@
             <tr>
                 <td class="{{ $loop->last ? 'bob' : '' }}">{{ $acc->description }}</td>
                 <td class="{{ $loop->last ? 'bob' : '' }}">{{ $acc->supplier }}</td>
-                <td class="{{ $loop->last ? 'bob' : '' }}">{{ (int)$acc->qty }}</td>
-                <td class="{{ $loop->last ? 'bob' : '' }}">${{ $acc->unit_price }}</td>
+                {{-- <td class="{{ $loop->last ? 'bob' : '' }}">{{ (int)$acc->qty }}</td> --}}
+                {{-- <td class="{{ $loop->last ? 'bob' : '' }}">${{ $acc->unit_price }}</td> --}}
+                <td class="{{ $loop->last ? 'bob' : '' }}">{{ number_format($acc->qty / 12, 2) }}</td>
+                <td class="{{ $loop->last ? 'bob' : '' }}">${{ number_format($acc->unit_price * 12, 2) }}</td>
                 <td class="{{ $loop->last ? 'bob' : '' }}">${{ $acc->ttl_usd }}</td>
             </tr>
             @endforeach
@@ -144,17 +146,19 @@
                         <th>Quantity (Doz)</th>
                         <th>Price/Doz</th>
                         <th>TTL US $</th>
-                        <td class="bob" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">${{ $acc->item_total }}</td>
-                        <td class="bob" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">{{ $acc->percent }}%</td>
-                        <td class="bob" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">{{ $acc->company_name }}</td>
-                        <td class="bob bor" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">{{ $acc->payment_value }}</td>
+                        <td class="bob" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">${{ $pe->item_total }}</td> {{-- $acc to $pe--}}
+                        <td class="bob" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">{{ $pe->percent }}%</td>
+                        <td class="bob" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">{{ $pe->company_name }}</td>
+                        <td class="bob bor" rowspan="{{ $budget->printEmbroidery->count() + 1 }}">{{ $pe->payment_value }}</td>
                     </tr>
                 @endif
             <tr>
                 <td class="{{ $loop->last ? 'bob' : '' }}">{{ $pe->description }}</td>
                 <td class="{{ $loop->last ? 'bob' : '' }}">{{ $pe->supplier }}</td>
-                <td class="{{ $loop->last ? 'bob' : '' }}">{{ (int)$pe->qty }}</td>
-                <td class="{{ $loop->last ? 'bob' : '' }}">${{ $pe->unit_price }}</td>
+                {{-- <td class="{{ $loop->last ? 'bob' : '' }}">{{ (int)$pe->qty }}</td>
+                <td class="{{ $loop->last ? 'bob' : '' }}">${{ $pe->unit_price }}</td> --}}
+                <td class="{{ $loop->last ? 'bob' : '' }}">{{ number_format($pe->qty / 12, 2) }}</td>
+                <td class="{{ $loop->last ? 'bob' : '' }}">${{ number_format($pe->unit_price * 12, 2) }}</td>
                 <td class="{{ $loop->last ? 'bob' : '' }}">${{ $pe->ttl_usd }}</td>
             </tr>
             @endforeach
@@ -173,17 +177,19 @@
                         <th>Quantity (Doz)</th>
                         <th colspan="">CM/Doz</th>
                         <th>TTL US $</th>
-                        <td class="bob" rowspan="{{ $budget->cms->count() + 1 }}">${{ $acc->item_total }}</td>
-                        <td class="bob" rowspan="{{ $budget->cms->count() + 1 }}">{{ $acc->percent }}%</td>
-                        <td class="bob" rowspan="{{ $budget->cms->count() + 1 }}">{{ $acc->company_name }}</td>
-                        <td class="bob bor" rowspan="{{ $budget->cms->count() + 1 }}">{{ $acc->payment_value }}</td>
+                        <td class="bob" rowspan="{{ $budget->cms->count() + 1 }}">${{ $cm->item_total }}</td> {{-- $acc to $cm --}}
+                        <td class="bob" rowspan="{{ $budget->cms->count() + 1 }}">{{ $cm->percent }}%</td>
+                        <td class="bob" rowspan="{{ $budget->cms->count() + 1 }}">{{ $cm->company_name }}</td>
+                        <td class="bob bor" rowspan="{{ $budget->cms->count() + 1 }}">{{ $cm->payment_value }}</td>
                     </tr>
                 @endif
                 <tr>
                     <td class="{{ $loop->last ? 'bob' : '' }}">{{ $cm->description }}</td>
                     <td class="{{ $loop->last ? 'bob' : '' }}">{{ $cm->supplier }}</td>
-                    <td class="{{ $loop->last ? 'bob' : '' }}">{{ (int)$cm->qty }}</td>
-                    <td class="{{ $loop->last ? 'bob' : '' }}">${{ $cm->unit_price }}</td>
+                    {{-- <td class="{{ $loop->last ? 'bob' : '' }}">{{ (int)$cm->qty }}</td>
+                    <td class="{{ $loop->last ? 'bob' : '' }}">${{ $cm->unit_price }}</td> --}}
+                    <td class="{{ $loop->last ? 'bob' : '' }}">{{ number_format($cm->qty / 12, 2) }}</td>
+                    <td class="{{ $loop->last ? 'bob' : '' }}">${{ number_format($cm->unit_price * 12, 2) }}</td>
                     <td class="{{ $loop->last ? 'bob' : '' }}">${{ $cm->ttl_usd }}</td>
                 </tr>
             @endforeach

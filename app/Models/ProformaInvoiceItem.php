@@ -26,6 +26,10 @@ class ProformaInvoiceItem extends Model
         return $this->belongsTo(User::class, 'addedby_id');
     }
 
+    public function pi()
+    {
+        return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id');
+    }
     public function proformaInvoice()
     {
         return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id');

@@ -123,18 +123,21 @@
      ">
 
     <!-- Back Button (Left) -->
-    <a href="{{ route('admin.fabricStatus',$id) }}"
-       style="
-            padding:6px 18px;
-            background:#6c757d;
-            color:#fff;
-            border-radius:4px;
-            text-decoration:none;
-            font-size:14px;
-            border:1px solid #6c757d;
-       ">
-        ← Back
-    </a>
+<a href="{{ route('admin.piWiseFabricStatus', [
+        'pi_id'   => request('pi_id'),
+        'pi_text' => request('pi_text')
+    ]) }}"
+   style="
+        padding:6px 18px;
+        background:#6c757d;
+        color:#fff;
+        border-radius:4px;
+        text-decoration:none;
+        font-size:14px;
+        border:1px solid #6c757d;
+   ">
+    ← Back
+</a>
 
     <!-- Print Button (Right) -->
     <button id="PrintAction"
