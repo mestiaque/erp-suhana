@@ -5,7 +5,7 @@
         <tr class="bot">
             <th class="vm bol">TOTAL VALUE OF ORDER</th>
             <td>
-                {{ $budget->total_qty ?? 0 }}
+                {{ $budget->pi_value ?? 0 }}
             </td>
 
             <th class="text-right vm">Total Expenditure</th>
@@ -23,7 +23,7 @@
             <th colspan="3" class="text-right vm bol">Reservation</th>
             <td colspan="2">
                 {{-- Logic usually: PI Value - Total Expenditure --}}
-                {{ ($budget->total_qty ?? 0) - ($budget->summary->total_expenditure ?? 0) }}
+                {{ ($budget->pi_value ?? 0) - ($budget->summary->total_expenditure ?? 0) }}
             </td>
         </tr>
 

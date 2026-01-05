@@ -4,7 +4,7 @@
         <div class="table-responsive">
             <table class="table table-bordered table-sm" id="summaryTable">
                 <tbody>
-
+                    {{-- @dd($budget) --}}
                     <!-- 1. Total Value of Order -->
                     <tr>
                         <th class="vm">TOTAL VALUE OF ORDER</th>
