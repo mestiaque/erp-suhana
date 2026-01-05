@@ -272,7 +272,7 @@ return [
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/daily-production',
                     'icon_color' => 'text-warning',
-                    'permission' => 'daily_production'
+                    'permission' => 'sweing'
                 ],
 
 
@@ -495,5 +495,4 @@ return [
             ]
         ],
     ],
-
 ];

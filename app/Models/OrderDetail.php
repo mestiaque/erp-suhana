@@ -46,7 +46,11 @@ class OrderDetail extends Model
         return $this->hasMany(OrderDetailItem::class, 'order_detail_id');
     }
 
- 
+    public function piItem() {
+        return $this->belongsTo(ProformaInvoiceItem::class, 'order_no', 'order_no');
+    }
+
+
 
     // Optional: fetch items directly (same as items())
     public function getItems()

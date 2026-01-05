@@ -134,6 +134,7 @@
                             <th style="width: 140px;min-width: 140px">Shipment Date</th>
                             <th>Fabrication</th>
                             <th>Remarks</th>
+                            <th>P.I No</th>
                             <th>Status</th>
                             <th style="width: 140px;min-width: 140px">Action</th>
                         </tr>
@@ -150,6 +151,7 @@
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
                             <td>{{ $order->remarks ?? '--' }}</td>
+                            <td>{{ $order?->piItem?->pi?->pi_no ?? '--' }}</td>
                             <td>
                                 @php
                                     $statusClass = [
@@ -178,7 +180,7 @@
                         </tr>
 
                         @empty
-                        <tr><td colspan="12" class="text-center text-muted">No order details found</td></tr>
+                        <tr><td colspan="13" class="text-center text-muted">No order details found</td></tr>
                         @endforelse
                     </tbody>
                 </table>

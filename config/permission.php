@@ -217,28 +217,6 @@ return [
                     'all'    => 'All',
                 ],
             ],
-            'daily_production' => [
-                'label'       => 'Daily Production',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'production_list' => [
-                'label'       => 'Production List',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
             'cutting' => [
                 'label'       => 'Cutting List',
                 'permissions' => [
@@ -250,8 +228,22 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'sweing' => [
+                'label'       => 'Sweing',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+        ],
+
+        'Procurement Management' =>[
             'yarn_booking' => [
-                'label'       => 'Yarn (Procurement)',
+                'label'       => 'Yarn Booking',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -262,7 +254,7 @@ return [
                 ],
             ],
             'knitting_booking' => [
-                'label'       => 'Knitting (Procurement)',
+                'label'       => 'Knitting Booking',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -273,7 +265,40 @@ return [
                 ],
             ],
             'dyeing_booking' => [
-                'label'       => 'Dyeing (Procurement)',
+                'label'       => 'Dyeing Booking',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'yarn_receive' => [
+                'label'       => 'Yarn Receive',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'knitting_receive' => [
+                'label'       => 'Knitting Receive',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'dyeing_receive' => [
+                'label'       => 'Dyeing Receive',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -284,14 +309,15 @@ return [
                 ],
             ],
             'pi_wise_fabric_status' => [
-                'label'       => 'Status',
+                'label'       => 'PI Wise Fabric Status',
                 'permissions' => [
-                    'list'   => 'List',
-                    'view'   => 'View',
-                    'all'    => 'All',
+                    'list' => 'List',
+                    'view' => 'View',
+                    'all'  => 'All',
                 ],
             ],
         ],
+
 
         'Accounts Management' =>[
             'expenses' => [
@@ -537,15 +563,5 @@ return [
             ],
 
         ],
-
-        // 'Development' =>[
-        //     'dev' => [
-        //         'label'       => 'Development',
-        //         'permissions' => [
-        //             'all'    => 'All',
-        //         ],
-        //     ]
-
-        // ],
     ],
 ];
