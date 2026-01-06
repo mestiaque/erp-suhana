@@ -102,22 +102,19 @@ class ProductionController extends Controller
 
             foreach($r->styles as $styleNo) {
                 $piItem = ProformaInvoiceItem::where('order_no', $styleNo['order_no'])->where('style_no', $styleNo['style_no'])->first();
-                dump($piItem);
 
-                // ProductionPlanning::create([
-                //     'master_plan_id' => $masterPlan->id,
-                //     'style_no'       => $styleNo['style_no'],
-                //     'pi_id'          => $piItem->proforma_invoice_id,
-                //     'pi_item_id'     => $piItem->id,
-                //     'pi_no'          => $piItem?->pi?->pi_no,
-                //     'order_no'       => $styleNo['order_no'],
-                //     'style_no'       => $styleNo['style_no'],
-                //     'style_qty'      => $piItem->order_qty,
-                //     'status'         => 'pending',
-                // ]);
+                ProductionPlanning::create([
+                    'master_plan_id' => $masterPlan->id,
+                    'style_no'       => $styleNo['style_no'],
+                    'pi_id'          => $piItem->proforma_invoice_id,
+                    'pi_item_id'     => $piItem->id,
+                    'pi_no'          => $piItem?->pi?->pi_no,
+                    'order_no'       => $styleNo['order_no'],
+                    'style_no'       => $styleNo['style_no'],
+                    'style_qty'      => $piItem->order_qty,
+                    'status'         => 'pending',
+                ]);
             }
-            dd('qqq');
-
             session()->flash('success','Master Planning Created');
             return redirect()->route('admin.productionPlanning');
         }
