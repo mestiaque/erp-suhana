@@ -106,12 +106,12 @@ class ProductionController extends Controller
                 ProductionPlanning::create([
                     'master_plan_id' => $masterPlan->id,
                     'style_no'       => $styleNo['style_no'],
-                    'pi_id'          => $piItem->proforma_invoice_id,
-                    'pi_item_id'     => $piItem->id,
+                    'pi_id'          => $piItem?->proforma_invoice_id ?? null,
+                    'pi_item_id'     => $piItem?->id,
                     'pi_no'          => $piItem?->pi?->pi_no,
                     'order_no'       => $styleNo['order_no'],
                     'style_no'       => $styleNo['style_no'],
-                    'style_qty'      => $piItem->order_qty,
+                    'style_qty'      => $piItem->order_qty ?? 0,
                     'status'         => 'pending',
                 ]);
             }
@@ -145,12 +145,12 @@ class ProductionController extends Controller
                 ProductionPlanning::create([
                     'master_plan_id' => $masterPlan->id,
                     'style_no'       => $styleNo['style_no'],
-                    'pi_id'          => $piItem->proforma_invoice_id,
-                    'pi_item_id'     => $piItem->id,
+                    'pi_id'          => $piItem?->proforma_invoice_id ?? null,
+                    'pi_item_id'     => $piItem?->id,
                     'pi_no'          => $piItem?->pi?->pi_no,
                     'order_no'       => $styleNo['order_no'],
                     'style_no'       => $styleNo['style_no'],
-                    'style_qty'      => $piItem->order_qty,
+                    'style_qty'      => $piItem->order_qty ?? 0,
                     'status'         => 'pending',
                 ]);
             }

@@ -16,8 +16,8 @@
     </div>
 
     <div class="card mb-30">
-        <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Master Planning</h3>
+        <div class="card-header">
+            <h3>Master Planning</h3>
         </div>
 
         <div class="card-body">
@@ -25,70 +25,72 @@
 
             <form action="{{ isset($masterPlan) ? route('admin.productionPlanningAction', ['update', $masterPlan->id]) : route('admin.productionPlanningAction', ['store']) }}" method="POST">
                 @csrf
+
                 <div class="row">
 
-                    {{-- Style Select --}}
-                    <div class="col-md-4">
-                        <div class="style-info">
-                            <select class="form-control form-control-sm mb-2 styleSelect select2" name="style_no">
-                                <option value="">-- Select --</option>
-                                @foreach($styles as $style)
-                                <option value="{{ $style->style_no }}"
-                                    data-buyer="{{ $style->buyer_name }}"
-                                    data-merchandiser="{{ $style->merchant_name }}"
-                                    data-order_no="{{ $style->order_no }}"
-                                    data-qty="{{ $style->total_qty }}">
-                                    {{ $style->style_no }} | {{ $style->merchant_name }} | {{ $style->order_no }}
-                                </option>
-                                @endforeach
-                            </select>
+                    {{-- LEFT : AVAILABLE STYLES --}}
+                    <div class="col-md-6">
+                        <h6 class="mb-2">Available Styles</h6>
+
+                        <div class="row style-grid" style="max-height:55vh; overflow-y:auto;">
+                            @foreach($styles as $style)
+                                @php
+                                    $key = $style->style_no.'__'.$style->order_no;
+                                @endphp
+                                <div class="col-md-6 mb-2 style-item"
+                                     data-key="{{ $key }}"
+                                     data-style="{{ $style->style_no }}"
+                                     data-buyer="{{ $style->buyer_name }}"
+                                     data-order_no="{{ $style->order_no }}"
+                                     data-qty="{{ $style->total_qty }}">
+                                    <div class="border p-2 rounded bg-light h-100 style-card">
+                                        <strong>{{ $style->style_no }}</strong><br>
+                                        Buyer: {{ $style->buyer_name }}<br>
+                                        Order: {{ $style->order_no }}<br>
+                                        Qty: {{ $style->total_qty }}
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
-                    {{-- Selected Styles Table --}}
-                    <div class="col-md-8 selected-style">
-                        <table class="table table-sm">
-                            <thead>
-                                <th>Style</th>
-                                <th>Buyer</th>
-                                <th>Order No</th>
-                                <th>Order Qty</th>
-                                <th class="text-center">Action</th>
-                            </thead>
-                            <tbody>
-                                {{-- @dd($masterPlan->productions) --}}
-                                @if(isset($masterPlan) && count($masterPlan->productions) > 0)
-                                    @foreach($masterPlan->productions as $index => $p)
-                                        <tr id="row-{{ $p->style_no }}">
-                                            <td>
-                                                {{ $p->style_no }}
-                                                <input type="hidden" name="styles[{{ $index }}][style_no]" value="{{ $p->style_no }}">
-                                                <input type="hidden" name="styles[{{ $index }}][order_no]" value="{{ $p->order_no }}">
-                                            </td>
-                                            <td>{{ $p->orderDetailItems->buyer_name }}</td>
-                                            <td>{{ $p->order_no }}</td>
-                                            <td>{{ $p->style_qty ?? 0 }}</td>
-                                            <td class="text-center p-0">
-                                                <button type="button"
-                                                        class="btn btn-sm btn-custom danger remove-style"
-                                                        data-style="{{ $p->style_no }}"
-                                                        data-buyer="{{ $p->orderDetailItems->buyer_name }}"
-                                                        data-order_no="{{ $p->order_no }}"
-                                                        data-qty="{{ $p->style_qty ?? 0 }}">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endif
-                            </tbody>
+                    {{-- RIGHT : SELECTED STYLES --}}
+                    <div class="col-md-6">
+                        <h6 class="mb-2">Selected Styles</h6>
 
-                        </table>
+                        <div class="row selected-style-list" style="max-height:55vh; overflow-y:auto;">
+                            @if(isset($masterPlan))
+                                @foreach($masterPlan->productions as $index => $p)
+                                    @php
+                                        $key = $p->style_no.'__'.$p->order_no;
+                                    @endphp
+                                    <div class="col-md-6 mb-2 selected-item"
+                                         data-key="{{ $key }}">
+                                        <div class="border p-2 rounded h-100 style-card selected">
+                                            <button type="button"
+                                                    class="remove-btn remove-style"
+                                                    data-key="{{ $key }}">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+
+                                            <strong>{{ $p->style_no }}</strong><br>
+                                            Buyer: {{ $p->orderDetailItems->buyer_name }}<br>
+                                            Order: {{ $p->order_no }}<br>
+                                            Qty: {{ $p->style_qty ?? 0 }}
+
+                                            <input type="hidden" name="styles[{{ $index }}][style_no]" value="{{ $p->style_no }}">
+                                            <input type="hidden" name="styles[{{ $index }}][order_no]" value="{{ $p->order_no }}">
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
                     </div>
 
-                    {{-- Submit --}}
-                    <div class="col-md-12">
-                        <button type="submit" class="btn btn-success"><i class="bx bx-check"></i>
+                    {{-- SUBMIT --}}
+                    <div class="col-md-12 mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bx bx-check"></i>
                             {{ isset($masterPlan) ? 'Update Plan' : 'Create Plan' }}
                         </button>
                     </div>
@@ -98,79 +100,103 @@
         </div>
     </div>
 </div>
-@endsection
+
+@push('css')
+<style>
+    .style-card {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out; /* smooth animation */
+    }
+
+    .style-card:hover {
+        transform: translateY(-3px) scale(1.02); /* subtle raise & zoom */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* soft shadow */
+    }
+
+    .style-card.selected {
+        border: 2px solid #28a745 !important;
+        background: #f6fff9;
+    }
+
+    .remove-btn {
+        position: absolute;
+        bottom: 4px;
+        right: 6px;
+        border: none;
+        background: transparent;
+        color: #dc3545;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* Optional: smooth scrollbar for left grid */
+    .style-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+    .style-grid::-webkit-scrollbar-thumb {
+        background: #bbb;
+        border-radius: 3px;
+    }
+</style>
+
+@endpush
 
 @push('js')
 <script>
 $(document).ready(function () {
 
-    // ================= Add Style =================
-    let rowIndex = 0;
+    let rowIndex = {{ isset($masterPlan) ? count($masterPlan->productions) : 0 }};
 
-    $(document).on('change', '.styleSelect', function () {
-        let select = $(this);
-        let option = select.find('option:selected');
-        if (!option.val()) return;
+    // ADD
+    $(document).on('click', '.style-item', function () {
 
-        let styleNo = option.val();
-        let buyer = option.data('buyer');
-        let qty = option.data('qty');
-        let order_no = option.data('order_no');
+        let item = $(this);
+        let key = item.data('key');
+        let styleNo = item.data('style');
+        let buyer = item.data('buyer');
+        let order_no = item.data('order_no');
+        let qty = item.data('qty');
 
-        if ($('#row-' + styleNo).length) {
+        if ($('.selected-item[data-key="'+key+'"]').length) {
             alert('Already added');
             return;
         }
 
-        let row = `
-            <tr id="row-${styleNo}">
-                <td>
-                    ${styleNo}
+        let html = `
+            <div class="col-md-6 mb-2 selected-item" data-key="${key}">
+                <div class="border p-2 rounded h-100 style-card selected">
+                    <button type="button"
+                            class="remove-btn remove-style"
+                            data-key="${key}">
+                        <i class="fa fa-times"></i>
+                    </button>
+
+                    <strong>${styleNo}</strong><br>
+                    Buyer: ${buyer}<br>
+                    Order: ${order_no}<br>
+                    Qty: ${qty}
+
                     <input type="hidden" name="styles[${rowIndex}][style_no]" value="${styleNo}">
                     <input type="hidden" name="styles[${rowIndex}][order_no]" value="${order_no}">
-                </td>
-                <td>${buyer}</td>
-                <td>${order_no}</td>
-                <td>${qty}</td>
-                <td class="text-center p-0">
-                    <button type="button"
-                            class="btn btn-sm btn-custom danger remove-style"
-                            data-style="${styleNo}"
-                            data-buyer="${buyer}"
-                            data-order_no="${order_no}"
-                            data-qty="${qty}">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </td>
-            </tr>
+                </div>
+            </div>
         `;
-        $('.selected-style tbody').append(row);
-        option.remove();
-        select.val('');
 
-        rowIndex++; // increment for next row
+        $('.selected-style-list').append(html);
+        item.hide();
+        rowIndex++;
     });
 
-
-    // ================= Remove Style =================
+    // REMOVE
     $(document).on('click', '.remove-style', function () {
-        let btn = $(this);
-        let styleNo = btn.data('style');
-        let buyer = btn.data('buyer');
-        let qty = btn.data('qty');
-        let order_no = btn.data('order_no');
-        let option = `
-            <option value="${styleNo}"
-                    data-buyer="${buyer}"
-                    data-qty="${qty}"
-                    data-order_no="${order_no}">
-                ${styleNo} | ${buyer} | ${qty}
-            </option>
-        `;
-        $('.styleSelect').append(option);
-        btn.closest('tr').remove();
+        let key = $(this).data('key');
+        $('.selected-item[data-key="'+key+'"]').remove();
+        $('.style-item[data-key="'+key+'"]').show();
     });
 
 });
 </script>
 @endpush
+
+@endsection
