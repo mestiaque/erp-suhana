@@ -46,7 +46,7 @@
                     </div>
                     <div class="col-md-6 d-flex">
                         <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control me-1"
-                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication">
+                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
                         <button type="submit" class="btn btn-success btn-sm">Search</button>
                     </div>
                 </div>

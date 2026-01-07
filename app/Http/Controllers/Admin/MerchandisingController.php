@@ -584,7 +584,7 @@ class MerchandisingController extends Controller
     public function orderDetails(Request $r)
     {
         // ১. বেস কুয়েরি তৈরি করুন (যাতে ফিল্টারগুলো সবখানে সমানভাবে কাজ করে)
-        $query = OrderDetail::orderBy('id', 'desc')
+        $query = OrderDetail::with('piItem.pi')->orderBy('id', 'desc')
             ->where('status', '<>', 'temp')
             ->where(function($q) use ($r) {
 
@@ -599,7 +599,10 @@ class MerchandisingController extends Controller
                             ->orWhere('invoice_no', 'LIKE', "%{$search}%")
                             ->orWhere('order_no', 'LIKE', "%{$search}%")
                             ->orWhere('fabrication', 'LIKE', "%{$search}%")
-                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
+                            ->orWhere('merchant_name', 'LIKE', "%{$search}%")
+                            ->orWhereHas('piItem.pi', function($pq) use ($search) {
+                                $pq->where('pi_no', 'LIKE', "%{$search}%");
+                            });
                     });
                 }
 
