@@ -108,7 +108,6 @@
                             }
 
                         } elseif ($level == 1) {
-
                             // CHILD LEVEL (must have children to show)
                             $show = $hasVisibleChild;
 

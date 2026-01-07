@@ -280,6 +280,159 @@ return [
         ],
     ],
 
+    [
+        'group_title' => '',
+        [
+            'title'      => 'Commercial',
+            'icon'       => 'fa-solid fa-file-invoice-dollar',
+            'icon_color' => 'text-primary',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Bank BTB LC',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/commercial/btb-lc',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'general'
+                ],
+                [
+                    'title'      => 'Export LC/Sales Contact',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/export-lc',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Purchase Order (PO)',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/purchase-orders',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Proforma Invoice (PI)',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/proforma-invoice',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'       => 'Pricing List',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/commercial/pricing-list',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'general'
+                ],
+                [
+                    'title'      => 'Commercial Invoice',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/invoices',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Packing List',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/packing-list',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Shipping Bill/Docs',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/shipping-docs',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Export Realization',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/export-realization',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Commercial Reports',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/commercial/reports',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+            ]
+        ],
+    ],
+
+
+    [
+        'group_title' => '',
+        [
+            'title'      => 'Payroll',
+            'icon'       => 'fa-solid fa-money-check-dollar',
+            'icon_color' => 'text-success',
+            'permission' => '',
+            'children'   => [
+                [
+                    'title'       => 'Salary Setup',
+                    'icon'        => 'fa-solid fa-arrow-right',
+                    'route'       => '/admin/payroll/salary-setup',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'general'
+                ],
+                [
+                    'title'      => 'Attendance Summary',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/attendance',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Generate Payslip',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/generate-payslip',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Bonus & Allowance',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/bonus-allowance',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Deductions & Loan',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/deductions',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Overtime (OT) Entry',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/overtime',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Salary Disbursement',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/disbursement',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+                [
+                    'title'      => 'Payroll Reports',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/payroll/reports',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'general'
+                ],
+            ]
+        ],
+    ],
+
+
+
     // Accounts Management
     [
         'group_title' => '',

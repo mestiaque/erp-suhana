@@ -7,7 +7,7 @@
 @section('contents')
 <div class="flex-grow-1">
     <div class="breadcrumb-area">
-        <h1>{{ 'Floor Planning (Scrollable Columns)' }}</h1>
+        <h1>{{ 'Floor Planning' }}</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
             <li class="item"><a href="{{ route('admin.floorPlanning') }}">Planning</a></li>

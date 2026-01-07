@@ -123,13 +123,13 @@
                                         @can('production_planning.edit')
                                             <a href="{{ route('admin.productionPlanningAction',['edit',$plan->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
                                         @endcan
-                                        @can('production_planning.delete')
-                                            <a href="{{ route('admin.productionPlanningAction',['delete',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
-                                        @endcan
                                         @can('production_planning.approve')
                                             <a href="{{ route('admin.productionPlanningAction',['approve',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom success mr-1"><i class="bx bx-check"></i></a>
                                         @endcan
                                     @endif
+                                    @can('production_planning.delete')
+                                        <a href="{{ route('admin.productionPlanningAction',['delete',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
+                                    @endcan
                                 @else
                                 --
                                 @endif

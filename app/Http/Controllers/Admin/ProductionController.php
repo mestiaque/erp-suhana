@@ -163,13 +163,21 @@ class ProductionController extends Controller
         }
 
         // ================= DELETE =================
-        if($action=='delete'){
-            $masterPlan->productions()->delete();
-            $masterPlan->delete();
+        if ($action == 'delete') {
+            DB::transaction(function () use ($masterPlan) {
+                $productionPlannings = ProductionPlanning::where('master_plan_id', $masterPlan->id)->get();
+                foreach ($productionPlannings as $pp) {
+                    SewingOutput::where('planning_id', $pp->id)->delete();
+                    ProductionSewing::where('planning_id', $pp->id)->delete();
+                    $pp->delete();
+                }
+                $masterPlan->delete();
+            });
 
-            session()->flash('success','Master Plan Deleted');
+            session()->flash('success', 'Master Plan and all related data deleted successfully');
             return redirect()->route('admin.productionPlanning');
         }
+
 
         // ================= PRINT =================
         if($action=='approve'){
