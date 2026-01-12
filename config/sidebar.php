@@ -645,6 +645,13 @@ return [
                     'icon_color'  => 'text-secondary',
                     'permission'  => 'sms'
                 ],
+                [
+                    'title'       => 'Roadmap',
+                    'icon'        => 'fa-solid fa-route',
+                    'route'       => '/admin/roadmap',
+                    'icon_color'  => 'text-secondary',
+                    'permission'  => 'sms'
+                ],
             ]
         ],
     ],
