@@ -9,6 +9,45 @@
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>ERP Road Map</h3>
+
+            <div class="d-flex flex-wrap gap-3 align-items-center">
+                <span class="fw-bold mr-4">Filter by Status:</span>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusAll" value="all">
+                    <label class="form-check-label" for="statusAll">All</label>
+                </div>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusCompleted" value="completed">
+                    <label class="form-check-label completed-bg">Completed</label>
+                </div>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusWorking" value="working">
+                    <label class="form-check-label working-bg">Working</label>
+                </div>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusPending" value="pending">
+                    <label class="form-check-label pending-bg">Pending</label>
+                </div>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusHold" value="hold">
+                    <label class="form-check-label hold-bg">Hold</label>
+                </div>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusRedev" value="redev">
+                    <label class="form-check-label redev-bg">Redevelopment</label>
+                </div>
+
+                <div class="form-check mr-3">
+                    <input class="form-check-input status-radio" type="radio" name="statusFilter" id="statusBug" value="bug">
+                    <label class="form-check-label bug-bg">Bug</label>
+                </div>
+            </div>
         </div>
 
         <div class="card-body">
@@ -21,64 +60,64 @@
                 // Dashboard & My Profile
                 [
                     'title' => 'Dashboard',
-                    'start' => '2026-01-15',
-                    'end'   => '2026-01-16',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'My Profile',
-                    'start' => '2026-01-15',
-                    'end'   => '2026-01-16',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
                 // Purchases Management
                 [
                     'title' => 'Purchases Orders',
-                    'start' => '2026-01-17',
-                    'end'   => '2026-01-22',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Goods Items',
-                    'start' => '2026-01-23',
-                    'end'   => '2026-01-28',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Requisitions',
-                    'start' => '2026-01-29',
-                    'end'   => '2026-02-02',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Goods Receive (GRN)',
-                    'start' => '2026-02-03',
-                    'end'   => '2026-02-07',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Damages / Returns',
-                    'start' => '2026-02-08',
-                    'end'   => '2026-02-10',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Creditor Ledgers',
-                    'start' => '2026-02-11',
-                    'end'   => '2026-02-15',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Purchase Reports',
-                    'start' => '2026-02-16',
-                    'end'   => '2026-02-20',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Purchase Stock',
-                    'start' => '2026-02-21',
-                    'end'   => '2026-02-25',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
@@ -91,419 +130,431 @@
                 ],
                 [
                     'title' => 'Order Details',
-                    'start' => '2026-03-03',
-                    'end'   => '2026-03-07',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Proforma Invoice (PI)',
-                    'start' => '2026-03-08',
-                    'end'   => '2026-03-12',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Budget',
-                    'start' => '2026-03-13',
-                    'end'   => '2026-03-17',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Fabrications',
-                    'start' => '2026-03-18',
-                    'end'   => '2026-03-20',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Compositions',
-                    'start' => '2026-03-21',
-                    'end'   => '2026-03-23',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Buyer List',
-                    'start' => '2026-03-24',
-                    'end'   => '2026-03-26',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
                 // Procurement
                 [
                     'title' => 'Yarn Booking',
-                    'start' => '2026-03-27',
-                    'end'   => '2026-03-30',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Knitting Booking',
-                    'start' => '2026-03-31',
-                    'end'   => '2026-04-02',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Dyeing Booking',
-                    'start' => '2026-04-03',
-                    'end'   => '2026-04-05',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Yarn Receiving',
-                    'start' => '2026-04-06',
-                    'end'   => '2026-04-08',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Knitting Receiving',
-                    'start' => '2026-04-09',
-                    'end'   => '2026-04-11',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Dyeing Receiving',
-                    'start' => '2026-04-12',
-                    'end'   => '2026-04-14',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Fabric Status (PI-wise)',
-                    'start' => '2026-04-15',
-                    'end'   => '2026-04-17',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
                 // Production
                 [
                     'title' => 'Master Plan',
-                    'start' => '2026-04-18',
-                    'end'   => '2026-04-22',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Floor Plan',
-                    'start' => '2026-04-23',
-                    'end'   => '2026-04-27',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Cutting',
-                    'start' => '2026-04-28',
-                    'end'   => '2026-05-02',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Sewing',
-                    'start' => '2026-05-03',
-                    'end'   => '2026-05-07',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
-                    'focus' => true,
+                    // 'focus' => true,
                 ],
 
                 // Accounts Management
                 [
                     'title' => 'Expenses List',
-                    'start' => '2026-05-08',
-                    'end'   => '2026-05-12',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Expense Head',
-                    'start' => '2026-05-13',
-                    'end'   => '2026-05-15',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Expense Reports',
-                    'start' => '2026-05-16',
-                    'end'   => '2026-05-18',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'I.O.U List',
-                    'start' => '2026-05-19',
-                    'end'   => '2026-05-21',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'I.O.U Reports',
-                    'start' => '2026-05-22',
-                    'end'   => '2026-05-24',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Payment Methods',
-                    'start' => '2026-05-25',
-                    'end'   => '2026-05-27',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Account List',
-                    'start' => '2026-05-28',
-                    'end'   => '2026-05-30',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Creditor List',
-                    'start' => '2026-05-31',
-                    'end'   => '2026-06-02',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Creditor Payment',
-                    'start' => '2026-06-03',
-                    'end'   => '2026-06-05',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Bill Collection',
-                    'start' => '2026-06-06',
-                    'end'   => '2026-06-08',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Fund Received',
-                    'start' => '2026-06-09',
-                    'end'   => '2026-06-11',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Withdrawal',
-                    'start' => '2026-06-12',
-                    'end'   => '2026-06-14',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Statement',
-                    'start' => '2026-06-15',
-                    'end'   => '2026-06-17',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
                 // HR / User Management
                 [
                     'title' => 'Employee List',
-                    'start' => '2026-06-18',
-                    'end'   => '2026-06-20',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Staff List',
-                    'start' => '2026-06-21',
-                    'end'   => '2026-06-23',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Admin List',
-                    'start' => '2026-06-24',
-                    'end'   => '2026-06-26',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Merchandiser List',
-                    'start' => '2026-06-27',
-                    'end'   => '2026-06-29',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Roles Setup',
-                    'start' => '2026-06-30',
-                    'end'   => '2026-07-02',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Branch / Factory',
-                    'start' => '2026-07-03',
-                    'end'   => '2026-07-05',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Departments',
-                    'start' => '2026-07-06',
-                    'end'   => '2026-07-08',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Designation',
-                    'start' => '2026-07-09',
-                    'end'   => '2026-07-11',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Floor / Lines',
-                    'start' => '2026-07-12',
-                    'end'   => '2026-07-14',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
                 // App Settings
                 [
                     'title' => 'General Setting',
-                    'start' => '2026-07-15',
-                    'end'   => '2026-07-16',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'Mail Setting',
-                    'start' => '2026-07-17',
-                    'end'   => '2026-07-18',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
                 [
                     'title' => 'SMS Setting',
-                    'start' => '2026-07-19',
-                    'end'   => '2026-07-20',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'completed',
                 ],
 
                 // Commercial
                 [
                     'title' => 'Bank BTB LC',
-                    'start' => '2026-07-21',
-                    'end'   => '2026-07-23',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Export LC / Sales Contract',
-                    'start' => '2026-07-24',
-                    'end'   => '2026-07-26',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Purchase Order (PO)',
-                    'start' => '2026-07-27',
-                    'end'   => '2026-07-29',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Proforma Invoice (PI)',
-                    'start' => '2026-07-30',
-                    'end'   => '2026-08-01',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Pricing List',
-                    'start' => '2026-08-02',
-                    'end'   => '2026-08-04',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Commercial Invoice',
-                    'start' => '2026-08-05',
-                    'end'   => '2026-08-07',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Packing List',
-                    'start' => '2026-08-08',
-                    'end'   => '2026-08-10',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Shipping Bill / Docs',
-                    'start' => '2026-08-11',
-                    'end'   => '2026-08-13',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Export Realization',
-                    'start' => '2026-08-14',
-                    'end'   => '2026-08-16',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Commercial Reports',
-                    'start' => '2026-08-17',
-                    'end'   => '2026-08-19',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
 
                 // Payroll
                 [
                     'title' => 'Salary Setup',
-                    'start' => '2026-08-20',
-                    'end'   => '2026-08-22',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Attendance Summary',
-                    'start' => '2026-08-23',
-                    'end'   => '2026-08-25',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Generate Payslip',
-                    'start' => '2026-08-26',
-                    'end'   => '2026-08-28',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Bonus & Allowance',
-                    'start' => '2026-08-29',
-                    'end'   => '2026-08-31',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Deductions & Loan',
-                    'start' => '2026-09-01',
-                    'end'   => '2026-09-03',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Overtime (OT) Entry',
-                    'start' => '2026-09-04',
-                    'end'   => '2026-09-06',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Salary Disbursement',
-                    'start' => '2026-09-07',
-                    'end'   => '2026-09-09',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Payroll Reports',
-                    'start' => '2026-09-10',
-                    'end'   => '2026-09-12',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
 
                 // Extras / Common ERP Garments Features
                 [
                     'title' => 'Inventory Reports',
-                    'start' => '2026-09-13',
-                    'end'   => '2026-09-15',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Supplier Management',
-                    'start' => '2026-09-16',
-                    'end'   => '2026-09-18',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Quality Control / Inspection',
-                    'start' => '2026-09-19',
-                    'end'   => '2026-09-22',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Production Analytics / KPIs',
-                    'start' => '2026-09-23',
-                    'end'   => '2026-09-25',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Material Requirement Planning (MRP)',
-                    'start' => '2026-09-26',
-                    'end'   => '2026-09-28',
+                    'start' => '',
+                    'end'   => '',
                     'status'=> 'pending',
                 ],
                 [
                     'title' => 'Shipment Tracking',
-                    'start' => '2026-09-29',
-                    'end'   => '2026-10-01',
+                    'start' => '',
+                    'end'   => '26-10-01',
                     'status'=> 'pending',
                 ],
 
             ];
+
+            // Filter from session (previously selected via JS)
+            $selectedStatus = session('roadmapStatusFilter', 'all');
+
+            // Filter $maps array so that only items existing in DOM are rendered
+            $maps = array_filter($maps, function($item) use ($selectedStatus) {
+                // Agar "all" selected, sob allow
+                if ($selectedStatus === 'all') return true;
+
+                // Check if item status matches selected filter
+                return isset($item['status']) && $item['status'] === $selectedStatus;
+            });
 
             @endphp
 
@@ -512,22 +563,24 @@
 
                 <div class="road-line"></div>
 
+
+
                 @foreach ($maps as $item)
 
                     @php
                         // status class
                         $statusClass = match($item['status']) {
-                            'completed' => 'completed',
+                            'completed'    => 'completed',
                             'working', 'in-progress' => 'working',
-                            'pending' => 'pending',
+                            'pending'      => 'pending',
 
-                            'redev'       => 'redev',
-                            'bug'         => 'bug',
-                            'testing'     => 'testing',
-                            'review'      => 'review',
-                            'deploy'      => 'deploy',
-                            'hold'        => 'hold',
-                            default => 'pending'
+                            'redev'   => 'redev',
+                            'bug'     => 'bug',
+                            'testing' => 'testing',
+                            'review'  => 'review',
+                            'deploy'  => 'deploy',
+                            'hold'    => 'hold',
+                            default   => 'pending'
                         };
 
                         // zigzag placement
@@ -718,6 +771,15 @@
         text-align: right !important;
     }
 
+    /* Status label colors matching card bg */
+    .completed-bg { color: rgba(60, 180, 75, 0.8); }
+    .working-bg   { color: rgba(255, 174, 0, 0.8); }
+    .pending-bg   { color: rgba(230, 57, 70, 0.8); }
+    .hold-bg      { color: rgba(108, 117, 125, 0.8); }
+    .redev-bg     { color: rgba(0, 123, 255, 0.8); }
+    .bug-bg       { color: rgba(217, 83, 79, 0.8); }
+
+
 
 
 
@@ -729,16 +791,54 @@
 @endpush
 @push('js')
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let focusItem = document.getElementById("focus-item");
+$(document).ready(function() {
+    // Scroll to focus item
+    let $focusItem = $('#focus-item');
+    if ($focusItem.length) {
+        $focusItem[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
-        if (focusItem) {
-            focusItem.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
-        }
+    const $roadItems = $('.road-item');
+    const $roadLine = $('.road-line'); // Container of the items
+    const storageKey = 'roadmapStatusFilter';
+
+    // Load saved filter
+    let savedStatus = sessionStorage.getItem(storageKey) || 'all';
+    $('input.status-radio[value="' + savedStatus + '"]').prop('checked', true);
+    filterRoadmap(savedStatus);
+
+    // On radio change
+    $('input.status-radio').change(function() {
+        let status = $(this).val();
+        sessionStorage.setItem(storageKey, status);
+        filterRoadmap(status);
     });
+
+    function filterRoadmap(status) {
+        $roadItems.each(function() {
+            let item = $(this);
+            let itemStatus = item.attr('class').match(/(completed|working|pending|hold|redev|bug)-/);
+            let itemStatusKey = itemStatus ? itemStatus[1] : '';
+
+            if (status === 'all' || itemStatusKey === status) {
+                item.show();
+            } else {
+                item.hide();
+            }
+        });
+
+        // Check visible items count
+        let visibleCount = $roadItems.filter(':visible').length;
+
+        if (visibleCount === 0) {
+            $roadLine.addClass('d-none'); // Hide container if none visible
+        } else {
+            $roadLine.removeClass('d-none'); // Show container if at least one visible
+        }
+    }
+});
+
+
 </script>
 
 @endpush
