@@ -471,6 +471,13 @@ return [
                     'permission'  => 'iou'
                 ],
                 [
+                    'title'       => 'Completed I.O.U List',
+                    'icon'        => 'fa-solid fa-layer-group',
+                    'route'       => '/admin/expenses/completed-iou',
+                    'icon_color'  => 'text-warning',
+                    'permission'  => 'iou'
+                ],
+                [
                     'title'       => 'I.O.U Reports',
                     'icon'        => 'fa-solid fa-layer-group',
                     'route'       => '/admin/expenses/iou-reports',

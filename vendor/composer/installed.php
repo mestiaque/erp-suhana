@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'b8e84a8ef001e7eff82b0e14715bc80c58da7786',
+        'reference' => '3aeab3c65bfb1b97c379dfa4226de8878b6450a5',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -394,7 +394,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'b8e84a8ef001e7eff82b0e14715bc80c58da7786',
+            'reference' => '3aeab3c65bfb1b97c379dfa4226de8878b6450a5',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -542,6 +542,17 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../monolog/monolog',
             'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'mshadydev/zkteco-php' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'c64a470c476142672e1be1d15601ef790cc70ac4',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../mshadydev/zkteco-php',
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
             'dev_requirement' => false,
         ),
         'mtdowling/cron-expression' => array(

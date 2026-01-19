@@ -281,7 +281,7 @@
                             <td>{{$expense->created_at->format('d.m.Y')}}</td>
                             <td>{{ $expense->company_name ?? '--' }}</td>
                             <td>{{ $expense->receiver_name ?? '--' }}</td>
-                            <td>{{$expense->category?$expense->category->name:''}}</td>
+                            <td>{{$expense->category?$expense?->category->name:''}}</td>
                             <td>{{priceFormat($expense->amount)}}</td>
                             <td>
                                 <span>{!! nl2br(e($expense->description)) !!}</span>
@@ -297,9 +297,11 @@
                             <td class="text-center">
                                  @if(auth()->user()->hasPermission('expenses.edit') || auth()->user()->hasPermission('expenses.view'))
                                     @can('expenses.edit')
+                                        @if($expense->category_id !== 0)
                                         <a href="javascript:void(0)" data-toggle="modal" data-target="#EditExpense_{{$expense->id}}" class="btn-custom success">
                                             <i class="bx bx-edit"></i>
                                         </a>
+                                        @endif
                                     @endcan
                                     @can('expenses.view')
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#ViewExpense_{{$expense->id}}" class="btn-custom yellow">
@@ -784,6 +786,7 @@
                             print-color-adjust: exact; /* Firefox */
                             background-color: #000 !important; /* same as screen */
                             color: #fff !important;
+                            margin-top: 1.5rem !important;
                         }
                     }
 
@@ -809,6 +812,7 @@
                 <p class="contact-info">Mobile: {{general()->mobile}}, {{general()->email}}</p>
 
                 <div class="transaction-badge">TRANSACTION SLIP</div>
+                <p class="" style="margin:0px !important"><i><b> {{$exp->category->name}}</b></i></p>
             </div>
 
             <div class="date-field">
@@ -816,7 +820,7 @@
                 <input type="text" class="input-underline" style="width: 100px;" value="{{$exp->created_at->format('d.m.Y')}}">
             </div>
 
-            <div class="form-section">
+            <div class="form-section" style="margin-top: 1rem !important">
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="amountWriteText">

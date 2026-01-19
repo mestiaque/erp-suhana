@@ -11,11 +11,12 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PostsController;
 use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\Admin\PayrollController;
-use App\Http\Controllers\Admin\PurchasesController;
+use App\Http\Controllers\Api\ZKTecoPushController;
 
 // ----------------------
 // Staff Controller
 // ----------------------
+use App\Http\Controllers\Admin\PurchasesController;
 use App\Http\Controllers\Admin\CommercialController;
 use App\Http\Controllers\Admin\ProductionController;
 use App\Http\Controllers\Admin\RequisitionController;
@@ -32,6 +33,8 @@ Route::get('/', function(){
 
 Route::any('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/log-out',[AuthController::class,'logout'])->name('logout');
+
+Route::get('/`test-zkteco`', [ZKTecoPushController::class, 'test'])->name('test-zkteco');
 
 
 // ----------------------
@@ -73,6 +76,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
     Route::get('/expenses/iou-reports',[AdminController::class,'expenseIOUReports'])->name('expenseIOUReports');
     Route::get('/expenses/iou',[AdminController::class,'expensesIOU'])->name('expensesIOU');
+    Route::get('/expenses/completed-iou',[AdminController::class,'completedIou'])->name('completedIou');
     Route::any('/expenses/iou/{action}/{id?}',[AdminController::class,'expensesIOUAction'])->name('expensesIOUAction');
 
     Route::get('/expenses/reports',[AdminController::class,'expenseReports'])->name('expenseReports');

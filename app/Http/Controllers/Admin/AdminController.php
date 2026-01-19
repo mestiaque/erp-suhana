@@ -3530,7 +3530,9 @@ class AdminController extends Controller
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $paymentMethods =Attribute::where('type',9)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
-        $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
+        $accountMethods =Attribute::where('type',10)->where('status','active')
+                                    ->where('addedby_id',Auth::id())->orderBy('name')
+                                    ->select(['id','name','amount'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
         return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches', 'to', 'from'));
@@ -4297,6 +4299,40 @@ class AdminController extends Controller
 
         return back();
 
+    }
+
+    public function completedIou(Request $r)
+    {
+        $completedIou =ExpenseIou::where('status', 'completed')
+                    ->where(function($q) use ($r) {
+                              if($r->search){
+
+                                  $q->where('employee_id','LIKE','%'.$r->search.'%')
+                                    ->orWhere('company_name','LIKE','%'.$r->search.'%')
+                                    ->orWhere('receiver_name','LIKE','%'.$r->search.'%')
+                                    ->orWhere(function($qq)use($r){
+                                        $qq->whereHas('employee',function($qqq)use($r){
+                                            $qqq->where('name','LIKE','%'.$r->search.'%');
+                                        });
+                                    });
+                              }
+
+                            if($r->status){
+                                $q->where('status',$r->status);
+                            }
+
+                            if($r->startDate || $r->endDate) {
+                                $from = $r->startDate ? Carbon::parse($r->startDate)->startOfDay() : Carbon::minValue();
+                                $to   = $r->endDate ? Carbon::parse($r->endDate)->endOfDay() : Carbon::now()->endOfDay();
+
+                                $q->whereBetween('created_at', [$from, $to]);
+                            }
+
+                        })
+                        ->orderBy('id','desc')
+                        ->paginate(50);
+
+        return view(adminTheme().'expenses.completedIOU', compact('completedIou'));
     }
 
 
@@ -5345,8 +5381,8 @@ class AdminController extends Controller
             return redirect()->back();
         }
         //Add Type  End
-
         $method =Attribute::where('type',10)->find($id);
+        // dd($id);
         if(!$method){
             Session()->flash('error','This Account Method Type Are Not Found');
             return redirect()->route('admin.accounts');
@@ -5388,6 +5424,54 @@ class AdminController extends Controller
 
       // Update Department Action End
 
+        if($action == 'daily-account-summary')
+        {
+            $fromDate = $r->from_date ? Carbon::parse($r->from_date)->startOfDay() : Carbon::now()->startOfDay();
+
+            // 1️⃣ Cash in Hand (opening balance)
+            // "form date er ager din" er balance
+            $openingBalance = Transaction::where('status', 'success')
+                                ->where('account_id', $method->id)
+                                ->where('created_at', '<', $fromDate)
+                                ->sum('amount'); // sum of all deposits/fund transfers before this date
+
+            // 2️⃣ Fund Transfer (from form date)
+            $fundTransfer = Transaction::where('type', 1) // deposit/fund transfer
+                                ->where('status', 'success')
+                                ->where('account_id', $method->id)
+                                ->whereBetween('created_at', [$fromDate, $fromDate->copy()->endOfDay()])
+                                ->sum('amount');
+
+            // 3️⃣ Adjust IOU (Completed IOU)
+            $adjustIou = ExpenseIou::where('status','completed')
+                            ->where('account_id', $method->id)
+                            ->whereBetween('created_at', [$fromDate, $fromDate->copy()->endOfDay()])
+                            ->sum('amount');
+
+            // 4️⃣ TOTAL
+            $total = $openingBalance + $fundTransfer + $adjustIou;
+
+            // 5️⃣ Total Expense
+            $totalExpense = Expense::where('status','active')
+                                ->where('account_id', $method->id)
+                                ->whereBetween('created_at', [$fromDate, $fromDate->copy()->endOfDay()])
+                                ->sum('amount');
+
+            // 6️⃣ Now Balance
+            $nowBalance = $total - $totalExpense;
+            // dd($nowBalance);
+
+            return view(adminTheme().'accounts.daily-account-summary', compact(
+                'fromDate',
+                'openingBalance',
+                'fundTransfer',
+                'adjustIou',
+                'total',
+                'totalExpense',
+                'nowBalance',
+                'method'
+            ));
+        }
 
       // Delete Department Action Start
       if($action=='delete'){

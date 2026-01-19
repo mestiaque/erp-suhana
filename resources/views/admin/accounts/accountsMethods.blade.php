@@ -128,6 +128,12 @@
                                         <i class="bx bx-show"></i>
                                     </a>
                                     @endcan
+                                    @can('accounts.view')
+                                    <a href="{{route('admin.accountsAction', ['daily-account-summary', $method->id])}}"
+                                    class="btn-custom green">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                    @endcan
 
                                 @else -- @endif
 

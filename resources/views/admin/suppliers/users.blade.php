@@ -119,7 +119,7 @@
                             <th style="min-width: 100px;">Due Bill</th>
                             <th style="min-width: 100px;">Paid Bill</th>
                             <th style="min-width: 95px;">Join Date</th>
-                            <th style="min-width: 80px; width: 80px;">Action</th>
+                            <th style="min-width: 80px; width: 180px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,8 +157,8 @@
                                 </span>
                             </td>
                             <td><a href="{{route('admin.suppliersAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
-                                @if($user->permission)
-                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                @if($user->employee_id)
+                                <br><span class="badge badge-info">{{$user->employee_id}}</span>
                                 @endif
                             </td>
                             <td>{{$user->company_name}}</td>
@@ -172,18 +172,23 @@
                             <td>{{$user->created_at->format('d M Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
                                  @if(can('creditor.edit')  || can('creditor.delete'))
-                                 @can('creditor.edit')
-                                <a href="{{route('admin.suppliersAction',['edit',$user->id])}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                @endcan
-                                @can('creditor.delete')
-                                @if($user->id==Auth::id()) @else
-                                <a href="{{route('admin.suppliersAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                    <i class="bx bx-trash"></i>
-                                </a>
-                                @endif
-                                @endcan
+                                    @can('creditor.edit')
+                                    <a href="{{route('admin.suppliersAction',['edit',$user->id])}}" class="btn-custom success">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    @endcan
+                                    @can('creditor.edit')
+                                        <a href="{{route('admin.suppliersAction',['bill-entry',$user->id])}}" class="btn-custom yellow">
+                                            <i class="bx bx-credit-card"></i>
+                                        </a>
+                                    @endcan
+                                    @can('creditor.delete')
+                                        @if($user->id==Auth::id()) @else
+                                        <a href="{{route('admin.suppliersAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
+                                            <i class="bx bx-trash"></i>
+                                        </a>
+                                        @endif
+                                    @endcan
                                 @else -- @endif
                             </td>
                         </tr>
