@@ -228,7 +228,7 @@
 
                                 {{-- <button type="submit" class="btn btn-success w-50 mt-2">Submit Payment</button> --}}
 
-                                <div class="d-flex gap-2 justify-content-end mt-2 w-100">
+                                <div class="d-flex gap-2 justify-content-start mt-2 w-100">
                                     <button type="button"  id="cancelEditBtn" class="btn grey btn-outline-secondary d-none mr-1">Close </button>
                                     <button type="submit" id="submitBtn" class="btn btn-primary"><i class="bx bx-plus"></i> Add Payment</button>
                                 </div>
