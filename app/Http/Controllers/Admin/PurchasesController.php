@@ -1341,7 +1341,7 @@ class PurchasesController extends Controller
 
         // ADD COMPANY
         if ($action == 'add-supplier') {
-            $supplier = Creditor::find($r->supplier_id);
+            $supplier = User::filterByType('supplier')->where('id', $r->supplier_id)->first();
             if ($supplier) {
                 $order->supplier_id = $supplier->id;
                 $order->save();
@@ -1434,34 +1434,63 @@ class PurchasesController extends Controller
                 'note' => 'nullable',
             ]);
 
-            $supplier =User::where('supplier',true)->find($r->supplier_id);
-            if(!$supplier){
-              session()->flash('error', 'Creditor are not found');
-              return back();
+            $newSupplier = User::where('supplier', true)->find($r->supplier_id);
+            if(!$newSupplier){
+                session()->flash('error', 'Supplier not found');
+                return back();
             }
 
-            $order->supplier_id = $supplier->id;
-            $order->currency = $r->currency?:general()->currency;
-            $order->company_name = $supplier->company_name;
-            $order->supplier_name = $supplier->name;
-            $order->supplier_email = $supplier->email;
-            $order->supplier_mobile = $supplier->mobile;
-            $order->supplier_address = $supplier->address_line1;
-            $order->status = $r->status?:'pending';
+            // 1️⃣ Adjust old supplier balance if supplier changed
+            if ($order->supplier_id && $order->supplier_id != $newSupplier->id) {
+                $oldSupplier = User::find($order->supplier_id);
+                if($oldSupplier){
+                    $oldSupplier->balance -= $order->total_amount; // previous order amount minus
+                    $oldSupplier->save();
+                }
+                // add order amount to new supplier balance
+                $newSupplier->balance += $order->total_amount;
+                $newSupplier->save();
+            }
+
+            // 2️⃣ If same supplier, we can optionally adjust if amount changed
+            elseif($order->supplier_id == $newSupplier->id){
+                $amountDiff = $order->total_amount - ($r->total_amount ?? $order->total_amount);
+                $newSupplier->balance -= $amountDiff;
+                $newSupplier->save();
+            }
+
+            // 3️⃣ Update order fields
+            $order->supplier_id = $newSupplier->id;
+            $order->currency = $r->currency ?: general()->currency;
+            $order->company_name = $newSupplier->company_name;
+            $order->supplier_name = $newSupplier->name;
+            $order->supplier_email = $newSupplier->email;
+            $order->supplier_mobile = $newSupplier->mobile;
+            $order->supplier_address = $newSupplier->address_line1;
+            $order->status = $r->status ?: 'pending';
             $order->note = $r->note;
 
-            $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
             if (!$createDate->isSameDay($order->created_at)) {
                 $order->created_at = $createDate;
             }
+
             $order->save();
 
             session()->flash('success', 'Purchase Order Updated');
             return redirect()->route('admin.purchasesOrdersAction', ['view', $order->id]);
         }
 
+
         // DELETE
         if ($action == 'delete') {
+            if($order->supplier_id){
+                $supplier = User::find($order->supplier_id);
+                if($supplier){
+                    $supplier->balance -= $order->total_amount;
+                    $supplier->save();
+                }
+            }
             $order->items()->delete();
             $order->delete();
             session()->flash('success', 'Purchase Order Deleted');
