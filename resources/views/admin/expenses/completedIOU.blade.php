@@ -138,7 +138,7 @@
                     @php
                         $isOlderThan2Days = $Iou->created_at->lt(\Carbon\Carbon::now()->subDays(7));
                     @endphp
-                    <tr @if($isOlderThan2Days) style="background-color: #ffebeb;" @endif>
+                    <tr>
                         <td>
 
                             <span style="margin:0 5px;">{{ $i+1 }}</span>
