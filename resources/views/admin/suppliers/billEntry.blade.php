@@ -114,10 +114,10 @@
                             <button class="nav-link active" id="pills-history-tab" data-bs-toggle="pill" data-open-tab="#pills-history" data-bs-target="#pills-history" type="button" role="tab" aria-controls="pills-history" aria-selected="true"> Statement / History </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pills-bill-tab" data-bs-toggle="pill" data-open-tab="#pills-bill" data-bs-target="#pills-bill" type="button" role="tab" aria-controls="pills-bill" aria-selected="false"> Add Bill (Credit) </button>
+                            <button class="nav-link" id="pills-bill-tab" data-bs-toggle="pill" data-open-tab="#pills-bill" data-bs-target="#pills-bill" type="button" role="tab" aria-controls="pills-bill" aria-selected="false"> Add Bill </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pills-payment-tab" data-bs-toggle="pill" data-open-tab="#pills-payment" data-bs-target="#pills-payment" type="button" role="tab" aria-controls="pills-payment" aria-selected="false"> Make Payment (Debit) </button>
+                            <button class="nav-link" id="pills-payment-tab" data-bs-toggle="pill" data-open-tab="#pills-payment" data-bs-target="#pills-payment" type="button" role="tab" aria-controls="pills-payment" aria-selected="false"> Make Payment </button>
                         </li>
                     </ul>
                 </div>
