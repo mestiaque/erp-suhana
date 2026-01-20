@@ -166,9 +166,12 @@
                             <td>
                                {{$user->address_line1}}
                             </td>
-                            <td>{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</td>
-                            <td style="color:red;">{{priceFullFormat($user->duePurchaseAmount())}}</td>
-                            <td >{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</td>
+                            <td>{{priceFullFormat($user->balance)}}</td>
+                            @php
+                                $totalPaid = App\Models\Transaction::where('user_id', $user->id)->where('type', 3)->sum('amount') ?? 0;
+                            @endphp
+                            <td style="color:red;">{{priceFullFormat($user->balance - $totalPaid)}}</td>
+                            <td >{{priceFullFormat($totalPaid)}}</td>
                             <td>{{$user->created_at->format('d M Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
                                  @if(can('creditor.edit')  || can('creditor.delete'))

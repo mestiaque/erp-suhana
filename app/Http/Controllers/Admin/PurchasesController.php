@@ -677,7 +677,7 @@ class PurchasesController extends Controller
           }
 
       })
-      ->select(['id','name','email','mobile','created_at','company_name', 'employee_id' ,'address_line1','addedby_id','status', 'deleted_by', 'deleted_at'])
+      ->select(['id','name','email','mobile','created_at','company_name', 'balance', 'employee_id' ,'address_line1','addedby_id','status', 'deleted_by', 'deleted_at'])
         ->paginate(25)->appends([
           'search'=>$r->search,
           'status'=>$r->status,
@@ -817,26 +817,46 @@ class PurchasesController extends Controller
             $user = User::findOrFail($id);
 
             // ১. বিল এবং পেমেন্ট ডাটা সংগ্রহ (Standardized for merging)
+            // $bills = $user->creditorBill()->get()->map(function($item) {
+            //     return (object) [
+            //         'date'    => $item->created_at,
+            //         'title'   => $item->title,
+            //         'note'    => $item->description,
+            //         'credit'  => $item->amount,
+            //         'debit'   => 0,
+            //         'type'    => 'bill'
+            //     ];
+            // });
+
             $bills = $user->creditorBill()->get()->map(function($item) {
-                return (object) [
-                    'date'    => $item->created_at,
-                    'title'   => $item->title,
-                    'note'    => $item->description,
-                    'credit'  => $item->amount,
-                    'debit'   => 0,
-                    'type'    => 'bill'
-                ];
+                $item->type = 'bill';
+                $item->credit = $item->amount;
+                $item->debit = 0;
+                $item->date = $item->created_at;
+                $item->title = $item->title;
+                $item->note = $item->description;
+                return $item; // এখনো Eloquent মডেল
             });
 
+            // $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
+            //     return (object) [
+            //         'date'    => $item->created_at,
+            //         'title'   => $item->transection_id,
+            //         'note'    => $item->billing_note,
+            //         'credit'  => 0,
+            //         'debit'   => $item->amount,
+            //         'type'    => 'payment'
+            //     ];
+            // });
+
             $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
-                return (object) [
-                    'date'    => $item->created_at,
-                    'title'   => $item->transection_id,
-                    'note'    => $item->billing_note,
-                    'credit'  => 0,
-                    'debit'   => $item->amount,
-                    'type'    => 'payment'
-                ];
+                $item->type = 'payment';
+                $item->credit = 0;
+                $item->debit = $item->amount;
+                $item->date = $item->created_at;
+                $item->title = $item->transection_id;
+                $item->note = $item->billing_note;
+                return $item; // এখনো Eloquent মডেল
             });
 
             // ২. মার্জ এবং সর্ট করা
@@ -1774,6 +1794,94 @@ class PurchasesController extends Controller
 
     public function billPayment(Request $r)
     {
+        /* ================= SUPPLIERS ================= */
+        $supplierQuery = User::filterByType('supplier')
+            ->whereIn('status', [0, 1]);
+
+        // creditor name filter
+        if ($r->creditor_name) {
+            $supplierQuery->where(function ($q) use ($r) {
+                $q->where('name', 'LIKE', "%{$r->creditor_name}%")
+                ->orWhere('company_name', 'LIKE', "%{$r->creditor_name}%");
+            });
+        }
+
+        // creditor code filter (employee_id)
+        if ($r->creditor_code) {
+            $supplierQuery->where('employee_id', 'LIKE', "%{$r->creditor_code}%");
+        }
+
+        $supplierIds = $supplierQuery->pluck('id');
+
+        /* ================= PAYMENTS ONLY ================= */
+        $paymentsQuery = Transaction::whereIn('user_id', $supplierIds)
+            ->where('type', 3) // supplier bill payment
+            ->with('user');
+
+        // title / transaction id filter
+        if ($r->title) {
+            $paymentsQuery->where('transection_id', 'LIKE', "%{$r->title}%");
+        }
+
+        // date range filter
+        if ($r->startDate || $r->endDate) {
+            $from = $r->startDate
+                ? Carbon::parse($r->startDate)->startOfDay()
+                : now()->startOfMonth();
+
+            $to = $r->endDate
+                ? Carbon::parse($r->endDate)->endOfDay()
+                : now();
+
+            $paymentsQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        /* ================= GET & FORMAT ================= */
+        $payments = $paymentsQuery
+            ->latest()
+            ->get()
+            ->map(function ($payment) {
+                return (object) [
+                    'type'        => 'payment',
+                    'date'        => $payment->created_at,
+                    'title'       => $payment->transection_id,
+                    'description' => $payment->billing_note,
+                    'credit'      => 0,
+                    'debit'       => $payment->amount,
+                    'user'        => $payment->user,
+                ];
+            });
+
+        /* ================= PAGINATION ================= */
+        $perPage = 20;
+        $page = request()->get('page', 1);
+
+        $ledgerEntries = new \Illuminate\Pagination\LengthAwarePaginator(
+            $payments->forPage($page, $perPage),
+            $payments->count(),
+            $perPage,
+            $page,
+            [
+                'path'  => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        /* ================= TOTAL PAID ================= */
+        $totalPaid = Transaction::whereIn('user_id', $supplierIds)
+            ->where('type', 3)
+            ->sum('amount');
+
+        return view(
+            adminTheme().'suppliers.bill-payments',
+            compact('ledgerEntries', 'totalPaid')
+        );
+    }
+
+
+
+    public function billPaymentX(Request $r)
+    {
         // Totals Count
         $totals = PurchaseOrder::selectRaw("count(*) as total")
             ->selectRaw("count(case when payment_status='due' then 1 end) as due")
@@ -1815,6 +1923,8 @@ class PurchasesController extends Controller
 
         return view(adminTheme().'purchases.bill-payments.index', compact('purchases','totals'));
     }
+
+
 
     public function billPaymentAction($action, $id = null)
     {
