@@ -10,7 +10,7 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3>Bill Payment Ledger</h3>
+            <h3>Bill Payment</h3>
             <a href="{{ route('admin.billPayment') }}" class="btn-custom yellow">
                 <i class="bx bx-rotate-left"></i>
             </a>
