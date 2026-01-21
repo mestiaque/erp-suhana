@@ -4325,11 +4325,11 @@ class AdminController extends Controller
                                 $from = $r->startDate ? Carbon::parse($r->startDate)->startOfDay() : Carbon::minValue();
                                 $to   = $r->endDate ? Carbon::parse($r->endDate)->endOfDay() : Carbon::now()->endOfDay();
 
-                                $q->whereBetween('created_at', [$from, $to]);
+                                $q->whereBetween('updated_at', [$from, $to]);
                             }
 
                         })
-                        ->orderBy('id','desc')
+                        ->orderBy('updated_at','desc')
                         ->paginate(50);
 
         return view(adminTheme().'expenses.completedIOU', compact('completedIou'));

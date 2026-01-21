@@ -808,7 +808,7 @@ class PurchasesController extends Controller
         if ($action == 'view') {
             $orders = $user->orders()->where('status', 'approved')->paginate(10);
             $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
-            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('addedby_id',Auth::id())->where('status', 'active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
             return view(adminTheme().'suppliers.viewUser', compact('user','orders','transactions','accountMethods','paymentMethods'));
         }
@@ -875,7 +875,7 @@ class PurchasesController extends Controller
 
             // ৪. অন্যান্য মেথড সংগ্রহ
             $paymentMethods = Attribute::where(['type' => 9, 'status' => 'active'])->latest()->get(['id','name']);
-            $accountMethods = Attribute::where(['type' => 10, 'status' => 'active'])->latest()->get(['id','name','amount']);
+            $accountMethods = Attribute::where(['type' => 10, 'status' => 'active'])->where('addedby_id',Auth::id())->latest()->get(['id','name','amount']);
             $totalPaid = Transaction::where('user_id', $user->id)->where('type', 3)->sum('amount');
 
             return view(adminTheme().'suppliers.billEntry', compact('user', 'ledgerEntries', 'accountMethods', 'paymentMethods', 'totalPaid'));
@@ -961,7 +961,7 @@ class PurchasesController extends Controller
             $user = User::findOrFail($id);
 
             $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
-            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('addedby_id',Auth::id())->where('status', 'active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
 
             return view(adminTheme().'suppliers.bill-payments.create', compact('user','paymentMethods','accountMethods','transactions'));
@@ -1050,7 +1050,7 @@ class PurchasesController extends Controller
             $user = User::findOrFail($transaction->user_id);
 
             $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
-            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('addedby_id',Auth::id())->where('status', 'active')->select(['id','name','amount'])->get();
 
             return view(adminTheme().'suppliers.bill-payments.edit', compact('transaction','user','paymentMethods','accountMethods'));
         }
@@ -1943,7 +1943,7 @@ class PurchasesController extends Controller
 
             $purchase = PurchaseOrder::findOrFail($id);
             $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
-            $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->select(['id','name','amount'])->get();
+            $accountMethods =Attribute::latest()->where('type',10)->where('addedby_id',Auth::id())->where('status','active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('src_id', $purchase->id)->where('type', 3)->latest()->get();
 
             return view(adminTheme().'purchases.bill-payments.view', compact('purchase', 'paymentMethods', 'accountMethods', 'transactions'));

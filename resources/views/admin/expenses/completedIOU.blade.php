@@ -122,7 +122,7 @@
                 <thead>
                     <tr>
                         <th style="min-width: 100px;width: 100px;">SL</th>
-                        <th style="min-width: 100px;">I.O.U Date</th>
+                        <th style="min-width: 120px;">Adjust Date</th>
                         <th style="min-width: 100px;">Company</th>
                         <th style="min-width: 100px;">Receiver</th>
                         <th style="min-width: 120px;">Employee</th>
@@ -140,7 +140,6 @@
                     @endphp
                     <tr>
                         <td>
-
                             <span style="margin:0 5px;">{{ $i+1 }}</span>
                             @if($Iou->status=='completed')
                             <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:relative;">
@@ -152,7 +151,7 @@
                             </span>
                             @endif
                         </td>
-                        <td>{{$Iou->created_at->format('d.m.Y')}}</td>
+                        <td>{{$Iou->updated_at->format('d.m.Y')}}</td>
                         <td>{{ $Iou->company_name ?? '--' }}</td>
                         <td>{{ $Iou->receiver_name ?? '--' }}</td>
                         <td>{{$Iou->employee?$Iou->employee->name:''}}</td>
