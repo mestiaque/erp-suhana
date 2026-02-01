@@ -44,7 +44,15 @@
                         <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control me-1">
                         <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control">
                     </div>
-                    <div class="col-md-6 d-flex">
+                    <div class="col-md-2 d-flex">
+                        <select class="form-control" name="buyer">
+                            <option value="">Select Buyer</option>
+                            
+                            <option value="">Select Buyer</option>
+                            
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex">
                         <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control me-1"
                                placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
                         <button type="submit" class="btn btn-success btn-sm">Search</button>
@@ -52,56 +60,57 @@
                 </div>
             </form>
 
-            <div class="row g-3"> <!-- g-3 adds gutter between cards -->
+            <div class="row g-3" style="margin:0 -5px;"> <!-- g-3 adds gutter between cards -->
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">👕</div>
+                        <!--<div style="font-size:30px;">👕</div>-->
                         <div style="font-weight:bold;">Total</div>
                         <div class="text-success">Qty: {{ number_format($totalOrderQty) }}</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                
+                <div class="col-12 col-md-2" style="padding:5px;" >
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">🎨</div>
+                        <!--<div style="font-size:30px;">✂️</div>-->
+                        <div style="font-weight:bold;">Cutting</div>
+                        <div class="text-success">Qty: {{ number_format($grandTotalCuttingOutput) }}</div>
+                        <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalCuttingOutput) }}</div>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-md-2" style="padding:5px;">
+                    <div class="custom-card" style="">
+                        <!--<div style="font-size:30px;">🎨</div>-->
                         <div style="font-weight:bold;">Print & Embroidery</div>
                         <div class="text-success">Qty: 0</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">✂️</div>
-                        <div style="font-weight:bold;">Cutting</div>
-                        <div class="text-success">Qty: {{ number_format($grandTotalCuttingOutput) }}</div>
-                        <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalCuttingOutput) }}</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-2">
-                    <div class="custom-card" style="">
-                        <div style="font-size:30px;">🧵</div>
+                        <!--<div style="font-size:30px;">🧵</div>-->
                         <div style="font-weight:bold;">Sewing Output</div>
                         <div class="text-success">Qty: {{ number_format($grandTotalSewingOutput) }}</div>
                         <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalSewingOutput) }}</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">📦</div>
+                        <!--<div style="font-size:30px;">📦</div>-->
                         <div style="font-weight:bold;">Packing</div>
                         <div class="text-success">Qty: 0</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">🚚</div>
+                        <!--<div style="font-size:30px;">🚚</div>-->
                         <div style="font-weight:bold;">Shipped</div>
                         <div class="text-success">Qty: 0</div>
                         <div class="text-danger">Balance: 0</div>
@@ -128,7 +137,7 @@
                             <th>SL</th>
                             <th>Buyer</th>
                             <th style="min-width: 160px">Brand / Customer</th>
-                            <th>Style No</th>
+                            <th style="min-width: 120px;">Style No</th>
                             <th style="width: 130px;min-width: 130px">Order / PO No</th>
                             <th style="width: 130px;min-width: 130px">Order Qty</th>
                             <th style="width: 140px;min-width: 140px">Shipment Date</th>
@@ -200,7 +209,7 @@
     background-color: #ffffff;
     border: 1px solid #e9ecef;
     border-radius: 12px;
-    padding: 20px;
+    padding: 5px;
     text-align: center;
     transition: all 0.3s ease-in-out; /* অ্যানিমেশন স্মুথ করবে */
     cursor: pointer;
