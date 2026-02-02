@@ -13,9 +13,9 @@
 
                 <form action="{{ route('admin.orderDetails') }}" method="GET" target="_blank" class="d-inline">
                     <input type="hidden" name="print" value="true">
-                    <input type="hidden" name="startDate" value="{{ request()->startDate }}">
-                    <input type="hidden" name="endDate" value="{{ request()->endDate }}">
-                    <input type="hidden" name="search" value="{{ request()->search }}">
+                    @foreach(request()->except('print') as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
                     <button type="submit" class="btn btn-info btn-sm mr-1">
                         <i class="fa fa-print"></i> Print
                     </button>
@@ -38,20 +38,13 @@
             @include(adminTheme().'alerts')
 
             <!-- Search & Date Filter -->
-            <form action="{{ route('admin.orderDetails') }}" class="mb-3">
+            <form action="{{ route('admin.orderDetails') }}" class="mb-3 d-none">
                 <div class="row g-2">
                     <div class="col-md-6 d-flex">
                         <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control me-1">
                         <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control">
                     </div>
-                    <div class="col-md-2 d-flex">
-                        <select class="form-control" name="buyer">
-                            <option value="">Select Buyer</option>
-                            
-                            <option value="">Select Buyer</option>
-                            
-                        </select>
-                    </div>
+
                     <div class="col-md-4 d-flex">
                         <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control me-1"
                                placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
@@ -59,6 +52,137 @@
                     </div>
                 </div>
             </form>
+
+            <form action="{{ route('admin.orderDetails') }}" method="GET" class="mb-3">
+
+                <div class="row g-2 align-items-end">
+
+                    {{-- Buyer --}}
+                    <div class="col-md-1 pr-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Buyer</label>
+                        <select name="buyer" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($buyers as $buyer)
+                                <option value="{{ $buyer }}"
+                                    {{ request('buyer')==$buyer?'selected':'' }}>
+                                    {{ $buyer }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Customer --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Customer</label>
+                        <select name="brand" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand }}"
+                                    {{ request('brand')==$brand?'selected':'' }}>
+                                    {{ $brand }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Style --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Style</label>
+                        <select name="style" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($styles as $style)
+                                <option value="{{ $style }}"
+                                    {{ request('style')==$style?'selected':'' }}>
+                                    {{ $style }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Order No --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Order No</label>
+                        <select name="order_no" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($orderNos as $no)
+                                <option value="{{ $no }}"
+                                    {{ request('order_no')==$no?'selected':'' }}>
+                                    {{ $no }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Shipment Date --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Ship Date</label>
+                        <input type="date"
+                            name="shipment_date"
+                            value="{{ request('shipment_date') }}"
+                            class="form-control form-control-sm">
+                    </div>
+
+
+                    {{-- Fabric --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Fabric</label>
+                        <select name="fabric" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($fabrics as $fabric)
+                                <option value="{{ $fabric }}"
+                                    {{ request('fabric')==$fabric?'selected':'' }}>
+                                    {{ $fabric }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- PI Number --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">PI No</label>
+                        <select name="pi" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($piNumbers as $pi)
+                                <option value="{{ $pi }}"
+                                    {{ request('pi')==$pi?'selected':'' }}>
+                                    {{ $pi }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Status --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">Status</label>
+                        <select name="status" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="pending" {{ request('status')=='pending'?'selected':'' }}>Pending</option>
+                            <option value="confirmed" {{ request('status')=='confirmed'?'selected':'' }}>Confirmed</option>
+                            <option value="completed" {{ request('status')=='completed'?'selected':'' }}>Completed</option>
+                            <option value="cancelled" {{ request('status')=='cancelled'?'selected':'' }}>Cancelled</option>
+                        </select>
+                    </div>
+
+
+                    {{-- Button --}}
+                    <div class="col-md-2 pl-0" style="margin-left:5px">
+                        <label class="form-label small mb-0">&nbsp;</label>
+                        <button type="submit" class="btn btn-success btn-sm w-10">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+
 
             <div class="row g-3" style="margin:0 -5px;"> <!-- g-3 adds gutter between cards -->
 
@@ -71,7 +195,7 @@
                     </div>
                 </div>
 
-                
+
                 <div class="col-12 col-md-2" style="padding:5px;" >
                     <div class="custom-card" style="">
                         <!--<div style="font-size:30px;">✂️</div>-->
@@ -80,7 +204,7 @@
                         <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalCuttingOutput) }}</div>
                     </div>
                 </div>
-                
+
                 <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
                         <!--<div style="font-size:30px;">🎨</div>-->
@@ -129,34 +253,65 @@
                 </div>
             </div>
 
-            <!-- Orders Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-light">
+
+            <div class="table-responsive table-wrapper">
+                <table class="table table-bordered table-stripeds table-hovers order-table">
+                    <thead class=" sticky-top text-white">
+                        {{-- Header --}}
                         <tr>
-                            <th>SL</th>
-                            <th>Buyer</th>
-                            <th style="min-width: 160px">Brand / Customer</th>
-                            <th style="min-width: 120px;">Style No</th>
-                            <th style="width: 130px;min-width: 130px">Order / PO No</th>
-                            <th style="width: 130px;min-width: 130px">Order Qty</th>
-                            <th style="width: 140px;min-width: 140px">Shipment Date</th>
+                            <th class="sticky-col col-sl">SL</th>
+                            <th class="sticky-col col-buyer">Buyer</th>
+                            <th class="sticky-col col-brand">Brand / Customer</th>
+                            <th class="sticky-col col-style">Style No</th>
+                            <th class="sticky-col col-order">Order / PO No</th>
+                            <th class="sticky-col col-qty">Order Qty</th>
+                            <th>Shipment Date</th>
                             <th>Fabrication</th>
                             <th>Remarks</th>
                             <th>P.I No</th>
                             <th>Status</th>
-                            <th style="width: 140px;min-width: 140px">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="table-hover">
-                        @forelse($orderDetails as $i => $order)
-                        <tr data-bs-toggle="collapse" data-bs-target="#items_{{ $order->id }}" class="accordion-toggle">
-                            <td>{{ $orderDetails->firstItem() + $i }}</td>
-                            <td>{{ $order->buyer_name ?? '--' }}</td>
-                            <td>{{ $order->company_name ?? '--' }}</td>
-                            <td>{{ $order->style_no ?? '--' }}</td>
-                            <td>{{ $order->order_no ?? '--' }}</td>
-                            <td>{{ number_format($order->total_qty) }}</td>
+
+                    <tbody>
+                    @forelse($orderDetails as $i => $order)
+                        <tr>
+                            {{-- SL + 3 DOT --}}
+                            <td class="sticky-col col-sl">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ $orderDetails->firstItem() + $i }}</span>
+
+                                    <div class="dropdown no-collapse">
+                                        <a href="javascript:void(0)" class="text-dark" data-toggle="dropdown" data-display="static"> <i class="fa fa-ellipsis-v"></i> </a>
+                                        <div class="dropdown-menu dropdown-menu-end a-dropdown-menu">
+                                            @can('order_details.view')
+                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#viewModal_{{ $order->id }}">
+                                                    <i class="fa fa-eye"></i> View
+                                                </a>
+                                            @endcan
+                                            @can('order_details.edit')
+                                                <a class="dropdown-item" href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}">
+                                                    <i class="bx bx-edit"></i> Edit
+                                                </a>
+                                            @endcan
+                                            @can('order_details.delete')
+                                                <a class="dropdown-item text-danger"
+                                                onclick="return confirm('Are you sure?')"
+                                                href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}">
+                                                    <i class="bx bx-trash"></i> Delete
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="sticky-col col-buyer">{{ $order->buyer_name ?? '--' }}</td>
+                            <td class="sticky-col col-brand">{{ $order->company_name ?? '--' }}</td>
+                            <td class="sticky-col col-style">{{ $order->style_no ?? '--' }}</td>
+                            <td class="sticky-col col-order">{{ $order->order_no ?? '--' }}</td>
+                            <td class="sticky-col col-qty">{{ number_format($order->total_qty) }}</td>
+
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
                             <td>{{ $order->remarks ?? '--' }}</td>
@@ -171,31 +326,23 @@
                                         'canceled'=>'danger'
                                     ];
                                 @endphp
-                                <span class="badge bg-{{ $statusClass[$order->status] ?? 'secondary' }}">{{ ucfirst($order->status) }}</span>
-                            </td>
-                            <td>
-                                @can('order_details.view')
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#viewModal_{{ $order->id }}"><i class="fa fa-eye"></i></a>
-                                @endcan
-                                {{-- @if(in_array($order->status,['pending','confirmed'])) --}}
-                                    @can('order_details.edit')
-                                        <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}" class="btn btn-sm btn-success"><i class="bx bx-edit"></i></a>
-                                    @endcan
-                                    @can('order_details.delete')
-                                        <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="bx bx-trash"></i></a>
-                                    @endcan
-                                {{-- @endif --}}
+                                <span class="badge bg-{{ $statusClass[$order->status] ?? 'secondary' }} text-white">
+                                    {{ ucfirst($order->status) }}
+                                </span>
                             </td>
                         </tr>
-
-                        @empty
-                        <tr><td colspan="13" class="text-center text-muted">No order details found</td></tr>
-                        @endforelse
+                    @empty
+                        <tr>
+                            <td colspan="11" class="text-center text-muted">No order details found</td>
+                        </tr>
+                    @endforelse
                     </tbody>
                 </table>
-
-                {{ $orderDetails->links('pagination') }}
+                <div class="d-flex justify-content-end mt-3">
+                    {{ $orderDetails->withQueryString()->links('pagination') }}
+                </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -228,15 +375,67 @@
     transform: scale(1.2);
     transition: transform 0.3s ease;
 }
+
+.table-wrapper{
+    max-height: 600px;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* THEAD FIX */
+.order-table thead th{
+    position: sticky;
+    top: 0;
+    /* z-index: 10; */
+    /* background: #075aad; */
+}
+
+
+/* STICKY COLUMNS */
+.sticky-col{
+    position: sticky;
+    left: 0;
+    background: #ffffff;
+    z-index: 5;
+}
+
+th.sticky-col{
+    background: #7c7c7c !important;
+    z-index: 115;    }
+
+/* COLUMN WIDTH + LEFT POSITION */
+.col-sl{ left:0; min-width:70px; }
+.col-buyer{ left:70px; min-width:120px; }
+.col-brand{ left:190px; min-width:160px; }
+.col-style{ left:350px; min-width:120px; }
+.col-order{ left:470px; min-width:140px; }
+.col-qty{ left:610px; min-width:130px; }
+
+.filter-row th{
+    /* background:#0ce61736 !important; */
+}
+/* table + td must allow overflow */
+.order-table,
+.order-table td,
+.order-table th{
+    overflow: visible !important;
+}
+.a-dropdown-menu{
+    z-index: 99999 !important;
+    position: relative;
+    padding: 0px;
+}
+
+
+thead.sticky-top th{
+    white-space: nowrap !important
+}
 </style>
 @endpush
 
 @push('js')
-<script>
-    $(document).on('click', '.no-collapse', function(e){
-        e.stopPropagation();
-    });
-</script>
+
 @endpush
 
 
