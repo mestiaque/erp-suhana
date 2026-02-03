@@ -5322,27 +5322,45 @@ class AdminController extends Controller
 
     }
 
-    public function accounts(Request $r){
+public function accounts(Request $r){
+    $accounts = Attribute::latest()->where('type',10)->where('status','<>','temp')
+        ->where(function($q) use ($r) {
+            if($r->search){
+                $q->where('name','LIKE','%'.$r->search.'%');
+            }
+            if($r->status){
+               $q->where('status',$r->status);
+            }
+        })
+        ->select(['id','name','slug','amount','usd_amount','description','created_at','addedby_id','status','fetured'])
+        ->paginate(25)->appends([
+            'search'=>$r->search,
+            'status'=>$r->status,
+        ]);
 
-        $accounts =Attribute::latest()->where('type',10)->where('status','<>','temp')
-            ->where(function($q) use ($r) {
-                  if($r->search){
-                      $q->where('name','LIKE','%'.$r->search.'%');
-                  }
-                  if($r->status){
-                     $q->where('status',$r->status);
-                  }
-            })
-            ->select(['id','name','slug','amount','usd_amount','description','created_at','addedby_id','status','fetured'])
-                ->paginate(25)->appends([
-                  'search'=>$r->search,
-                  'status'=>$r->status,
-                ]);
+    // ✅ ADD CALCULATED BALANCE FOR EACH ACCOUNT
+    $accounts->getCollection()->transform(function ($account) {
+        $currentBalance = Transaction::where('account_id', $account->id)
+            ->where('status','success')
+            ->selectRaw("
+                SUM(
+                    CASE
+                        WHEN type IN (0,1) THEN amount
+                        WHEN type IN (3,4,5,6,7) THEN -amount
+                        ELSE 0
+                    END
+                ) as balance
+            ")
+            ->value('balance') ?? 0;
 
-        $adminUsers =User::where('admin',true)->select(['id','name','mobile'])->get();
+        $account->current_balance = $currentBalance;
+        return $account;
+    });
 
-        return view(adminTheme().'accounts.accountsMethods',compact('accounts','adminUsers'));
-    }
+    $adminUsers = User::where('admin',true)->select(['id','name','mobile'])->get();
+
+    return view(adminTheme().'accounts.accountsMethods',compact('accounts','adminUsers'));
+}
 
     public function accountsAction(Request $r,$action,$id=null){
         //Add Type  Start
@@ -5496,6 +5514,7 @@ class AdminController extends Controller
 
       $openingBalance = Transaction::where('account_id', $method->id)
                         ->whereDate('created_at', '<', $from)
+                        ->where('status','success')
                         ->selectRaw("
                             SUM(
                                 CASE
@@ -5512,6 +5531,7 @@ class AdminController extends Controller
         ->whereDate('created_at', '<=', $to)
         // ->where('payment_method_id', $method->id)
         ->where('account_id', $method->id)
+->where('status','success')
         //->where('type',1)
         ->whereIn('type', [0,1,3,4,5,6,7])
         ->orderBy('created_at')
@@ -5534,55 +5554,55 @@ class AdminController extends Controller
 
     }
 
-    public function accountsStatement(Request $r){
-        $user = Auth::user()->accounts;
-        $firstAccount = Auth::user()->accounts()->first() ?? null;
-        $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
-        $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
-        $method =Attribute::with('user')->where('type',10)->find($r?->account_id ?? $firstAccount?->id);
-        $openingBalance=0;
-        $availableBalance=0;
-        $transections=null;
-        if($method){
-            $openingBalance = Transaction::where('account_id', $method->id)
-            ->whereDate('created_at', '<', $from)
-            ->selectRaw("
-                            SUM(
-                                CASE
-                                    WHEN type IN (0,1) THEN amount
-                                    WHEN type IN (3,4,5,6,7) THEN -amount
-                                    ELSE 0
-                                END
-                            ) as balance
-                        ")
-                        ->value('balance') ?? 0;
+public function accountsStatement(Request $r){
+    $user = Auth::user()->accounts;
+    $firstAccount = Auth::user()->accounts()->first() ?? null;
+    $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
+    $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
+    $method =Attribute::with('user')->where('type',10)->find($r?->account_id ?? $firstAccount?->id);
+    $openingBalance=0;
+    $availableBalance=0;
+    $transections=null;
+    if($method){
+        $openingBalance = Transaction::where('account_id', $method->id)
+        ->where('status','success')  // ✅ ADD THIS LINE
+        ->whereDate('created_at', '<', $from)
+        ->selectRaw("
+                        SUM(
+                            CASE
+                                WHEN type IN (0,1) THEN amount
+                                WHEN type IN (3,4,5,6,7) THEN -amount
+                                ELSE 0
+                            END
+                        ) as balance
+                    ")
+                    ->value('balance') ?? 0;
 
 
-            $transections = Transaction::whereDate('created_at', '>=', $from)
-            ->where('status','success')
-            ->whereDate('created_at', '<=', $to)
-            ->where('account_id', $method->id)
-            ->whereIn('type', [0,1,3,4,5,6,7])
-            ->orderBy('created_at')
-            ->get();
+        $transections = Transaction::whereDate('created_at', '>=', $from)
+        ->where('status','success')
+        ->whereDate('created_at', '<=', $to)
+        ->where('account_id', $method->id)
+        ->whereIn('type', [0,1,3,4,5,6,7])
+        ->orderBy('created_at')
+        ->get();
 
-            $balance = $openingBalance;
-            $transections->map(function ($t) use (&$balance) {
-                if (in_array($t->type, [0,1])) {
-                    $balance += $t->amount;
-                } else {
-                    $balance -= $t->amount;
-                }
-                $t->running_balance = $balance;
-                return $t;
-            });
-            $availableBalance = $balance;
-        }
-        $accounts =Attribute::with('user')->where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
-
-        // return $openingBalance;
-        return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
+        $balance = $openingBalance;
+        $transections->map(function ($t) use (&$balance) {
+            if (in_array($t->type, [0,1])) {
+                $balance += $t->amount;
+            } else {
+                $balance -= $t->amount;
+            }
+            $t->running_balance = $balance;
+            return $t;
+        });
+        $availableBalance = $balance;
     }
+    $accounts =Attribute::with('user')->where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
+
+    return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
+}
 
 
     // Services Management Function
