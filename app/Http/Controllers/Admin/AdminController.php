@@ -5442,7 +5442,7 @@ public function accounts(Request $r){
 
       // Update Department Action End
 
-        if($action == 'daily-account-summary')
+        if($action == 'daily-account-summaryX')
         {
             $fromDate = $r->from_date ? Carbon::parse($r->from_date)->startOfDay() : Carbon::now()->startOfDay();
 
@@ -5490,6 +5490,59 @@ public function accounts(Request $r){
                 'method'
             ));
         }
+
+        if($action == 'daily-account-summary')
+{
+    $fromDate = $r->from_date ? Carbon::parse($r->from_date)->startOfDay() : Carbon::now()->startOfDay();
+
+    // 1️⃣ Opening balance (সব transactions এর sum before this date)
+    $openingBalance = Transaction::where('status', 'success')
+                                ->where('account_id', $method->id)
+                                ->where('created_at', '<', $fromDate)
+                                ->selectRaw("
+                                    SUM(
+                                        CASE
+                                            WHEN type IN (0,1) THEN amount
+                                            WHEN type IN (3,4,5,6,7) THEN -amount
+                                            ELSE 0
+                                        END
+                                    ) as balance
+                                ")
+                                ->value('balance') ?? 0;
+
+    // 2️⃣ Today এর transactions
+    $transections = Transaction::where('status', 'success')
+                                ->where('account_id', $method->id)
+                                ->whereBetween('created_at', [$fromDate, $fromDate->copy()->endOfDay()])
+                                ->whereIn('type', [0,1,3,4,5,6,7])
+                                ->get();
+
+    // 3️⃣ Calculate totals
+    $creditTotal = 0;  // Type 0,1
+    $debitTotal = 0;   // Type 3,4,5,6,7
+
+    foreach($transections as $t) {
+        if(in_array($t->type, [0,1])) {
+            $creditTotal += $t->amount;
+        } else {
+            $debitTotal += $t->amount;
+        }
+    }
+
+    // 4️⃣ Final calculation
+    $total = $openingBalance + $creditTotal;
+    $nowBalance = $total - $debitTotal;
+
+    return view(adminTheme().'accounts.daily-account-summary', compact(
+        'fromDate',
+        'openingBalance',
+        'creditTotal',
+        'debitTotal',
+        'total',
+        'nowBalance',
+        'method'
+    ));
+}
 
       // Delete Department Action Start
       if($action=='delete'){

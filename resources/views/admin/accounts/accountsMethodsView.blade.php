@@ -47,7 +47,7 @@
                          <i class="bx bxs-badge-dollar"></i>
                      </div>
                      <span class="sub-title">{{$method->name}} </span>
-                     <h3>BDT {{priceFormat($method->amount)}} <span class="badge"></h3>
+                     <h3>BDT {{priceFormat($availableBalance)}} <span class="badge"></h3>
                      <!--<h3>USD {{priceFormat($method->usd_amount)}} <span class="badge"></h3>-->
                  </div>
             </div>
