@@ -101,13 +101,19 @@
             color: white;
             background-color:#d9a50c;
         }
+        .table{
+            font-size: 11px  !important;
+        }
 
         table.table a { color: #000; }
         .badge-warning { color: #000; background-color: #d9a50c4d; }
         .badge-success { color: #035415; background-color: #17e64642; }
         .badge-secondary { color: #fff; background-color: #6c757d; }
         .badge-danger { color: #fff; background-color: #dc3545; }
-
+        .card-header{
+            margin-bottom: 5px !important;
+            padding-bottom: 5px !important;
+        }
      </style>
 
      @stack('css')

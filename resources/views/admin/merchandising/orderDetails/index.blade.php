@@ -59,7 +59,7 @@
 
                     {{-- Buyer --}}
                     <div class="col-md-1 pr-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Buyer</label>
+                        <label class="form-label mb-0">Buyer</label>
                         <select name="buyer" class="form-control form-control-sm">
                             <option value="">All</option>
                             @foreach($buyers as $buyer)
@@ -74,7 +74,7 @@
 
                     {{-- Customer --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Customer</label>
+                        <label class="form-label mb-0">Customer</label>
                         <select name="brand" class="form-control form-control-sm">
                             <option value="">All</option>
                             @foreach($brands as $brand)
@@ -89,7 +89,7 @@
 
                     {{-- Style --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Style</label>
+                        <label class="form-label mb-0">Style</label>
                         <select name="style" class="form-control form-control-sm">
                             <option value="">All</option>
                             @foreach($styles as $style)
@@ -104,7 +104,7 @@
 
                     {{-- Order No --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Order No</label>
+                        <label class="form-label mb-0">Order No</label>
                         <select name="order_no" class="form-control form-control-sm">
                             <option value="">All</option>
                             @foreach($orderNos as $no)
@@ -119,7 +119,7 @@
 
                     {{-- Shipment Date --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Ship Date</label>
+                        <label class="form-label mb-0">Ship Date</label>
                         <input type="date"
                             name="shipment_date"
                             value="{{ request('shipment_date') }}"
@@ -129,7 +129,7 @@
 
                     {{-- Fabric --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Fabric</label>
+                        <label class="form-label mb-0">Fabric</label>
                         <select name="fabric" class="form-control form-control-sm">
                             <option value="">All</option>
                             @foreach($fabrics as $fabric)
@@ -144,7 +144,7 @@
 
                     {{-- PI Number --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">PI No</label>
+                        <label class="form-label mb-0">PI No</label>
                         <select name="pi" class="form-control form-control-sm">
                             <option value="">All</option>
                             @foreach($piNumbers as $pi)
@@ -159,7 +159,7 @@
 
                     {{-- Status --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">Status</label>
+                        <label class="form-label mb-0">Status</label>
                         <select name="status" class="form-control form-control-sm">
                             <option value="">All</option>
                             <option value="pending" {{ request('status')=='pending'?'selected':'' }}>Pending</option>
@@ -172,7 +172,7 @@
 
                     {{-- Button --}}
                     <div class="col-md-2 pl-0" style="margin-left:5px">
-                        <label class="form-label small mb-0">&nbsp;</label>
+                        <label class="form-label mb-0">&nbsp;</label>
                         <button type="submit" class="btn btn-success btn-sm w-10">
                             <i class="fa fa-search"></i> Search
                         </button>
@@ -265,6 +265,14 @@
                             <th class="sticky-col col-style">Style No</th>
                             <th class="sticky-col col-order">Order / PO No</th>
                             <th class="sticky-col col-qty">Order Qty</th>
+
+                            <!-- New output columns to the right of Order Qty -->
+                            <th>Cutting</th>
+                            <th>Print &amp; Emb</th>
+                            <th>Sewing Output</th>
+                            <th>Packing</th>
+                            <th>Shipped</th>
+
                             <th>Shipment Date</th>
                             <th>Fabrication</th>
                             <th>Remarks</th>
@@ -281,27 +289,16 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span>{{ $orderDetails->firstItem() + $i }}</span>
 
-                                    <div class="dropdown no-collapse">
-                                        <a href="javascript:void(0)" class="text-dark" data-toggle="dropdown" data-display="static"> <i class="fa fa-ellipsis-v"></i> </a>
-                                        <div class="dropdown-menu dropdown-menu-end a-dropdown-menu">
-                                            @can('order_details.view')
-                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#viewModal_{{ $order->id }}">
-                                                    <i class="fa fa-eye"></i> View
-                                                </a>
-                                            @endcan
-                                            @can('order_details.edit')
-                                                <a class="dropdown-item" href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}">
-                                                    <i class="bx bx-edit"></i> Edit
-                                                </a>
-                                            @endcan
-                                            @can('order_details.delete')
-                                                <a class="dropdown-item text-danger"
-                                                onclick="return confirm('Are you sure?')"
-                                                href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}">
-                                                    <i class="bx bx-trash"></i> Delete
-                                                </a>
-                                            @endcan
-                                        </div>
+                                    {{-- REPLACED: dropdown -> action button that opens a popup modal --}}
+                                    <div class="no-collapse">
+                                        <button type="button"
+                                            class="text-dark btn btn-link p-0 action-trigger"
+                                            data-view-modal="#viewModal_{{ $order->id }}"
+                                            data-edit-url="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}"
+                                            data-delete-url="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}"
+                                            title="Actions">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </td>
@@ -311,6 +308,13 @@
                             <td class="sticky-col col-style">{{ $order->style_no ?? '--' }}</td>
                             <td class="sticky-col col-order">{{ $order->order_no ?? '--' }}</td>
                             <td class="sticky-col col-qty">{{ number_format($order->total_qty) }}</td>
+
+                            <!-- Per-order outputs (use common possible attribute names with fallbacks) -->
+                            <td>{{ number_format($order->cutting_output ?? $order->cutting ?? 0) }}</td>
+                            <td>{{ number_format($order->print_emb_output ?? $order->print_emb ?? 0) }}</td>
+                            <td>{{ number_format($order->sewing_output ?? $order->sew ?? $order->sewing ?? 0) }}</td>
+                            <td>{{ number_format($order->packing_output ?? $order->packing ?? 0) }}</td>
+                            <td>{{ number_format($order->shipped_qty ?? $order->shipped ?? 0) }}</td>
 
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
@@ -348,6 +352,28 @@
 </div>
 
 @include(adminTheme().'merchandising.orderDetails.details')
+
+{{-- ADDED: centralized Action Modal (small popup) --}}
+<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-2">
+        <div class="list-group">
+          <button type="button" class="list-group-item list-group-item-action" id="actionViewBtn">
+            <i class="fa fa-eye"></i> View
+          </button>
+          <a href="#" class="list-group-item list-group-item-action" id="actionEditBtn">
+            <i class="bx bx-edit"></i> Edit
+          </a>
+          <a href="#" class="list-group-item list-group-item-action text-danger" id="actionDeleteBtn">
+            <i class="bx bx-trash"></i> Delete
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('css')
@@ -381,7 +407,15 @@
     overflow-x: auto;
     overflow-y: auto;
     position: relative;
+    cursor: grab; /* shows draggable cursor */
 }
+
+.table-wrapper.active{
+    cursor: grabbing;
+}
+
+/* small adjustment for modal action list */
+#actionModal .list-group-item { cursor: pointer; }
 
 /* THEAD FIX */
 .order-table thead th{
@@ -405,12 +439,13 @@ th.sticky-col{
     z-index: 115;    }
 
 /* COLUMN WIDTH + LEFT POSITION */
-.col-sl{ left:0; min-width:70px; }
-.col-buyer{ left:70px; min-width:120px; }
-.col-brand{ left:190px; min-width:160px; }
-.col-style{ left:350px; min-width:120px; }
-.col-order{ left:470px; min-width:140px; }
-.col-qty{ left:610px; min-width:130px; }
+/* adjusted smaller widths and updated left offsets */
+.col-sl{ left:0;    min-width:60px;  }
+.col-buyer{ left:60px;  min-width:100px; }
+.col-brand{ left:160px; min-width:130px; }
+.col-style{ left:290px; min-width:100px; }
+.col-order{ left:390px; min-width:120px; }
+.col-qty{ left:510px;   min-width:90px;  }
 
 .filter-row th{
     /* background:#0ce61736 !important; */
@@ -435,7 +470,93 @@ thead.sticky-top th{
 @endpush
 
 @push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1) Action modal population + behaviors
+    document.querySelectorAll('.action-trigger').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var viewModal = this.getAttribute('data-view-modal');
+            var editUrl = this.getAttribute('data-edit-url');
+            var deleteUrl = this.getAttribute('data-delete-url');
 
+            // set edit link
+            var editBtn = document.getElementById('actionEditBtn');
+            editBtn.setAttribute('href', editUrl);
+
+            // set delete link (use click handler to confirm)
+            var deleteBtn = document.getElementById('actionDeleteBtn');
+            deleteBtn.setAttribute('data-delete-url', deleteUrl);
+
+            // store view modal selector on the view button
+            var viewBtn = document.getElementById('actionViewBtn');
+            viewBtn.setAttribute('data-view-modal', viewModal);
+
+            // show action modal
+            $('#actionModal').modal('show');
+        });
+    });
+
+    // when "View" clicked: hide action modal and open the per-row view modal
+    document.getElementById('actionViewBtn').addEventListener('click', function(){
+        var vm = this.getAttribute('data-view-modal');
+        $('#actionModal').modal('hide');
+        if(vm){
+            // small timeout to avoid modal stacking issues
+            setTimeout(function(){ $(vm).modal('show'); }, 200);
+        }
+    });
+
+    // when "Delete" clicked: confirm then navigate
+    document.getElementById('actionDeleteBtn').addEventListener('click', function(e){
+        var url = this.getAttribute('data-delete-url');
+        if(!url) return;
+        if(confirm('Are you sure?')){
+            window.location.href = url;
+        }
+    });
+
+    // 2) Drag-to-scroll for .table-wrapper (mouse + touch)
+    var slider = document.querySelector('.table-wrapper');
+    if(slider){
+        var isDown = false;
+        var startX, scrollLeft;
+
+        slider.addEventListener('mousedown', function(e){
+            isDown = true;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+            e.preventDefault();
+        });
+        slider.addEventListener('mouseleave', function(){
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mouseup', function(){
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mousemove', function(e){
+            if(!isDown) return;
+            e.preventDefault();
+            var x = e.pageX - slider.offsetLeft;
+            var walk = (x - startX) * 1; // scroll-fast factor
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+        // touch support
+        slider.addEventListener('touchstart', function(e){
+            startX = e.touches[0].pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        }, {passive: true});
+        slider.addEventListener('touchmove', function(e){
+            var x = e.touches[0].pageX - slider.offsetLeft;
+            var walk = (x - startX) * 1;
+            slider.scrollLeft = scrollLeft - walk;
+        }, {passive: true});
+    }
+});
+</script>
 @endpush
 
 
