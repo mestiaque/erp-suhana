@@ -114,6 +114,9 @@
             margin-bottom: 5px !important;
             padding-bottom: 5px !important;
         }
+        .flex-grow-1 .card{
+            padding: 1rem !important;
+        }
      </style>
 
      @stack('css')
