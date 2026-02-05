@@ -1913,18 +1913,39 @@ class MerchandisingController extends Controller
         ========================================================= */
         if ($action === 'create') {
 
-            $pisAll    = ProformaInvoice::whereNotNull('pi_no')->whereIn('status',[0,1])->get();
+            $pisAll = ProformaInvoice::whereNotNull('pi_no')
+                        ->whereIn('status',[0,1])
+                        ->get();
+
             $pis = $pisAll->map(function($pi) {
-                            return [
-                                'id'           => $pi->id,
-                                'pi_no'        => $pi->pi_no,
-                                'buyer_name'   => $pi->buyer_name,
-                                'total_qty'    => $pi->items->sum('order_qty'),          // sum of all items qty
-                                'total_bill'   => $pi->items->sum('total_price'),       // sum of all items amount
-                                'style_count'  => $pi->items->unique('style_no')->count(), // unique style_no count
-                                'order_count'  => $pi->items->unique('order_no')->count(), // unique order_no count
-                            ];
-                        });
+
+                $piItem = ProformaInvoiceItem::where('proforma_invoice_id', $pi->id)->first();
+
+                $orderDetailItem = null;
+
+                if ($piItem) {
+                    $orderDetailItem = OrderDetailItem::where('order_no', $piItem->order_no)->first();
+                }
+
+                return [
+                    'id'            => $pi->id,
+                    'pi_no'         => $pi->pi_no,
+                    'buyer_name'    => $pi->buyer_name,
+
+                    'total_qty'     => $pi->items->sum('order_qty'),
+                    'total_bill'    => $pi->items->sum('total_price'),
+
+                    'style_count'   => $pi->items->unique('style_no')->count(),
+                    'order_count'   => $pi->items->unique('order_no')->count(),
+
+                    // 👇 new fields
+                    'item_name'     => $orderDetailItem->item_name ?? 'N/A',
+                    'shipment_date' => $orderDetailItem && $orderDetailItem->shipment_date
+                                        ? $orderDetailItem->shipment_date->format('Y-m-d')
+                                        : null,
+                ];
+            });
+
             return view(adminTheme().'merchandising.budget.edit', compact('pis'));
         }
 

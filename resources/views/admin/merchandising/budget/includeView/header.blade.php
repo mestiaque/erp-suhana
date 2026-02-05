@@ -11,10 +11,10 @@
 
         <tr>
             <th class="bol">TOTAL STYLES</th>
-            <td>{{ $budget->total_styles ?? '' }}</td>
+            <td>{{ $budget->total_style ?? '' }}</td>
 
             <th>TOTAL POs</th>
-            <td>{{ $budget->total_pos ?? '' }}</td>
+            <td>{{ $budget->total_po ?? '' }}</td>
 
             <td class="bor bob" width="10%" rowspan="5">
                 {{-- <img src="" alt="Attachment"> --}}
@@ -23,7 +23,7 @@
 
         <tr>
             <th class="bol">ITEM</th>
-            <td></td>
+            <td>{{ $budget->item ?? '' }}</td>
             <th></th>
             <td class=""></td>
         </tr>
@@ -41,7 +41,7 @@
             <td></td>
 
             <th>SHIP DATE</th>
-            <td></td>
+            <td>{{ $budget->shipment_date ?? 'N/A' }}</td>
         </tr>
 
         <tr>
