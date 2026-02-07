@@ -581,159 +581,14 @@ class MerchandisingController extends Controller
         return view(adminTheme().'merchandising.samples.edit', compact('sample','items', 'buyers', 'merchandisers'));
     }
 
-    public function orderDetailsw(Request $r)
-    {
-        // ১. বেস কুয়েরি তৈরি করুন (যাতে ফিল্টারগুলো সবখানে সমানভাবে কাজ করে)
-        $query = OrderDetail::with('piItem.pi')->orderBy('id', 'desc')
-            ->where('status', '<>', 'temp')
-            ->where(function($q) use ($r) {
-
-                // SEARCH
-                if ($r->search) {
-                    $search = $r->search;
-                    $q->where(function($qq) use ($search) {
-                        $qq->where('id', 'LIKE', "%{$search}%")
-                            ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                            ->orWhere('style_no', 'LIKE', "%{$search}%")
-                            ->orWhere('company_name', 'LIKE', "%{$search}%")
-                            ->orWhere('invoice_no', 'LIKE', "%{$search}%")
-                            ->orWhere('order_no', 'LIKE', "%{$search}%")
-                            ->orWhere('fabrication', 'LIKE', "%{$search}%")
-                            ->orWhere('merchant_name', 'LIKE', "%{$search}%")
-                            ->orWhereHas('piItem.pi', function($pq) use ($search) {
-                                $pq->where('pi_no', 'LIKE', "%{$search}%");
-                            });
-                    });
-                }
-
-                // DATE RANGE
-                if ($r->startDate || $r->endDate) {
-                    $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to   = $r->endDate ?: now()->format('Y-m-d');
-                    $q->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-                }
-
-                // SHIPMENT DATE RANGE
-                if ($r->shipmentStartDate || $r->shipmentEndDate) {
-                    $sfrom = $r->shipmentStartDate ?: now()->format('Y-m-d');
-                    $sto   = $r->shipmentEndDate ?: now()->format('Y-m-d');
-                    $q->whereDate('shipment_date', '>=', $sfrom)
-                    ->whereDate('shipment_date', '<=', $sto);
-                }
-
-                // STATUS
-                if ($r->status) {
-                    $q->where('status', $r->status);
-                } else {
-                    $q->where('status', '<>', 'trash');
-                }
-            });
-
-        // ২. ফিল্টার করা ডাটা থেকে total_qty এর যোগফল বের করুন
-        // মনে রাখবেন: sum('column_name') এখানে আপনার ডাটাবেসের একচুয়াল কলামের নাম দিন (যেমন: 'total_qty')
-        $totalOrderQty = (clone $query)->sum('total_qty');
-
-        // ৩. রেজাল্ট পেজিনেট করুন
-        $orderDetails = $query->paginate(25)->appends($r->all());
-
-        // ৪. স্ট্যাটাস অনুযায়ী কাউন্ট (এটি আগের মতোই থাকবে)
-        $totals = OrderDetail::whereNotIn('status', ['trash', 'temp'])
-            ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
-            ->first();
-
-        $styles = OrderDetail::whereNotIn('status', ['trash', 'temp'])
-                    ->distinct()
-                    ->pluck('style_no')
-                    ->toArray(); // নিশ্চিত করুন এটি একটি অ্যারে
-
-        $sewingOutputs = SewingOutput::query()
-            // Join এর বদলে LeftJoin ব্যবহার করুন যাতে ডাটা ম্যাচ না করলেও SewingOutput গুলো আসে
-            ->leftJoin('production_plannings', 'sewing_outputs.planning_id', '=', 'production_plannings.id')
-            ->whereIn('sewing_outputs.style_no', $styles)
-            ->select(
-                'sewing_outputs.style_no',
-                DB::raw('SUM(sewing_outputs.production) as actual_production'),
-                // style_qty যদি নাল থাকে তবে সেটিকে ০ হিসেবে ট্রিট করা
-                DB::raw('IFNULL(MAX(production_plannings.style_qty), 0) as allowed_qty')
-            )
-            ->groupBy('sewing_outputs.style_no')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                // যদি allowed_qty ০ হয় (অর্থাৎ প্ল্যানিং টেবিল থেকে ডাটা পায়নি),
-                // তবে আমরা অরিজিনাল প্রোডাকশনই দেখাবো (অথবা আপনার লজিক অনুযায়ী পরিবর্তন করতে পারেন)
-                $allowed = $item->allowed_qty > 0 ? $item->allowed_qty : 999999999;
-
-                $totalOutput = ($item->actual_production > $allowed)
-                            ? $allowed
-                            : $item->actual_production;
-
-                return [
-                    $item->style_no => [
-                        'style_no' => $item->style_no,
-                        'total_qty' => $totalOutput,
-                        'actual' => $item->actual_production,
-                        'allowed' => $item->allowed_qty
-                    ]
-                ];
-            });
-
-        $grandTotalSewingOutput = $sewingOutputs->sum(function ($item) {
-            return $item['total_qty'];
-        });
-
-
-        $cuttingSummary = Cutting::query()
-            ->leftJoin('proforma_invoice_items', function($join) {
-                $join->on('cuttings.style_no', '=', 'proforma_invoice_items.style_no')
-                    ->on('cuttings.pi_id', '=', 'proforma_invoice_items.proforma_invoice_id');
-            })
-            ->select(
-                'cuttings.style_no',
-                'cuttings.pi_id',
-                DB::raw('SUM(cuttings.cutting_qty) as actual_cut'),
-                DB::raw('IFNULL(MAX(proforma_invoice_items.order_qty), 0) as allowed_qty')
-            )
-            ->groupBy('cuttings.style_no', 'cuttings.pi_id')
-            ->get()
-            ->map(function ($item) {
-                // যদি allowed_qty ০ হয় (অর্থাৎ PI আইটেমে ডাটা নেই), তবে অরিজিনাল কাটিংই দেখাবে
-                $allowed = $item->allowed_qty > 0 ? $item->allowed_qty : 999999999;
-
-                // যদি একচুয়াল কাটিং অর্ডারের চেয়ে বেশি হয়, তবে অর্ডার কোয়ান্টিটি (Allowed) নিবে
-                $cappedCut = ($item->actual_cut > $allowed) ? $allowed : $item->actual_cut;
-
-                return [
-                    'capped_val' => $cappedCut
-                ];
-            });
-
-        // ২. গ্র্যান্ড টোটাল বের করা (Capped Output)
-        $grandTotalCuttingOutput = $cuttingSummary->sum('capped_val');
-
-
-        $data = compact('orderDetails', 'totals', 'totalOrderQty', 'grandTotalSewingOutput', 'grandTotalCuttingOutput');
-
-        if($r->has('print')){
-            return view(adminTheme().'merchandising.orderDetails.printList', $data);
-        } else {
-            return view(adminTheme().'merchandising.orderDetails.index', $data);
-        }
-    }
-
     public function orderDetails(Request $r)
     {
         // ================================
         // Base Query
         // ================================
-        // eager-load piItem->pi so we can map cuttings by PI and style for current page
         $query = OrderDetail::with('piItem.pi')
-             ->whereNotIn('status', ['temp', 'trash'])
-             ->orderBy('id', 'desc');
+            ->whereNotIn('status', ['temp', 'trash'])
+            ->orderBy('id', 'desc');
 
         // ================================
         // Global Search
@@ -867,6 +722,8 @@ class MerchandisingController extends Controller
             ->selectRaw("COUNT(CASE WHEN status='cancelled' THEN 1 END) as cancelled")
             ->first();
 
+        $filteredStyles = $orderDetails->pluck('style_no')->unique();
+        $filteredOrderNos = $orderDetails->pluck('order_no')->unique();
 
         // ================================
         // Sewing Output
@@ -874,102 +731,63 @@ class MerchandisingController extends Controller
         $styles = $orderDetails->pluck('style_no')->unique()->toArray();
 
         $sewingOutputs = SewingOutput::query()
-            ->leftJoin('production_plannings', 'sewing_outputs.planning_id', '=', 'production_plannings.id')
-            ->whereIn('sewing_outputs.style_no', $styles)
-            ->select(
-                'sewing_outputs.style_no',
-                DB::raw('SUM(sewing_outputs.production) as actual_production'),
-                DB::raw('IFNULL(MAX(production_plannings.style_qty),0) as allowed_qty')
-            )
-            ->groupBy('sewing_outputs.style_no')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                $allowed = $item->allowed_qty ?: 999999999;
-                $total = min($item->actual_production, $allowed);
-                return [
-                    $item->style_no => [
-                        'style_no'   => $item->style_no,
-                        'total_qty'  => $total,
-                        'actual'     => $item->actual_production,
-                        'allowed'    => $item->allowed_qty
-                    ]
-                ];
-            });
+        ->leftJoin('production_plannings', 'sewing_outputs.planning_id', '=', 'production_plannings.id')
+        ->whereIn('sewing_outputs.style_no', $filteredStyles)
+        ->whereIn('production_plannings.order_no', $filteredOrderNos)
+        ->select(
+            'sewing_outputs.style_no',
+            DB::raw('SUM(sewing_outputs.production) as actual_production'),
+            DB::raw('IFNULL(MAX(production_plannings.style_qty),0) as allowed_qty')
+        )
+        ->groupBy('sewing_outputs.style_no')
+        ->get()
+        ->mapWithKeys(function ($item) {
+            $allowed = $item->allowed_qty ?: 999999999;
+            $total = min($item->actual_production, $allowed);
+            return [
+                $item->style_no => [
+                    'style_no'  => $item->style_no,
+                    'total_qty' => $total,
+                    'actual'    => $item->actual_production,
+                    'allowed'   => $item->allowed_qty
+                ]
+            ];
+        });
 
         $grandTotalSewingOutput = $sewingOutputs->sum('total_qty');
-
-        // map sewing outputs per order (simple style-based assignment, capped by order total)
-        $sewingByOrder = [];
-        foreach ($orderDetails as $order) {
-            $style = $order->style_no;
-            $styleTotal = $sewingOutputs[$style]['total_qty'] ?? 0;
-            $sewingByOrder[$order->id] = (int) min($styleTotal, $order->total_qty ?? 0);
-        }
 
 
         // ================================
         // Cutting Summary
         // ================================
-        // build list of PI ids from current page to better associate cuttings
-        $piIds = $orderDetails->map(function($o){
-            return $o->piItem?->pi?->id ?? null;
-        })->filter()->unique()->values()->toArray();
-
         $cuttingSummary = Cutting::query()
-             ->leftJoin('proforma_invoice_items', function ($join) {
-                 $join->on('cuttings.style_no', '=', 'proforma_invoice_items.style_no')
-                     ->on('cuttings.pi_id', '=', 'proforma_invoice_items.proforma_invoice_id');
-             })
-             ->select(
+            ->leftJoin('proforma_invoice_items', function ($join) {
+                $join->on('cuttings.style_no', '=', 'proforma_invoice_items.style_no')
+                    ->on('cuttings.pi_id', '=', 'proforma_invoice_items.proforma_invoice_id');
+            })
+            ->whereIn('cuttings.style_no', $filteredStyles)
+
+            ->select(
                 'cuttings.style_no',
                 'cuttings.pi_id',
                 DB::raw('SUM(cuttings.cutting_qty) as actual_cut'),
                 DB::raw('IFNULL(MAX(proforma_invoice_items.order_qty),0) as allowed_qty')
             )
-            ->when(count($piIds), function($q) use ($piIds){
-                return $q->whereIn('cuttings.pi_id', $piIds);
-            })
             ->groupBy('cuttings.style_no', 'cuttings.pi_id')
             ->get()
-            ->mapWithKeys(function($item){
+            ->map(function ($item) {
                 $allowed = $item->allowed_qty ?: 999999999;
-                $capped = min($item->actual_cut, $allowed);
-                // key by style|pi for easy lookup
-                $key = trim($item->style_no) . '|' . ($item->pi_id ?? 0);
-                return [$key => (int) $capped];
+                return ['capped_val' => min($item->actual_cut, $allowed)];
             });
 
-        $grandTotalCuttingOutput = $cuttingSummary->sum(function ($v) {
-            return $v;
-         });
-
-        // map cutting per order based on style + pi_id (cap at order total)
-        $cuttingByOrder = [];
-        foreach ($orderDetails as $order) {
-            $piId = $order->piItem?->pi?->id ?? 0;
-            $key = trim($order->style_no) . '|' . $piId;
-            $cutVal = $cuttingSummary[$key] ?? 0;
-            $cuttingByOrder[$order->id] = (int) min($cutVal, $order->total_qty ?? 0);
-        }
-
-        // Print & Embroidery, Packing, Shipped: no dedicated models in current codebase,
-        // so provide zero fallback per order (replace with real queries if models exist)
-        $printByOrder = [];
-        $packingByOrder = [];
-        $shippedByOrder = [];
-        foreach ($orderDetails as $order) {
-            $printByOrder[$order->id] = 0;
-            $packingByOrder[$order->id] = 0;
-            $shippedByOrder[$order->id] = 0;
-        }
-
+        $grandTotalCuttingOutput = $cuttingSummary->sum('capped_val');
 
         $buyers = OrderDetail::whereNotIn('status', ['trash','temp'])
-             ->select('buyer_name')
-             ->distinct()
-             ->orderBy('buyer_name')
-             ->pluck('buyer_name');
-             // dd($buyers);
+            ->select('buyer_name')
+            ->distinct()
+            ->orderBy('buyer_name')
+            ->pluck('buyer_name');
+            // dd($buyers);
         $brands = OrderDetail::whereNotIn('status', ['trash','temp'])
             ->select('company_name')
             ->distinct()
@@ -1001,6 +819,7 @@ class MerchandisingController extends Controller
             ->pluck('pi_no');
 
 
+
         // ================================
         // View Data
         // ================================
@@ -1015,13 +834,7 @@ class MerchandisingController extends Controller
             'fabrics',
             'styles',
             'orderNos',
-            'piNumbers',
-            // per-order maps for blade
-            'cuttingByOrder',
-            'sewingByOrder',
-            'printByOrder',
-            'packingByOrder',
-            'shippedByOrder'
+            'piNumbers'
         );
 
 
@@ -1920,7 +1733,6 @@ class MerchandisingController extends Controller
                         ->orWhere('buyer','LIKE',"%{$search}%");
                 });
             })
-
             ->when($r->startDate || $r->endDate, function($q) use ($r){
                 $from = $r->startDate ?: now()->format('Y-m-d');
                 $to   = $r->endDate   ?: now()->format('Y-m-d');

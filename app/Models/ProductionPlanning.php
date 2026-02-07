@@ -13,6 +13,28 @@ class ProductionPlanning extends Model
 
     protected $guarded = [];
 
+    // columns
+    // id
+    // addedby_id
+    // editedby_id
+    // pi_id
+    // pi_no
+    // master_plan_id
+    // pi_item_id
+    // order_no
+    // status
+    // remarks
+    // sewing_start
+    // sewing_end
+    // style_qty
+    // style_no
+    // extra_time
+    // working_hours
+    // total_hourly_capacity
+    // total_working_time
+    // created_at
+    // updated_at
+
     protected $casts = [
         'created_date'     => 'date',
         'cutting_start'    => 'datetime',

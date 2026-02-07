@@ -13,6 +13,22 @@ class SewingOutput extends Model
 
     protected $guarded = [];
 
+    // columns
+    // id
+    // planning_id
+    // sewing_id
+    // floor_name
+    // line_name
+    // style_no
+    // capacity_hour
+    // date
+    // hour
+    // production
+    // addedby_id
+    // editedby_id
+    // created_at
+    // updated_at
+
     protected $casts = [
         'created_date' => 'date',
     ];

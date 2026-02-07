@@ -12,6 +12,9 @@ class MasterPlanning extends Model
 
     protected $guarded = [];
 
+    // columns
+    // id	status	created_by	updated_by	approved_at	approved_by	created_at	updated_at
+
     // relation to production planning rows
     public function productions()
     {

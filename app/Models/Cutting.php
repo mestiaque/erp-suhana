@@ -13,6 +13,19 @@ class Cutting extends Model
 
     protected $guarded = [];
 
+    // columns
+    // id
+    // pi_id
+    // pi_no
+    // style_no
+    // cutting_qty
+    // cutting_date
+    // remarks
+    // created_at
+    // updated_at
+    // created_by
+    // updated_by
+
     // তারিখগুলোকে অটোমেটিক কাস্ট করার জন্য (২০২৫ স্ট্যান্ডার্ড)
     protected $casts = [
         'cutting_date' => 'date',

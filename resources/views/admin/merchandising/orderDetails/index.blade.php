@@ -169,6 +169,12 @@
                         </select>
                     </div>
 
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Keyword</label>
+                        <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control form-control-sm"
+                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
+                    </div>
+
 
                     {{-- Button --}}
                     <div class="col-md-2 pl-0" style="margin-left:5px">
@@ -308,11 +314,9 @@
                             <td class="sticky-col col-style">{{ $order->style_no ?? '--' }}</td>
                             <td class="sticky-col col-order">{{ $order->order_no ?? '--' }}</td>
                             <td class="sticky-col col-qty">{{ number_format($order->total_qty) }}</td>
-
-                            <!-- Per-order outputs (use common possible attribute names with fallbacks) -->
-                            <td>{{ number_format($order->cutting_output ?? $order->cutting ?? 0) }}</td>
+                            <td>{{ number_format($order->getCutQty() ?? 0) }}</td>
                             <td>{{ number_format($order->print_emb_output ?? $order->print_emb ?? 0) }}</td>
-                            <td>{{ number_format($order->sewing_output ?? $order->sew ?? $order->sewing ?? 0) }}</td>
+                            <td>{{ number_format($order->getSewingQty() ?? 0) }}</td>
                             <td>{{ number_format($order->packing_output ?? $order->packing ?? 0) }}</td>
                             <td>{{ number_format($order->shipped_qty ?? $order->shipped ?? 0) }}</td>
 
