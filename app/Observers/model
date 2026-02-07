@@ -1,0 +1,503 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ActivityLoggable;
+
+class OrderDetail extends Model
+{
+    use HasFactory, ActivityLoggable;
+
+    protected $guarded = [];
+
+    // columns
+    // id
+    // buyer_id
+    // buyer_name
+    // merchant_id
+    // merchant_name
+    // style_no
+    // total_qty
+    // total_bill
+    // status
+    // company_name
+    // order_no
+    // shipment_date
+    // fabrication
+    // remarks
+    // created_by
+    // edited_by
+    // created_at
+    // updated_at
+
+    protected $casts = [
+        'shipment_date' => 'date',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
+    ];
+
+    // -----------------------------
+    // Relationships
+    // -----------------------------
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function editedBy()
+    {
+        return $this->belongsTo(User::class, 'editedby_id');
+    }
+
+    public function buyer()
+    {
+        return $this->belongsTo(User::class, 'buyer_id');
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(User::class, 'merchant_id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(OrderDetailItem::class, 'order_detail_id');
+    }
+
+    public function piItem() {
+        return $this->belongsTo(ProformaInvoiceItem::class, 'order_no', 'order_no');
+    }
+
+
+
+    // Optional: fetch items directly (same as items())
+    public function getItems()
+    {
+        return $this->items()->get();
+    }
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class OrderDetailItem extends Model
+{
+    protected $table = 'order_detail_items';
+
+    protected $guarded = [];
+
+    //columns
+    // id
+    // order_detail_id
+    // color_name
+    // composition
+    // order_no
+    // style_no
+    // qty
+    // created_at
+    // updated_at
+    // item_name
+    // fabrication
+    // gsm
+
+    // shipment_date
+    // created_by
+    // edited_by
+
+    protected $casts = [
+        'shipment_date' => 'date',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
+    ];
+
+    /**
+     * Relationship: belongs to OrderDetail
+     */
+    public function orderDetail()
+    {
+        return $this->belongsTo(OrderDetail::class, 'order_detail_id');
+    }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetailItem::class, 'order_detail_id');
+    }
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ActivityLoggable;
+
+class ProformaInvoice extends Model
+{
+    use HasFactory;
+    use ActivityLoggable;
+
+    protected $guarded = [];
+
+    // columns
+    // id
+    // buyer_id
+    // buyer_name
+    // total_qty
+    // total_bill
+    // total_commission
+    // pi_no
+    // order_date
+    // terms
+    // status
+    // remarks
+    // addedby_id
+    // editedby_id
+    // created_at
+    // updated_at
+    // applicant
+    // applicant_bank
+    // first_beneficiary
+    // first_beneficiary_bank
+    // second_beneficiary
+    // second_beneficiary_bank
+    // notify_party
+    // buyer_info
+    // created_by
+    // edited_by
+    // deleted_by
+    // deleted_at
+
+    protected $casts = [
+        'created_date' => 'date',
+        'updated_at' => 'date',
+        'order_date' => 'date',
+
+    ];
+
+    // Relationships
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function buyer()
+    {
+        return $this->belongsTo(User::class, 'buyer_id');
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(User::class, 'merchant_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(OrderDetail::class, 'order_no', 'order_no');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(ProformaInvoiceItem::class, 'proforma_invoice_id');
+    }
+
+    public function yarnBookings()
+    {
+        return $this->hasMany(YarnBooking::class, 'pi_id', 'id');
+    }
+
+    public function yarnReceives()
+    {
+        return $this->hasMany(YarnReceive::class, 'pi_id', 'id');
+    }
+
+    public function dyeingBookings()
+    {
+        return $this->hasMany(DyeingBooking::class, 'pi_id', 'id');
+    }
+
+    public function dyeingReceives()
+    {
+        return $this->hasMany(DyeingReceive::class, 'pi_id', 'id');
+    }
+
+    public function knittingBookings()
+    {
+        return $this->hasMany(KnittingBooking::class, 'pi_id', 'id');
+    }
+
+    public function knittingReceives()
+    {
+        return $this->hasMany(KnittingReceive::class, 'pi_id', 'id');
+    }
+
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ActivityLoggable;
+
+class ProformaInvoiceItem extends Model
+{
+    use HasFactory;
+    use ActivityLoggable;
+
+    protected $guarded = [];
+
+    // columns
+    // id
+    // proforma_invoice_id
+    // order_no
+    // fabrication
+    // style_no
+    // order_qty
+    // unit_price
+    // total_price
+    // status
+    // addedby_id
+    // editedby_id
+    // created_at
+    // updated_at
+    // uom
+    // created_by
+    // edited_by
+    // deleted_by
+    // deleted_at
+
+    protected $casts = [
+        'created_date' => 'date',
+        'shipment_date' => 'date',
+        'updated_at' => 'date',
+    ];
+
+    // Relationships
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'addedby_id');
+    }
+
+    public function pi()
+    {
+        return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id');
+    }
+    public function proformaInvoice()
+    {
+        return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(OrderDetail::class, 'order_no', 'order_no');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderDetailItem::class, 'style_no', 'style_no')
+                    ->where('order_no', $this->order_no);
+    }
+
+    public function orderDetails()
+    {
+        return $this->belongsTo(OrderDetail::class,'style_no','style_no', 'order_no', 'order_no');
+    }
+
+    public function detailItems()
+    {
+        return OrderDetailItem::where('order_no', $this->order_no)
+            ->where('style_no', $this->style_no)
+            ->get();
+    }
+
+    public function getActucalOrder()
+    {
+        $order = OrderDetail::where('order_no', $this->order_no)->where('style_no', $this->style_no)->first();
+        return $order;
+    }
+
+}
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class MasterPlanning extends Model
+{
+    use HasFactory;
+
+    protected $table = 'master_planning';
+
+    protected $guarded = [];
+
+    // columns
+    // id	status	created_by	updated_by	approved_at	approved_by	created_at	updated_at
+
+    // relation to production planning rows
+    public function productions()
+    {
+        return $this->hasMany(ProductionPlanning::class, 'master_plan_id', 'id');
+    }
+
+
+    // creator
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // updater
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    // approver
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ActivityLoggable;
+
+class ProductionPlanning extends Model
+{
+    use HasFactory;
+    use ActivityLoggable;
+
+    protected $guarded = [];
+
+    // columns
+    // id
+    // addedby_id
+    // editedby_id
+    // pi_id
+    // pi_no
+    // master_plan_id
+    // pi_item_id
+    // order_no
+    // status
+    // remarks
+    // sewing_start
+    // sewing_end
+    // style_qty
+    // style_no
+    // extra_time
+    // working_hours
+    // total_hourly_capacity
+    // total_working_time
+    // created_at
+    // updated_at
+
+    protected $casts = [
+        'created_date'     => 'date',
+        'cutting_start'    => 'datetime',
+        'cutting_end'      => 'datetime',
+        'sewing_start'     => 'datetime',
+        'sewing_end'       => 'datetime',
+        'packing_start'    => 'datetime',
+        'packing_end'      => 'datetime',
+        'shippment_start'  => 'datetime',
+        'shippment_end'    => 'datetime',
+    ];
+
+    // Relationships
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'addedby_id');
+    }
+
+    public function style()
+    {
+        return $this->belongsTo(OrderDetail::class,'style_no','style_no');
+    }
+
+    public function orderDetailItems()
+    {
+        return $this->belongsTo(OrderDetail::class,'order_no','order_no');
+    }
+
+    public function sewingLines()
+    {
+        return $this->hasMany(ProductionSewing::class, 'planning_id');
+    }
+
+    public function sewingOutputs()
+    {
+        return $this->hasMany(SewingOutput::class, 'planning_id');
+    }
+
+    public function floorLines(){
+        return Attribute::whereIn(
+            'slug',
+            $this->sewingLines()->pluck('line_name')
+        )->get();
+    }
+
+
+
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ActivityLoggable;
+
+class SewingOutput extends Model
+{
+    use HasFactory;
+    use ActivityLoggable;
+
+    protected $guarded = [];
+
+    // columns
+    // id
+    // planning_id
+    // sewing_id
+    // floor_name
+    // line_name
+    // style_no
+    // capacity_hour
+    // date
+    // hour
+    // production
+    // addedby_id
+    // editedby_id
+    // created_at
+    // updated_at
+
+    protected $casts = [
+        'created_date' => 'date',
+    ];
+
+    // Relationships
+
+    public function style()
+    {
+        return $this->belongsTo(OrderDetail::class,'style_no','style_no');
+    }
+
+    public function addedby()
+    {
+        return $this->belongsTo(User::class, 'addedby_id');
+    }
+
+}
+
+

@@ -80,7 +80,6 @@ class OrderDetail extends Model
     }
 
 
-    // Optional: fetch items directly (same as items())
     public function getItems()
     {
         return $this->items()->get();
@@ -93,18 +92,18 @@ class OrderDetail extends Model
             ->sum('production');
     }
 
-public function getCutQty()
-{
-    $piIds = $this->piItems()
-        ->where('style_no', $this->style_no)
-        ->pluck('proforma_invoice_id');
+    public function getCutQty()
+    {
+        $piIds = $this->piItems()
+            ->where('style_no', $this->style_no)
+            ->pluck('proforma_invoice_id');
 
-    if ($piIds->isEmpty()) {
-        return 0;
+        if ($piIds->isEmpty()) {
+            return 0;
+        }
+
+        return Cutting::whereIn('pi_id', $piIds)
+            ->where('style_no', $this->style_no)
+            ->sum('cutting_qty');
     }
-
-    return Cutting::whereIn('pi_id', $piIds)
-        ->where('style_no', $this->style_no)
-        ->sum('cutting_qty');
-}
 }

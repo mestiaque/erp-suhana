@@ -58,6 +58,9 @@ class AppServiceProvider extends ServiceProvider
             \Config::set("mail.mailers.smtp.encryption", $general->mail_encryption);
             \Config::set("mail.mailers.smtp.username", $general->mail_username);
             \Config::set("mail.mailers.smtp.password", $general->mail_password);
+
+            // observers
+            \App\Models\OrderDetail::observe(\App\Observers\OrderDetailObserver::class);
         }
     }
 
