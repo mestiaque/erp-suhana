@@ -44,21 +44,10 @@ class EmailNotificationsDaily extends Command
         $accounts = collect($accounts)->map(function($acc) use ($from,$to) {
 
             // Opening Balance calculation
-            $openingBalance = Transaction::where('account_id', $acc->id)
-                ->whereDate('created_at', '<', $from)
-                ->selectRaw("
-                    SUM(
-                        CASE
-                            WHEN type IN (0,1) THEN amount
-                            WHEN type IN (3,4,5,6,7) THEN -amount
-                            ELSE 0
-                        END
-                    ) as balance
-                ")
-                ->value('balance') ?? 0;
+            $openingBalance = Transaction::accountBalance($acc->id, $from, null, 'BDT', true);
 
             // Fetch transactions inside date range
-            $transactions = Transaction::where('account_id', $acc->id)
+            $transactions = Transaction::accountAffectingQuery($acc->id)
                 ->where('status','success')
                 ->whereIn('type', [0,1,3,4,5,6,7])
                 ->whereDate('created_at', '>=', $from)
@@ -69,12 +58,8 @@ class EmailNotificationsDaily extends Command
             // Running balance generation
             $balance = $openingBalance;
 
-            $transactions->map(function($t) use (&$balance) {
-                if (in_array($t->type, [0,1])) {
-                    $balance += $t->amount;
-                } else {
-                    $balance -= $t->amount;
-                }
+            $transactions->map(function($t) use (&$balance, $acc) {
+                $balance += $t->signedAmountForAccount($acc->id);
                 $t->running_balance = $balance;
                 return $t;
             });
@@ -86,8 +71,8 @@ class EmailNotificationsDaily extends Command
 
             return $acc;
         });
-        
-        
+
+
         $emails =['info@natoreit.com','rabiulk449@gmail.com'];
         $toName =general()->title;
         $subject ='Erp Software Daily Summery Report Mail Form '.general()->title;
@@ -97,10 +82,10 @@ class EmailNotificationsDaily extends Command
         foreach ($emails as $toEmail){
             sendMail($toEmail,$toName,$subject,$datas,$template);
         }
-        
+
         \Log::info('Every Hour after Mail Send Notification');
     }
-    
-    
-    
+
+
+
 }

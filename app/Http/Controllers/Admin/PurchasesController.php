@@ -1068,7 +1068,7 @@ class PurchasesController extends Controller
             $transaction = Transaction::findOrFail($id);
             $user = User::findOrFail($transaction->user_id);
 
-            $old_amount = floatval($transaction->pay_amount);
+            $old_amount = floatval($transaction->amount);
             $new_amount = floatval($r->pay_amount);
 
             // Adjust user balance
@@ -1076,15 +1076,37 @@ class PurchasesController extends Controller
             $user->save();
 
             // Update account & payment method
-            $account = Attribute::findOrFail($r->account_id);
+            $oldAccountId = $transaction->account_id;
+            $newAccountId = $r->account_id;
+
+            $account = Attribute::findOrFail($newAccountId);
             $paymentMethod = Attribute::findOrFail($r->payment_method_id);
 
+            $available = $account->amount;
+            if ((int) $oldAccountId === (int) $newAccountId) {
+                $available += $old_amount;
+            }
+            if ($new_amount > $available) {
+                return redirect()->back()->with('error','Insufficient account balance!');
+            }
+
+            if ($oldAccountId) {
+                $oldAccount = Attribute::find($oldAccountId);
+                if ($oldAccount) {
+                    $oldAccount->amount += $old_amount;
+                    $oldAccount->save();
+                }
+            }
+
+            $account->amount -= $new_amount;
+            $account->save();
+
             $transaction->update([
-                "pay_amount"        => $new_amount,
+                "amount"            => $new_amount,
                 "account_id"        => $account->id,
                 "payment_method"    => $paymentMethod->name,
                 "payment_method_id" => $paymentMethod->id,
-                "note"              => $r->note,
+                "billing_note"      => $r->note,
             ]);
 
             if($r->hasFile('attachment')){
@@ -1101,14 +1123,15 @@ class PurchasesController extends Controller
             $user = User::findOrFail($transaction->user_id);
 
             // Refund user balance
-            $user->balance += $transaction->pay_amount;
+            $amount = floatval($transaction->amount);
+            $user->balance += $amount;
             $user->save();
 
             // Refund account balance
             if($transaction->account_id){
                 $account = Attribute::find($transaction->account_id);
                 if($account){
-                    $account->amount += $transaction->pay_amount;
+                    $account->amount += $amount;
                     $account->save();
                 }
             }
@@ -2057,6 +2080,29 @@ class PurchasesController extends Controller
             }
 
             // Update account method & payment method
+            $oldAccountId = $transaction->account_id;
+            $newAccountId = $request->account_id;
+
+            $account = Attribute::findOrFail($newAccountId);
+            $available = $account->amount;
+            if ((int) $oldAccountId === (int) $newAccountId) {
+                $available += $old_amount;
+            }
+            if ($new_amount > $available) {
+                return back()->with('error','Insufficient account balance!');
+            }
+
+            if ($oldAccountId) {
+                $oldAccount = Attribute::find($oldAccountId);
+                if ($oldAccount) {
+                    $oldAccount->amount += $old_amount;
+                    $oldAccount->save();
+                }
+            }
+
+            $account->amount -= $new_amount;
+            $account->save();
+
             $paymentMethod = Attribute::find($request->payment_method_id);
 
             // Update transaction
@@ -2104,6 +2150,14 @@ class PurchasesController extends Controller
             }
 
             $purchase->save();
+
+            if ($transaction->account_id) {
+                $account = Attribute::find($transaction->account_id);
+                if ($account) {
+                    $account->amount += $amount;
+                    $account->save();
+                }
+            }
 
             $transaction->delete();
 

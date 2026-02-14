@@ -117,6 +117,10 @@
         .flex-grow-1 .card{
             padding: 1rem !important;
         }
+        /* .main-content{
+            min-height: 80vh !important;
+            height: 101vh !important;
+        } */
      </style>
 
      @stack('css')

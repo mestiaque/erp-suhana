@@ -5,7 +5,7 @@
 @endsection
 
 @section('contents')
-<div class="flex-grow-1">
+<div class="">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>Order Details List</h3>
@@ -382,6 +382,10 @@
 
 @push('css')
 <style>
+.main-content{
+            min-height: 80vh !important;
+            height: 100vh !important;
+        }
     .custom-card {
     background-color: #ffffff;
     border: 1px solid #e9ecef;
@@ -407,7 +411,7 @@
 }
 
 .table-wrapper{
-    max-height: 600px;
+       max-height: 58vh;
     overflow-x: auto;
     overflow-y: auto;
     position: relative;
