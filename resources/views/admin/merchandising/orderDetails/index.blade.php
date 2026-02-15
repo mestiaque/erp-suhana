@@ -120,10 +120,15 @@
                     {{-- Shipment Date --}}
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
                         <label class="form-label mb-0">Ship Date</label>
-                        <input type="date"
-                            name="shipment_date"
-                            value="{{ request('shipment_date') }}"
-                            class="form-control form-control-sm">
+                        <select name="shipment_date" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($shipmentDates as $date)
+                                <option value="{{ $date->format('Y-m-d') }}"
+                                    {{ request('shipment_date')==$date->format('Y-m-d')?'selected':'' }}>
+                                    {{ $date->format('d.m.Y') }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
 

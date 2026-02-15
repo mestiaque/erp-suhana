@@ -684,7 +684,6 @@ class MerchandisingController extends Controller
         // Shipment Date
         // ================================
         if ($r->shipment_date) {
-
             $query->whereDate('shipment_date', $r->shipment_date);
         }
 
@@ -818,6 +817,13 @@ class MerchandisingController extends Controller
             ->orderBy('pi_no')
             ->pluck('pi_no');
 
+        $shipmentDates = OrderDetail::whereNotIn('status',['trash','temp'])
+            ->whereNotNull('shipment_date')
+            ->select('shipment_date')
+            ->distinct()
+            ->orderBy('shipment_date', 'desc')
+            ->pluck('shipment_date');
+
 
 
         // ================================
@@ -834,7 +840,8 @@ class MerchandisingController extends Controller
             'fabrics',
             'styles',
             'orderNos',
-            'piNumbers'
+            'piNumbers',
+            'shipmentDates'
         );
 
 
