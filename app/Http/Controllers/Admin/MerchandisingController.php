@@ -681,8 +681,19 @@ class MerchandisingController extends Controller
 
 
         // ================================
-        // Shipment Date
+        // Shipment Date (Year/Month/Date hierarchical filter)
         // ================================
+        if ($r->shipment_year) {
+            $query->whereYear('shipment_date', $r->shipment_year);
+        }
+        if ($r->shipment_month) {
+            // shipment_month format: YYYY-MM
+            $monthParts = explode('-', $r->shipment_month);
+            if (count($monthParts) == 2) {
+                $query->whereYear('shipment_date', $monthParts[0])
+                      ->whereMonth('shipment_date', $monthParts[1]);
+            }
+        }
         if ($r->shipment_date) {
             $query->whereDate('shipment_date', $r->shipment_date);
         }
@@ -817,12 +828,46 @@ class MerchandisingController extends Controller
             ->orderBy('pi_no')
             ->pluck('pi_no');
 
-        $shipmentDates = OrderDetail::whereNotIn('status',['trash','temp'])
+        // Build hierarchical shipment dates (year → month → dates)
+        $shipmentDatesRaw = OrderDetail::whereNotIn('status',['trash','temp'])
             ->whereNotNull('shipment_date')
             ->select('shipment_date')
             ->distinct()
             ->orderBy('shipment_date', 'desc')
             ->pluck('shipment_date');
+
+        $shipmentDatesHierarchy = [];
+        foreach ($shipmentDatesRaw as $date) {
+            if (!$date) continue;
+            $year = $date->format('Y');
+            $monthKey = $date->format('Y-m');
+            $monthName = $date->format('M');
+            $dateStr = $date->format('Y-m-d');
+            $dateDisplay = $date->format('d');
+
+            if (!isset($shipmentDatesHierarchy[$year])) {
+                $shipmentDatesHierarchy[$year] = [
+                    'year' => $year,
+                    'months' => []
+                ];
+            }
+            if (!isset($shipmentDatesHierarchy[$year]['months'][$monthKey])) {
+                $shipmentDatesHierarchy[$year]['months'][$monthKey] = [
+                    'month_key' => $monthKey,
+                    'month_name' => $monthName,
+                    'dates' => []
+                ];
+            }
+            $shipmentDatesHierarchy[$year]['months'][$monthKey]['dates'][] = [
+                'date' => $dateStr,
+                'display' => $dateDisplay
+            ];
+        }
+        // Re-index months arrays
+        foreach ($shipmentDatesHierarchy as &$yearData) {
+            $yearData['months'] = array_values($yearData['months']);
+        }
+        $shipmentDatesHierarchy = array_values($shipmentDatesHierarchy);
 
 
 
@@ -841,7 +886,7 @@ class MerchandisingController extends Controller
             'styles',
             'orderNos',
             'piNumbers',
-            'shipmentDates'
+            'shipmentDatesHierarchy'
         );
 
 
