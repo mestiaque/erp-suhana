@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use Carbon\Carbon;
 use App\Models\Cutting;
+use App\Models\Finishing;
+use App\Models\Iron;
+use App\Models\Poly;
 use App\Models\Attribute;
 use App\Models\OrderDetail;
 use App\Models\YarnBooking;
@@ -544,7 +547,9 @@ class ProductionController extends Controller
         if ($r->search) {
             $query->where(function($q) use ($r) {
                 $q->where('pi_no', 'LIKE', "%{$r->search}%")
-                ->orWhere('style_no', 'LIKE', "%{$r->search}%");
+                ->orWhere('order_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('style_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('color_name', 'LIKE', "%{$r->search}%");
             });
         }
 
@@ -557,14 +562,37 @@ class ProductionController extends Controller
     public function cuttingAction(Request $r, $action)
     {
 
+        if ($action == 'get-orders') {
+            // Get orders based on PI
+            $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
+                    ->groupBy('order_no')
+                    ->get();
+
+            return response()->json($orders);
+        }
+
         if ($action == 'get-styles') {
-            // একই style_no থাকলে সেটিকে গ্রুপ করে style_qty যোগ করা হচ্ছে
-            $styles = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id) // অথবা 'pi_id'
-                    ->select('style_no', \DB::raw('SUM(order_qty) as total_style_qty'))
+            // Get styles based on PI and Order
+            $styles = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->select('style_no', DB::raw('SUM(order_qty) as total_style_qty'))
                     ->groupBy('style_no')
                     ->get();
 
             return response()->json($styles);
+        }
+
+        if ($action == 'get-colors') {
+            // Get colors for selected style within a PI and Order
+            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->where('style_no', $r->style_no)
+                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->groupBy('color_name')
+                    ->get();
+
+            return response()->json($colors);
         }
 
         if($action == 'create'){
@@ -572,7 +600,9 @@ class ProductionController extends Controller
             Cutting::create([
                 'pi_id'         => $pi->id,
                 'pi_no'         => $pi->pi_no,
+                'order_no'      => $r->order_no,
                 'style_no'      => $r->style_no,
+                'color_name'    => $r->color_name,
                 'cutting_qty'  => $r->cutting_qty,
                 'cutting_date' => $r->cutting_date,
                 'remarks'       => $r->remarks,
@@ -585,6 +615,8 @@ class ProductionController extends Controller
         if ($action == "update") {
             $cut = Cutting::findorFail($r->id);
             $cut->update([
+                'order_no'      => $r->order_no,
+                'color_name'    => $r->color_name,
                 'cutting_qty'  => $r->cutting_qty,
                 'cutting_date' => $r->cutting_date,
                 'remarks'       => $r->remarks,
@@ -601,6 +633,275 @@ class ProductionController extends Controller
         return redirect()->route('admin.cutting');
     }
 
+    // ================== FINISHING ==================
+    public function finishing(Request $r)
+    {
+        $query = Finishing::query();
+
+        if ($r->startDate && $r->endDate) {
+            $query->whereBetween('finishing_date', [$r->startDate, $r->endDate]);
+        }
+
+        if ($r->search) {
+            $query->where(function($q) use ($r) {
+                $q->where('pi_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('order_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('style_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('color_name', 'LIKE', "%{$r->search}%");
+            });
+        }
+
+        $finishings = $query->latest('finishing_date')->paginate(20);
+        $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+
+        return view('admin.productions.finishing.index', compact('finishings', 'pis'));
+    }
+
+    public function finishingAction(Request $r, $action)
+    {
+        if ($action == 'get-orders') {
+            $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
+                    ->groupBy('order_no')
+                    ->get();
+            return response()->json($orders);
+        }
+
+        if ($action == 'get-styles') {
+            $styles = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->select('style_no', DB::raw('SUM(order_qty) as total_style_qty'))
+                    ->groupBy('style_no')
+                    ->get();
+            return response()->json($styles);
+        }
+
+        if ($action == 'get-colors') {
+            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->where('style_no', $r->style_no)
+                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->groupBy('color_name')
+                    ->get();
+            return response()->json($colors);
+        }
+
+        if($action == 'create'){
+            $pi = ProformaInvoice::find($r->pi_no);
+            Finishing::create([
+                'pi_id'         => $pi->id,
+                'pi_no'         => $pi->pi_no,
+                'order_no'      => $r->order_no,
+                'style_no'      => $r->style_no,
+                'color_name'    => $r->color_name,
+                'finishing_qty' => $r->finishing_qty,
+                'finishing_date'=> $r->finishing_date,
+                'remarks'       => $r->remarks,
+                'created_by'    => auth()->id(),
+            ]);
+            return redirect()->back()->with('success', 'Finishing Record Added Successfully');
+        }
+
+        if ($action == 'update') {
+            $fin = Finishing::findorFail($r->id);
+            $fin->update([
+                'order_no'      => $r->order_no,
+                'color_name'    => $r->color_name,
+                'finishing_qty' => $r->finishing_qty,
+                'finishing_date'=> $r->finishing_date,
+                'remarks'       => $r->remarks,
+            ]);
+            return redirect()->back()->with('success', 'Finishing Record Updated Successfully');
+        }
+
+        if($action == 'delete'){
+            $fin = Finishing::findorFail($r->id);
+            $fin->delete();
+            return redirect()->back()->with('success', 'Finishing Record Deleted Successfully');
+        }
+
+        return redirect()->route('admin.finishing');
+    }
+
+    // ================== IRON ==================
+    public function iron(Request $r)
+    {
+        $query = Iron::query();
+
+        if ($r->startDate && $r->endDate) {
+            $query->whereBetween('iron_date', [$r->startDate, $r->endDate]);
+        }
+
+        if ($r->search) {
+            $query->where(function($q) use ($r) {
+                $q->where('pi_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('order_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('style_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('color_name', 'LIKE', "%{$r->search}%");
+            });
+        }
+
+        $irons = $query->latest('iron_date')->paginate(20);
+        $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+
+        return view('admin.productions.iron.index', compact('irons', 'pis'));
+    }
+
+    public function ironAction(Request $r, $action)
+    {
+        if ($action == 'get-orders') {
+            $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
+                    ->groupBy('order_no')
+                    ->get();
+            return response()->json($orders);
+        }
+
+        if ($action == 'get-styles') {
+            $styles = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->select('style_no', DB::raw('SUM(order_qty) as total_style_qty'))
+                    ->groupBy('style_no')
+                    ->get();
+            return response()->json($styles);
+        }
+
+        if ($action == 'get-colors') {
+            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->where('style_no', $r->style_no)
+                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->groupBy('color_name')
+                    ->get();
+            return response()->json($colors);
+        }
+
+        if($action == 'create'){
+            $pi = ProformaInvoice::find($r->pi_no);
+            Iron::create([
+                'pi_id'         => $pi->id,
+                'pi_no'         => $pi->pi_no,
+                'order_no'      => $r->order_no,
+                'style_no'      => $r->style_no,
+                'color_name'    => $r->color_name,
+                'iron_qty'      => $r->iron_qty,
+                'iron_date'     => $r->iron_date,
+                'remarks'       => $r->remarks,
+                'created_by'    => auth()->id(),
+            ]);
+            return redirect()->back()->with('success', 'Iron Record Added Successfully');
+        }
+
+        if ($action == 'update') {
+            $irn = Iron::findorFail($r->id);
+            $irn->update([
+                'order_no'      => $r->order_no,
+                'color_name'    => $r->color_name,
+                'iron_qty'      => $r->iron_qty,
+                'iron_date'     => $r->iron_date,
+                'remarks'       => $r->remarks,
+            ]);
+            return redirect()->back()->with('success', 'Iron Record Updated Successfully');
+        }
+
+        if($action == 'delete'){
+            $irn = Iron::findorFail($r->id);
+            $irn->delete();
+            return redirect()->back()->with('success', 'Iron Record Deleted Successfully');
+        }
+
+        return redirect()->route('admin.iron');
+    }
+
+    // ================== POLY ==================
+    public function poly(Request $r)
+    {
+        $query = Poly::query();
+
+        if ($r->startDate && $r->endDate) {
+            $query->whereBetween('poly_date', [$r->startDate, $r->endDate]);
+        }
+
+        if ($r->search) {
+            $query->where(function($q) use ($r) {
+                $q->where('pi_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('order_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('style_no', 'LIKE', "%{$r->search}%")
+                ->orWhere('color_name', 'LIKE', "%{$r->search}%");
+            });
+        }
+
+        $polies = $query->latest('poly_date')->paginate(20);
+        $pis = ProformaInvoice::whereNotNull('pi_no')->get();
+
+        return view('admin.productions.poly.index', compact('polies', 'pis'));
+    }
+
+    public function polyAction(Request $r, $action)
+    {
+        if ($action == 'get-orders') {
+            $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
+                    ->groupBy('order_no')
+                    ->get();
+            return response()->json($orders);
+        }
+
+        if ($action == 'get-styles') {
+            $styles = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->select('style_no', DB::raw('SUM(order_qty) as total_style_qty'))
+                    ->groupBy('style_no')
+                    ->get();
+            return response()->json($styles);
+        }
+
+        if ($action == 'get-colors') {
+            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
+                    ->where('order_no', $r->order_no)
+                    ->where('style_no', $r->style_no)
+                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->groupBy('color_name')
+                    ->get();
+            return response()->json($colors);
+        }
+
+        if($action == 'create'){
+            $pi = ProformaInvoice::find($r->pi_no);
+            Poly::create([
+                'pi_id'         => $pi->id,
+                'pi_no'         => $pi->pi_no,
+                'order_no'      => $r->order_no,
+                'style_no'      => $r->style_no,
+                'color_name'    => $r->color_name,
+                'poly_qty'      => $r->poly_qty,
+                'poly_date'     => $r->poly_date,
+                'remarks'       => $r->remarks,
+                'created_by'    => auth()->id(),
+            ]);
+            return redirect()->back()->with('success', 'Poly Record Added Successfully');
+        }
+
+        if ($action == 'update') {
+            $ply = Poly::findorFail($r->id);
+            $ply->update([
+                'order_no'      => $r->order_no,
+                'color_name'    => $r->color_name,
+                'poly_qty'      => $r->poly_qty,
+                'poly_date'     => $r->poly_date,
+                'remarks'       => $r->remarks,
+            ]);
+            return redirect()->back()->with('success', 'Poly Record Updated Successfully');
+        }
+
+        if($action == 'delete'){
+            $ply = Poly::findorFail($r->id);
+            $ply->delete();
+            return redirect()->back()->with('success', 'Poly Record Deleted Successfully');
+        }
+
+        return redirect()->route('admin.poly');
+    }
 
 
 

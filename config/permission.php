@@ -237,6 +237,39 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'finishing' => [
+                'label'       => 'Finishing List',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'iron' => [
+                'label'       => 'Iron List',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'poly' => [
+                'label'       => 'Poly List',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'yarn_booking' => [
                 'label'       => 'Yarn (Procurement)',
                 'permissions' => [

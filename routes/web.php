@@ -173,6 +173,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/cutting',[ProductionController::class,'cutting'])->name('cutting');
     Route::any('/cutting/{action}/{id?}',[ProductionController::class,'cuttingAction'])->name('cuttingAction');
 
+    Route::get('/finishing',[ProductionController::class,'finishing'])->name('finishing');
+    Route::any('/finishing/{action}/{id?}',[ProductionController::class,'finishingAction'])->name('finishingAction');
+
+    Route::get('/iron',[ProductionController::class,'iron'])->name('iron');
+    Route::any('/iron/{action}/{id?}',[ProductionController::class,'ironAction'])->name('ironAction');
+
+    Route::get('/poly',[ProductionController::class,'poly'])->name('poly');
+    Route::any('/poly/{action}/{id?}',[ProductionController::class,'polyAction'])->name('polyAction');
+
     //Buyer Order Management
     Route::get('/products',[OrderController::class,'products'])->name('products');
     Route::any('/products/{action}/{id?}',[OrderController::class,'productsAction'])->name('productsAction');

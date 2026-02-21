@@ -51,7 +51,7 @@
                     </div>
                     <div class="col-md-5 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Style No" class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Style No, Color" class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -67,6 +67,7 @@
                             <th style="min-width: 120px;">Cutting Date</th>
                             <th style="min-width: 150px;">PI Number</th>
                             <th style="min-width: 150px;">Style Number</th>
+                            <th style="min-width: 120px;">Color</th>
                             <th style="min-width: 120px;">Cutting Qty</th>
                             <th style="min-width: 150px;">Added By</th>
                             <th style="min-width: 150px;">Remarks</th>
@@ -82,6 +83,7 @@
                             <td>
                                 <span class="badge badge-info">{{ $cut->style_no }}</span>
                             </td>
+                            <td>{{ $cut->color_name }}</td>
                             <td class="text-success font-weight-bold">{{ number_format($cut->cutting_qty) }} Pcs</td>
                             <td>{{ $cut->createdBy?->name }}</td>
                             <td><smalls>{{ $cut->remarks }}</smalls></td>
@@ -105,7 +107,7 @@
                     @if($cuttings->count() > 0)
                     <tfoot class="bg-light">
                         <tr>
-                            <th colspan="4" class="text-right">Total:</th>
+                            <th colspan="5" class="text-right">Total:</th>
                             <th class="text-success">{{ number_format($cuttings->sum('cutting_qty')) }} Pcs</th>
                             <th colspan="3"></th>
                         </tr>
@@ -148,13 +150,29 @@
                             </select>
                         </div>
 
+                        <!-- Order Selection (AJAX loaded) -->
+                        <div class="col-md-12 form-group">
+                            <label>Select Order (PO)* <span id="order_qty_label" class="badge badge-primary"></span></label>
+                            <select name="order_no" id="order_select" class="form-control" required disabled>
+                                <option value="">-- First Select PI --</option>
+                            </select>
+                        </div>
+
                         <!-- Style Selection (AJAX loaded) -->
                         <div class="col-md-12 form-group">
                             <label>Select Style* <span id="style_qty_label" class="badge badge-warning"></span></label>
                             <select name="style_no" id="style_select" class="form-control" required disabled>
-                                <option value="">-- First Select PI --</option>
+                                <option value="">-- Select Order First --</option>
                             </select>
                             <input type="hidden" name="planning_id" id="planning_id">
+                        </div>
+
+                        <!-- Color Selection (AJAX loaded) -->
+                        <div class="col-md-12 form-group">
+                            <label>Select Color* <span id="color_qty_label" class="badge badge-info"></span></label>
+                            <select name="color_name" id="color_select" class="form-control" required disabled>
+                                <option value="">-- Select Style First --</option>
+                            </select>
                         </div>
 
                         <!-- Cutting Qty -->
@@ -215,6 +233,12 @@
                         <div class="col-md-12 form-group">
                             <label>Select Style* <span id="style_qty_label" class="badge badge-warning"></span></label>
                             <input type="text" value="{{ $cut->style_no }}" class="form-control" readonly>
+                        </div>
+
+                        <!-- Color Name -->
+                        <div class="col-md-12 form-group">
+                            <label>Color Name*</label>
+                            <input type="text" name="color_name" value="{{ $cut->color_name }}" class="form-control">
                         </div>
 
                         <!-- Cutting Qty -->
@@ -278,19 +302,45 @@ $(document).ready(function() {
         }
     });
 
-    // স্টাইল সিলেক্ট করলে Qty লেবেলে দেখানো
+    // স্টাইল সিলেক্ট করলে Qty লেবেলে দেখানো এবং কালার লোড
     $('#style_select').on('change', function() {
         let selected = $(this).find('option:selected');
         let qty = selected.data('qty');
         let planId = selected.data('plan');
+        let pi_no = $('#pi_select').val();
+        let style_no = $(this).val();
+        let $colorSelect = $('#color_select');
 
         if (qty) {
             $('#style_qty_label').text('Qty: ' + qty);
-            // $('.cutting_qty').attr('max', qty);
-
         } else {
             $('#style_qty_label').text('');
-            // $('.cutting_qty').attr('max', '');
+        }
+
+        // Load colors for selected style
+        if (style_no && pi_no) {
+            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
+
+            $.get("{{ route('admin.cuttingAction', 'get-colors') }}", { pi_id: pi_no, style_no: style_no }, function(data) {
+                $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', false);
+                data.forEach(function(item) {
+                    $colorSelect.append(`<option value="${item.color_name}" data-qty="${item.total_color_qty}">${item.color_name} (${item.total_color_qty})</option>`);
+                });
+            });
+        } else {
+            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $('#color_qty_label').text('');
+        }
+    });
+
+    // Color selection - show color qty
+    $('#color_select').on('change', function() {
+        let selected = $(this).find('option:selected');
+        let qty = selected.data('qty');
+        if (qty) {
+            $('#color_qty_label').text('Qty: ' + qty);
+        } else {
+            $('#color_qty_label').text('');
         }
     });
 });

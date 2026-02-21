@@ -254,6 +254,27 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'cutting'
                 ],
+                [
+                    'title'      => 'Finishing',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/finishing',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'finishing'
+                ],
+                [
+                    'title'      => 'Iron',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/iron',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'iron'
+                ],
+                [
+                    'title'      => 'Poly',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/poly',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'poly'
+                ],
 
             ]
         ],
