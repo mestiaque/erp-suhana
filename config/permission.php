@@ -228,68 +228,8 @@ return [
                     'all'    => 'All',
                 ],
             ],
-<<<<<<< HEAD
-            'finishing' => [
-                'label'       => 'Finishing List',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'iron' => [
-                'label'       => 'Iron List',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'poly' => [
-                'label'       => 'Poly List',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'yarn_booking' => [
-                'label'       => 'Yarn (Procurement)',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'knitting_booking' => [
-                'label'       => 'Knitting (Procurement)',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'dyeing_booking' => [
-                'label'       => 'Dyeing (Procurement)',
-=======
             'sweing' => [
                 'label'       => 'Sweing',
->>>>>>> master
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',

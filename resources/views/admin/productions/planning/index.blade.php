@@ -67,17 +67,7 @@
                     <tbody>
                         @forelse($masterPlans as $i => $plan)
                         <tr>
-<<<<<<< HEAD
-                            <td>
-                                <b>No:</b> {{ $order->style_no}}
-                                <br> <b>Qnty:</b> {{number_format($order->style_qty)}} pcs
-                            </td>
-                            <td>
-                                <b>M:</b> {{$order->getPiStyle()?->merchant_name}}
-                                <br><b>B:</b> {{$order->getPiStyle()?->buyer_name}}
-=======
                             <td>{{ $masterPlans->firstItem() + $i }}</td>
->>>>>>> master
 
                             {{-- Styles as comma-separated --}}
                             <td>
