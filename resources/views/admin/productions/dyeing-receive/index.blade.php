@@ -17,9 +17,9 @@
             <h3>Dyeing Receive List</h3>
             <div class="dropdown">
                 {{-- @can('production_planning.add') --}}
-                    {{-- <a href="{{ route('admin.dyeingReceiveAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
+                    <a href="{{ route('admin.dyeingReceiveAction','create') }}" class="btn-custom primary" style="padding:5px 15px;">
                         <i class="bx bx-plus"></i> Add Dyeing Receive
-                    </a> --}}
+                    </a>
                 {{-- @endcan --}}
 
                     <a href="{{ route('admin.dyeingReceive') }}" class="btn-custom yellow">
@@ -53,7 +53,7 @@
                         <div class="input-group">
                             <input type="text" name="search"
                                    value="{{ request()->search ?? '' }}"
-                                   placeholder="Search Buyer, Pi No, Receive No, Fabrication"
+                                   placeholder="Search Buyer, Pi No, Receive No, Challan, Order No"
                                    class="form-control">
 
                             <button class="btn btn-success btn-sm rounded-0">Search</button>
@@ -62,13 +62,14 @@
 
                 </div>
             </form>
-
             {{-- Table --}}
-            {{-- <div class="table-responsive">
+            <div class="table-responsive">
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
                             <th style="width: 60px">SL</th>
+                            <th>PI No</th>
+                            <th>Booking No</th>
                             <th>Receive No</th>
                             <th>Receive Date</th>
                             <th>Buyer</th>
@@ -83,11 +84,13 @@
                         @forelse ($bookings as $i => $row)
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
+                            <td>{{ $row->pi->pi_no }}</td>
+                            <td>{{ $row->getBookingNo() }}</td>
                             <td>{{ $row->getReceiveNo() }}</td>
                             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</td>
-                            <td>{{ $row->buyer_name ?? '-' }}</td>
+                            <td>{{ $row->booking->buyer_name ?? '-' }}</td>
                             <td class="text-center">{{ $row->total_items }}</td>
-                            <td class="text-center">{{ $row->total_req_qty }}</td>
+                            <td class="text-center">{{ number_format($row->total_rcv_qty, 2) }} Kgs</td>
                             <td>
                                 @php
                                     $createdBy = App\Models\User::findOrFail($row->created_by);
@@ -95,20 +98,20 @@
                                 {{ $createdBy?->name ?? '-' }}
                             </td>
                             <td>
-                                <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->booking_no }}">
+                                <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->receive_no }}">
                                     <i class="fa fa-eye"></i>
                                 </a>
-                                <a href="{{ route('admin.dyeingReceiveAction',['edit',$row->booking_no]) }}" class="btn-custom success mr-1">
+                                <a href="{{ route('admin.dyeingReceiveAction',['edit',$row->receive_no]) }}" class="btn-custom success mr-1">
                                     <i class="bx bx-edit"></i>
                                 </a>
-                                <a href="{{ route('admin.dyeingReceiveAction',['delete',$row->booking_no]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger">
+                                <a href="{{ route('admin.dyeingReceiveAction',['delete',$row->receive_no]) }}" onclick="return confirm('Are You Sure To Delete?')" class="btn-custom danger">
                                     <i class="bx bx-trash"></i>
                                 </a>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-3">
+                            <td colspan="10" class="text-center text-muted py-3">
                                 No Dyeing Receive Found
                             </td>
                         </tr>
@@ -116,17 +119,17 @@
                     </tbody>
 
                 </table>
-            </div> --}}
+            </div>
 
             {{-- Pagination --}}
             <div class="mt-3">
-                {{-- {{ $bookings->appends(request()->query())->links() }} --}}
+                {{ $bookings->appends(request()->query())->links() }}
             </div>
 
         </div>
     </div>
 
-     {{-- @include(adminTheme().'productions.dyeing-booking.includes.details') --}}
+     @include(adminTheme().'productions.dyeing-receive.includes.details')
 
 
 </div>

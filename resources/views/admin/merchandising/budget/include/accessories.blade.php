@@ -5,7 +5,7 @@
             <table class="table table-bordered table-sm" id="accessoriesTable">
                 <thead>
                     <tr>
-                        <th>Description</th><th>Supplier</th><th>Qty</th><th>Unit Price ($)</th><th>TTL US $</th><th>Item Wise Total Value</th><th>%</th><th>Company Name</th><th>Payment Value</th><th>Action</th>
+                        <th>Description</th><th>Creditor</th><th>Qty</th><th>Unit Price ($)</th><th>TTL US $</th><th>Item Wise Total Value</th><th>%</th><th>Company Name</th><th>Payment Value</th><th>Action</th>
                     </tr>
                 </thead>
                 <tbody>

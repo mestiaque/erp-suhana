@@ -172,7 +172,7 @@
                             <div class="invoice-dates">
                                 <p>
                                     <b>Request Date:</b> {{ $order->created_at->format('d.m.Y') }} <br>
-                                    <b>Supplier:</b> {{$order->supplier_name}} {{$order->company_name?'- '.$order->company_name:''}} <br>
+                                    <b>Creditor:</b> {{$order->supplier_name}} {{$order->company_name?'- '.$order->company_name:''}} <br>
                                     <b>Mobile:</b> {{$order->supplier_name}} <b>Address:</b> {{$order->supplier_address}}
                                 </p>
                             </div>

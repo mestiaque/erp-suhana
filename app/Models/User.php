@@ -275,6 +275,11 @@ class User extends Authenticatable
         return $this->hasMany(Attribute::class, 'addedby_id')->where('type', 10);
     }
 
+    public function creditorBill()
+    {
+        return $this->hasMany(CreditorBill::class, 'creditor_id');
+    }
+
         // User model
     public function is_staff()
     {

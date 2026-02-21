@@ -49,7 +49,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 d-none     ">
                     <form action="{{ route('admin.dailyProductionAction', ['assing-style']) }}" method="POST" class="d-flex align-items-center">
                         @csrf
                         <input type="hidden" name="startDate" value="{{ $startDate->format('Y-m-d') }}">
@@ -81,7 +81,7 @@
                 $sum_previous = 0;
                 $sum_grand    = 0;
                 $sum_style    = $swings->flatten()->sum(function($swing){
-                    return $swing->planning->style_qty;
+                    return $swing?->planning?->style_qty;
                 });
 
                 $unique_styles = [];
@@ -130,7 +130,7 @@
                         @if($lineSwings->count())
                             @foreach($lineSwings as $swing)
                                 @php
-                                    $style_no = $swing->planning->style_no;
+                                    $style_no = $swing?->planning?->style_no;
                                     $unique_styles[] = $style_no;
                                     $unique_orders[] = $swing?->planning?->style?->order_no;
 
@@ -151,7 +151,7 @@
                                     $sum_today    += $today_total;
                                     $sum_previous += $previous_total;
                                     $sum_grand    += $grand_total;
-                                    $style_qty = $swing->planning->style_qty;
+                                    $style_qty = $swing?->planning?->style_qty;
                                 @endphp
                                 <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}">
                                     <td>{{ $lineKey }}</td>

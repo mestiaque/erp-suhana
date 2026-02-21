@@ -5,7 +5,7 @@
 @endsection
 
 @section('contents')
-<div class="flex-grow-1">
+<div class="">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>Order Details List</h3>
@@ -13,9 +13,9 @@
 
                 <form action="{{ route('admin.orderDetails') }}" method="GET" target="_blank" class="d-inline">
                     <input type="hidden" name="print" value="true">
-                    <input type="hidden" name="startDate" value="{{ request()->startDate }}">
-                    <input type="hidden" name="endDate" value="{{ request()->endDate }}">
-                    <input type="hidden" name="search" value="{{ request()->search }}">
+                    @foreach(request()->except('print') as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
                     <button type="submit" class="btn btn-info btn-sm mr-1">
                         <i class="fa fa-print"></i> Print
                     </button>
@@ -38,71 +38,251 @@
             @include(adminTheme().'alerts')
 
             <!-- Search & Date Filter -->
-            <form action="{{ route('admin.orderDetails') }}" class="mb-3">
+            <form action="{{ route('admin.orderDetails') }}" class="mb-3 d-none">
                 <div class="row g-2">
                     <div class="col-md-6 d-flex">
                         <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control me-1">
                         <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control">
                     </div>
-                    <div class="col-md-6 d-flex">
+
+                    <div class="col-md-4 d-flex">
                         <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control me-1"
-                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication">
+                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
                         <button type="submit" class="btn btn-success btn-sm">Search</button>
                     </div>
                 </div>
             </form>
 
-            <div class="row g-3"> <!-- g-3 adds gutter between cards -->
+            <form action="{{ route('admin.orderDetails') }}" method="GET" class="mb-3">
 
-                <div class="col-12 col-md-2">
+                <div class="row g-2 align-items-end">
+
+                    {{-- Buyer --}}
+                    <div class="col-md-1 pr-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Buyer</label>
+                        <select name="buyer" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($buyers as $buyer)
+                                <option value="{{ $buyer }}"
+                                    {{ request('buyer')==$buyer?'selected':'' }}>
+                                    {{ $buyer }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Customer --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Customer</label>
+                        <select name="brand" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand }}"
+                                    {{ request('brand')==$brand?'selected':'' }}>
+                                    {{ $brand }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Style --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Style</label>
+                        <select name="style" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($styles as $style)
+                                <option value="{{ $style }}"
+                                    {{ request('style')==$style?'selected':'' }}>
+                                    {{ $style }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Order No --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Order No</label>
+                        <select name="order_no" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($orderNos as $no)
+                                <option value="{{ $no }}"
+                                    {{ request('order_no')==$no?'selected':'' }}>
+                                    {{ $no }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Shipment Date --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Ship Date</label>
+                        <div class="shipment-date-dropdown" id="shipmentDateDropdown">
+                            <input type="hidden" name="shipment_year" id="shipment_year" value="{{ request('shipment_year') }}">
+                            <input type="hidden" name="shipment_month" id="shipment_month" value="{{ request('shipment_month') }}">
+                            <input type="hidden" name="shipment_date" id="shipment_date" value="{{ request('shipment_date') }}">
+                            
+                            <div class="shipment-dropdown-trigger form-control form-control-sm">
+                                <span class="shipment-selected-text">All</span>
+                                <i class="fa fa-chevron-down shipment-dropdown-arrow"></i>
+                            </div>
+                            
+                            <div class="shipment-dropdown-menu">
+                                <div class="shipment-tree-container">
+                                    @forelse($shipmentDatesHierarchy as $yearData)
+                                        <div class="shipment-year-item">
+                                            <div class="shipment-year-header" data-year="{{ $yearData['year'] }}">
+                                                <input type="radio" name="shipment_radio" class="shipment-radio" value="year:{{ $yearData['year'] }}">
+                                                <i class="fa fa-chevron-right shipment-toggle-icon"></i>
+                                                <span class="shipment-label">{{ $yearData['year'] }}</span>
+                                            </div>
+                                            <div class="shipment-months-container" style="display:none;">
+                                                @foreach($yearData['months'] as $monthData)
+                                                    <div class="shipment-month-item">
+                                                        <div class="shipment-month-header" data-month="{{ $monthData['month_key'] }}">
+                                                            <input type="radio" name="shipment_radio" class="shipment-radio" value="month:{{ $monthData['month_key'] }}">
+                                                            <i class="fa fa-chevron-right shipment-toggle-icon"></i>
+                                                            <span class="shipment-label">{{ $monthData['month_name'] }}</span>
+                                                        </div>
+                                                        <div class="shipment-dates-container" style="display:none;">
+                                                            @foreach($monthData['dates'] as $dateData)
+                                                                <div class="shipment-date-item" data-date="{{ $dateData['date'] }}">
+                                                                    <input type="radio" name="shipment_radio" class="shipment-radio" value="date:{{ $dateData['date'] }}">
+                                                                    <span class="shipment-label">{{ $dateData['display'] }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <span class="text-muted">No dates</span>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {{-- Fabric --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Fabric</label>
+                        <select name="fabric" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($fabrics as $fabric)
+                                <option value="{{ $fabric }}"
+                                    {{ request('fabric')==$fabric?'selected':'' }}>
+                                    {{ $fabric }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- PI Number --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">PI No</label>
+                        <select name="pi" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($piNumbers as $pi)
+                                <option value="{{ $pi }}"
+                                    {{ request('pi')==$pi?'selected':'' }}>
+                                    {{ $pi }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    {{-- Status --}}
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Status</label>
+                        <select name="status" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="pending" {{ request('status')=='pending'?'selected':'' }}>Pending</option>
+                            <option value="confirmed" {{ request('status')=='confirmed'?'selected':'' }}>Confirmed</option>
+                            <option value="completed" {{ request('status')=='completed'?'selected':'' }}>Completed</option>
+                            <option value="cancelled" {{ request('status')=='cancelled'?'selected':'' }}>Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Keyword</label>
+                        <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control form-control-sm"
+                               placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
+                    </div>
+
+
+                    {{-- Button --}}
+                    <div class="col-md-2 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">&nbsp;</label>
+                        <button type="submit" class="btn btn-success btn-sm w-10">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+
+
+            <div class="row g-3" style="margin:0 -5px;"> <!-- g-3 adds gutter between cards -->
+
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">👕</div>
+                        <!--<div style="font-size:30px;">👕</div>-->
                         <div style="font-weight:bold;">Total</div>
                         <div class="text-success">Qty: {{ number_format($totalOrderQty) }}</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+
+                <div class="col-12 col-md-2" style="padding:5px;" >
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">✂️</div>
+                        <!--<div style="font-size:30px;">✂️</div>-->
                         <div style="font-weight:bold;">Cutting</div>
                         <div class="text-success">Qty: {{ number_format($grandTotalCuttingOutput) }}</div>
                         <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalCuttingOutput) }}</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">🧵</div>
+                        <!--<div style="font-size:30px;">🎨</div>-->
+                        <div style="font-weight:bold;">Print & Embroidery</div>
+                        <div class="text-success">Qty: 0</div>
+                        <div class="text-danger">Balance: 0</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-2" style="padding:5px;">
+                    <div class="custom-card" style="">
+                        <!--<div style="font-size:30px;">🧵</div>-->
                         <div style="font-weight:bold;">Sewing Output</div>
                         <div class="text-success">Qty: {{ number_format($grandTotalSewingOutput) }}</div>
                         <div class="text-danger">Balance: {{ number_format($totalOrderQty - $grandTotalSewingOutput) }}</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">📦</div>
+                        <!--<div style="font-size:30px;">📦</div>-->
                         <div style="font-weight:bold;">Packing</div>
                         <div class="text-success">Qty: 0</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2" style="padding:5px;">
                     <div class="custom-card" style="">
-                        <div style="font-size:30px;">🚚</div>
+                        <!--<div style="font-size:30px;">🚚</div>-->
                         <div style="font-weight:bold;">Shipped</div>
-                        <div class="text-success">Qty: 0</div>
-                        <div class="text-danger">Balance: 0</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-2">
-                    <div class="custom-card" style="">
-                        <div style="font-size:30px;">🎨</div>
-                        <div style="font-weight:bold;">Print & Embroidery</div>
                         <div class="text-success">Qty: 0</div>
                         <div class="text-danger">Balance: 0</div>
                     </div>
@@ -120,36 +300,71 @@
                 </div>
             </div>
 
-            <!-- Orders Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-light">
+
+            <div class="table-responsive table-wrapper">
+                <table class="table table-bordered table-stripeds table-hovers order-table">
+                    <thead class=" sticky-top text-white">
+                        {{-- Header --}}
                         <tr>
-                            <th>SL</th>
-                            <th>Buyer</th>
-                            <th style="min-width: 160px">Brand / Customer</th>
-                            <th>Style No</th>
-                            <th style="width: 130px;min-width: 130px">Order / PO No</th>
-                            <th style="width: 130px;min-width: 130px">Order Qty</th>
-                            <th style="width: 140px;min-width: 140px">Shipment Date</th>
+                            <th class="sticky-col col-sl">SL</th>
+                            <th class="sticky-col col-buyer">Buyer</th>
+                            <th class="sticky-col col-brand">Brand / Customer</th>
+                            <th class="sticky-col col-style">Style No</th>
+                            <th class="sticky-col col-order">Order / PO No</th>
+                            <th class="sticky-col col-qty">Order Qty</th>
+
+                            <!-- New output columns to the right of Order Qty -->
+                            <th>Cutting</th>
+                            <th>Print &amp; Emb</th>
+                            <th>Sewing Output</th>
+                            <th>Packing</th>
+                            <th>Shipped</th>
+
+                            <th>Shipment Date</th>
                             <th>Fabrication</th>
                             <th>Remarks</th>
+                            <th>P.I No</th>
                             <th>Status</th>
-                            <th style="width: 140px;min-width: 140px">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="table-hover">
-                        @forelse($orderDetails as $i => $order)
-                        <tr data-bs-toggle="collapse" data-bs-target="#items_{{ $order->id }}" class="accordion-toggle">
-                            <td>{{ $orderDetails->firstItem() + $i }}</td>
-                            <td>{{ $order->buyer_name ?? '--' }}</td>
-                            <td>{{ $order->company_name ?? '--' }}</td>
-                            <td>{{ $order->style_no ?? '--' }}</td>
-                            <td>{{ $order->order_no ?? '--' }}</td>
-                            <td>{{ number_format($order->total_qty) }}</td>
+
+                    <tbody>
+                    @forelse($orderDetails as $i => $order)
+                        <tr>
+                            {{-- SL + 3 DOT --}}
+                            <td class="sticky-col col-sl">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ $orderDetails->firstItem() + $i }}</span>
+
+                                    {{-- REPLACED: dropdown -> action button that opens a popup modal --}}
+                                    <div class="no-collapse">
+                                        <button type="button"
+                                            class="text-dark btn btn-link p-0 action-trigger"
+                                            data-view-modal="#viewModal_{{ $order->id }}"
+                                            data-edit-url="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}"
+                                            data-delete-url="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}"
+                                            title="Actions">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="sticky-col col-buyer">{{ $order->buyer_name ?? '--' }}</td>
+                            <td class="sticky-col col-brand">{{ $order->company_name ?? '--' }}</td>
+                            <td class="sticky-col col-style">{{ $order->style_no ?? '--' }}</td>
+                            <td class="sticky-col col-order">{{ $order->order_no ?? '--' }}</td>
+                            <td class="sticky-col col-qty">{{ number_format($order->total_qty) }}</td>
+                            <td>{{ number_format($order->getCutQty() ?? 0) }}</td>
+                            <td>{{ number_format($order->print_emb_output ?? $order->print_emb ?? 0) }}</td>
+                            <td>{{ number_format($order->getSewingQty() ?? 0) }}</td>
+                            <td>{{ number_format($order->packing_output ?? $order->packing ?? 0) }}</td>
+                            <td>{{ number_format($order->shipped_qty ?? $order->shipped ?? 0) }}</td>
+
                             <td>{{ $order->shipment_date?->format('d.m.Y') ?? '--' }}</td>
                             <td>{{ $order->fabrication ?? '--' }}</td>
                             <td>{{ $order->remarks ?? '--' }}</td>
+                            <td>{{ $order?->piItem?->pi?->pi_no ?? '--' }}</td>
                             <td>
                                 @php
                                     $statusClass = [
@@ -160,45 +375,63 @@
                                         'canceled'=>'danger'
                                     ];
                                 @endphp
-                                <span class="badge bg-{{ $statusClass[$order->status] ?? 'secondary' }}">{{ ucfirst($order->status) }}</span>
-                            </td>
-                            <td>
-                                @can('order_details.view')
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#viewModal_{{ $order->id }}"><i class="fa fa-eye"></i></a>
-                                @endcan
-                                {{-- @if(in_array($order->status,['pending','confirmed'])) --}}
-                                    @can('order_details.edit')
-                                        <a href="{{ route('admin.orderDetailsAction',['edit',$order->id]) }}" class="btn btn-sm btn-success"><i class="bx bx-edit"></i></a>
-                                    @endcan
-                                    @can('order_details.delete')
-                                        <a href="{{ route('admin.orderDetailsAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="bx bx-trash"></i></a>
-                                    @endcan
-                                {{-- @endif --}}
+                                <span class="badge bg-{{ $statusClass[$order->status] ?? 'secondary' }} text-white">
+                                    {{ ucfirst($order->status) }}
+                                </span>
                             </td>
                         </tr>
-
-                        @empty
-                        <tr><td colspan="12" class="text-center text-muted">No order details found</td></tr>
-                        @endforelse
+                    @empty
+                        <tr>
+                            <td colspan="16" class="text-center text-muted">No order details found</td>
+                        </tr>
+                    @endforelse
                     </tbody>
                 </table>
-
-                {{ $orderDetails->links('pagination') }}
+                <div class="d-flex justify-content-end mt-3">
+                    {{ $orderDetails->withQueryString()->links('pagination') }}
+                </div>
             </div>
+
         </div>
     </div>
 </div>
 
 @include(adminTheme().'merchandising.orderDetails.details')
+
+{{-- ADDED: centralized Action Modal (small popup) --}}
+<div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-2">
+        <div class="list-group">
+          <button type="button" class="list-group-item list-group-item-action" id="actionViewBtn">
+            <i class="fa fa-eye"></i> View
+          </button>
+          <a href="#" class="list-group-item list-group-item-action" id="actionEditBtn">
+            <i class="bx bx-edit"></i> Edit
+          </a>
+          <a href="#" class="list-group-item list-group-item-action text-danger" id="actionDeleteBtn">
+            <i class="bx bx-trash"></i> Delete
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('css')
 <style>
+.main-content{
+            min-height: 80vh !important;
+            height: 100vh !important;
+        }
     .custom-card {
     background-color: #ffffff;
     border: 1px solid #e9ecef;
     border-radius: 12px;
-    padding: 20px;
+    padding: 5px;
     text-align: center;
     transition: all 0.3s ease-in-out; /* অ্যানিমেশন স্মুথ করবে */
     cursor: pointer;
@@ -217,13 +450,427 @@
     transform: scale(1.2);
     transition: transform 0.3s ease;
 }
+
+.table-wrapper{
+       max-height: 58vh;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: relative;
+    cursor: grab; /* shows draggable cursor */
+}
+
+.table-wrapper.active{
+    cursor: grabbing;
+}
+
+/* small adjustment for modal action list */
+#actionModal .list-group-item { cursor: pointer; }
+
+/* THEAD FIX */
+.order-table thead th{
+    position: sticky;
+    top: 0;
+    /* z-index: 10; */
+    /* background: #075aad; */
+}
+
+
+/* STICKY COLUMNS */
+.sticky-col{
+    position: sticky;
+    left: 0;
+    background: #ffffff;
+    z-index: 5;
+}
+
+th.sticky-col{
+    background: #7c7c7c !important;
+    z-index: 115;    }
+
+/* COLUMN WIDTH + LEFT POSITION */
+/* adjusted smaller widths and updated left offsets */
+.col-sl{ left:0;    min-width:60px;  }
+.col-buyer{ left:60px;  min-width:100px; }
+.col-brand{ left:160px; min-width:130px; }
+.col-style{ left:290px; min-width:100px; }
+.col-order{ left:390px; min-width:120px; }
+.col-qty{ left:510px;   min-width:90px;  }
+
+.filter-row th{
+    /* background:#0ce61736 !important; */
+}
+/* table + td must allow overflow */
+.order-table,
+.order-table td,
+.order-table th{
+    overflow: visible !important;
+}
+.a-dropdown-menu{
+    z-index: 99999 !important;
+    position: relative;
+    padding: 0px;
+}
+
+
+thead.sticky-top th{
+    white-space: nowrap !important
+}
+
+/* Shipment Date Dropdown Styles (Select2-like) */
+.shipment-date-dropdown {
+    position: relative;
+    width: 100%;
+}
+.shipment-dropdown-trigger {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+}
+.shipment-dropdown-trigger:hover {
+    border-color: #007bff;
+}
+.shipment-selected-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+.shipment-dropdown-arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+}
+.shipment-date-dropdown.open .shipment-dropdown-arrow {
+    transform: rotate(180deg);
+}
+.shipment-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 2px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.175);
+    min-width: 180px;
+}
+.shipment-date-dropdown.open .shipment-dropdown-menu {
+    display: block;
+}
+.shipment-tree-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 5px 0;
+    font-size: 12px;
+}
+.shipment-year-item {
+    margin-bottom: 2px;
+}
+.shipment-year-header,
+.shipment-month-header,
+.shipment-date-item {
+    padding: 6px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.shipment-year-header:hover,
+.shipment-month-header:hover,
+.shipment-date-item:hover {
+    background-color: #f5f5f5;
+}
+.shipment-radio {
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+.shipment-months-container {
+    margin-left: 15px;
+}
+.shipment-dates-container {
+    margin-left: 30px;
+}
+.shipment-toggle-icon {
+    font-size: 10px;
+    transition: transform 0.2s;
+    width: 10px;
+}
+.shipment-toggle-icon.expanded {
+    transform: rotate(90deg);
+}
+.shipment-year-header.selected,
+.shipment-month-header.selected,
+.shipment-date-item.selected {
+    background-color: #007bff;
+    color: white;
+}
+.shipment-year-header.selected:hover,
+.shipment-month-header.selected:hover,
+.shipment-date-item.selected:hover {
+    background-color: #0056b3;
+}
 </style>
 @endpush
 
 @push('js')
 <script>
-    $(document).on('click', '.no-collapse', function(e){
-        e.stopPropagation();
+document.addEventListener('DOMContentLoaded', function () {
+    // 1) Action modal population + behaviors
+    document.querySelectorAll('.action-trigger').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var viewModal = this.getAttribute('data-view-modal');
+            var editUrl = this.getAttribute('data-edit-url');
+            var deleteUrl = this.getAttribute('data-delete-url');
+
+            // set edit link
+            var editBtn = document.getElementById('actionEditBtn');
+            editBtn.setAttribute('href', editUrl);
+
+            // set delete link (use click handler to confirm)
+            var deleteBtn = document.getElementById('actionDeleteBtn');
+            deleteBtn.setAttribute('data-delete-url', deleteUrl);
+
+            // store view modal selector on the view button
+            var viewBtn = document.getElementById('actionViewBtn');
+            viewBtn.setAttribute('data-view-modal', viewModal);
+
+            // show action modal
+            $('#actionModal').modal('show');
+        });
     });
+
+    // when "View" clicked: hide action modal and open the per-row view modal
+    document.getElementById('actionViewBtn').addEventListener('click', function(){
+        var vm = this.getAttribute('data-view-modal');
+        $('#actionModal').modal('hide');
+        if(vm){
+            // small timeout to avoid modal stacking issues
+            setTimeout(function(){ $(vm).modal('show'); }, 200);
+        }
+    });
+
+    // when "Delete" clicked: confirm then navigate
+    document.getElementById('actionDeleteBtn').addEventListener('click', function(e){
+        var url = this.getAttribute('data-delete-url');
+        if(!url) return;
+        if(confirm('Are you sure?')){
+            window.location.href = url;
+        }
+    });
+
+    // 2) Drag-to-scroll for .table-wrapper (mouse + touch)
+    var slider = document.querySelector('.table-wrapper');
+    if(slider){
+        var isDown = false;
+        var startX, scrollLeft;
+
+        slider.addEventListener('mousedown', function(e){
+            isDown = true;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+            e.preventDefault();
+        });
+        slider.addEventListener('mouseleave', function(){
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mouseup', function(){
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mousemove', function(e){
+            if(!isDown) return;
+            e.preventDefault();
+            var x = e.pageX - slider.offsetLeft;
+            var walk = (x - startX) * 1; // scroll-fast factor
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+        // touch support
+        slider.addEventListener('touchstart', function(e){
+            startX = e.touches[0].pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        }, {passive: true});
+        slider.addEventListener('touchmove', function(e){
+            var x = e.touches[0].pageX - slider.offsetLeft;
+            var walk = (x - startX) * 1;
+            slider.scrollLeft = scrollLeft - walk;
+        }, {passive: true});
+    }
+
+    // 3) Shipment Date Dropdown (Select2-like with collapsible tree)
+    (function initShipmentDateDropdown() {
+        var dropdown = document.getElementById('shipmentDateDropdown');
+        if (!dropdown) return;
+
+        var trigger = dropdown.querySelector('.shipment-dropdown-trigger');
+        var selectedText = dropdown.querySelector('.shipment-selected-text');
+
+        // Restore selected state on page load
+        var selectedYear = document.getElementById('shipment_year').value;
+        var selectedMonth = document.getElementById('shipment_month').value;
+        var selectedDate = document.getElementById('shipment_date').value;
+
+        // Update display text based on selection
+        function updateDisplayText() {
+            var year = document.getElementById('shipment_year').value;
+            var month = document.getElementById('shipment_month').value;
+            var date = document.getElementById('shipment_date').value;
+            
+            if (date) {
+                var dateObj = new Date(date);
+                var day = dateObj.getDate();
+                var monthName = dateObj.toLocaleString('en', { month: 'short' });
+                var yearNum = dateObj.getFullYear();
+                selectedText.textContent = day + ' ' + monthName + ' ' + yearNum;
+            } else if (month) {
+                var parts = month.split('-');
+                var monthDate = new Date(parts[0], parts[1] - 1);
+                var monthName = monthDate.toLocaleString('en', { month: 'short' });
+                selectedText.textContent = monthName + ' ' + parts[0];
+            } else if (year) {
+                selectedText.textContent = year;
+            } else {
+                selectedText.textContent = 'All';
+            }
+        }
+        updateDisplayText();
+
+        // Toggle dropdown
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        // Handle radio button selection
+        document.querySelectorAll('.shipment-radio').forEach(function(radio) {
+            radio.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var value = this.value;
+                var parts = value.split(':');
+                var type = parts[0];
+                var val = parts[1];
+
+                // Clear all selections
+                document.querySelectorAll('.shipment-year-header, .shipment-month-header, .shipment-date-item').forEach(function(el) {
+                    el.classList.remove('selected');
+                });
+
+                // Set hidden inputs based on type
+                if (type === 'year') {
+                    document.getElementById('shipment_year').value = val;
+                    document.getElementById('shipment_month').value = '';
+                    document.getElementById('shipment_date').value = '';
+                    this.closest('.shipment-year-header').classList.add('selected');
+                } else if (type === 'month') {
+                    document.getElementById('shipment_year').value = '';
+                    document.getElementById('shipment_month').value = val;
+                    document.getElementById('shipment_date').value = '';
+                    this.closest('.shipment-month-header').classList.add('selected');
+                } else if (type === 'date') {
+                    document.getElementById('shipment_year').value = '';
+                    document.getElementById('shipment_month').value = '';
+                    document.getElementById('shipment_date').value = val;
+                    this.closest('.shipment-date-item').classList.add('selected');
+                }
+
+                updateDisplayText();
+                dropdown.classList.remove('open');
+            });
+        });
+
+        // Toggle year expand/collapse (click on header, not radio)
+        document.querySelectorAll('.shipment-year-header').forEach(function(header) {
+            header.addEventListener('click', function(e) {
+                if (e.target.classList.contains('shipment-radio')) return;
+                e.stopPropagation();
+                var container = this.nextElementSibling;
+                var icon = this.querySelector('.shipment-toggle-icon');
+                
+                if (container) {
+                    if (container.style.display === 'none' || !container.style.display) {
+                        container.style.display = 'block';
+                        icon.classList.add('expanded');
+                    } else {
+                        container.style.display = 'none';
+                        icon.classList.remove('expanded');
+                    }
+                }
+            });
+        });
+
+        // Toggle month expand/collapse (click on header, not radio)
+        document.querySelectorAll('.shipment-month-header').forEach(function(header) {
+            header.addEventListener('click', function(e) {
+                if (e.target.classList.contains('shipment-radio')) return;
+                e.stopPropagation();
+                var container = this.nextElementSibling;
+                var icon = this.querySelector('.shipment-toggle-icon');
+                
+                if (container) {
+                    if (container.style.display === 'none' || !container.style.display) {
+                        container.style.display = 'block';
+                        icon.classList.add('expanded');
+                    } else {
+                        container.style.display = 'none';
+                        icon.classList.remove('expanded');
+                    }
+                }
+            });
+        });
+
+        // Restore selected state and expand parents if needed
+        if (selectedDate) {
+            var radio = document.querySelector('.shipment-radio[value="date:' + selectedDate + '"]');
+            if (radio) {
+                radio.checked = true;
+                radio.closest('.shipment-date-item').classList.add('selected');
+                var monthContainer = radio.closest('.shipment-months-container');
+                var yearContainer = radio.closest('.shipment-year-item').querySelector('.shipment-months-container');
+                if (monthContainer) {
+                    monthContainer.style.display = 'block';
+                    monthContainer.previousElementSibling.querySelector('.shipment-toggle-icon').classList.add('expanded');
+                }
+                if (yearContainer) {
+                    yearContainer.style.display = 'block';
+                    yearContainer.previousElementSibling.querySelector('.shipment-toggle-icon').classList.add('expanded');
+                }
+            }
+        } else if (selectedMonth) {
+            var radio = document.querySelector('.shipment-radio[value="month:' + selectedMonth + '"]');
+            if (radio) {
+                radio.checked = true;
+                radio.closest('.shipment-month-header').classList.add('selected');
+                var yearContainer = radio.closest('.shipment-year-item').querySelector('.shipment-months-container');
+                if (yearContainer) {
+                    yearContainer.style.display = 'block';
+                    yearContainer.previousElementSibling.querySelector('.shipment-toggle-icon').classList.add('expanded');
+                }
+            }
+        } else if (selectedYear) {
+            var radio = document.querySelector('.shipment-radio[value="year:' + selectedYear + '"]');
+            if (radio) {
+                radio.checked = true;
+                radio.closest('.shipment-year-header').classList.add('selected');
+            }
+        }
+    })();
+});
 </script>
 @endpush
+
+

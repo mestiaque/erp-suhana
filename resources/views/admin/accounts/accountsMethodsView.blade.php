@@ -47,7 +47,7 @@
                          <i class="bx bxs-badge-dollar"></i>
                      </div>
                      <span class="sub-title">{{$method->name}} </span>
-                     <h3>BDT {{priceFormat($method->amount)}} <span class="badge"></h3>
+                     <h3>BDT {{priceFormat($availableBalance)}} <span class="badge"></h3>
                      <!--<h3>USD {{priceFormat($method->usd_amount)}} <span class="badge"></h3>-->
                  </div>
             </div>
@@ -123,7 +123,7 @@
 
                                             @if($tran->purchase)
                                                <b>Invoice:</b> {{$tran->purchase->order_no}}
-                                               <b>Supplier:</b> {{$tran->purchase->supplier_name}}
+                                               <b>Creditor:</b> {{$tran->purchase->supplier_name}}
                                             @else
                                             <span>N/A</span>
                                             @endif
@@ -140,7 +140,7 @@
                                             @elseif($tran->type==1)
                                                 Deposit
                                             @elseif($tran->type==3)
-                                                Supplier Bill
+                                                Creditor Bill
                                             @elseif($tran->type==4)
                                                 Transfer Balance
                                             @elseif($tran->type==5)

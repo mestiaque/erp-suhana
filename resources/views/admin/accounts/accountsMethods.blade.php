@@ -102,8 +102,7 @@
                                 @endif
                             </td>
                             <td>
-                                <b>Balane:</b> BDT {{priceFormat($method->amount)}} <br>
-                                <!--<b>Balane:</b> USD {{priceFormat($method->usd_amount)}} <br>-->
+                                <b>Balance:</b> BDT {{priceFormat($method->current_balance)}} <br>
                                 <span>{!!$method->description!!}</span>
                             </td>
                             <td class="text-center">
@@ -126,6 +125,12 @@
                                     <a href="{{route('admin.accountsAction', ['view', $method->id])}}"
                                     class="btn-custom yellow">
                                         <i class="bx bx-show"></i>
+                                    </a>
+                                    @endcan
+                                    @can('accounts.view')
+                                    <a href="{{route('admin.accountsAction', ['daily-account-summary', $method->id])}}"
+                                    class="btn-custom green ">
+                                        <i class="bx bx-notepad test-white"></i>
                                     </a>
                                     @endcan
 

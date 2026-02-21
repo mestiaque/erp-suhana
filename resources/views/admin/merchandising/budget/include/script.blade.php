@@ -251,6 +251,7 @@ $(document).ready(function(){
     // On change
     $(document).on('change', '#pi_id', function () {
         let selectedJson = getSelectedPiJson();
+        console.log(selectedJson);
         $('.buyer_name').val(selectedJson.buyer_name)
         $('.pi_value').val(parseFloat(selectedJson.total_bill).toFixed(2));
         $('.summary_pi_value').val(parseFloat(selectedJson.total_bill).toFixed(2));
@@ -258,6 +259,9 @@ $(document).ready(function(){
         $('.pi_total_qty').val(selectedJson.total_qty)
         $('.order_count').val(selectedJson.order_count)
         $('.style_count').val(selectedJson.style_count)
+        $('.item_name').val(selectedJson.item_name)
+        $('.shipment_date').val(selectedJson.shipment_date)
+        console.log(selectedJson.shipment_date);
     });
 </script>
 

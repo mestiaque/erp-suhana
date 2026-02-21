@@ -192,31 +192,22 @@ return [
             ],
 
         ],
+
         'Production Management' =>[
             'production_planning' => [
-                'label'       => 'Production Planning',
+                'label'       => 'Master Planning',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
                     'edit'   => 'Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
+                    'approve' => 'Approve',
                     'all'    => 'All',
                 ],
             ],
-            'daily_production' => [
-                'label'       => 'Daily Production',
-                'permissions' => [
-                    'list'   => 'List',
-                    'add'    => 'Create',
-                    'edit'   => 'Edit',
-                    'view'   => 'View',
-                    'delete' => 'Delete',
-                    'all'    => 'All',
-                ],
-            ],
-            'production_list' => [
-                'label'       => 'Production List',
+            'floor_planning' => [
+                'label'       => 'Floor Planning',
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -237,6 +228,7 @@ return [
                     'all'    => 'All',
                 ],
             ],
+<<<<<<< HEAD
             'finishing' => [
                 'label'       => 'Finishing List',
                 'permissions' => [
@@ -294,6 +286,10 @@ return [
             ],
             'dyeing_booking' => [
                 'label'       => 'Dyeing (Procurement)',
+=======
+            'sweing' => [
+                'label'       => 'Sweing',
+>>>>>>> master
                 'permissions' => [
                     'list'   => 'List',
                     'add'    => 'Create',
@@ -304,6 +300,84 @@ return [
                 ],
             ],
         ],
+
+        'Procurement Management' =>[
+            'yarn_booking' => [
+                'label'       => 'Yarn Booking',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'knitting_booking' => [
+                'label'       => 'Knitting Booking',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'dyeing_booking' => [
+                'label'       => 'Dyeing Booking',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'yarn_receive' => [
+                'label'       => 'Yarn Receive',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'knitting_receive' => [
+                'label'       => 'Knitting Receive',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'dyeing_receive' => [
+                'label'       => 'Dyeing Receive',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'pi_wise_fabric_status' => [
+                'label'       => 'PI Wise Fabric Status',
+                'permissions' => [
+                    'list' => 'List',
+                    'view' => 'View',
+                    'all'  => 'All',
+                ],
+            ],
+        ],
+
 
         'Accounts Management' =>[
             'expenses' => [
@@ -549,15 +623,5 @@ return [
             ],
 
         ],
-
-        // 'Development' =>[
-        //     'dev' => [
-        //         'label'       => 'Development',
-        //         'permissions' => [
-        //             'all'    => 'All',
-        //         ],
-        //     ]
-
-        // ],
     ],
 ];

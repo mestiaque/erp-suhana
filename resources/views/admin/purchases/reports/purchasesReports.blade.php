@@ -50,7 +50,7 @@ span b {
                     <div class="col-md-6 mb-1">
                         <div class="input-group">
                             <select name="supplier_id" class="form-control select2">
-                                <option value="">-- Select Supplier --</option>
+                                <option value="">-- Select Creditor --</option>
                                 @foreach($suppliers as $supplier)
                                 <option value="{{$supplier->id}}" {{request()->supplier_id==$supplier->id?'selected':''}}>{{$supplier->name}} {{$supplier->company_name?'- '.$supplier->company_name:''}}</option>
                                 @endforeach
@@ -94,7 +94,7 @@ span b {
                     <span>
                         <b>Invoice:</b><a href="{{ route('admin.purchasesOrdersAction',['view',$order->id]) }}" target="_blank">{{$order->order_no}}</a>
                         <b>Date:</b> {{$order->created_at?->format('d-m-Y')}}
-                        <b>Supplier:</b>
+                        <b>Creditor:</b>
                         @if($order->supplier)
                         {{$order->supplier->name}} {{$order->supplier->company_name?'- '.$order->supplier->company_name:''}}
                         @endif

@@ -2753,6 +2753,67 @@
             "install-path": "../monolog/monolog"
         },
         {
+            "name": "mshadydev/zkteco-php",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mshadydev/zkteco-php.git",
+                "reference": "c64a470c476142672e1be1d15601ef790cc70ac4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mshadydev/zkteco-php/zipball/c64a470c476142672e1be1d15601ef790cc70ac4",
+                "reference": "c64a470c476142672e1be1d15601ef790cc70ac4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-sockets": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^9.0|^10.0"
+            },
+            "time": "2026-01-10T17:49:41+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-4": {
+                    "MshadyDev\\ZKTeco\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mohamed Shady",
+                    "email": "support@itechnologyeg.com",
+                    "homepage": "https://itechnologyeg.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A comprehensive PHP library for connecting to and extracting data from ZKTeco fingerprint attendance devices. Supports user management, attendance records extraction, and device information retrieval.",
+            "homepage": "https://github.com/mshadydev/zkteco-php",
+            "keywords": [
+                "Fingerprint",
+                "attendance",
+                "biometric",
+                "php",
+                "time-attendance",
+                "zklib",
+                "zkteco"
+            ],
+            "support": {
+                "issues": "https://github.com/mshadydev/zkteco-php/issues",
+                "source": "https://github.com/mshadydev/zkteco-php"
+            },
+            "install-path": "../mshadydev/zkteco-php"
+        },
+        {
             "name": "myclabs/deep-copy",
             "version": "1.13.4",
             "version_normalized": "1.13.4.0",

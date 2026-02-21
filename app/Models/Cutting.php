@@ -11,7 +11,17 @@ class Cutting extends Model
 
     protected $table = 'cuttings';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'pi_id',
+        'pi_no',
+        'style_no',
+        'cutting_qty',
+        'reject_qty',
+        'cutting_date',
+        'remarks',
+        'created_by',
+        'updated_by'
+    ];
 
     // তারিখগুলোকে অটোমেটিক কাস্ট করার জন্য (২০২৫ স্ট্যান্ডার্ড)
     protected $casts = [
@@ -28,5 +38,10 @@ class Cutting extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

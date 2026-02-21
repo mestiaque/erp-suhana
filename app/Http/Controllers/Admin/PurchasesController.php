@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use DB;
 use Str;
-use Auth;
 use File;
 use Hash;
 use Image;
@@ -16,17 +15,20 @@ use App\Models\User;
 use App\Models\Media;
 use App\Models\Order;
 use Redirect,Response;
+use App\Models\Expense;
 use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\Transaction;
+use App\Models\CreditorBill;
 use Illuminate\Http\Request;
+use App\Models\MeterialStock;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseReceive;
 use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseReceiveItem;
 use App\Models\PurchaseRequisition;
-use App\Models\MeterialStock;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\PurchaseRequisitionItem;
 
 class PurchasesController extends Controller
@@ -652,6 +654,7 @@ class PurchasesController extends Controller
               $q->orWhere('email','LIKE','%'.$r->search.'%');
               $q->orWhere('mobile','LIKE','%'.$r->search.'%');
               $q->orWhere('company_name','LIKE','%'.$r->search.'%');
+              $q->orWhere('employee_id','LIKE','%'.$r->search.'%');
           }
           if($r->status){
             $q->where('status',$r->status=='inactive'?0:1);
@@ -674,7 +677,7 @@ class PurchasesController extends Controller
           }
 
       })
-      ->select(['id','name','email','mobile','created_at','company_name','address_line1','addedby_id','status', 'deleted_by', 'deleted_at'])
+      ->select(['id','name','email','mobile','created_at','company_name', 'balance', 'employee_id' ,'address_line1','addedby_id','status', 'deleted_by', 'deleted_at'])
         ->paginate(25)->appends([
           'search'=>$r->search,
           'status'=>$r->status,
@@ -706,7 +709,6 @@ class PurchasesController extends Controller
     {
         /* ================= CREATE SUPPLIER ================= */
         if ($action == 'create' && $r->isMethod('post')) {
-
             $r->validate([
                 'name'         => 'required|max:100',
                 'company_name' => 'nullable|max:100',
@@ -738,6 +740,10 @@ class PurchasesController extends Controller
                 return redirect()->back();
             }
 
+            $year = date('y');
+            $last = User::filterByType('supplier') ->where('employee_id', 'like', "$year%") ->orderByDesc('employee_id') ->value('employee_id');
+            $serial = $year . str_pad(($last ? substr($last, 2) + 1 : 1), 2, '0', STR_PAD_LEFT);
+
             // Create new supplier
             $password = Str::random(8);
             $user = new User();
@@ -751,12 +757,12 @@ class PurchasesController extends Controller
             $user->address_line1 = $r->address;
             $user->password_show = $password;
             $user->password      = Hash::make($password);
-
+            $user->employee_id   = $serial;
             // Set supplier type
             $user->setTypes('supplier');
             $user->save();
 
-            Session()->flash('success', 'Supplier registered successfully!');
+            Session()->flash('success', 'Creditor registered successfully!');
             return redirect()->route('admin.suppliersAction', ['view', $user->id]);
         }
         /* ================= CREATE END ================= */
@@ -766,11 +772,11 @@ class PurchasesController extends Controller
         if ($action == 'restore') {
             $user = User::onlyTrashed()->filterByType('supplier')->find($id);
             if (!$user) {
-                Session()->flash('error', 'Supplier not found in trash.');
+                Session()->flash('error', 'Creditor not found in trash.');
                 return redirect()->route('admin.suppliers', ['view' => 'deleted']);
             }
             $user->restore();
-            Session()->flash('success', 'Supplier restored successfully!');
+            Session()->flash('success', 'Creditor restored successfully!');
             return redirect()->route('admin.suppliers');
         }
 
@@ -778,7 +784,7 @@ class PurchasesController extends Controller
         if ($action == 'delete') {
             $user = User::filterByType('supplier')->find($id);
             if (!$user) {
-                Session()->flash('error', 'Supplier not found.');
+                Session()->flash('error', 'Creditor not found.');
                 return redirect()->route('admin.suppliers');
             }
 
@@ -787,14 +793,14 @@ class PurchasesController extends Controller
             $user->deleted_by = Auth::id();
             $user->save();
 
-            Session()->flash('success', 'Supplier soft-deleted successfully!');
+            Session()->flash('success', 'Creditor soft-deleted successfully!');
             return redirect()->route('admin.suppliers');
         }
 
         /* ================= FIND SUPPLIER ================= */
         $user = User::filterByType('supplier')->whereIn('status', [0,1])->find($id);
         if (!$user && $action != 'create') {
-            Session()->flash('error', 'Supplier not found.');
+            Session()->flash('error', 'Creditor not found.');
             return redirect()->route('admin.suppliers');
         }
 
@@ -802,9 +808,338 @@ class PurchasesController extends Controller
         if ($action == 'view') {
             $orders = $user->orders()->where('status', 'approved')->paginate(10);
             $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
-            $accountMethods = Attribute::latest()->where('type', 10)->where('status', 'active')->where('addedby_id', Auth::id())->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('addedby_id',Auth::id())->where('status', 'active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
             return view(adminTheme().'suppliers.viewUser', compact('user','orders','transactions','accountMethods','paymentMethods'));
+        }
+        /* ================= ADD BILL SUPPLIER ================= */
+        if ($action == 'bill-entry') {
+            $user = User::findOrFail($id);
+
+            // ১. বিল এবং পেমেন্ট ডাটা সংগ্রহ (Standardized for merging)
+            // $bills = $user->creditorBill()->get()->map(function($item) {
+            //     return (object) [
+            //         'date'    => $item->created_at,
+            //         'title'   => $item->title,
+            //         'note'    => $item->description,
+            //         'credit'  => $item->amount,
+            //         'debit'   => 0,
+            //         'type'    => 'bill'
+            //     ];
+            // });
+
+            $bills = $user->creditorBill()->get()->map(function($item) {
+                $item->type = 'bill';
+                $item->credit = $item->amount;
+                $item->debit = 0;
+                $item->date = $item->created_at;
+                $item->title = $item->title;
+                $item->note = $item->description;
+                return $item; // এখনো Eloquent মডেল
+            });
+
+            // $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
+            //     return (object) [
+            //         'date'    => $item->created_at,
+            //         'title'   => $item->transection_id,
+            //         'note'    => $item->billing_note,
+            //         'credit'  => 0,
+            //         'debit'   => $item->amount,
+            //         'type'    => 'payment'
+            //     ];
+            // });
+
+            $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
+                $item->type = 'payment';
+                $item->credit = 0;
+                $item->debit = $item->amount;
+                $item->date = $item->created_at;
+                $item->title = $item->transection_id;
+                $item->note = $item->billing_note;
+                return $item; // এখনো Eloquent মডেল
+            });
+
+            // ২. মার্জ এবং সর্ট করা
+            $merged = $bills->merge($payments)->sortByDesc('date');
+
+            // ৩. ম্যানুয়াল পেজিনেশন (১০ টি করে প্রতি পেজে)
+            $perPage = 20;
+            $page = request()->get('page', 1);
+            $ledgerEntries = new \Illuminate\Pagination\LengthAwarePaginator(
+                $merged->forPage($page, $perPage),
+                $merged->count(),
+                $perPage,
+                $page,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+
+            // ৪. অন্যান্য মেথড সংগ্রহ
+            $paymentMethods = Attribute::where(['type' => 9, 'status' => 'active'])->latest()->get(['id','name']);
+            $accountMethods = Attribute::where(['type' => 10, 'status' => 'active'])->where('addedby_id',Auth::id())->latest()->get(['id','name','amount']);
+            $totalPaid = Transaction::where('user_id', $user->id)->where('type', 3)->sum('amount');
+
+            return view(adminTheme().'suppliers.billEntry', compact('user', 'ledgerEntries', 'accountMethods', 'paymentMethods', 'totalPaid'));
+        }
+
+
+        if ($action == 'bill-entry-post') {
+
+            // Validate the request (optional but recommended)
+            $r->validate([
+                'title' => 'required|string|max:255',
+                'amount' => 'required|numeric|min:0',
+                'description' => 'nullable|string|max:1000',
+            ]);
+
+            // Create the transaction
+            $bill = CreditorBill::create([
+                'title'        => $r->title,
+                'creditor_id'  => $id,
+                'amount'       => $r->amount,
+                'description'  => $r->description,
+                'created_by'   => auth()->id(),
+            ]);
+
+            // Increment user's balance
+            $user = User::findOrFail($id);
+            $user->increment('balance', $r->amount);
+
+            // Return the view with all necessary data
+            return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id]) ->with('success', 'Bill added successfully');
+        }
+
+        /* ================= BILL ENTRY EDIT ================= */
+        if ($action == 'bill-entry-edit') {
+            $bill = CreditorBill::findOrFail($id);
+            return view(adminTheme().'suppliers.bill-payments.edit-bill', compact('bill'));
+        }
+
+        /* ================= BILL ENTRY UPDATE ================= */
+        if ($action == 'bill-entry-update' && $r->isMethod('post')) {
+            $r->validate([
+                'title' => 'required|string|max:255',
+                'amount' => 'required|numeric|min:0',
+                'description' => 'nullable|string|max:1000',
+            ]);
+
+            $bill = CreditorBill::findOrFail($id);
+            $oldAmount = $bill->amount;
+
+            $bill->update([
+                'title'       => $r->title,
+                'amount'      => $r->amount,
+                'description' => $r->description,
+                'created_by'  => auth()->id(),
+            ]);
+
+            // Adjust user balance
+            $user = User::findOrFail($bill->creditor_id);
+            $user->balance = ($user->balance - $oldAmount) + $r->amount;
+            $user->save();
+
+            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+                            ->with('success', 'Bill updated successfully!');
+        }
+
+        /* ================= BILL ENTRY DELETE ================= */
+        if ($action == 'bill-entry-delete') {
+            $bill = CreditorBill::findOrFail($id);
+            $user = User::findOrFail($bill->creditor_id);
+
+            // Deduct bill amount from user balance
+            $user->balance -= $bill->amount;
+            $user->save();
+
+            $bill->delete();
+
+            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+                            ->with('success', 'Bill deleted successfully!');
+        }
+
+        /* ================= BILL PAYMENT CREATE ================= */
+        if ($action == 'bill-payment-create') {
+            $user = User::findOrFail($id);
+
+            $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('addedby_id',Auth::id())->where('status', 'active')->select(['id','name','amount'])->get();
+            $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
+
+            return view(adminTheme().'suppliers.bill-payments.create', compact('user','paymentMethods','accountMethods','transactions'));
+        }
+
+        /* ================= BILL PAYMENT STORE ================= */
+        if ($action == 'bill-payment-store' && $r->isMethod('post')) {
+
+            $r->validate([
+                'pay_amount' => 'required|numeric|min:0.01',
+                'account_id' => 'required',
+                'payment_method_id' => 'required',
+                'attachment' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,pdf|max:2048',
+                'note' => 'nullable|string|max:500'
+            ]);
+
+            $user = User::findOrFail($id);
+            $pay_amount = floatval($r->pay_amount);
+
+            $account = Attribute::findOrFail($r->account_id);
+            $paymentMethod = Attribute::findOrFail($r->payment_method_id);
+
+            if($pay_amount > $account->amount){
+                return redirect()->back()->with('error','Insufficient account balance!');
+            }
+
+            // Create transaction
+            $transactionData = [
+                "src_id"            => $user->id,
+                "user_id"           => $user->id,
+                "billing_name"      => $user?->name ?? null,
+                "billing_mobile"    => $user?->mobile ?? null,
+                "billing_email"     => $user?->email ?? null,
+                "billing_address"   => $user?->address ?? null,
+                "billing_note"      => $r->note ?? null,
+                "type"              => 3,
+                "account_id"        => $account->id ?? null,
+                "transection_id"    => date('Ymd') . random_int(1000, 9999),
+                "payment_method"    => $paymentMethod->name,
+                "payment_method_id" => $paymentMethod->id,
+                "amount"            => $pay_amount,
+                "balance"           => $account->amount - $pay_amount,
+                "currency"          => "BDT",
+                "status"            => "success",
+                "addedby_id"        => Auth::user()->id,
+            ];
+            $transaction = Transaction::create($transactionData);
+
+            // Deduct account balance
+            $account->amount -= $pay_amount;
+            $account->save();
+
+            // Deduct user balance
+            $user->balance = max(0, $user->balance - $pay_amount);
+            $user->save();
+            // dd(Attribute::where('type', 0)->first()->id);
+
+            $expense = Expense::create([
+                "category_id"     => 0,
+                "method_id"       => $paymentMethod->id,
+                "account_id"      => $account->id,
+                "branch_id"       => 542,
+                "title"           => "Supplier Bill Payment",
+                "amount"          => $pay_amount,
+                "description"     => $r->note,
+                "company_name"    => $user->name,
+                "receiver_name"   => $user->name,
+                "receiver_mobile" => $user->mobile,
+                "status"          => "active",
+                "addedby_id"      => Auth::id(),
+                "created_at"      => now(),
+            ]);
+
+            // Upload attachment if exists
+            if($r->hasFile('attachment')){
+                uploadFile($r->attachment, $transaction->id, 9, 1);
+            }
+
+            return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id])
+                            ->with('success', 'Payment made successfully!');
+        }
+
+        /* ================= BILL PAYMENT EDIT ================= */
+        if ($action == 'bill-payment-edit') {
+            $transaction = Transaction::findOrFail($id);
+            $user = User::findOrFail($transaction->user_id);
+
+            $paymentMethods = Attribute::latest()->where('type', 9)->where('status', 'active')->select(['id','name','amount'])->get();
+            $accountMethods = Attribute::latest()->where('type', 10)->where('addedby_id',Auth::id())->where('status', 'active')->select(['id','name','amount'])->get();
+
+            return view(adminTheme().'suppliers.bill-payments.edit', compact('transaction','user','paymentMethods','accountMethods'));
+        }
+
+        /* ================= BILL PAYMENT UPDATE ================= */
+        if ($action == 'bill-payment-update' && $r->isMethod('post')) {
+            $r->validate([
+                'pay_amount' => 'required|numeric|min:0.01',
+                'account_id' => 'required',
+                'payment_method_id' => 'required',
+                'attachment' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,pdf|max:2048',
+                'note' => 'nullable|string|max:500'
+            ]);
+
+            $transaction = Transaction::findOrFail($id);
+            $user = User::findOrFail($transaction->user_id);
+
+            $old_amount = floatval($transaction->amount);
+            $new_amount = floatval($r->pay_amount);
+
+            // Adjust user balance
+            $user->balance = ($user->balance + $old_amount) - $new_amount;
+            $user->save();
+
+            // Update account & payment method
+            $oldAccountId = $transaction->account_id;
+            $newAccountId = $r->account_id;
+
+            $account = Attribute::findOrFail($newAccountId);
+            $paymentMethod = Attribute::findOrFail($r->payment_method_id);
+
+            $available = $account->amount;
+            if ((int) $oldAccountId === (int) $newAccountId) {
+                $available += $old_amount;
+            }
+            if ($new_amount > $available) {
+                return redirect()->back()->with('error','Insufficient account balance!');
+            }
+
+            if ($oldAccountId) {
+                $oldAccount = Attribute::find($oldAccountId);
+                if ($oldAccount) {
+                    $oldAccount->amount += $old_amount;
+                    $oldAccount->save();
+                }
+            }
+
+            $account->amount -= $new_amount;
+            $account->save();
+
+            $transaction->update([
+                "amount"            => $new_amount,
+                "account_id"        => $account->id,
+                "payment_method"    => $paymentMethod->name,
+                "payment_method_id" => $paymentMethod->id,
+                "billing_note"      => $r->note,
+            ]);
+
+            if($r->hasFile('attachment')){
+                uploadFile($r->attachment, $transaction->id, 9, 1);
+            }
+
+            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+                            ->with('success','Payment updated successfully!');
+        }
+
+        /* ================= BILL PAYMENT DELETE ================= */
+        if ($action == 'bill-payment-delete') {
+            $transaction = Transaction::findOrFail($id);
+            $user = User::findOrFail($transaction->user_id);
+
+            // Refund user balance
+            $amount = floatval($transaction->amount);
+            $user->balance += $amount;
+            $user->save();
+
+            // Refund account balance
+            if($transaction->account_id){
+                $account = Attribute::find($transaction->account_id);
+                if($account){
+                    $account->amount += $amount;
+                    $account->save();
+                }
+            }
+
+            $transaction->delete();
+
+            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+                            ->with('success','Payment deleted successfully!');
         }
 
         /* ================= UPDATE SUPPLIER ================= */
@@ -838,7 +1173,7 @@ class PurchasesController extends Controller
             $user->setTypes('supplier');
             $user->save();
 
-            Session()->flash('success','Supplier updated successfully!');
+            Session()->flash('success','Creditor updated successfully!');
             return redirect()->back();
         }
 
@@ -905,7 +1240,7 @@ class PurchasesController extends Controller
         return view(adminTheme().'suppliers.supplierLadgers', compact('ledgerEntries', 'supplier', 'suppliers'));
     }
 
-    
+
 
     public function purchasesReports(Request $r){
 
@@ -1049,7 +1384,7 @@ class PurchasesController extends Controller
 
         // ADD COMPANY
         if ($action == 'add-supplier') {
-            $supplier = Supplier::find($r->supplier_id);
+            $supplier = User::filterByType('supplier')->where('id', $r->supplier_id)->first();
             if ($supplier) {
                 $order->supplier_id = $supplier->id;
                 $order->save();
@@ -1142,34 +1477,63 @@ class PurchasesController extends Controller
                 'note' => 'nullable',
             ]);
 
-            $supplier =User::where('supplier',true)->find($r->supplier_id);
-            if(!$supplier){
-              session()->flash('error', 'Supplier are not found');
-              return back();
+            $newSupplier = User::where('supplier', true)->find($r->supplier_id);
+            if(!$newSupplier){
+                session()->flash('error', 'Supplier not found');
+                return back();
             }
 
-            $order->supplier_id = $supplier->id;
-            $order->currency = $r->currency?:general()->currency;
-            $order->company_name = $supplier->company_name;
-            $order->supplier_name = $supplier->name;
-            $order->supplier_email = $supplier->email;
-            $order->supplier_mobile = $supplier->mobile;
-            $order->supplier_address = $supplier->address_line1;
-            $order->status = $r->status?:'pending';
+            // 1️⃣ Adjust old supplier balance if supplier changed
+            if ($order->supplier_id && $order->supplier_id != $newSupplier->id) {
+                $oldSupplier = User::find($order->supplier_id);
+                if($oldSupplier){
+                    $oldSupplier->balance -= $order->total_amount; // previous order amount minus
+                    $oldSupplier->save();
+                }
+                // add order amount to new supplier balance
+                $newSupplier->balance += $order->total_amount;
+                $newSupplier->save();
+            }
+
+            // 2️⃣ If same supplier, we can optionally adjust if amount changed
+            elseif($order->supplier_id == $newSupplier->id){
+                $amountDiff = $order->total_amount - ($r->total_amount ?? $order->total_amount);
+                $newSupplier->balance -= $amountDiff;
+                $newSupplier->save();
+            }
+
+            // 3️⃣ Update order fields
+            $order->supplier_id = $newSupplier->id;
+            $order->currency = $r->currency ?: general()->currency;
+            $order->company_name = $newSupplier->company_name;
+            $order->supplier_name = $newSupplier->name;
+            $order->supplier_email = $newSupplier->email;
+            $order->supplier_mobile = $newSupplier->mobile;
+            $order->supplier_address = $newSupplier->address_line1;
+            $order->status = $r->status ?: 'pending';
             $order->note = $r->note;
 
-            $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
             if (!$createDate->isSameDay($order->created_at)) {
                 $order->created_at = $createDate;
             }
+
             $order->save();
 
             session()->flash('success', 'Purchase Order Updated');
             return redirect()->route('admin.purchasesOrdersAction', ['view', $order->id]);
         }
 
+
         // DELETE
         if ($action == 'delete') {
+            if($order->supplier_id){
+                $supplier = User::find($order->supplier_id);
+                if($supplier){
+                    $supplier->balance -= $order->total_amount;
+                    $supplier->save();
+                }
+            }
             $order->items()->delete();
             $order->delete();
             session()->flash('success', 'Purchase Order Deleted');
@@ -1453,6 +1817,94 @@ class PurchasesController extends Controller
 
     public function billPayment(Request $r)
     {
+        /* ================= SUPPLIERS ================= */
+        $supplierQuery = User::filterByType('supplier')
+            ->whereIn('status', [0, 1]);
+
+        // creditor name filter
+        if ($r->creditor_name) {
+            $supplierQuery->where(function ($q) use ($r) {
+                $q->where('name', 'LIKE', "%{$r->creditor_name}%")
+                ->orWhere('company_name', 'LIKE', "%{$r->creditor_name}%");
+            });
+        }
+
+        // creditor code filter (employee_id)
+        if ($r->creditor_code) {
+            $supplierQuery->where('employee_id', 'LIKE', "%{$r->creditor_code}%");
+        }
+
+        $supplierIds = $supplierQuery->pluck('id');
+
+        /* ================= PAYMENTS ONLY ================= */
+        $paymentsQuery = Transaction::whereIn('user_id', $supplierIds)
+            ->where('type', 3) // supplier bill payment
+            ->with('user');
+
+        // title / transaction id filter
+        if ($r->title) {
+            $paymentsQuery->where('transection_id', 'LIKE', "%{$r->title}%");
+        }
+
+        // date range filter
+        if ($r->startDate || $r->endDate) {
+            $from = $r->startDate
+                ? Carbon::parse($r->startDate)->startOfDay()
+                : now()->startOfMonth();
+
+            $to = $r->endDate
+                ? Carbon::parse($r->endDate)->endOfDay()
+                : now();
+
+            $paymentsQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        /* ================= GET & FORMAT ================= */
+        $payments = $paymentsQuery
+            ->latest()
+            ->get()
+            ->map(function ($payment) {
+                return (object) [
+                    'type'        => 'payment',
+                    'date'        => $payment->created_at,
+                    'title'       => $payment->transection_id,
+                    'description' => $payment->billing_note,
+                    'credit'      => 0,
+                    'debit'       => $payment->amount,
+                    'user'        => $payment->user,
+                ];
+            });
+
+        /* ================= PAGINATION ================= */
+        $perPage = 20;
+        $page = request()->get('page', 1);
+
+        $ledgerEntries = new \Illuminate\Pagination\LengthAwarePaginator(
+            $payments->forPage($page, $perPage),
+            $payments->count(),
+            $perPage,
+            $page,
+            [
+                'path'  => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        /* ================= TOTAL PAID ================= */
+        $totalPaid = Transaction::whereIn('user_id', $supplierIds)
+            ->where('type', 3)
+            ->sum('amount');
+
+        return view(
+            adminTheme().'suppliers.bill-payments',
+            compact('ledgerEntries', 'totalPaid')
+        );
+    }
+
+
+
+    public function billPaymentX(Request $r)
+    {
         // Totals Count
         $totals = PurchaseOrder::selectRaw("count(*) as total")
             ->selectRaw("count(case when payment_status='due' then 1 end) as due")
@@ -1495,6 +1947,8 @@ class PurchasesController extends Controller
         return view(adminTheme().'purchases.bill-payments.index', compact('purchases','totals'));
     }
 
+
+
     public function billPaymentAction($action, $id = null)
     {
         $request = request();
@@ -1512,7 +1966,7 @@ class PurchasesController extends Controller
 
             $purchase = PurchaseOrder::findOrFail($id);
             $paymentMethods =Attribute::latest()->where('type',9)->where('status','active')->select(['id','name','amount'])->get();
-            $accountMethods =Attribute::latest()->where('type',10)->where('status','active')->where('addedby_id',Auth::id())->select(['id','name','amount'])->get();
+            $accountMethods =Attribute::latest()->where('type',10)->where('addedby_id',Auth::id())->where('status','active')->select(['id','name','amount'])->get();
             $transactions = Transaction::where('src_id', $purchase->id)->where('type', 3)->latest()->get();
 
             return view(adminTheme().'purchases.bill-payments.view', compact('purchase', 'paymentMethods', 'accountMethods', 'transactions'));
@@ -1559,19 +2013,18 @@ class PurchasesController extends Controller
             $transactionData = [
                             "src_id"            => $purchase->id,
                             "user_id"           => $purchase->supplier_id,
-
-                            "billing_name"      =>  $purchase->supplier_name ?? null,
-                            "billing_mobile"    =>  $purchase->supplier_mobile ?? null,
-                            "billing_email"     =>  $purchase->supplier_email ?? null,
-                            "billing_address"   =>  $purchase->supplier_address ?? null,
-                            "billing_note"      =>  request()->note ?? null,
+                            "billing_name"      => $purchase->supplier_name ?? null,
+                            "billing_mobile"    => $purchase->supplier_mobile ?? null,
+                            "billing_email"     => $purchase->supplier_email ?? null,
+                            "billing_address"   => $purchase->supplier_address ?? null,
+                            "billing_note"      => request()->note ?? null,
                             "type"              => 3,
                             "account_id"        => request()->account_id ?? null,
                             "transection_id"    => date('Ymd') . random_int(1000, 9999),
                             "payment_method"    => $paymentMethods->name,
                             "payment_method_id" => $paymentMethods->id,
-                            "amount"      => request()->pay_amount,
-                            "balance"      => $account->amount-request()->pay_amount,
+                            "amount"            => request()->pay_amount,
+                            "balance"           => $account->amount-request()->pay_amount,
                             "currency"          => "BDT",
                             "status"            => "success",
                             "addedby_id"        => Auth::user()->id,
@@ -1627,6 +2080,29 @@ class PurchasesController extends Controller
             }
 
             // Update account method & payment method
+            $oldAccountId = $transaction->account_id;
+            $newAccountId = $request->account_id;
+
+            $account = Attribute::findOrFail($newAccountId);
+            $available = $account->amount;
+            if ((int) $oldAccountId === (int) $newAccountId) {
+                $available += $old_amount;
+            }
+            if ($new_amount > $available) {
+                return back()->with('error','Insufficient account balance!');
+            }
+
+            if ($oldAccountId) {
+                $oldAccount = Attribute::find($oldAccountId);
+                if ($oldAccount) {
+                    $oldAccount->amount += $old_amount;
+                    $oldAccount->save();
+                }
+            }
+
+            $account->amount -= $new_amount;
+            $account->save();
+
             $paymentMethod = Attribute::find($request->payment_method_id);
 
             // Update transaction
@@ -1674,6 +2150,14 @@ class PurchasesController extends Controller
             }
 
             $purchase->save();
+
+            if ($transaction->account_id) {
+                $account = Attribute::find($transaction->account_id);
+                if ($account) {
+                    $account->amount += $amount;
+                    $account->save();
+                }
+            }
 
             $transaction->delete();
 

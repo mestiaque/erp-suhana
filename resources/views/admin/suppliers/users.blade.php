@@ -119,7 +119,7 @@
                             <th style="min-width: 100px;">Due Bill</th>
                             <th style="min-width: 100px;">Paid Bill</th>
                             <th style="min-width: 95px;">Join Date</th>
-                            <th style="min-width: 80px; width: 80px;">Action</th>
+                            <th style="min-width: 80px; width: 180px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,8 +157,8 @@
                                 </span>
                             </td>
                             <td><a href="{{route('admin.suppliersAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
-                                @if($user->permission)
-                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                @if($user->employee_id)
+                                <br><span class="badge badge-info">{{$user->employee_id}}</span>
                                 @endif
                             </td>
                             <td>{{$user->company_name}}</td>
@@ -166,24 +166,32 @@
                             <td>
                                {{$user->address_line1}}
                             </td>
-                            <td>{{priceFullFormat($user->orders->where('status','approved')->sum('grand_total'))}}</td>
-                            <td style="color:red;">{{priceFullFormat($user->duePurchaseAmount())}}</td>
-                            <td >{{priceFullFormat($user->orders->where('status','approved')->sum('paid_amount'))}}</td>
+                            <td>{{priceFullFormat($user->balance)}}</td>
+                            @php
+                                $totalPaid = App\Models\Transaction::where('user_id', $user->id)->where('type', 3)->sum('amount') ?? 0;
+                            @endphp
+                            <td style="color:red;">{{priceFullFormat($user->balance - $totalPaid)}}</td>
+                            <td >{{priceFullFormat($totalPaid)}}</td>
                             <td>{{$user->created_at->format('d M Y')}}</td>
                             <td style="padding: 8px 5px; text-align: center;">
                                  @if(can('creditor.edit')  || can('creditor.delete'))
-                                 @can('creditor.edit')
-                                <a href="{{route('admin.suppliersAction',['edit',$user->id])}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                @endcan
-                                @can('creditor.delete')
-                                @if($user->id==Auth::id()) @else
-                                <a href="{{route('admin.suppliersAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                    <i class="bx bx-trash"></i>
-                                </a>
-                                @endif
-                                @endcan
+                                    @can('creditor.edit')
+                                    <a href="{{route('admin.suppliersAction',['edit',$user->id])}}" class="btn-custom success">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    @endcan
+                                    @can('creditor.edit')
+                                        <a href="{{route('admin.suppliersAction',['bill-entry',$user->id])}}" class="btn-custom yellow">
+                                            <i class="bx bx-credit-card"></i>
+                                        </a>
+                                    @endcan
+                                    @can('creditor.delete')
+                                        @if($user->id==Auth::id()) @else
+                                        <a href="{{route('admin.suppliersAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
+                                            <i class="bx bx-trash"></i>
+                                        </a>
+                                        @endif
+                                    @endcan
                                 @else -- @endif
                             </td>
                         </tr>
@@ -206,7 +214,7 @@
 	 	<form action="{{route('admin.suppliersAction','create')}}" method="post">
 	   		@csrf
 	   <div class="modal-header">
-		 <h4 class="modal-title">Add Supplier</h4>
+		 <h4 class="modal-title">Add Creditor</h4>
 		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		   <span aria-hidden="true">&times; </span>
 		 </button>
@@ -214,7 +222,7 @@
 	   <div class="modal-body">
             <div class="row">
                 <div class="col-md-6 form-group">
-                    <label for="name">Supplier Name* </label>
+                    <label for="name">Creditor Name* </label>
                     <div class="controls">
                         <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
                         @if ($errors->has('name'))
@@ -248,7 +256,7 @@
 	   </div>
 	   <div class="modal-footer">
 		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-		 <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Supplier</button>
+		 <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Creditor</button>
 	   </div>
 	   </form>
 	 </div>

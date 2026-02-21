@@ -47,7 +47,7 @@ body {
   background-color: #fafafa;
   padding: 0;
   margin: 0;
-  font-size: 15px;
+  font-size: 11px;
   font-family: "Nunito", sans-serif;
 }
 
@@ -55,6 +55,10 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+
+
+
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
   color: #2a2a2a;
@@ -1559,12 +1563,12 @@ Main Content CSS
   transition: 0.5s;
   overflow: hidden;
   min-height: 100vh;
-  padding-right: 30px;
-  padding-left: 280px;
+  padding-right: 10px;
+  padding-left: 255px;
 }
 
 .main-content.hide-sidemenu-area {
-  padding-left: 85px;
+  padding-left: 65px;
 }
 
 .breadcrumb-area {

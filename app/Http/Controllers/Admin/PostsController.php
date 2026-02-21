@@ -50,7 +50,7 @@ class PostsController extends Controller
               $data->fetured=false;
               $data->save();
             }elseif($r->action==5){
-              
+
               $medias =Media::latest()->where('src_type',1)->where('src_id',$data->id)->get();
               foreach($medias as $media){
                 if(File::exists($media->file_url)){
@@ -88,7 +88,7 @@ class PostsController extends Controller
                   $qq->where('name','LIKE','%'.$r->search.'%');
               });
           }
-          
+
           if($r->startDate || $r->endDate)
           {
               if($r->startDate){
@@ -106,14 +106,14 @@ class PostsController extends Controller
               $q->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
 
           }
-        
+
         if($r->status){
-             $q->where('status',$r->status); 
+             $q->where('status',$r->status);
         }
 
         // Check Permission
         if($allPer){
-         $q->where('addedby_id',auth::id()); 
+         $q->where('addedby_id',auth::id());
         }
 
       })
@@ -124,7 +124,7 @@ class PostsController extends Controller
         'startDate'=>$r->startDate,
         'endDate'=>$r->endDate,
       ]);
-      
+
       //Total Count Results
       $totals = DB::table('posts')->where('status','<>','temp')
       ->where('type',1)
@@ -138,7 +138,7 @@ class PostsController extends Controller
     }
 
     public function postsAction(Request $r,$action,$id=null){
-      
+
       //Add Post  Start
       if($action=='create'){
         $post =Post::where('type',1)->where('status','temp')->where('addedby_id',Auth::id())->first();
@@ -154,7 +154,7 @@ class PostsController extends Controller
         return redirect()->route('admin.postsAction',['edit',$post->id]);
       }
       //Add Post  End
-      
+
       $post =Post::where('type',1)->find($id);
       if(!$post){
         Session()->flash('error','This Post Are Not Found');
@@ -191,7 +191,7 @@ class PostsController extends Controller
 
         ///////Image Uploard Start////////////
         if($r->hasFile('image')){
-   
+
           $file =$r->image;
           $src  =$post->id;
           $srcType  =1;
@@ -234,11 +234,11 @@ class PostsController extends Controller
         if($r->categoryid){
 
           $post->postCtgs()->whereNotIn('reff_id',$r->categoryid)->delete();
-    
+
           for ($i=0; $i < count($r->categoryid); $i++) {
-    
+
             $ctg = $post->postCtgs()->where('reff_id',$r->categoryid[$i])->first();
-    
+
             if(!$ctg){
               $ctg =new PostAttribute();
               $ctg->src_id=$post->id;
@@ -248,19 +248,19 @@ class PostsController extends Controller
             $ctg->drag=$i;
             $ctg->save();
           }
-    
+
         }else{
             $post->postCtgs()->delete();
           }
-          
+
           //Tag posts
             if($r->tags){
-    
+
               $post->postTags()->whereNotIn('reff_id',$r->tags)->delete();
-    
+
               for ($i=0; $i < count($r->tags); $i++) {
                 $tag = $post->postTags()->where('reff_id',$r->tags[$i])->first();
-    
+
                   if(!$tag){
                     $tag =new PostAttribute();
                     $tag->type=2;
@@ -273,8 +273,8 @@ class PostsController extends Controller
           }else{
             $post->postTags()->delete();
           }
-            
-    
+
+
           Session()->flash('success','Your Are Successfully Updated');
           return redirect()->back();
 
@@ -303,7 +303,7 @@ class PostsController extends Controller
 
       $categories =Attribute::where('type',6)->where('status','<>','temp')->where('parent_id',null)->get();
       $tags =Attribute::where('type',7)->where('status','<>','temp')->where('parent_id',null)->get();
-      
+
       return view(adminTheme().'posts.postEdit',compact('post','categories','tags'));
     }
 
@@ -374,7 +374,7 @@ class PostsController extends Controller
     }
 
     public function postsComments(Request $r,$id){
-      
+
       $post =Post::where('type',1)->find($id);
       if(!$post){
         Session()->flash('error','This Post Are Not Found');
@@ -440,7 +440,7 @@ class PostsController extends Controller
       }
 
     //Filter Action End
-      
+
       $comments =Review::latest()->where('type',1)->where('src_id',$post->id)->where('status','<>','temp')
       ->where(function($q) use ($r) {
 
@@ -455,7 +455,7 @@ class PostsController extends Controller
       ->paginate(25)->appends([
         'search'=>$r->search,
       ]);;
-      
+
       return view(adminTheme().'posts.comments.postsComments',compact('comments','post'));
     }
 
@@ -476,7 +476,7 @@ class PostsController extends Controller
             'email' => 'nullable|max:100',
             'website' => 'nullable|max:200',
           ]);
-  
+
           $replay =new Review();
           $replay->src_id=$comment->src_id;
           $replay->parent_id=$comment->id;
@@ -489,7 +489,7 @@ class PostsController extends Controller
           $replay->addedby_id=Auth::id();
           $replay->type=1;
           $replay->save();
-    
+
           Session()->flash('success','Your Are Successfully Done');
           return redirect()->route('admin.postsCommentsAction',['replay',$comment->id]);
         }
@@ -516,7 +516,7 @@ class PostsController extends Controller
           'name' => 'required|max:191',
           'email' => 'nullable|max:100',
           'website' => 'nullable|max:200',
-        ]);      
+        ]);
 
         if($comment->status=='temp' && $comment->post){
           $post =$comment->post;
@@ -554,7 +554,7 @@ class PostsController extends Controller
       }
 
       return view(adminTheme().'posts.comments.CommentEdit',compact('comment'));
-    } 
+    }
 
     //Post Comments Function End
 
@@ -583,7 +583,7 @@ class PostsController extends Controller
               $data->fetured=false;
               $data->save();
             }elseif($r->action==5){
-              
+
               $medias =Media::latest()->where('src_type',3)->where('src_id',$data->id)->get();
               foreach($medias as $media){
                 if(File::exists($media->file_url)){
@@ -597,7 +597,7 @@ class PostsController extends Controller
                 $subctg->parent_id=$data->parent_id;
                 $subctg->save();
               }
-              
+
               $data->delete();
             }
 
@@ -626,13 +626,13 @@ class PostsController extends Controller
     ->paginate(25)->appends([
         'search'=>$r->search,
       ]);
-      
+
     return view(adminTheme().'posts.category.postsCategories',compact('categories'));
 
     }
 
     public function postsCategoriesAction(Request $r,$action,$id=null){
-      
+
       //Add Category  Start
       if($action=='create'){
         $category =Attribute::latest()->where('type',6)->where('addedby_id',Auth::id())->where('status','temp')->first();
@@ -649,9 +649,9 @@ class PostsController extends Controller
         return redirect()->route('admin.postsCategoriesAction',['edit',$category->id]);
       }
       //Add Category  End
-      
-      
-      
+
+
+
       $category =Attribute::where('type',6)->find($id);
       if(!$category){
         Session()->flash('error','This Category Are Not Found');
@@ -691,7 +691,7 @@ class PostsController extends Controller
 
         ///////Banner Uploard Start////////////
         if($r->hasFile('banner')){
-   
+
           $file =$r->image;
           $src  =$category->id;
           $srcType  =3;
@@ -722,7 +722,7 @@ class PostsController extends Controller
 
       //Delete Category Start
       if($action=='delete'){
-        
+
           //Category Media File Delete
           $medias =Media::latest()->where('src_type',3)->where('src_id',$category->id)->get();
           foreach($medias as $media){
@@ -737,7 +737,7 @@ class PostsController extends Controller
             $subctg->parent_id=$category->parent_id;
             $subctg->save();
           }
-          
+
           $category->delete();
 
         Session()->flash('success','Your Are Successfully Done');
@@ -805,13 +805,13 @@ class PostsController extends Controller
     ->paginate(25)->appends([
         'search'=>$r->search,
       ]);
-      
+
       return view(adminTheme().'posts.tags.postsTags',compact('tags'));
 
     }
 
     public function postsTagsAction(Request $r,$action,$id=null){
-      
+
       //Add Tag Start
       if($action=='create'){
         $tag =Attribute::latest()->where('type',7)->where('addedby_id',Auth::id())->where('status','temp')->first();
@@ -828,7 +828,7 @@ class PostsController extends Controller
         return redirect()->route('admin.postsTagsAction',['edit',$tag->id]);
       }
       //Add Tag End
-      
+
       $tag =Attribute::where('type',7)->find($id);
       if(!$tag){
         Session()->flash('error','This Tag Are Not Found');
@@ -876,9 +876,14 @@ class PostsController extends Controller
         return redirect()->route('admin.postsTags');
       }
       //update Tag End
-      
+
       return view(adminTheme().'posts.tags.postsTagsEdit',compact('tag'));
     }
 
     //Post Tags Function End
+
+
+    public function roadmap(){
+        return view('roadmap');
+    }
 }

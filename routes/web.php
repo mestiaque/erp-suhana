@@ -8,15 +8,19 @@ use App\Http\Controllers\Auth\AuthController;
 // ----------------------
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\PurchasesController;
-use App\Http\Controllers\Admin\RequisitionController;
-use App\Http\Controllers\Admin\MerchandisingController;
-use App\Http\Controllers\Admin\ProductionController;
+use App\Http\Controllers\Admin\PostsController;
+use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\Admin\PayrollController;
+use App\Http\Controllers\Api\ZKTecoPushController;
 
 // ----------------------
 // Staff Controller
 // ----------------------
-use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\Admin\PurchasesController;
+use App\Http\Controllers\Admin\CommercialController;
+use App\Http\Controllers\Admin\ProductionController;
+use App\Http\Controllers\Admin\RequisitionController;
+use App\Http\Controllers\Admin\MerchandisingController;
 
 
 
@@ -29,6 +33,8 @@ Route::get('/', function(){
 
 Route::any('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/log-out',[AuthController::class,'logout'])->name('logout');
+
+Route::get('/`test-zkteco`', [ZKTecoPushController::class, 'test'])->name('test-zkteco');
 
 
 // ----------------------
@@ -70,6 +76,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
     Route::get('/expenses/iou-reports',[AdminController::class,'expenseIOUReports'])->name('expenseIOUReports');
     Route::get('/expenses/iou',[AdminController::class,'expensesIOU'])->name('expensesIOU');
+    Route::get('/expenses/completed-iou',[AdminController::class,'completedIou'])->name('completedIou');
     Route::any('/expenses/iou/{action}/{id?}',[AdminController::class,'expensesIOUAction'])->name('expensesIOUAction');
 
     Route::get('/expenses/reports',[AdminController::class,'expenseReports'])->name('expenseReports');
@@ -146,11 +153,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     //Production
     Route::get('/production-planning',[ProductionController::class,'productionPlanning'])->name('productionPlanning');
     Route::any('/production-planning/{action}/{id?}',[ProductionController::class,'productionPlanningAction'])->name('productionPlanningAction');
+    Route::get('/floor-planning',[ProductionController::class,'floorPlanning'])->name('floorPlanning');
+    Route::any('/floor-planning/{action}/{id?}',[ProductionController::class,'floorPlanningAction'])->name('floorPlanningAction');
 
     Route::get('/booking',[MerchandisingController::class,'booking'])->name('booking');
     Route::any('/booking/{action}/{id?}',[MerchandisingController::class,'bookingAction'])->name('bookingAction');
     Route::get('/budget',[MerchandisingController::class,'budget'])->name('budget');
     Route::any('/budget/{action}/{id?}',[MerchandisingController::class,'budgetAction'])->name('budgetAction');
+    Route::get('/fabric-status/{id}',[MerchandisingController::class,'fabricStatus'])->name('fabricStatus');
+
 
     Route::get('/procurement/yarn-booking',[ProductionController::class,'yarnBooking'])->name('yarnBooking');
     Route::any('/procurement/yarn-booking/{action}/{id?}',[ProductionController::class,'yarnBookingAction'])->name('yarnBookingAction');
@@ -165,6 +176,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/procurement/knitting-receive/{action}/{id?}',[ProductionController::class,'knittingReceiveAction'])->name('knittingReceiveAction');
     Route::get('/procurement/dyeing-receive',[ProductionController::class,'dyeingReceive'])->name('dyeingReceive');
     Route::any('/procurement/dyeing-receive/{action}/{id?}',[ProductionController::class,'dyeingReceiveAction'])->name('dyeingReceiveAction');
+
+    Route::any('/procurement/pi-wise-fabric-status',[ProductionController::class,'piWiseFabricStatus'])->name('piWiseFabricStatus');
 
     Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
@@ -221,6 +234,87 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
     // Route::get('/sales',[RequisitionController::class,'sales'])->name('sales');
     // Route::any('/sales/{action}/{id?}',[RequisitionController::class,'salesAction'])->name('salesAction');
+
+
+    // --- Commercial Management Routes ---
+    // --- Commercial Management Routes ---
+    Route::group(['prefix' => 'commercial', 'as' => 'commercial.'], function () {
+        // 1. Bank BTB LC
+        Route::get('/btb-lc', [CommercialController::class, 'btbLc'])->name('btbLc');
+        Route::any('/btb-lc/{action}/{id?}', [CommercialController::class, 'btbLcAction'])->name('btbLcAction');
+
+        // 2. Export LC/Sales Contact
+        Route::get('/export-lc', [CommercialController::class, 'exportLc'])->name('exportLc');
+        Route::any('/export-lc/{action}/{id?}', [CommercialController::class, 'exportLcAction'])->name('exportLcAction');
+
+        // 3. Purchase Order (PO)
+        Route::get('/purchase-orders', [CommercialController::class, 'purchaseOrders'])->name('purchaseOrders');
+        Route::any('/purchase-orders/{action}/{id?}', [CommercialController::class, 'purchaseOrdersAction'])->name('purchaseOrdersAction');
+
+        // 4. Proforma Invoice (PI)
+        Route::get('/proforma-invoice', [CommercialController::class, 'pi'])->name('pi');
+        Route::any('/proforma-invoice/{action}/{id?}', [CommercialController::class, 'piAction'])->name('piAction');
+
+        // 5. Commercial Invoice
+        Route::get('/invoices', [CommercialController::class, 'invoice'])->name('invoice');
+        Route::any('/invoices/{action}/{id?}', [CommercialController::class, 'invoiceAction'])->name('invoiceAction');
+
+        // 6. Packing List
+        Route::get('/pricing-list', [CommercialController::class, 'pricingList'])->name('pricingList');
+        Route::any('/pricing-list/{action}/{id?}', [CommercialController::class, 'pricingListAction'])->name('pricingListAction');
+
+        // 6. Packing List
+        Route::get('/packing-list', [CommercialController::class, 'packingList'])->name('packingList');
+        Route::any('/packing-list/{action}/{id?}', [CommercialController::class, 'packingListAction'])->name('packingListAction');
+
+        // 7. Shipping Bill/Docs
+        Route::get('/shipping-docs', [CommercialController::class, 'shippingDocs'])->name('shippingDocs');
+        Route::any('/shipping-docs/{action}/{id?}', [CommercialController::class, 'shippingDocsAction'])->name('shippingDocsAction');
+
+        // 8. Export Realization
+        Route::get('/export-realization', [CommercialController::class, 'realization'])->name('realization');
+        Route::any('/export-realization/{action}/{id?}', [CommercialController::class, 'realizationAction'])->name('realizationAction');
+
+        // 9. Commercial Reports
+        Route::get('/reports', [CommercialController::class, 'reports'])->name('reports');
+    });
+
+    // --- Payroll Management Routes ---
+    Route::group(['prefix' => 'payroll', 'as' => 'payroll.'], function () {
+        // 1. Salary Setup
+        Route::get('/salary-setup', [PayrollController::class, 'salarySetup'])->name('salarySetup');
+        Route::any('/salary-setup/{action}/{id?}', [PayrollController::class, 'salarySetupAction'])->name('salarySetupAction');
+
+        // 2. Attendance Summary
+        Route::get('/attendance', [PayrollController::class, 'attendance'])->name('attendance');
+        Route::any('/attendance/{action}/{id?}', [PayrollController::class, 'attendanceAction'])->name('attendanceAction');
+
+        // 3. Generate Payslip
+        Route::get('/generate-payslip', [PayrollController::class, 'payslip'])->name('payslip');
+        Route::any('/generate-payslip/{action}/{id?}', [PayrollController::class, 'payslipAction'])->name('payslipAction');
+
+        // 4. Bonus & Allowance
+        Route::get('/bonus-allowance', [PayrollController::class, 'bonus'])->name('bonus');
+        Route::any('/bonus-allowance/{action}/{id?}', [PayrollController::class, 'bonusAction'])->name('bonusAction');
+
+        // 5. Deductions & Loan
+        Route::get('/deductions', [PayrollController::class, 'deductions'])->name('deductions');
+        Route::any('/deductions/{action}/{id?}', [PayrollController::class, 'deductionsAction'])->name('deductionsAction');
+
+        // 6. Overtime (OT) Entry
+        Route::get('/overtime', [PayrollController::class, 'overtime'])->name('overtime');
+        Route::any('/overtime/{action}/{id?}', [PayrollController::class, 'overtimeAction'])->name('overtimeAction');
+
+        // 7. Salary Disbursement
+        Route::get('/disbursement', [PayrollController::class, 'disbursement'])->name('disbursement');
+        Route::any('/disbursement/{action}/{id?}', [PayrollController::class, 'disbursementAction'])->name('disbursementAction');
+
+        // 8. Payroll Reports
+        Route::get('/payroll-reports', [PayrollController::class, 'reports'])->name('reports');
+    });
+
+
+    Route::get('/roadmap', [PostsController::class, 'roadmap']);
 
 
 });

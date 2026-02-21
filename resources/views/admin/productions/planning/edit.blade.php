@@ -1,64 +1,37 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Production Planning Edit') }}</title>
+<title>{{ websiteTitle(isset($masterPlan) ? 'Master Planning Edit' : 'Master Planning Create') }}</title>
 @endsection
-
-@push('css')
-<style>
-    .search-result-box{position:absolute;z-index:9;width:100%;background:#fff;border:1px solid #ddd;display:none;}
-    .search-result-box li{padding:6px 10px;cursor:pointer;}
-    .searchlist ul {list-style:none;margin:0;padding:0;}
-    .searchlist ul li{border-top:1px solid #dbd6d6;padding:5px 10px;cursor:pointer;}
-    .searchlist ul li:hover{background:#f2f2f2;}
-    .searchGrid {position:relative;}
-    .itemSearch {height:200px;overflow:auto;position:absolute;width:100%;background:white;border:1px solid #dfdfdf;border-top:0;display:none;}
-    .table-striped tr th{padding:3px;}
-    .table-striped tr td{padding:3px;}
-    .lineCheck {
-        border: 1px solid #bebebe;
-        padding: 5px 10px;
-        border-radius: 3px;
-        margin: 0;
-        cursor: pointer;
-        margin: 3px 1px;
-    }
-</style>
-@endpush
 
 @section('contents')
 <div class="flex-grow-1">
     <div class="breadcrumb-area">
-        <h1>Edit Planning</h1>
+        <h1>{{ isset($masterPlan) ? 'Edit Planning' : 'Create Planning' }}</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
             <li class="item"><a href="{{ route('admin.productionPlanning') }}">Planning</a></li>
-            <li class="item">Edit Planning</li>
+            <li class="item">{{ isset($masterPlan) ? 'Edit Planning' : 'Create Planning' }}</li>
         </ol>
     </div>
 
     <div class="card mb-30">
-        <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Production Planning</h3>
-             <div class="dropdown">
-                @if($plan->status!='temp')
-                @can('samples.add')
-                 <a href="{{ route('admin.productionPlanningAction',['view',$plan->id]) }}" class="btn-custom primary" style="padding:5px 15px;">
-                    View
-                 </a>
-                @endcan
-                @endif
-                 <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
-                     <i class="bx bx-rotate-left"></i>
-                 </a>
-             </div>
+        <div class="card-header">
+            <h3>Master Planning</h3>
         </div>
+
         <div class="card-body">
             @include(adminTheme().'alerts')
 
+<<<<<<< HEAD
             <form action="{{ route('admin.productionPlanningAction', ['update', $plan->id]) }}" method="POST">
+=======
+            <form action="{{ isset($masterPlan) ? route('admin.productionPlanningAction', ['update', $masterPlan->id]) : route('admin.productionPlanningAction', ['store']) }}" method="POST">
+>>>>>>> master
                 @csrf
+
                 <div class="row">
+<<<<<<< HEAD
                     <div class="col-md-2">
                         <div class="style-info">
                             @if($plan->style_no)
@@ -89,33 +62,64 @@
                                 Buyer :<b class="styleBuyer">{{$plan->getPiStyle()?->buyer_name}}</b> <br>
                                 Merchandiser :<b class="styleMerchant">{{$plan->getPiStyle()?->merchant_name}}</b> <br>
                             </p>
+=======
+
+                    {{-- LEFT : AVAILABLE STYLES --}}
+                    <div class="col-md-6">
+                        <h6 class="mb-2">Available Styles</h6>
+
+                        <div class="row style-grid" style="max-height:55vh; overflow-y:auto;">
+                            @foreach($styles as $style)
+                                @php
+                                    $key = $style->style_no.'__'.$style->order_no;
+                                @endphp
+                                <div class="col-md-6 mb-2 style-item"
+                                     data-key="{{ $key }}"
+                                     data-style="{{ $style->style_no }}"
+                                     data-buyer="{{ $style->buyer_name }}"
+                                     data-order_no="{{ $style->order_no }}"
+                                     data-qty="{{ $style->total_qty }}">
+                                    <div class="border p-2 rounded bg-light h-100 style-card">
+                                        <strong>{{ $style->style_no }}</strong><br>
+                                        Buyer: {{ $style->buyer_name }}<br>
+                                        Order: {{ $style->order_no }}<br>
+                                        Qty: {{ $style->total_qty }}
+                                    </div>
+                                </div>
+                            @endforeach
+>>>>>>> master
                         </div>
                     </div>
-                    <div class="col-md-10">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="card shadow-sm mb-3 flex-fill">
-                                    <div class="card-header">
-                                        <h3><span style="background: #4CAF50;color: white;padding: 5px 10px;border-radius: 5px;">1.Cutting Section</span></h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
-                                                <tr>
-                                                    <th style="padding:5px;">Starting Date</th>
-                                                    <td style="padding:1px;">
-                                                        <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->cutting_start?Carbon\Carbon::parse($plan->cutting_start)->format('Y-m-d\TH:i'):''}}" data-name="cutting_start">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th style="padding:5px;">Ending Date</th>
-                                                    <td style="padding:1px;">
-                                                        <input type="datetime-local" class="form-control form-control-sm updateDate" value="{{$plan->cutting_end?Carbon\Carbon::parse($plan->cutting_end)->format('Y-m-d\TH:i'):''}}" data-name="cutting_end">
-                                                    </td>
-                                                </tr>
-                                            </table>
+
+                    {{-- RIGHT : SELECTED STYLES --}}
+                    <div class="col-md-6">
+                        <h6 class="mb-2">Selected Styles</h6>
+
+                        <div class="row selected-style-list" style="max-height:55vh; overflow-y:auto;">
+                            @if(isset($masterPlan))
+                                @foreach($masterPlan->productions as $index => $p)
+                                    @php
+                                        $key = $p->style_no.'__'.$p->order_no;
+                                    @endphp
+                                    <div class="col-md-6 mb-2 selected-item"
+                                         data-key="{{ $key }}">
+                                        <div class="border p-2 rounded h-100 style-card selected">
+                                            <button type="button"
+                                                    class="remove-btn remove-style"
+                                                    data-key="{{ $key }}">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+
+                                            <strong>{{ $p->style_no }}</strong><br>
+                                            Buyer: {{ $p->orderDetailItems->buyer_name }}<br>
+                                            Order: {{ $p->order_no }}<br>
+                                            Qty: {{ $p->style_qty ?? 0 }}
+
+                                            <input type="hidden" name="styles[{{ $index }}][style_no]" value="{{ $p->style_no }}">
+                                            <input type="hidden" name="styles[{{ $index }}][order_no]" value="{{ $p->order_no }}">
                                         </div>
                                     </div>
+<<<<<<< HEAD
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -255,7 +259,19 @@
                                     </div>
                                 </div>
                             </div>
+=======
+                                @endforeach
+                            @endif
+>>>>>>> master
                         </div>
+                    </div>
+
+                    {{-- SUBMIT --}}
+                    <div class="col-md-12 mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bx bx-check"></i>
+                            {{ isset($masterPlan) ? 'Update Plan' : 'Create Plan' }}
+                        </button>
                     </div>
 
                 </div>
@@ -263,6 +279,7 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 @endsection
 
 @push('js')
@@ -418,5 +435,105 @@
     padding: 2px;
     z-index: 1000;
 }
+=======
+
+@push('css')
+<style>
+    .style-card {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out; /* smooth animation */
+    }
+
+    .style-card:hover {
+        transform: translateY(-3px) scale(1.02); /* subtle raise & zoom */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* soft shadow */
+    }
+
+    .style-card.selected {
+        border: 2px solid #28a745 !important;
+        background: #f6fff9;
+    }
+
+    .remove-btn {
+        position: absolute;
+        bottom: 4px;
+        right: 6px;
+        border: none;
+        background: transparent;
+        color: #dc3545;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* Optional: smooth scrollbar for left grid */
+    .style-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+    .style-grid::-webkit-scrollbar-thumb {
+        background: #bbb;
+        border-radius: 3px;
+    }
+>>>>>>> master
 </style>
+
 @endpush
+
+@push('js')
+<script>
+$(document).ready(function () {
+
+    let rowIndex = {{ isset($masterPlan) ? count($masterPlan->productions) : 0 }};
+
+    // ADD
+    $(document).on('click', '.style-item', function () {
+
+        let item = $(this);
+        let key = item.data('key');
+        let styleNo = item.data('style');
+        let buyer = item.data('buyer');
+        let order_no = item.data('order_no');
+        let qty = item.data('qty');
+
+        if ($('.selected-item[data-key="'+key+'"]').length) {
+            alert('Already added');
+            return;
+        }
+
+        let html = `
+            <div class="col-md-6 mb-2 selected-item" data-key="${key}">
+                <div class="border p-2 rounded h-100 style-card selected">
+                    <button type="button"
+                            class="remove-btn remove-style"
+                            data-key="${key}">
+                        <i class="fa fa-times"></i>
+                    </button>
+
+                    <strong>${styleNo}</strong><br>
+                    Buyer: ${buyer}<br>
+                    Order: ${order_no}<br>
+                    Qty: ${qty}
+
+                    <input type="hidden" name="styles[${rowIndex}][style_no]" value="${styleNo}">
+                    <input type="hidden" name="styles[${rowIndex}][order_no]" value="${order_no}">
+                </div>
+            </div>
+        `;
+
+        $('.selected-style-list').append(html);
+        item.hide();
+        rowIndex++;
+    });
+
+    // REMOVE
+    $(document).on('click', '.remove-style', function () {
+        let key = $(this).data('key');
+        $('.selected-item[data-key="'+key+'"]').remove();
+        $('.style-item[data-key="'+key+'"]').show();
+    });
+
+});
+</script>
+@endpush
+
+@endsection

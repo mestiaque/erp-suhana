@@ -4,7 +4,7 @@
         <div class="modal-content">
 
             <div class="modal-header bg-primary text-white py-2">
-                <h5 class="modal-title">Yarn Booking Details #{{ $booking->booking_no }}</h5>
+                <h5 class="modal-title text-white">Yarn Booking Details #{{ $booking->getBookingNo() }}</h5>
                 <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -24,7 +24,7 @@
                                 <strong>{{ $booking->pi->buyer_name ?? '--' }}</strong>
                             </div>
                             <div class="col-md-3 border-right">
-                                <small class="text-muted d-block">Supplier</small>
+                                <small class="text-muted d-block">Creditor</small>
                                 <strong>{{ $booking->supplier ?? '--' }}</strong>
                             </div>
                             <div class="col-md-3">
@@ -39,7 +39,7 @@
                 <h5 class="mb-3"><i class="bx bx-list-ul"></i> Yarn Booking Items</h5>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-sm">
-                        <thead class="bg-primary text-white">
+                        <thead class="">
                             <tr>
                                 <th width="5%" class="text-center">SL</th>
                                 <th width="15%">Style</th>

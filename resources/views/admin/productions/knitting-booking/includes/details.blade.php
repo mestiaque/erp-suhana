@@ -8,7 +8,7 @@
 
             <!-- Modal Header -->
             <div class="modal-header bg-primary text-white py-2">
-                <h5 class="modal-title">Knitting Booking Details #{{ $row->getBookingNo() }}</h5>
+                <h5 class="modal-title text-white">Knitting Booking Details #{{ $row->getBookingNo() }}</h5>
                 <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -20,12 +20,12 @@
                     <div class="card-body p-3">
                         <div class="row">
                             <div class="col-md-3 border-right">
-                                <small class="text-muted d-block">Buyer Name</small>
-                                <strong>{{ $row->pi->buyer_name ?? '--' }}</strong>
-                            </div>
-                            <div class="col-md-3 border-right">
                                 <small class="text-muted d-block">PI Number</small>
                                 <strong>{{ $row->pi->pi_no ?? '--' }}</strong>
+                            </div>
+                            <div class="col-md-3 border-right">
+                                <small class="text-muted d-block">Buyer Name</small>
+                                <strong>{{ $row->pi->buyer_name ?? '--' }}</strong>
                             </div>
                             <div class="col-md-3 border-right">
                                 <small class="text-muted d-block">Knitting Unit/Factory</small>
@@ -33,16 +33,16 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted d-block">Booking Date</small>
-                                <strong>{{ \Carbon\Carbon::parse($row->created_at)->format('d M, Y') }}</strong>
+                                <strong>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</strong>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Knitting Items Table -->
-                <h6 class="mb-3 font-weight-bold text-primary"><i class="bx bx-list-ul"></i> Fabric Specifications & Targets</h6>
+                <h5 class="mb-3 font-weight-bold"><i class="bx bx-list-ul"></i> Knitting Booking Items</h6>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-sm table-hover">
                         <thead class="bg-secondary text-white text-center">
                             <tr>
                                 <th width="5%">SL</th>
@@ -52,7 +52,6 @@
                                 <th width="10%">Dia</th>
                                 <th width="15%">Booking Qnty (KG)</th>
                                 {{-- <th width="15%">Produced (KG)</th> --}}
-                                <th width="5%">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -83,15 +82,10 @@
                                     <td class="text-center"><span class="badge badge-light border">{{ $item->dia ?? 'N/A' }}</span></td>
                                     <td class="text-right font-weight-bold">{{ number_format($item->booking_qty, 2) }}</td>
                                     {{-- <td class="text-right text-success">{{ number_format($item->produced_qty, 2) }}</td> --}}
-                                    <td class="text-center">
-                                        <small class="badge {{ $item->status == 'pending' ? 'badge-warning' : 'badge-success' }}">
-                                            {{ strtoupper($item->status) }}
-                                        </small>
-                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No items found.</td>
+                                    <td colspan="6" class="text-center">No items found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -99,7 +93,7 @@
                             <tr>
                                 <td colspan="4" class="text-right">Grand Total:</td>
                                 <td class="text-right text-primary">{{ number_format($totalKnitQty, 2) }} KG</td>
-                                <td class="text-right text-success">{{ number_format($totalProdQty, 2) }} KG</td>
+                                {{-- <td class="text-right text-success">{{ number_format($totalProdQty, 2) }} KG</td> --}}
                                 {{-- <td></td> --}}
                             </tr>
                         </tfoot>

@@ -6,7 +6,7 @@
                 <thead>
                     <tr>
                         <th>Description</th>
-                        <th>Supplier</th>
+                        <th>Creditor</th>
                         <th>Qty</th>
                         <th>Unit Price ($)</th>
                         <th>TTL US $</th>

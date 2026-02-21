@@ -2,7 +2,6 @@
     <div class="card-body">
 
         <h4 class="text-center fw-bold mb-3">COST SHEET</h4>
-
         <div class="table-responsive">
             <table class="table table-sm table-bordered align-middle headerTable">
                 <tbody>
@@ -35,12 +34,12 @@
                     <tr>
                         <th>TOTAL STYLES</th>
                         <td>
-                            <input type="text" name="budget[total_styles]" class="form-control form-control-sm style_count" value="{{ $budget->total_styles ?? '' }}" readonly>
+                            <input type="text" name="budget[total_styles]" class="form-control form-control-sm style_count" value="{{ $budget->total_style ?? '' }}" readonly>
                         </td>
 
                         <th>TOTAL POs</th>
                         <td>
-                            <input type="text" name="budget[total_pos]" class="form-control form-control-sm order_count" value="{{ $budget->total_pos ?? '' }}" readonly>
+                            <input type="text" name="budget[total_pos]" class="form-control form-control-sm order_count" value="{{ $budget->total_po ?? '' }}" readonly>
                         </td>
 
                         <td width="10%" rowspan="5">
@@ -51,7 +50,7 @@
                     <tr>
                         <th>ITEM</th>
                         <td>
-                            <input type="text" name="budget[item]" class="form-control form-control-sm" value="" readonly>
+                            <input type="text" name="budget[item]" class="form-control form-control-sm item_name" value="{{ $budget->item ?? '' }}" readonly>
                         </td>
                         <th></th>
                         <td></td>
@@ -77,7 +76,7 @@
 
                         <th>SHIP DATE</th>
                         <td>
-                            <input type="date" name="budget[ship_date]" class="form-control form-control-sm" value="" readonly>
+                            <input type="date" name="budget[ship_date]" class="form-control form-control-sm shipment_date" value="{{ $budget->shipment_date ?? '' }}" readonly>
                         </td>
                     </tr>
 

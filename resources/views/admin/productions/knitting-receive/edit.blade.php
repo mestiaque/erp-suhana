@@ -51,7 +51,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label>Knitting Booking No</label>
-                        <input type="text" name="" id="knit_booking_no_display" class="form-control bg-light" value="{{ $receive->knit_booking_no ?? '' }}" readonly>
+                        <input type="text" name="" id="knit_booking_no_display" class="form-control bg-light" value="{{ $receive?->getKBookingNo() ?? '' }}" readonly>
                         <input type="hidden" name="knit_booking_no" id="knit_booking_no_input" value="{{ $receive->knit_booking_no ?? '' }}">
                     </div>
                 </div>
@@ -63,8 +63,8 @@
                 </div>
 
                 <br>
-                <div class="text-right">
-                    <button type="submit" class="btn btn-success btn-lg">
+                <div class="text-">
+                    <button type="submit" class="btn btn-success">
                         <i class="bx bx-check"></i> {{ $receive ? 'Update' : 'Save' }} Receive Record
                     </button>
                 </div>

@@ -12,25 +12,8 @@ class DyeingBooking extends Model
     protected $table = 'dyeing_bookings';
 
     // Fields that are mass assignable
-    protected $fillable = [
-        'pi_id',
-        'booking_no',
-        'style',
-        'fabric_type',
-        'composition',
-        'color',
-        'shade',
-        'required_qty',
-        'buyer_name',
-        'expected_delivery',
-        'remarks',
-        'status',
-        'created_by',
-        'updated_by',
-        'deleted_by',
-    ];
-
-    // Dates for Carbon instances
+    protected $guarded = [];
+        // Dates for Carbon instances
     protected $dates = [
         'created_at',
         'updated_at',

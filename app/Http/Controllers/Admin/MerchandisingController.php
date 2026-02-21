@@ -581,215 +581,325 @@ class MerchandisingController extends Controller
         return view(adminTheme().'merchandising.samples.edit', compact('sample','items', 'buyers', 'merchandisers'));
     }
 
-    public function orderDetailsX(Request $r)
+    public function orderDetails(Request $r)
     {
+        // ================================
+        // Base Query
+        // ================================
+        $query = OrderDetail::with('piItem.pi')
+            ->whereNotIn('status', ['temp', 'trash'])
+            ->orderBy('id', 'desc');
 
-        $orderDetails = OrderDetail::orderBy('id', 'desc')
-            ->where('status', '<>', 'temp')
-            ->where(function($q) use ($r) {
+        // ================================
+        // Global Search
+        // ================================
+        if ($r->search) {
 
-                // SEARCH
-                if ($r->search) {
-                    $search = $r->search;
-                    $q->where(function($qq) use ($search) {
-                        $qq->where('id', 'LIKE', "%{$search}%")
-                            ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                            ->orWhere('style_no', 'LIKE', "%{$search}%")
-                            ->orWhere('company_name', 'LIKE', "%{$search}%")
-                            ->orWhere('invoice_no', 'LIKE', "%{$search}%")
-                            ->orWhere('order_no', 'LIKE', "%{$search}%")
-                            ->orWhere('composition', 'LIKE', "%{$search}%")
-                            ->orWhere('fabrication', 'LIKE', "%{$search}%")
-                            ->orWhere('gsm', 'LIKE', "%{$search}%")
-                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
-                    });
-                }
+            $search = $r->search;
 
-                // DATE RANGE
-                if ($r->startDate || $r->endDate) {
-                    $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to   = $r->endDate ?: now()->format('Y-m-d');
+            $query->where(function ($q) use ($search) {
 
-                    $q->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-                }
+                $q->where('id', 'like', "%$search%")
+                ->orWhere('buyer_name', 'like', "%$search%")
+                ->orWhere('style_no', 'like', "%$search%")
+                ->orWhere('company_name', 'like', "%$search%")
+                ->orWhere('invoice_no', 'like', "%$search%")
+                ->orWhere('order_no', 'like', "%$search%")
+                ->orWhere('fabrication', 'like', "%$search%")
+                ->orWhere('merchant_name', 'like', "%$search%")
 
-                if ($r->shipmentStartDate || $r->shipmentEndDate) {
-                    $sfrom = $r->shipmentStartDate ?: now()->format('Y-m-d');
-                    $sto   = $r->shipmentEndDate ?: now()->format('Y-m-d');
+                ->orWhereHas('piItem.pi', function ($pq) use ($search) {
+                        $pq->where('pi_no', 'like', "%$search%");
+                });
+            });
+        }
 
-                    $q->whereDate('shipment_date', '>=', $sfrom)
-                    ->whereDate('shipment_date', '<=', $sto);
-                }
 
-                // STATUS
-                if ($r->status) {
-                    $q->where('status', $r->status);
-                } else {
-                    $q->where('status', '<>', 'trash');
-                }
+        // ================================
+        // Buyer Filter
+        // ================================
+        if ($r->buyer) {
+            $query->where('buyer_name', $r->buyer);
+        }
 
-            })
+
+        // ================================
+        // Style Filter
+        // ================================
+        if ($r->style) {
+            $query->where('style_no', 'like', "%{$r->style}%");
+        }
+
+
+        // ================================
+        // Order No Filter
+        // ================================
+        if ($r->order_no) {
+            $query->where('order_no', 'like', "%{$r->order_no}%");
+        }
+
+
+        // ================================
+        // Fabrication Filter
+        // ================================
+        if ($r->fabric) {
+            $query->where('fabrication', $r->fabric);
+        }
+
+
+        // ================================
+        // PI Filter
+        // ================================
+        if ($r->pi) {
+
+            $pi = $r->pi;
+
+            $query->whereHas('piItem.pi', function ($q) use ($pi) {
+                $q->where('pi_no', 'like', "%$pi%");
+            });
+        }
+
+
+        // ================================
+        // Brand / Customer
+        // ================================
+        if ($r->filled('brand')) {
+            $query->where('company_name', $r->brand);
+        }
+
+
+        // ================================
+        // Created Date Range
+        // ================================
+        if ($r->startDate || $r->endDate) {
+
+            $from = $r->startDate ?: now()->toDateString();
+            $to   = $r->endDate   ?: now()->toDateString();
+
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+
+        // ================================
+        // Shipment Date (Year/Month/Date hierarchical filter)
+        // ================================
+        if ($r->shipment_year) {
+            $query->whereYear('shipment_date', $r->shipment_year);
+        }
+        if ($r->shipment_month) {
+            // shipment_month format: YYYY-MM
+            $monthParts = explode('-', $r->shipment_month);
+            if (count($monthParts) == 2) {
+                $query->whereYear('shipment_date', $monthParts[0])
+                      ->whereMonth('shipment_date', $monthParts[1]);
+            }
+        }
+        if ($r->shipment_date) {
+            $query->whereDate('shipment_date', $r->shipment_date);
+        }
+
+
+        // ================================
+        // Status
+        // ================================
+        if ($r->status) {
+            $query->where('status', $r->status);
+        }
+
+
+        // ================================
+        // Total Qty (After Filter)
+        // ================================
+        $totalOrderQty = (clone $query)->sum('total_qty');
+
+
+        // ================================
+        // Pagination
+        // ================================
+        $orderDetails = $query
             ->paginate(25)
             ->appends($r->all());
 
-        // TOTAL COUNTS
+
+        // ================================
+        // Status Count
+        // ================================
         $totals = OrderDetail::whereNotIn('status', ['trash', 'temp'])
-            ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
+            ->selectRaw("COUNT(*) as total")
+            ->selectRaw("COUNT(CASE WHEN status='pending' THEN 1 END) as pending")
+            ->selectRaw("COUNT(CASE WHEN status='confirmed' THEN 1 END) as confirmed")
+            ->selectRaw("COUNT(CASE WHEN status='completed' THEN 1 END) as completed")
+            ->selectRaw("COUNT(CASE WHEN status='cancelled' THEN 1 END) as cancelled")
             ->first();
 
-        if($r->has('print')){
-            return view(adminTheme().'merchandising.orderDetails.printList', compact('orderDetails', 'totals'));
-        } else {
-            return view(adminTheme().'merchandising.orderDetails.index', compact('orderDetails', 'totals'));
-        }
-    }
+        $filteredStyles = $orderDetails->pluck('style_no')->unique();
+        $filteredOrderNos = $orderDetails->pluck('order_no')->unique();
 
-
-    public function orderDetails(Request $r)
-    {
-        // ১. বেস কুয়েরি তৈরি করুন (যাতে ফিল্টারগুলো সবখানে সমানভাবে কাজ করে)
-        $query = OrderDetail::orderBy('id', 'desc')
-            ->where('status', '<>', 'temp')
-            ->where(function($q) use ($r) {
-
-                // SEARCH
-                if ($r->search) {
-                    $search = $r->search;
-                    $q->where(function($qq) use ($search) {
-                        $qq->where('id', 'LIKE', "%{$search}%")
-                            ->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                            ->orWhere('style_no', 'LIKE', "%{$search}%")
-                            ->orWhere('company_name', 'LIKE', "%{$search}%")
-                            ->orWhere('invoice_no', 'LIKE', "%{$search}%")
-                            ->orWhere('order_no', 'LIKE', "%{$search}%")
-                            ->orWhere('fabrication', 'LIKE', "%{$search}%")
-                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
-                    });
-                }
-
-                // DATE RANGE
-                if ($r->startDate || $r->endDate) {
-                    $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to   = $r->endDate ?: now()->format('Y-m-d');
-                    $q->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-                }
-
-                // SHIPMENT DATE RANGE
-                if ($r->shipmentStartDate || $r->shipmentEndDate) {
-                    $sfrom = $r->shipmentStartDate ?: now()->format('Y-m-d');
-                    $sto   = $r->shipmentEndDate ?: now()->format('Y-m-d');
-                    $q->whereDate('shipment_date', '>=', $sfrom)
-                    ->whereDate('shipment_date', '<=', $sto);
-                }
-
-                // STATUS
-                if ($r->status) {
-                    $q->where('status', $r->status);
-                } else {
-                    $q->where('status', '<>', 'trash');
-                }
-            });
-
-        // ২. ফিল্টার করা ডাটা থেকে total_qty এর যোগফল বের করুন
-        // মনে রাখবেন: sum('column_name') এখানে আপনার ডাটাবেসের একচুয়াল কলামের নাম দিন (যেমন: 'total_qty')
-        $totalOrderQty = (clone $query)->sum('total_qty');
-
-        // ৩. রেজাল্ট পেজিনেট করুন
-        $orderDetails = $query->paginate(25)->appends($r->all());
-
-        // ৪. স্ট্যাটাস অনুযায়ী কাউন্ট (এটি আগের মতোই থাকবে)
-        $totals = OrderDetail::whereNotIn('status', ['trash', 'temp'])
-            ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
-            ->first();
-
-        $styles = OrderDetail::whereNotIn('status', ['trash', 'temp'])
-                    ->distinct()
-                    ->pluck('style_no')
-                    ->toArray(); // নিশ্চিত করুন এটি একটি অ্যারে
+        // ================================
+        // Sewing Output
+        // ================================
+        $styles = $orderDetails->pluck('style_no')->unique()->toArray();
 
         $sewingOutputs = SewingOutput::query()
-            // Join এর বদলে LeftJoin ব্যবহার করুন যাতে ডাটা ম্যাচ না করলেও SewingOutput গুলো আসে
-            ->leftJoin('production_plannings', 'sewing_outputs.planning_id', '=', 'production_plannings.id')
-            ->whereIn('sewing_outputs.style_no', $styles)
-            ->select(
-                'sewing_outputs.style_no',
-                DB::raw('SUM(sewing_outputs.production) as actual_production'),
-                // style_qty যদি নাল থাকে তবে সেটিকে ০ হিসেবে ট্রিট করা
-                DB::raw('IFNULL(MAX(production_plannings.style_qty), 0) as allowed_qty')
-            )
-            ->groupBy('sewing_outputs.style_no')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                // যদি allowed_qty ০ হয় (অর্থাৎ প্ল্যানিং টেবিল থেকে ডাটা পায়নি),
-                // তবে আমরা অরিজিনাল প্রোডাকশনই দেখাবো (অথবা আপনার লজিক অনুযায়ী পরিবর্তন করতে পারেন)
-                $allowed = $item->allowed_qty > 0 ? $item->allowed_qty : 999999999;
-
-                $totalOutput = ($item->actual_production > $allowed)
-                            ? $allowed
-                            : $item->actual_production;
-
-                return [
-                    $item->style_no => [
-                        'style_no' => $item->style_no,
-                        'total_qty' => $totalOutput,
-                        'actual' => $item->actual_production,
-                        'allowed' => $item->allowed_qty
-                    ]
-                ];
-            });
-
-        $grandTotalSewingOutput = $sewingOutputs->sum(function ($item) {
-            return $item['total_qty'];
+        ->leftJoin('production_plannings', 'sewing_outputs.planning_id', '=', 'production_plannings.id')
+        ->whereIn('sewing_outputs.style_no', $filteredStyles)
+        ->whereIn('production_plannings.order_no', $filteredOrderNos)
+        ->select(
+            'sewing_outputs.style_no',
+            DB::raw('SUM(sewing_outputs.production) as actual_production'),
+            DB::raw('IFNULL(MAX(production_plannings.style_qty),0) as allowed_qty')
+        )
+        ->groupBy('sewing_outputs.style_no')
+        ->get()
+        ->mapWithKeys(function ($item) {
+            $allowed = $item->allowed_qty ?: 999999999;
+            $total = min($item->actual_production, $allowed);
+            return [
+                $item->style_no => [
+                    'style_no'  => $item->style_no,
+                    'total_qty' => $total,
+                    'actual'    => $item->actual_production,
+                    'allowed'   => $item->allowed_qty
+                ]
+            ];
         });
 
+        $grandTotalSewingOutput = $sewingOutputs->sum('total_qty');
 
+
+        // ================================
+        // Cutting Summary
+        // ================================
         $cuttingSummary = Cutting::query()
-            ->leftJoin('proforma_invoice_items', function($join) {
+            ->leftJoin('proforma_invoice_items', function ($join) {
                 $join->on('cuttings.style_no', '=', 'proforma_invoice_items.style_no')
                     ->on('cuttings.pi_id', '=', 'proforma_invoice_items.proforma_invoice_id');
             })
+            ->whereIn('cuttings.style_no', $filteredStyles)
+
             ->select(
                 'cuttings.style_no',
                 'cuttings.pi_id',
                 DB::raw('SUM(cuttings.cutting_qty) as actual_cut'),
-                DB::raw('IFNULL(MAX(proforma_invoice_items.order_qty), 0) as allowed_qty')
+                DB::raw('IFNULL(MAX(proforma_invoice_items.order_qty),0) as allowed_qty')
             )
             ->groupBy('cuttings.style_no', 'cuttings.pi_id')
             ->get()
             ->map(function ($item) {
-                // যদি allowed_qty ০ হয় (অর্থাৎ PI আইটেমে ডাটা নেই), তবে অরিজিনাল কাটিংই দেখাবে
-                $allowed = $item->allowed_qty > 0 ? $item->allowed_qty : 999999999;
-
-                // যদি একচুয়াল কাটিং অর্ডারের চেয়ে বেশি হয়, তবে অর্ডার কোয়ান্টিটি (Allowed) নিবে
-                $cappedCut = ($item->actual_cut > $allowed) ? $allowed : $item->actual_cut;
-
-                return [
-                    'capped_val' => $cappedCut
-                ];
+                $allowed = $item->allowed_qty ?: 999999999;
+                return ['capped_val' => min($item->actual_cut, $allowed)];
             });
 
-        // ২. গ্র্যান্ড টোটাল বের করা (Capped Output)
         $grandTotalCuttingOutput = $cuttingSummary->sum('capped_val');
 
+        $buyers = OrderDetail::whereNotIn('status', ['trash','temp'])
+            ->select('buyer_name')
+            ->distinct()
+            ->orderBy('buyer_name')
+            ->pluck('buyer_name');
+            // dd($buyers);
+        $brands = OrderDetail::whereNotIn('status', ['trash','temp'])
+            ->select('company_name')
+            ->distinct()
+            ->orderBy('company_name')
+            ->pluck('company_name');
 
-        $data = compact('orderDetails', 'totals', 'totalOrderQty', 'grandTotalSewingOutput', 'grandTotalCuttingOutput');
+        $fabrics = OrderDetail::whereNotIn('status', ['trash','temp'])
+            ->select('fabrication')
+            ->distinct()
+            ->orderBy('fabrication')
+            ->pluck('fabrication');
+            $styles = OrderDetail::whereNotIn('status',['trash','temp'])
+            ->select('style_no')
+            ->distinct()
+            ->orderBy('style_no')
+            ->pluck('style_no');
 
-        if($r->has('print')){
-            return view(adminTheme().'merchandising.orderDetails.printList', $data);
-        } else {
-            return view(adminTheme().'merchandising.orderDetails.index', $data);
+        $orderNos = OrderDetail::whereNotIn('status',['trash','temp'])
+            ->select('order_no')
+            ->distinct()
+            ->orderBy('order_no')
+            ->pluck('order_no');
+
+        $piNumbers = ProformaInvoice::whereNotIn('status',['trash','temp'])
+            ->whereNotNull('pi_no')
+            ->select('pi_no')
+            ->distinct()
+            ->orderBy('pi_no')
+            ->pluck('pi_no');
+
+        // Build hierarchical shipment dates (year → month → dates)
+        $shipmentDatesRaw = OrderDetail::whereNotIn('status',['trash','temp'])
+            ->whereNotNull('shipment_date')
+            ->select('shipment_date')
+            ->distinct()
+            ->orderBy('shipment_date', 'desc')
+            ->pluck('shipment_date');
+
+        $shipmentDatesHierarchy = [];
+        foreach ($shipmentDatesRaw as $date) {
+            if (!$date) continue;
+            $year = $date->format('Y');
+            $monthKey = $date->format('Y-m');
+            $monthName = $date->format('M');
+            $dateStr = $date->format('Y-m-d');
+            $dateDisplay = $date->format('d');
+
+            if (!isset($shipmentDatesHierarchy[$year])) {
+                $shipmentDatesHierarchy[$year] = [
+                    'year' => $year,
+                    'months' => []
+                ];
+            }
+            if (!isset($shipmentDatesHierarchy[$year]['months'][$monthKey])) {
+                $shipmentDatesHierarchy[$year]['months'][$monthKey] = [
+                    'month_key' => $monthKey,
+                    'month_name' => $monthName,
+                    'dates' => []
+                ];
+            }
+            $shipmentDatesHierarchy[$year]['months'][$monthKey]['dates'][] = [
+                'date' => $dateStr,
+                'display' => $dateDisplay
+            ];
         }
+        // Re-index months arrays
+        foreach ($shipmentDatesHierarchy as &$yearData) {
+            $yearData['months'] = array_values($yearData['months']);
+        }
+        $shipmentDatesHierarchy = array_values($shipmentDatesHierarchy);
+
+
+
+        // ================================
+        // View Data
+        // ================================
+        $data = compact(
+            'orderDetails',
+            'totals',
+            'totalOrderQty',
+            'grandTotalSewingOutput',
+            'grandTotalCuttingOutput',
+            'buyers',
+            'brands',
+            'fabrics',
+            'styles',
+            'orderNos',
+            'piNumbers',
+            'shipmentDatesHierarchy'
+        );
+
+
+        // ================================
+        // Print / Normal View
+        // ================================
+        if ($r->has('print')) {
+            return view(adminTheme().'merchandising.orderDetails.printList', $data);
+        }
+
+        return view(adminTheme().'merchandising.orderDetails.index', $data);
     }
+
 
     public function orderDetailsAction(Request $r, $action, $id = null)
     {
@@ -1419,7 +1529,47 @@ class MerchandisingController extends Controller
         return view(adminTheme().'merchandising.masterData.'.$view, compact('data','report'));
     }
 
+    public function fabricStatus($piId, Request $r)
+    {
+        $id = $piId;
+        // Eager Loading এর মাধ্যমে রিলেটেড সব ডেটা একবারেই নিয়ে আসা
+        $pi = ProformaInvoice::with([
+            'buyer',
+            'items',
+            'yarnBookings.receives', // Yarn Booking and its receives
+            'dyeingBookings'
+        ])->find($piId);
 
+        if(is_null($pi)) return redirect()->back()->with('errors', 'P.I. Fabric status not found');
+
+        // ম্যানুয়ালি মডেল ব্যবহার করে রিলেটেড রিসিভগুলো সংগ্রহ করা (যেহেতু অনেক ক্ষেত্রে সরাসরি রিলেশন নেই)
+        $yarnReceivesSum = \App\Models\YarnReceive::where('pi_id', $piId)->sum('receive_qty');
+
+        $knittingBookings = \App\Models\KnittingBooking::where('pi_id', $piId)->get();
+        $knittingReceivesSum = \App\Models\KnittingReceive::where('pi_id', $piId)->sum('weight');
+
+        $dyeingReceivesSum = \App\Models\DyeingReceive::where('pi_id', $piId)->sum('receive_qty');
+
+        if ($r->has('print')) {
+            return view(adminTheme().'merchandising.booking.statusPrint', compact(
+                'pi',
+                'yarnReceivesSum',
+                'knittingBookings',
+                'knittingReceivesSum',
+                'dyeingReceivesSum',
+                'id'
+            ));
+        }else{
+            return view(adminTheme().'merchandising.booking.statusShow', compact(
+                'pi',
+                'yarnReceivesSum',
+                'knittingBookings',
+                'knittingReceivesSum',
+                'dyeingReceivesSum',
+                'id'
+            ));
+        }
+    }
 
     public function booking(Request $r)
     {
@@ -1653,18 +1803,39 @@ class MerchandisingController extends Controller
         ========================================================= */
         if ($action === 'create') {
 
-            $pisAll    = ProformaInvoice::whereNotNull('pi_no')->whereIn('status',[0,1])->get();
+            $pisAll = ProformaInvoice::whereNotNull('pi_no')
+                        ->whereIn('status',[0,1])
+                        ->get();
+
             $pis = $pisAll->map(function($pi) {
-                            return [
-                                'id'           => $pi->id,
-                                'pi_no'        => $pi->pi_no,
-                                'buyer_name'   => $pi->buyer_name,
-                                'total_qty'    => $pi->items->sum('order_qty'),          // sum of all items qty
-                                'total_bill'   => $pi->items->sum('total_price'),       // sum of all items amount
-                                'style_count'  => $pi->items->unique('style_no')->count(), // unique style_no count
-                                'order_count'  => $pi->items->unique('order_no')->count(), // unique order_no count
-                            ];
-                        });
+
+                $piItem = ProformaInvoiceItem::where('proforma_invoice_id', $pi->id)->first();
+
+                $orderDetailItem = null;
+
+                if ($piItem) {
+                    $orderDetailItem = OrderDetailItem::where('order_no', $piItem->order_no)->first();
+                }
+
+                return [
+                    'id'            => $pi->id,
+                    'pi_no'         => $pi->pi_no,
+                    'buyer_name'    => $pi->buyer_name,
+
+                    'total_qty'     => $pi->items->sum('order_qty'),
+                    'total_bill'    => $pi->items->sum('total_price'),
+
+                    'style_count'   => $pi->items->unique('style_no')->count(),
+                    'order_count'   => $pi->items->unique('order_no')->count(),
+
+                    // 👇 new fields
+                    'item_name'     => $orderDetailItem->item_name ?? 'N/A',
+                    'shipment_date' => $orderDetailItem && $orderDetailItem->shipment_date
+                                        ? $orderDetailItem->shipment_date->format('Y-m-d')
+                                        : null,
+                ];
+            });
+
             return view(adminTheme().'merchandising.budget.edit', compact('pis'));
         }
 

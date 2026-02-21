@@ -13,6 +13,28 @@ class ProductionPlanning extends Model
 
     protected $guarded = [];
 
+    // columns
+    // id
+    // addedby_id
+    // editedby_id
+    // pi_id
+    // pi_no
+    // master_plan_id
+    // pi_item_id
+    // order_no
+    // status
+    // remarks
+    // sewing_start
+    // sewing_end
+    // style_qty
+    // style_no
+    // extra_time
+    // working_hours
+    // total_hourly_capacity
+    // total_working_time
+    // created_at
+    // updated_at
+
     protected $casts = [
         'created_date'     => 'date',
         'cutting_start'    => 'datetime',
@@ -37,6 +59,7 @@ class ProductionPlanning extends Model
         return $this->belongsTo(OrderDetail::class,'style_no','style_no');
     }
 
+<<<<<<< HEAD
     // ১. প্রোফর্মা ইনভয়েসের সাথে রিলেশন (যদি pi_id কলাম থাকে)
     public function pi()
     {
@@ -60,6 +83,11 @@ class ProductionPlanning extends Model
             ->where('pii.style_no', $this->style_no)
             ->groupBy('od.buyer_name', 'od.merchant_name', 'od.company_name', 'od.fabrication')
             ->first();
+=======
+    public function orderDetailItems()
+    {
+        return $this->belongsTo(OrderDetail::class,'order_no','order_no');
+>>>>>>> master
     }
 
     public function sewingLines()

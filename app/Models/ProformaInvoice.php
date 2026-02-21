@@ -13,6 +13,35 @@ class ProformaInvoice extends Model
 
     protected $guarded = [];
 
+    // columns
+    // id
+    // buyer_id
+    // buyer_name
+    // total_qty
+    // total_bill
+    // total_commission
+    // pi_no
+    // order_date
+    // terms
+    // status
+    // remarks
+    // addedby_id
+    // editedby_id
+    // created_at
+    // updated_at
+    // applicant
+    // applicant_bank
+    // first_beneficiary
+    // first_beneficiary_bank
+    // second_beneficiary
+    // second_beneficiary_bank
+    // notify_party
+    // buyer_info
+    // created_by
+    // edited_by
+    // deleted_by
+    // deleted_at
+
     protected $casts = [
         'created_date' => 'date',
         'updated_at' => 'date',
@@ -32,14 +61,14 @@ class ProformaInvoice extends Model
         return $this->belongsTo(User::class, 'buyer_id');
     }
 
-    public function order()
-    {
-        return $this->belongsTo(OrderDetail::class,'order_no','order_no');
-    }
-
     public function merchant()
     {
         return $this->belongsTo(User::class, 'merchant_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(OrderDetail::class, 'order_no', 'order_no');
     }
 
     public function items()
@@ -52,5 +81,29 @@ class ProformaInvoice extends Model
         return $this->hasMany(YarnBooking::class, 'pi_id', 'id');
     }
 
+    public function yarnReceives()
+    {
+        return $this->hasMany(YarnReceive::class, 'pi_id', 'id');
+    }
+
+    public function dyeingBookings()
+    {
+        return $this->hasMany(DyeingBooking::class, 'pi_id', 'id');
+    }
+
+    public function dyeingReceives()
+    {
+        return $this->hasMany(DyeingReceive::class, 'pi_id', 'id');
+    }
+
+    public function knittingBookings()
+    {
+        return $this->hasMany(KnittingBooking::class, 'pi_id', 'id');
+    }
+
+    public function knittingReceives()
+    {
+        return $this->hasMany(KnittingReceive::class, 'pi_id', 'id');
+    }
 
 }

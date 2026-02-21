@@ -10,6 +10,24 @@ class OrderDetailItem extends Model
 
     protected $guarded = [];
 
+    //columns
+    // id
+    // order_detail_id
+    // color_name
+    // composition
+    // order_no
+    // style_no
+    // qty
+    // created_at
+    // updated_at
+    // item_name
+    // fabrication
+    // gsm
+
+    // shipment_date
+    // created_by
+    // edited_by
+
     protected $casts = [
         'shipment_date' => 'date',
         'created_at'    => 'datetime',

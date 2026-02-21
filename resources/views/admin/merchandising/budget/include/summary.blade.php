@@ -4,12 +4,12 @@
         <div class="table-responsive">
             <table class="table table-bordered table-sm" id="summaryTable">
                 <tbody>
-
+                    {{-- @dd($budget) --}}
                     <!-- 1. Total Value of Order -->
                     <tr>
                         <th class="vm">TOTAL VALUE OF ORDER</th>
                         <td>
-                            <input type="number" step="any" name="summary[pi_value]" class="form-control form-control-sm summary_pi_value" value="{{ $budget->total_qty ?? 0 }}" readonly comment="User input for PI value">
+                            <input type="number" step="any" name="summary[pi_value]" class="form-control form-control-sm summary_pi_value" value="{{ $budget->pi_value ?? 0 }}" readonly comment="User input for PI value">
                         </td>
 
                         <th class="text-right vm">Total Expenditure</th>

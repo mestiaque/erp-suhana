@@ -1,6 +1,6 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('Supplier Ledgers')}}</title>
+<title>{{websiteTitle('Creditor Ledgers')}}</title>
 @endsection
 
 @push('css')
@@ -9,7 +9,7 @@
         max-width: 64px;
         max-height: 64px;
     }
-    
+
 </style>
 @endpush
 
@@ -18,12 +18,12 @@
 <div class="flex-grow-1">
     <!-- Breadcrumb Area -->
     <div class="breadcrumb-area">
-        <h1>Supplier Ledgers</h1>
+        <h1>Creditor Ledgers</h1>
         <ol class="breadcrumb">
             <li class="item">
                 <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
             </li>
-            <li class="item">Supplier Ledgers</li>
+            <li class="item">Creditor Ledgers</li>
         </ol>
     </div>
 
@@ -39,7 +39,7 @@
              <div class="d-flex align-items-center" style="gap:0.5rem;">
                 <form id="supplierFilterForm" method="GET" action="{{ route('admin.suppliersLegers') }}">
                     <select name="supplier_id" id="supplier_id" class="form-control" style="width:20rem" required>
-                        <option value="">-- Select Supplier --</option>
+                        <option value="">-- Select Creditor --</option>
                         @foreach($suppliers as $s)
                             <option value="{{ $s->id }}" {{ request()->supplier_id == $s->id ? 'selected' : '' }}>
                                 {{ $s->name }} {{ $s->company_name?' - ('.$s->company_name.')': ''}}
@@ -61,7 +61,7 @@
                             <tr>
                                 <th>SL</th>
                                 <th>Date</th>
-                                <th>Supplier</th>
+                                <th>Creditor</th>
                                 <th>Reference</th>
                                 <th class="text-right">Debit</th>
                                 <th class="text-right">Credit</th>
@@ -89,7 +89,7 @@
                 </div>
             @else
                 <div class="text-center display-4 text-muted p-4">
-                    Please Select A Supplier
+                    Please Select A Creditor
                 </div>
             @endif
         </div>

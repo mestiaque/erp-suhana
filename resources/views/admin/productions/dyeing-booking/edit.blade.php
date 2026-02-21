@@ -24,12 +24,17 @@
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label>PI Number</label>
-                        <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.dyeingBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
-                            <option value="">-- Select PI Number --</option>
-                            @foreach($pis as $pi)
-                                <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
-                            @endforeach
-                        </select>
+                        @if(isset($booking) && $action == 'update')
+                            <input type="text" class="form-control" value="{{ $booking?->pi?->pi_no ?? '' }}" readonly>
+                            <input type="hidden" class="form-control" name="pi_id" value="{{ $booking?->pi_id }}" hidden>
+                        @else
+                            <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.dyeingBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
+                                <option value="">-- Select PI Number --</option>
+                                @foreach($pis as $pi)
+                                    <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>Buyer Name</label>
@@ -37,11 +42,17 @@
                     </div>
 
                     {{-- <div class="col-md-3 mb-3">
-                        <label>Supplier</label>
+                        <label>Creditor</label>
                         <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required>
                     </div> --}}
 
                     <div class="col-md-3 mb-3">
+                        <label>Dyeing Unit/Factory</label>
+                        <input type="text" name="dyeing_unit" class="form-control"
+                               value="{{ $booking->dyeing_unit ?? '' }}" placeholder="Enter Factory Name">
+                    </div>
+
+                    <div class="col-md-3 mb-3 d-none">
                         <label>Status</label>
                         <select name="status" class="form-control" required>
                             <option value="pending" {{ $booking?->status=='pending'?'selected':'' }}>Pending</option>
@@ -96,14 +107,6 @@ $(document).ready(function() {
 });
 
 </script>
-
-
-<script>
-
-
-</script>
-
-
 
 @endpush
 

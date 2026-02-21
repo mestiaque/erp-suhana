@@ -1,88 +1,105 @@
-@foreach($bookings as $booking)
-<div class="modal fade" id="viewModal_{{ $booking->booking_no }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+@foreach($bookings as $row)
+<div class="modal fade" id="viewModal_{{ $row->receive_no }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
 
-            <div class="modal-header bg- text- py-2">
-                <h5 class="modal-title">Dyeing Booking Details #{{ $booking->getBookingNo() }}</h5>
-                <button type="button" class="close text-" data-dismiss="modal">
+            <!-- Modal Header -->
+            <div class="modal-header bg-success text-white py-2">
+                <h5 class="modal-title text-white">Dyeing Receive Details #{{ $row->getReceiveNo() }}</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
             </div>
 
             <div class="modal-body">
-
-                <!-- Booking Info -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <strong>PI Number:</strong>
-                        <p>{{ $booking->pi->pi_no?? '--' }}</p>
+                <!-- Summary Info Card (Theme Based) -->
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body p-3">
+                        <div class="row text-center">
+                            <div class="col-md-3 border-right">
+                                <small class="text-muted d-block">Booking Number</small>
+                                <strong>{{ $row->getBookingNo() }}</strong>
+                            </div>
+                            <div class="col-md-3 border-right">
+                                <small class="text-muted d-block">Buyer Name</small>
+                                <strong>{{ $row->pi->buyer->name ?? $row->buyer_name ?? '--' }}</strong>
+                            </div>
+                            <div class="col-md-3 border-right">
+                                <small class="text-muted d-block">Challan No</small>
+                                <strong>{{ $row->challan_no ?? '--' }}</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Receive Date</small>
+                                <strong>{{ \Carbon\Carbon::parse($row->receive_date)->format('d M, Y') }}</strong>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Buyer Name:</strong>
-                        <p>{{ $booking->pi->buyer_name ?? '--' }}</p>
-                    </div>
-                    {{-- <div class="col-md-4">
-                        <strong>Supplier:</strong>
-                        <p>{{ $booking->supplier ?? '--' }}</p>
-                    </div> --}}
-                    <div class="col-md-4">
-                        <strong>Booking Date:</strong>
-                        <p>{{ \Carbon\Carbon::parse($row->created_at)->format('d.m.Y') }}</p>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Status:</strong>
-                        <p>{{ ucfirst($booking->status ?? '--') }}</p>
-                    </div>
-                    {{-- <div class="col-md-4">
-                        <strong>Expected Delivery:</strong>
-                        <p>{{ $booking->expected_delivery ? \Carbon\Carbon::parse($booking->expected_delivery)->format('d.m.Y') : '--' }}</p>
-                    </div>
-                    <div class="col-12">
-                        <strong>Remarks:</strong>
-                        <p>{{ $booking->remarks ?? '--' }}</p>
-                    </div> --}}
                 </div>
 
-                <hr>
-
-                <!-- Booking Items Table -->
-                <h5 class="mb-2">Dyeing Booking Items</h5>
+                <!-- Receive Items Table -->
+                <h5 class="mb-3 font-weight-bold text-">
+                    <i class="bx bx-package"></i> Received Dyeing Items
+                </h5>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-sm">
-                        <thead>
+                    <table class="table table-sm table-bordered table-hover">
+                        <thead class="bg-secondary text-white text-center">
                             <tr>
-                                <th>SL</th>
-                                <th>Style</th>
-                                <th>Fabrication</th>
-                                <th>Composition</th>
-                                <th>Req. Qnty</th>
+                                <th width="5%">SL</th>
+                                <th width="20%">Style No</th>
+                                <th width="20%">Fabrication</th>
+                                <th width="20%">Composition</th>
+                                <th width="20%">Color</th>
+                                <th width="20%">Received Qnty</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php
-                                $booking_items = \App\Models\DyeingBooking::where('booking_no', $booking->booking_no)->get();
+                                // এই রিসিভ নম্বরের সব আইটেম লোড করা
+                                $receiveItems = \App\Models\DyeingReceive::where('receive_no', $row->receive_no)->get();
+                                $totalRcvQty = 0;
                             @endphp
-                            @forelse($booking_items as $i => $item)
+                            @forelse($receiveItems as $index => $item)
+                                @php
+                                    $totalRcvQty += $item->receive_qty;
+                                @endphp
                                 <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td>{{ $item->style ?? '--' }}</td>
-                                    <td>{{ $item->fabric_type ?? '--' }}</td>
-                                    <td>{{ $item->composition ?? '--' }}</td>
-                                    <td>{{ number_format($item->required_qty, 2) }}</td>
+                                    <td class="text-center">{{ $index + 1 }}</td>
+                                    <td class="text-center"><b>{{ $item->style }}</b></td>
+                                    <td>
+                                        {{ $item->fabric_type ?? '--' }}
+                                    </td>
+                                    <td>
+                                        {{ $item->composition ?? '--' }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ $item->color }}
+                                    </td>
+                                    <td class="text-right font-weight-bold">{{ number_format($item->receive_qty, 2) }} KG</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">No Items Found</td>
+                                    <td colspan="6" class="text-center text-muted">No items found in this receive record.</td>
                                 </tr>
                             @endforelse
                         </tbody>
+                        <tfoot class="bg-light font-weight-bold">
+                            <tr>
+                                <td colspan="5" class="text-right">Grand Total Received:</td>
+                                <td class="text-right font-weight-bold text-successs">{{ number_format($totalRcvQty, 2) }} KG</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 
+                @if($row->remarks)
+                <div class="mt-3 p-2 bg-light border-left border-primary">
+                    <strong>Note/Remarks:</strong> {{ $row->remarks }}
+                </div>
+                @endif
             </div>
 
-            <div class="modal-footer">
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
             </div>
 

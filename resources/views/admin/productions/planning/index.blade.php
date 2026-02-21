@@ -1,31 +1,15 @@
 @extends(adminTheme().'layouts.app')
 
 @section('title')
-<title>{{ websiteTitle('Production Planning List') }}</title>
+<title>{{ websiteTitle('Master Planning List') }}</title>
 @endsection
-
-@push('css')
-<style type="text/css">
-
-</style>
-@endpush
 
 @section('contents')
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-             <h3>Planning List</h3>
+             <h3>Master Planning List</h3>
              <div class="dropdown d-flex">
-                <form action="{{ route('admin.productionPlanning') }}" method="GET" target="_blank" class="d-inline">
-                    <input type="hidden" name="print" value="true">
-                    <input type="hidden" name="startDate" value="{{ request()->startDate }}">
-                    <input type="hidden" name="endDate" value="{{ request()->endDate }}">
-                    <input type="hidden" name="search" value="{{ request()->search }}">
-                    <button type="submit" class="btn btn-info btn-sm mr-1">
-                        <i class="fa fa-print"></i> Print
-                    </button>
-                </form>
-
                 @can('production_planning.add')
                  <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary mr-1" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Planning
@@ -40,8 +24,6 @@
 
         <div class="card-body">
             @include(adminTheme().'alerts')
-
-            <!-- Search Form -->
             <form action="{{ route('admin.productionPlanning') }}">
                 <div class="row mb-2">
                     <div class="col-md-6 mb-1">
@@ -60,33 +42,32 @@
             </form>
 
             <!-- Status Filter -->
-            <div class="row mb-2">
+            <div class="row mb-0">
                 <div class="col-md-12">
-                    <ul class="statuslist p-0">
+                    <ul class="statuslist p-0 m-0">
                         <li><a href="{{ route('admin.productionPlanning') }}">All ({{ $totals->total }})</a></li>
-                        <li><a href="{{ route('admin.productionPlanning',['status'=>'confirmed']) }}">Confirmed ({{ $totals->confirmed }})</a></li>
+                        <li><a href="{{ route('admin.productionPlanning',['status'=>'approved']) }}">Approved ({{ $totals->approved }})</a></li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Samples Table -->
             <div class="table-responsive">
-                <table class="table table-striped table-borderd">
+                <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th style="width: 150px;min-width: 150px">Style No</th>
-                            <th style="width: 150px;min-width: 150px">Merchant/Buyer</th>
-                            <th style="min-width:200px">Cutting</th>
-                            <th style="min-width:200px">Swetting</th>
-                            <th style="width: 150px;min-width: 150px">Total Hours</th>
-                            <th style="width: 200px;min-width: 200px">Packing</th>
-                            <th style="width: 160px;min-width: 160px">Plan By/Date</th>
-                            <th style="width: 200px;min-width: 200px">Action/Status</th>
+                            <th>SL</th>
+                            <th>PI</th>
+                            <th>Styles</th>
+                            <th>Total Qty</th>
+                            <th>Created By / Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($orders as $i => $order)
+                        @forelse($masterPlans as $i => $plan)
                         <tr>
+<<<<<<< HEAD
                             <td>
                                 <b>No:</b> {{ $order->style_no}}
                                 <br> <b>Qnty:</b> {{number_format($order->style_qty)}} pcs
@@ -94,70 +75,87 @@
                             <td>
                                 <b>M:</b> {{$order->getPiStyle()?->merchant_name}}
                                 <br><b>B:</b> {{$order->getPiStyle()?->buyer_name}}
+=======
+                            <td>{{ $masterPlans->firstItem() + $i }}</td>
+>>>>>>> master
 
+                            {{-- Styles as comma-separated --}}
+                            <td>
+                                @php
+                                    $piNos = $plan->productions->pluck('pi_no')->unique()->toArray();
+                                @endphp
+                                {{ implode(', ', $piNos) }}
                             </td>
                             <td>
-                                <b>S:</b> {{$order->cutting_start?Carbon\Carbon::parse($order->cutting_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->cutting_end?Carbon\Carbon::parse($order->cutting_end)->format('d.m.Y h:i A'):''}}
+                                @php
+                                    $styleNos = $plan->productions->pluck('style_no')->unique()->toArray();
+                                @endphp
+                                {{ implode(', ', $styleNos) }}
+                            </td>
+
+                            {{-- Total Qty --}}
+                            <td>
+                                @php
+                                    $totalQty = $plan->productions->sum(fn($p) => $p->style?->total_qty ?? 0);
+                                @endphp
+                                {{ number_format($totalQty) }}
+                            </td>
+
+                            {{-- Created By / Date --}}
+                            <td>
+                                {{ $plan->creator?->name ?? '--' }}
+                                <br>
+                                {{ $plan->created_at->format('d.m.Y H:i') }}
+                            </td>
+
+                            {{-- Status --}}
+                            <td>
+                                @if($plan->status=='pending')
+                                    <span class="badge badge-warning">Pending</span>
+                                @elseif($plan->status=='confirmed')
+                                    <span class="badge badge-info">Confirmed</span>
+                                @elseif($plan->status=='approved')
+                                    <span class="badge badge-success">Approved</span>
+                                @elseif($plan->status=='cancelled')
+                                    <span class="badge badge-danger">Cancelled</span>
+                                @else
+                                    <span class="badge badge-secondary">{{ ucfirst($plan->status) }}</span>
+                                @endif
                             </td>
                             <td>
-                                <b>S:</b> {{$order->sewing_start?Carbon\Carbon::parse($order->sewing_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->sewing_end?Carbon\Carbon::parse($order->sewing_end)->format('d.m.Y h:i A'):''}}
-                            </td>
-                            <td>
-                                <b>Total:</b> {{$order->total_working_time}}
-                                <br><b>H/T:</b> {{$order->total_hourly_capacity}} pcs
-                            </td>
-                            <td>
-                                <b>S:</b> {{$order->packing_start?Carbon\Carbon::parse($order->packing_start)->format('d.m.Y h:i A'):''}}
-                                <br><b>E:</b> {{$order->packing_end?Carbon\Carbon::parse($order->packing_end)->format('d.m.Y h:i A'):''}}
-                            </td>
-                            <td>
-                                <b>By:</b> {{ $order->user?->name }}
-                                <br><b>Date:</b> {{ $order->created_at->format('d.m.Y') }}
-                            </td>
-                            <td class="text-center">
-                                @if(can('production_planning.view') || can('production_planning.edit') || can('production_planning.delete'))
+                                @if(can('production_planning.view') || can('production_planning.edit') || can('production_planning.delete') || can('production_planning.approve'))
                                     @can('production_planning.view')
-                                    <a href="{{ route('admin.productionPlanningAction',['print',$order->id]) }}" class="btn-custom info mr-1"><i class="fa fa-print"></i></a>
-                                    <a href="{{ route('admin.productionPlanningAction',['view',$order->id]) }}" class="btn-custom yellow mr-1"><i class="fa fa-eye"></i></a>
+                                        <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#masterPlanModal_{{ $plan->id }}">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
                                     @endcan
-                                    @can('production_planning.edit')
-                                    <a href="{{ route('admin.productionPlanningAction',['edit',$order->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
-                                    @endcan
-                                    @if($order->sewingOutputs->sum('production')==0)
-                                    @can('production_planning.delete')
-                                    <a href="{{ route('admin.productionPlanningAction',['delete',$order->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
-                                    @endcan
+                                    @if($plan->status !== 'approved')
+                                        @can('production_planning.edit')
+                                            <a href="{{ route('admin.productionPlanningAction',['edit',$plan->id]) }}" class="btn-custom success mr-1"><i class="bx bx-edit"></i></a>
+                                        @endcan
+                                        @can('production_planning.approve')
+                                            <a href="{{ route('admin.productionPlanningAction',['approve',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom success mr-1"><i class="bx bx-check"></i></a>
+                                        @endcan
                                     @endif
+                                    @can('production_planning.delete')
+                                        <a href="{{ route('admin.productionPlanningAction',['delete',$plan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
+                                    @endcan
                                 @else
                                 --
-                                @endif
-                                <br>
-                                @if($order->status=='pending')
-                                    <span class="badge badge-warning">Pending</span>
-                                @elseif($order->status=='confirmed')
-                                    <span class="badge badge-info">Confirmed</span>
-                                @elseif($order->status=='completed')
-                                    <span class="badge badge-success">Completed</span>
-                                @elseif($order->status=='cancel')
-                                    <span class="badge badge-danger">Cancelled</span>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">No Samples Found</td>
+                            <td colspan="7" class="text-center text-muted">No Planning Found</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
-                {{ $orders->links('pagination') }}
+                {{ $masterPlans->links('pagination') }}
             </div>
         </div>
     </div>
 </div>
+@include(adminTheme().'productions.planning.view')
 @endsection
-
-@push('js')
-@endpush
