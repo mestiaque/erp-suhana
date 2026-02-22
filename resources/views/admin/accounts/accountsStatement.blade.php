@@ -1,11 +1,54 @@
 @extends(adminTheme().'layouts.app') @section('title')
 <title>Account Statement Report</title>
 @endsection @push('css')
-<style type="text/css"></style>
+<style type="text/css">
+    .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .loader-overlay.active {
+        display: flex;
+    }
+    .loader-content {
+        text-align: center;
+        background: #fff;
+        padding: 30px 50px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    .loader-content i {
+        font-size: 40px;
+        color: #4a90e2;
+        animation: spin 1s linear infinite;
+    }
+    .loader-content p {
+        margin-top: 15px;
+        font-size: 16px;
+        color: #333;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
 @endpush @section('contents')
 
 <div class="flex-grow-1">
-
+    <!-- Loader Overlay -->
+    <div class="loader-overlay" id="pageLoader">
+        <div class="loader-content">
+            <i class="fa-solid fa-circle-notch"></i>
+            <p>Loading, please wait...</p>
+        </div>
+    </div>
     <!-- Start -->
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -31,7 +74,7 @@
                                 <select class="form-control" name="account_id">
                                     <option value="">Select Method</option>
                                     @foreach($accounts as $account)
-                                    <option value="{{ $account->id }}"
+                                    <option value="{{ $account->id }}" {{ $loop->first && !request()->account_id ? 'selected' : '' }}
                                         {{ $account->id == request()->account_id || (isset($method) && $account->id == $method->id) ? 'selected' : '' }}>
                                         {{ $account->name }}
                                     </option>
@@ -49,8 +92,23 @@
                         </div>
                     </form>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2 offset-md-2">
+                    <div class=" rounded px-3 d-flex align-items-center justify-content-between shadow-sm" style="background: rgba(0, 255, 0, 0.25)">
 
+                        <!-- Left Icon -->
+                        <div  style="font-size: xxx-large; color: rgb(6, 163, 6)">
+                            <i class="fa fa-wallet"></i>
+                        </div>
+
+                        <!-- Right Content -->
+                        <div class="text-right">
+                            <div style="font-size: 13px; color: #6c757d;">Current Balance</div>
+                            <div class="text-dark font-weight-bold" style="font-size: 18px;">
+                                {{ isset($openingBalance) ? priceFormat($openingBalance + $creditTotal - $debetTotal) : priceFormat(0) }}
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
@@ -69,17 +127,15 @@
                     }
                 </style>
                 <div class="text-center mb-4">
-                    <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;">
-                    <h2>{{general()->title}}</h2>
-                    <p>
-                        {!!general()->address_one!!}
-                        <br>
-                        <b>Phone:</b> {{general()->mobile}}
-                        <b>Email:</b> {{general()->email}}
-                        <br>
-                        <b>Date:</b>
-                        {{ date('d M, Y') }}
-                    </p>
+                    <div class="d-flex align-items-center justify-content-center">
+                        <img src="{{asset(general()->logo())}}" alt="logo" style="max-height: 80px;" class="mr-3">
+                        <div class="text-left">
+                            <h2 style="font-size: 3rem" class="mb-1">{{general()->title}}</h2>
+                            <p class="mb-0">
+                                {!!general()->address_one!!} | <b>Phone:</b> {{general()->mobile}} | <b>Email:</b> {{general()->email}}
+                            </p>
+                        </div>
+                    </div>
                     <span style="display: inline-block;padding: 1px 25px;border: 1px solid #e3cfcf;border-radius: 5px;background: #fbfbfb;">{{$method->name}} Statement</span>
                 </div>
                 <div class="table-responsive">
@@ -88,6 +144,7 @@
                             <tr>
                                 <th style="width: 120px;min-width: 120px;">Date</th>
                                 <th style="width: 130px;min-width: 130px;">Reference</th>
+                                <th style="width: 130px;min-width: 130px;">Type</th>
                                 <th style="min-width: 200px;">Particulars</th>
                                 <th style="width: 130px;min-width: 130px;">Debit</th>
                                 <th style="width: 130px;min-width: 130px;">Credit</th>
@@ -99,110 +156,48 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td>Previus Balance</td>
+                                <td></td>
+                                <td>Previous Balance</td>
                                 <td></td>
                                 <td></td>
-                                <td>{{priceFormat($openingBalance)}}</td>
+                                <td>{{ priceFormat($openingBalance) }}</td>
                                 <td></td>
                             </tr>
-                            @php
-                                $debetTotal = 0;
-                                $creditTotal = 0;
-                            @endphp
                             @forelse($transections as $tran)
                                 <tr>
                                     <td>{{ $tran->created_at->format('d-m-Y') }}</td>
+                                    <td>{{ $tran->reference }}</td>
+                                    <td class="text-capitalize">{{ $tran->transaction_direction }}</td>
+                                    <td>{{ $tran->particulars }}</td>
                                     <td>
-
-                                            @if($tran->type==0)
-                                                Sales
-                                            @elseif($tran->type==1)
-                                                Deposit
-                                            @elseif($tran->type==3)
-                                                Creditor Bill
-                                            @elseif($tran->type==4)
-                                                Transfer Balance
-                                            @elseif($tran->type==5)
-                                                 Expense
-                                            @elseif($tran->type==6)
-                                                Withdrawal
-                                            @elseif($tran->type==7)
-                                                I.O.U
-                                            @else
-                                                Unknown
-                                            @endif
-
-                                    </td>
-                                    <td>
-                                        @if($tran->type == 0)
-                                            {{ $tran->sale->name ?? '' }}
-                                            {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
-                                        @elseif($tran->type==1)
-                                            <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{$tran->account?$tran->account->name:'N/A'}} {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
-                                        @elseif($tran->type==5)
-                                           @if($tran->expense)
-                                            <b>Company:</b> {{ $tran->expense->company_name}} - <b>Receiver:</b> {{ $tran->expense->receiver_name}} {{ $tran->expense->description?'- '.$tran->expense->description:'' }}
-                                            @else
-                                            <span>N/A</span>
-                                            @endif
-                                        @elseif($tran->type==7)
-                                            @if($tran->expenseIou)
-                                            <b>Company:</b> {{ $tran->expenseIou->company_name}} - <b>Receiver:</b> {{ $tran->expenseIou->receiver_name}} {{ $tran->expenseIou->description?'- '.$tran->expenseIou->description:'' }}
-                                            @else
-                                            <span>N/A</span>
-                                            @endif
-                                        @elseif($tran->type==6)
-                                            <b>TNX ID:</b> {{ $tran->transection_id }} - <b>Account:</b> {{$tran->account?$tran->account->name:'N/A'}} {{ $tran->billing_note?'- '.$tran->billing_note:'' }}
-                                        @elseif($tran->type==3)
-
-                                            @if($tran->purchase)
-                                               <b>Invoice:</b> {{$tran->purchase->order_no}}
-                                               <b>Creditor:</b> {{$tran->purchase->supplier_name}}
-                                            @else
-                                            <span>N/A</span>
-                                            @endif
-                                        @else
-                                            {{ $tran->transection_id }}
-
-                                        @endif
-
-                                    </td>
-
-                                    <td>
-                                        @if(in_array($tran->type, [3,4,5,6,7]))
+                                        @if($tran->transaction_direction == 'debit')
                                             {{ priceFormat($tran->amount) }}
-                                            @php
-                                                $debetTotal += $tran->amount;
-                                            @endphp
                                         @endif
                                     </td>
                                     <td>
-                                        @if(in_array($tran->type, [0,1]))
+                                        @if($tran->transaction_direction == 'credit')
                                             {{ priceFormat($tran->amount) }}
-                                            @php
-                                                $creditTotal += $tran->amount;
-                                            @endphp
                                         @endif
                                     </td>
                                     <td>{{ priceFormat($tran->running_balance) }}</td>
-                                    <td>{{$method->name}}</td>
+                                    <td>{{ $method->name }}</td>
                                 </tr>
-                                @empty
+                            @empty
                                 <tr>
                                     <td colspan="7" style="text-align:center;">No Record</td>
                                 </tr>
-                                @endforelse
+                            @endforelse
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3"></td>
+                                <td colspan="4"></td>
                                 <td>
                                     {{ priceFormat($debetTotal) }}
                                 </td>
                                 <td>
                                     {{ priceFormat($creditTotal) }}
                                 </td>
-                                <td></td>
+                                <td>{{ priceFormat($openingBalance + $creditTotal - $debetTotal) }}</td>
                                 <td></td>
                             </tr>
                         </tfoot>
@@ -219,6 +214,20 @@
 @endsection @push('js')
 <script>
     $(document).ready(function () {
+        // Show loader on form submit
+        $('form').on('submit', function() {
+            $('#pageLoader').addClass('active');
+        });
+
+        // Hide loader when page is fully loaded
+        $(window).on('load', function() {
+            $('#pageLoader').removeClass('active');
+        });
+
+        // Also hide on page ready in case of back button
+        $(document).ajaxComplete(function() {
+            $('#pageLoader').removeClass('active');
+        });
 
         $('#example').DataTable( {
 	        dom: 'Bfrtip',

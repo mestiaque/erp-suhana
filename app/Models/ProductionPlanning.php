@@ -59,35 +59,9 @@ class ProductionPlanning extends Model
         return $this->belongsTo(OrderDetail::class,'style_no','style_no');
     }
 
-<<<<<<< HEAD
-    // ১. প্রোফর্মা ইনভয়েসের সাথে রিলেশন (যদি pi_id কলাম থাকে)
-    public function pi()
-    {
-        return $this->belongsTo(ProformaInvoice::class, 'pi_id');
-    }
-
-    // ২. পিআই এবং স্টাইল অনুযায়ী ডিটেইলস নিয়ে আসার মেথড
-    public function getPiStyle()
-    {
-        // এই প্ল্যানিং এর pi_id এবং style_no ব্যবহার করে প্রোফর্মা আইটেম এবং অর্ডার ডিটেইলস জয়েন করা হচ্ছে
-        return \DB::table('proforma_invoice_items as pii')
-            ->join('order_details as od', 'pii.style_no', '=', 'od.style_no')
-            ->select(
-                'od.buyer_name',
-                'od.merchant_name',
-                'od.company_name',
-                'od.fabrication',
-                \DB::raw('SUM(pii.order_qty) as pi_total_qty')
-            )
-            ->where('pii.proforma_invoice_id', $this->pi_id)
-            ->where('pii.style_no', $this->style_no)
-            ->groupBy('od.buyer_name', 'od.merchant_name', 'od.company_name', 'od.fabrication')
-            ->first();
-=======
     public function orderDetailItems()
     {
         return $this->belongsTo(OrderDetail::class,'order_no','order_no');
->>>>>>> master
     }
 
     public function sewingLines()

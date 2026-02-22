@@ -816,6 +816,11 @@ class PurchasesController extends Controller
         if ($action == 'bill-entry') {
             $user = User::findOrFail($id);
 
+            // Get filter parameters
+            $startDate = $r->startDate;
+            $endDate = $r->endDate;
+            $search = $r->search;
+
             // ১. বিল এবং পেমেন্ট ডাটা সংগ্রহ (Standardized for merging)
             // $bills = $user->creditorBill()->get()->map(function($item) {
             //     return (object) [
@@ -828,15 +833,33 @@ class PurchasesController extends Controller
             //     ];
             // });
 
-            $bills = $user->creditorBill()->get()->map(function($item) {
+            $billsQuery = $user->creditorBill();
+
+            // Apply date filter for bills
+            if($startDate){
+                $billsQuery = $billsQuery->whereDate('created_at', '>=', $startDate);
+            }
+            if($endDate){
+                $billsQuery = $billsQuery->whereDate('created_at', '<=', $endDate);
+            }
+
+            $bills = $billsQuery->get()->map(function($item) {
                 $item->type = 'bill';
                 $item->credit = $item->amount;
                 $item->debit = 0;
                 $item->date = $item->created_at;
                 $item->title = $item->title;
                 $item->note = $item->description;
-                return $item; // এখনো Eloquent মডেল
+                $item->searchable = $item->title ?? '';
+                return $item;
             });
+
+            // Apply search filter on bills
+            if($search){
+                $bills = $bills->filter(function($item) use ($search) {
+                    return stripos($item->title, $search) !== false;
+                });
+            }
 
             // $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
             //     return (object) [
@@ -849,21 +872,50 @@ class PurchasesController extends Controller
             //     ];
             // });
 
-            $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
+            $paymentsQuery = Transaction::where('user_id', $user->id)->where('type', 3);
+
+            // Apply date filter for payments
+            if($startDate){
+                $paymentsQuery = $paymentsQuery->whereDate('created_at', '>=', $startDate);
+            }
+            if($endDate){
+                $paymentsQuery = $paymentsQuery->whereDate('created_at', '<=', $endDate);
+            }
+
+            $payments = $paymentsQuery->get()->map(function($item) {
                 $item->type = 'payment';
                 $item->credit = 0;
                 $item->debit = $item->amount;
                 $item->date = $item->created_at;
                 $item->title = $item->transection_id;
                 $item->note = $item->billing_note;
-                return $item; // এখনো Eloquent মডেল
+                $item->searchable = $item->transection_id ?? '';
+                return $item;
             });
 
-            // ২. মার্জ এবং সর্ট করা
-            $merged = $bills->merge($payments)->sortByDesc('date');
+            // Apply search filter on payments
+            if($search){
+                $payments = $payments->filter(function($item) use ($search) {
+                    return stripos($item->title, $search) !== false;
+                });
+            }
+
+            // ২. মার্জ এবং সর্ট করা (ascending for balance calculation)
+            $merged = $bills->merge($payments)->sortBy('date')->values();
+
+            // Calculate running balance
+            $balance = 0;
+            $merged = $merged->map(function($entry) use (&$balance) {
+                $balance = $balance + $entry->credit - $entry->debit;
+                $entry->balance = $balance;
+                return $entry;
+            });
+
+            // Reverse for descending display
+            $merged = $merged->sortByDesc('date')->values();
 
             // ৩. ম্যানুয়াল পেজিনেশন (১০ টি করে প্রতি পেজে)
-            $perPage = 20;
+            $perPage = 10;
             $page = request()->get('page', 1);
             $ledgerEntries = new \Illuminate\Pagination\LengthAwarePaginator(
                 $merged->forPage($page, $perPage),

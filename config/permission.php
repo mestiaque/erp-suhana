@@ -228,6 +228,39 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'finishing' => [
+                'label'       => 'Finishing',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'iron' => [
+                'label'       => 'Iron',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
+            'poly' => [
+                'label'       => 'Poly',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'sweing' => [
                 'label'       => 'Sweing',
                 'permissions' => [

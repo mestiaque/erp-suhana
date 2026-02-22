@@ -268,6 +268,27 @@ return [
                     'permission' => 'cutting'
                 ],
                 [
+                    'title'      => 'Finishing',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/finishing',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'finishing'
+                ],
+                [
+                    'title'      => 'Iron',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/iron',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'iron'
+                ],
+                [
+                    'title'      => 'Poly',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/poly',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'poly'
+                ],
+                [
                     'title'      => 'Sweing',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/daily-production',
@@ -513,25 +534,11 @@ return [
                     'permission'  => 'bill_payments'
                 ],
                 [
-                    'title'       => 'Bill Collection',
-                    'icon'        => 'fas fa-wallet',
-                    'route'       => '/admin/bill-collections',
-                    'icon_color'  => 'text-warning',
-                    'permission'  => 'bill_collections'
-                ],
-                [
                     'title'       => 'Fund Received',
                     'icon'        => 'fas fa-wallet',
                     'route'       => '/admin/accounts/deposits',
                     'icon_color'  => 'text-warning',
                     'permission'  => 'deposits'
-                ],
-                [
-                    'title'       => 'Withdrawal',
-                    'icon'        => 'fas fa-wallet',
-                    'route'       => '/admin/accounts/withdrawal',
-                    'icon_color'  => 'text-warning',
-                    'permission'  => 'withdrawal'
                 ],
                 [
                     'title'       => 'Statement',
@@ -619,8 +626,6 @@ return [
             ]
         ],
     ],
-
-
 
     // App Settings
     [

@@ -681,21 +681,51 @@ class MerchandisingController extends Controller
 
 
         // ================================
-        // Shipment Date (Year/Month/Date hierarchical filter)
+        // Shipment Date (Year/Month/Date hierarchical filter) - Multiple selection with checkboxes
         // ================================
-        if ($r->shipment_year) {
-            $query->whereYear('shipment_date', $r->shipment_year);
-        }
-        if ($r->shipment_month) {
-            // shipment_month format: YYYY-MM
-            $monthParts = explode('-', $r->shipment_month);
-            if (count($monthParts) == 2) {
-                $query->whereYear('shipment_date', $monthParts[0])
-                      ->whereMonth('shipment_date', $monthParts[1]);
-            }
-        }
-        if ($r->shipment_date) {
-            $query->whereDate('shipment_date', $r->shipment_date);
+        $shipmentYears = $r->input('shipment_year', []);
+        $shipmentMonths = $r->input('shipment_month', []);
+        $shipmentDates = $r->input('shipment_date', []);
+        $shipmentAll = $r->input('shipment_all', false);
+
+        // If "All" is selected or no filters, don't apply date filter
+        if ($shipmentAll || (empty($shipmentYears) && empty($shipmentMonths) && empty($shipmentDates))) {
+            // Don't filter by date - show all
+        } else {
+            $query->where(function ($q) use ($shipmentYears, $shipmentMonths, $shipmentDates) {
+                $dateConditions = [];
+                
+                // Handle year filters
+                if (!empty($shipmentYears)) {
+                    $years = is_array($shipmentYears) ? $shipmentYears : [$shipmentYears];
+                    foreach ($years as $year) {
+                        $dateConditions[] = "YEAR(shipment_date) = " . intval($year);
+                    }
+                }
+                
+                // Handle month filters
+                if (!empty($shipmentMonths)) {
+                    $months = is_array($shipmentMonths) ? $shipmentMonths : [$shipmentMonths];
+                    foreach ($months as $month) {
+                        $parts = explode('-', $month);
+                        if (count($parts) == 2) {
+                            $dateConditions[] = "YEAR(shipment_date) = " . intval($parts[0]) . " AND MONTH(shipment_date) = " . intval($parts[1]);
+                        }
+                    }
+                }
+                
+                // Handle date filters
+                if (!empty($shipmentDates)) {
+                    $dates = is_array($shipmentDates) ? $shipmentDates : [$shipmentDates];
+                    foreach ($dates as $date) {
+                        $dateConditions[] = "DATE(shipment_date) = '" . $date . "'";
+                    }
+                }
+                
+                if (!empty($dateConditions)) {
+                    $q->whereRaw('(' . implode(' OR ', $dateConditions) . ')');
+                }
+            });
         }
 
 

@@ -79,7 +79,7 @@
                     <div class="card amount-card c1 shadow-sm border-0">
                         <div class="card-body">
                             <h6 class="text-muted mb-1 text-uppercase fw-semibold">Total Purchases</h6>
-                            <h3 class="text-success fw-bold mb-0">{{ priceFullFormat($user->balance) }}</h3>
+                            <h3 class="text-success fw-bold mb-0">{{ priceFullFormat($user->creditorBill->sum('amount')) }}</h3>
                         </div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                     <div class="card amount-card c3 shadow-sm border-0">
                         <div class="card-body">
                             <h6 class="text-muted mb-1 text-uppercase fw-semibold">Net Due Balance</h6>
-                            <h3 class="text-danger fw-bold mb-0">{{ priceFullFormat($user->balance - $totalPaid) }}</h3>
+                            <h3 class="text-danger fw-bold mb-0">{{ priceFullFormat($user->creditorBill->sum('amount') - $totalPaid) }}</h3>
                         </div>
                     </div>
                 </div>
@@ -128,26 +128,45 @@
                         {{-- Tab 1: Transaction History (Ledger) --}}
                         <div class="tab-pane fade show active" id="pills-history" role="tabpanel">
 
+                            {{-- Filter Form --}}
+                            <form method="GET" action="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="mb-1">
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by Title/Invoice/Transaction ID" value="{{ request('search') }}">
+                                    </div>
+                                    <div class="col-md-6 d-flex gap-2">
+                                        <input type="date" name="startDate" class="form-control form-control-sm" placeholder="Start Date" value="{{ request('startDate') }}">
+                                        <span class="text-muted" style="padding: 0.5rem"><i>TO</i></span>
+                                        <input type="date" name="endDate" class="form-control form-control-sm" placeholder="End Date" value="{{ request('endDate') }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-sm btn-primary me-2"><i class="bx bx-filter"></i> Filter</button>
+                                        <a href="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="btn btn-sm btn-secondary"><i class="bx bx-reset"></i> Reset</a>
+                                    </div>
+                                </div>
+                            </form>
+
                             <div class="table-responsive">
                                 <table class="table align-middle table-ledger">
                                     <thead>
                                         <tr>
                                             <th>Date</th>
-                                            <th>Title/Note</th>
+                                            <th>Title/Invoice/Transaction ID</th>
+                                            <th>Description/Note</th>
                                             <th class="text-right">Credit (+)</th>
                                             <th class="text-right">Debit (-)</th>
+                                            <th class="text-right">Balance</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($ledgerEntries as $item)
-                                        <tr class=" {{$item->type == 'payment'? 'credit-row':'debit-row'}}">
-                                            <td class="">{{ $item->date->format('d-m-Y') }}</td>
-                                            <td>
-                                                <span class="fw-bold">{{ $item->title }}</span><br>
-                                                <small class="text-muted">{{ $item->note ?? 'N/A' }}</small>
-                                            </td>
+                                        <tr class="{{ $item->type == 'payment' ? 'credit-row' : 'debit-row' }}">
+                                            <td>{{ $item->date ? $item->date->format('d-m-Y') : '' }}</td>
+                                            <td>{{ $item->title }}</td>
+                                            <td>{{ $item->note ?? '-' }}</td>
                                             <td class="text-right text-success">{{ $item->credit > 0 ? priceFullFormat($item->credit) : '-' }}</td>
                                             <td class="text-right text-danger">{{ $item->debit > 0 ? priceFullFormat($item->debit) : '-' }}</td>
+                                            <td class="text-right {{ $loop->first ? 'font-weight-bold' : '' }}">{{ priceFullFormat($item->balance) }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>

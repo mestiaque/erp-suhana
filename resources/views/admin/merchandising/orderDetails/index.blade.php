@@ -14,7 +14,13 @@
                 <form action="{{ route('admin.orderDetails') }}" method="GET" target="_blank" class="d-inline">
                     <input type="hidden" name="print" value="true">
                     @foreach(request()->except('print') as $key => $value)
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @if(is_array($value))
+                            @foreach($value as $arrKey => $arrVal)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $arrVal }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
                     @endforeach
                     <button type="submit" class="btn btn-info btn-sm mr-1">
                         <i class="fa fa-print"></i> Print
@@ -121,9 +127,7 @@
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
                         <label class="form-label mb-0">Ship Date</label>
                         <div class="shipment-date-dropdown" id="shipmentDateDropdown">
-                            <input type="hidden" name="shipment_year" id="shipment_year" value="{{ request('shipment_year') }}">
-                            <input type="hidden" name="shipment_month" id="shipment_month" value="{{ request('shipment_month') }}">
-                            <input type="hidden" name="shipment_date" id="shipment_date" value="{{ request('shipment_date') }}">
+                            <input type="hidden" name="shipment_all" id="shipment_all" value="{{ request()->query('shipment_all', request()->input('shipment_all', '1')) }}">
                             
                             <div class="shipment-dropdown-trigger form-control form-control-sm">
                                 <span class="shipment-selected-text">All</span>
@@ -132,10 +136,26 @@
                             
                             <div class="shipment-dropdown-menu">
                                 <div class="shipment-tree-container">
+                                    @php
+                                        $shipmentYearInput = request()->query('shipment_year', request()->input('shipment_year', []));
+                                        $shipmentMonthInput = request()->query('shipment_month', request()->input('shipment_month', []));
+                                        $shipmentDateInput = request()->query('shipment_date', request()->input('shipment_date', []));
+                                        $shipmentAllInput = request()->query('shipment_all', request()->input('shipment_all', '1'));
+                                        
+                                        // Ensure arrays
+                                        $selectedYears = is_array($shipmentYearInput) ? $shipmentYearInput : [];
+                                        $selectedMonths = is_array($shipmentMonthInput) ? $shipmentMonthInput : [];
+                                        $selectedDates = is_array($shipmentDateInput) ? $shipmentDateInput : [];
+                                        $isAll = $shipmentAllInput == '1' && empty($selectedYears) && empty($selectedMonths) && empty($selectedDates);
+                                    @endphp
+                                    <div class="shipment-all-item">
+                                        <input type="checkbox" class="shipment-checkbox shipment-all-checkbox" value="all" {{ $isAll ? 'checked' : '' }}>
+                                        <span class="shipment-label">All</span>
+                                    </div>
                                     @forelse($shipmentDatesHierarchy as $yearData)
                                         <div class="shipment-year-item">
                                             <div class="shipment-year-header" data-year="{{ $yearData['year'] }}">
-                                                <input type="radio" name="shipment_radio" class="shipment-radio" value="year:{{ $yearData['year'] }}">
+                                                <input type="checkbox" class="shipment-checkbox" name="shipment_year[]" value="{{ $yearData['year'] }}" {{ in_array($yearData['year'], $selectedYears) ? 'checked' : '' }}>
                                                 <i class="fa fa-chevron-right shipment-toggle-icon"></i>
                                                 <span class="shipment-label">{{ $yearData['year'] }}</span>
                                             </div>
@@ -143,14 +163,14 @@
                                                 @foreach($yearData['months'] as $monthData)
                                                     <div class="shipment-month-item">
                                                         <div class="shipment-month-header" data-month="{{ $monthData['month_key'] }}">
-                                                            <input type="radio" name="shipment_radio" class="shipment-radio" value="month:{{ $monthData['month_key'] }}">
+                                                            <input type="checkbox" class="shipment-checkbox" name="shipment_month[]" value="{{ $monthData['month_key'] }}" {{ in_array($monthData['month_key'], $selectedMonths) ? 'checked' : '' }}>
                                                             <i class="fa fa-chevron-right shipment-toggle-icon"></i>
                                                             <span class="shipment-label">{{ $monthData['month_name'] }}</span>
                                                         </div>
                                                         <div class="shipment-dates-container" style="display:none;">
                                                             @foreach($monthData['dates'] as $dateData)
                                                                 <div class="shipment-date-item" data-date="{{ $dateData['date'] }}">
-                                                                    <input type="radio" name="shipment_radio" class="shipment-radio" value="date:{{ $dateData['date'] }}">
+                                                                    <input type="checkbox" class="shipment-checkbox" name="shipment_date[]" value="{{ $dateData['date'] }}" {{ in_array($dateData['date'], $selectedDates) ? 'checked' : '' }}>
                                                                     <span class="shipment-label">{{ $dateData['display'] }}</span>
                                                                 </div>
                                                             @endforeach
@@ -585,10 +605,20 @@ thead.sticky-top th{
 .shipment-date-item:hover {
     background-color: #f5f5f5;
 }
-.shipment-radio {
+.shipment-checkbox {
     cursor: pointer;
     margin: 0;
     flex-shrink: 0;
+}
+.shipment-all-item {
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-bottom: 1px solid #eee;
+}
+.shipment-all-item:hover {
+    background-color: #f5f5f5;
 }
 .shipment-months-container {
     margin-left: 15px;
@@ -596,12 +626,15 @@ thead.sticky-top th{
 .shipment-dates-container {
     margin-left: 30px;
 }
-.shipment-toggle-icon {
+.shipment-toggle-icon,
+.svg-inline--fa.fa-chevron-right {
     font-size: 10px;
     transition: transform 0.2s;
     width: 10px;
+    display: inline-block;
 }
-.shipment-toggle-icon.expanded {
+.shipment-toggle-icon.expanded,
+.svg-inline--fa.fa-chevron-right.expanded {
     transform: rotate(90deg);
 }
 .shipment-year-header.selected,
@@ -713,30 +746,54 @@ document.addEventListener('DOMContentLoaded', function () {
         var trigger = dropdown.querySelector('.shipment-dropdown-trigger');
         var selectedText = dropdown.querySelector('.shipment-selected-text');
 
-        // Restore selected state on page load
-        var selectedYear = document.getElementById('shipment_year').value;
-        var selectedMonth = document.getElementById('shipment_month').value;
-        var selectedDate = document.getElementById('shipment_date').value;
-
-        // Update display text based on selection
+        // Update display text based on selections
         function updateDisplayText() {
-            var year = document.getElementById('shipment_year').value;
-            var month = document.getElementById('shipment_month').value;
-            var date = document.getElementById('shipment_date').value;
+            var yearCheckboxes = document.querySelectorAll('input[name="shipment_year[]"]:checked');
+            var monthCheckboxes = document.querySelectorAll('input[name="shipment_month[]"]:checked');
+            var dateCheckboxes = document.querySelectorAll('input[name="shipment_date[]"]:checked');
+            var allCheckbox = document.querySelector('.shipment-all-checkbox');
             
-            if (date) {
-                var dateObj = new Date(date);
-                var day = dateObj.getDate();
-                var monthName = dateObj.toLocaleString('en', { month: 'short' });
-                var yearNum = dateObj.getFullYear();
-                selectedText.textContent = day + ' ' + monthName + ' ' + yearNum;
-            } else if (month) {
-                var parts = month.split('-');
-                var monthDate = new Date(parts[0], parts[1] - 1);
-                var monthName = monthDate.toLocaleString('en', { month: 'short' });
-                selectedText.textContent = monthName + ' ' + parts[0];
-            } else if (year) {
-                selectedText.textContent = year;
+            if (allCheckbox && allCheckbox.checked) {
+                selectedText.textContent = 'All';
+                return;
+            }
+            
+            var selectedValues = [];
+            
+            // Get selected dates
+            if (dateCheckboxes.length > 0) {
+                dateCheckboxes.forEach(function(cb) {
+                    var date = cb.value;
+                    var dateObj = new Date(date);
+                    var day = dateObj.getDate();
+                    var monthName = dateObj.toLocaleString('en', { month: 'short' });
+                    selectedValues.push(day + ' ' + monthName);
+                });
+            }
+            
+            // Get selected months
+            if (monthCheckboxes.length > 0) {
+                monthCheckboxes.forEach(function(cb) {
+                    var parts = cb.value.split('-');
+                    var monthDate = new Date(parts[0], parts[1] - 1);
+                    var monthName = monthDate.toLocaleString('en', { month: 'short' });
+                    selectedValues.push(monthName + ' ' + parts[0]);
+                });
+            }
+            
+            // Get selected years
+            if (yearCheckboxes.length > 0) {
+                yearCheckboxes.forEach(function(cb) {
+                    selectedValues.push(cb.value);
+                });
+            }
+            
+            if (selectedValues.length > 0) {
+                var display = selectedValues.join(', ');
+                if (display.length > 20) {
+                    display = display.substring(0, 20) + '...';
+                }
+                selectedText.textContent = display;
             } else {
                 selectedText.textContent = 'All';
             }
@@ -756,118 +813,155 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Handle radio button selection
-        document.querySelectorAll('.shipment-radio').forEach(function(radio) {
-            radio.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var value = this.value;
-                var parts = value.split(':');
-                var type = parts[0];
-                var val = parts[1];
-
-                // Clear all selections
-                document.querySelectorAll('.shipment-year-header, .shipment-month-header, .shipment-date-item').forEach(function(el) {
-                    el.classList.remove('selected');
-                });
-
-                // Set hidden inputs based on type
-                if (type === 'year') {
-                    document.getElementById('shipment_year').value = val;
-                    document.getElementById('shipment_month').value = '';
-                    document.getElementById('shipment_date').value = '';
-                    this.closest('.shipment-year-header').classList.add('selected');
-                } else if (type === 'month') {
-                    document.getElementById('shipment_year').value = '';
-                    document.getElementById('shipment_month').value = val;
-                    document.getElementById('shipment_date').value = '';
-                    this.closest('.shipment-month-header').classList.add('selected');
-                } else if (type === 'date') {
-                    document.getElementById('shipment_year').value = '';
-                    document.getElementById('shipment_month').value = '';
-                    document.getElementById('shipment_date').value = val;
-                    this.closest('.shipment-date-item').classList.add('selected');
+        // Handle "All" checkbox
+        var allCheckbox = document.querySelector('.shipment-all-checkbox');
+        if (allCheckbox) {
+            allCheckbox.addEventListener('change', function() {
+                document.getElementById('shipment_all').value = this.checked ? '1' : '0';
+                if (this.checked) {
+                    // Uncheck all other checkboxes
+                    document.querySelectorAll('.shipment-checkbox:not(.shipment-all-checkbox)').forEach(function(cb) {
+                        cb.checked = false;
+                    });
                 }
-
                 updateDisplayText();
-                dropdown.classList.remove('open');
+            });
+        }
+
+        // Handle year checkbox
+        document.querySelectorAll('input[name="shipment_year[]"]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    var allCheckbox = document.querySelector('.shipment-all-checkbox');
+                    if (allCheckbox) {
+                        allCheckbox.checked = false;
+                        document.getElementById('shipment_all').value = '0';
+                    }
+                }
+                updateDisplayText();
             });
         });
 
-        // Toggle year expand/collapse (click on header, not radio)
+        // Handle month checkbox
+        document.querySelectorAll('input[name="shipment_month[]"]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    var allCheckbox = document.querySelector('.shipment-all-checkbox');
+                    if (allCheckbox) {
+                        allCheckbox.checked = false;
+                        document.getElementById('shipment_all').value = '0';
+                    }
+                }
+                updateDisplayText();
+            });
+        });
+
+        // Handle date checkbox
+        document.querySelectorAll('input[name="shipment_date[]"]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    var allCheckbox = document.querySelector('.shipment-all-checkbox');
+                    if (allCheckbox) {
+                        allCheckbox.checked = false;
+                        document.getElementById('shipment_all').value = '0';
+                    }
+                }
+                updateDisplayText();
+            });
+        });
+
+        // Toggle year expand/collapse (click on header, not checkbox)
         document.querySelectorAll('.shipment-year-header').forEach(function(header) {
             header.addEventListener('click', function(e) {
-                if (e.target.classList.contains('shipment-radio')) return;
+                if (e.target.classList.contains('shipment-checkbox')) return;
                 e.stopPropagation();
                 var container = this.nextElementSibling;
-                var icon = this.querySelector('.shipment-toggle-icon');
+                var icon = this.querySelector('.shipment-toggle-icon, .svg-inline--fa');
                 
                 if (container) {
                     if (container.style.display === 'none' || !container.style.display) {
                         container.style.display = 'block';
-                        icon.classList.add('expanded');
+                        if (icon) icon.classList.add('expanded');
                     } else {
                         container.style.display = 'none';
-                        icon.classList.remove('expanded');
+                        if (icon) icon.classList.remove('expanded');
                     }
                 }
             });
         });
 
-        // Toggle month expand/collapse (click on header, not radio)
+        // Toggle month expand/collapse (click on header, not checkbox)
         document.querySelectorAll('.shipment-month-header').forEach(function(header) {
             header.addEventListener('click', function(e) {
-                if (e.target.classList.contains('shipment-radio')) return;
+                if (e.target.classList.contains('shipment-checkbox')) return;
                 e.stopPropagation();
                 var container = this.nextElementSibling;
-                var icon = this.querySelector('.shipment-toggle-icon');
+                var icon = this.querySelector('.shipment-toggle-icon, .svg-inline--fa');
                 
                 if (container) {
                     if (container.style.display === 'none' || !container.style.display) {
                         container.style.display = 'block';
-                        icon.classList.add('expanded');
+                        if (icon) icon.classList.add('expanded');
                     } else {
                         container.style.display = 'none';
-                        icon.classList.remove('expanded');
+                        if (icon) icon.classList.remove('expanded');
                     }
                 }
             });
         });
 
-        // Restore selected state and expand parents if needed
-        if (selectedDate) {
-            var radio = document.querySelector('.shipment-radio[value="date:' + selectedDate + '"]');
-            if (radio) {
-                radio.checked = true;
-                radio.closest('.shipment-date-item').classList.add('selected');
-                var monthContainer = radio.closest('.shipment-months-container');
-                var yearContainer = radio.closest('.shipment-year-item').querySelector('.shipment-months-container');
-                if (monthContainer) {
-                    monthContainer.style.display = 'block';
-                    monthContainer.previousElementSibling.querySelector('.shipment-toggle-icon').classList.add('expanded');
-                }
-                if (yearContainer) {
-                    yearContainer.style.display = 'block';
-                    yearContainer.previousElementSibling.querySelector('.shipment-toggle-icon').classList.add('expanded');
-                }
-            }
-        } else if (selectedMonth) {
-            var radio = document.querySelector('.shipment-radio[value="month:' + selectedMonth + '"]');
-            if (radio) {
-                radio.checked = true;
-                radio.closest('.shipment-month-header').classList.add('selected');
-                var yearContainer = radio.closest('.shipment-year-item').querySelector('.shipment-months-container');
-                if (yearContainer) {
-                    yearContainer.style.display = 'block';
-                    yearContainer.previousElementSibling.querySelector('.shipment-toggle-icon').classList.add('expanded');
+        // Expand parents based on selected checkboxes on page load
+        // Expand months for selected dates
+        document.querySelectorAll('input[name="shipment_date[]"]:checked').forEach(function(cb) {
+            var dateItem = cb.closest('.shipment-date-item');
+            var monthHeader = dateItem.parentElement.previousElementSibling;
+            var monthContainer = dateItem.closest('.shipment-dates-container');
+            var yearContainer = dateItem.closest('.shipment-year-item').querySelector('.shipment-months-container');
+            
+            if (monthContainer && monthHeader) {
+                monthContainer.style.display = 'block';
+                var monthIcon = monthHeader.querySelector('.shipment-toggle-icon');
+                if (!monthIcon) monthIcon = monthHeader.querySelector('.svg-inline--fa.fa-chevron-right');
+                if (monthIcon) {
+                    monthIcon.classList.add('expanded');
+                    monthIcon.classList.remove('fa-chevron-right');
+                    monthIcon.classList.add('fa-chevron-down');
                 }
             }
-        } else if (selectedYear) {
-            var radio = document.querySelector('.shipment-radio[value="year:' + selectedYear + '"]');
-            if (radio) {
-                radio.checked = true;
-                radio.closest('.shipment-year-header').classList.add('selected');
+            if (yearContainer) {
+                var yearHeader = yearContainer.previousElementSibling;
+                yearContainer.style.display = 'block';
+                var yearIcon = yearHeader.querySelector('.shipment-toggle-icon');
+                if (!yearIcon) yearIcon = yearHeader.querySelector('.svg-inline--fa.fa-chevron-right');
+                if (yearIcon) {
+                    yearIcon.classList.add('expanded');
+                    yearIcon.classList.remove('fa-chevron-right');
+                    yearIcon.classList.add('fa-chevron-down');
+                }
             }
-        }
+        });
+        
+        // Expand year for selected months
+        document.querySelectorAll('input[name="shipment_month[]"]:checked').forEach(function(cb) {
+            var monthItem = cb.closest('.shipment-month-item');
+            var monthHeader = monthItem.parentElement.previousElementSibling;
+            var yearContainer = monthItem.closest('.shipment-year-item').querySelector('.shipment-months-container');
+            
+            if (yearContainer) {
+                var yearHeader = yearContainer.previousElementSibling;
+                yearContainer.style.display = 'block';
+                var yearIcon = yearHeader.querySelector('.shipment-toggle-icon');
+                if (!yearIcon) yearIcon = yearHeader.querySelector('.svg-inline--fa.fa-chevron-right');
+                if (yearIcon) {
+                    yearIcon.classList.add('expanded');
+                    yearIcon.classList.remove('fa-chevron-right');
+                    yearIcon.classList.add('fa-chevron-down');
+                }
+            }
+        });
+        
+        // Update display text on page load
+        updateDisplayText();
     })();
 });
 </script>

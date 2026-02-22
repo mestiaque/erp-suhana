@@ -58,15 +58,14 @@ class Transaction extends Model
     	return $this->belongsTo(Attribute::class,'payment_method_id');
     }
 
-    public function sale(){
-    	return $this->belongsTo(Order::class,'src_id');
-    }
+
     public function user(){
     	return $this->belongsTo(User::class,'user_id');
     }
 
-    public function company(){
-    	return $this->belongsTo(Company::class,'user_id');
+
+    public function supplierBill(){
+    	return $this->belongsTo(CreditorBill::class,'src_id');
     }
 
 

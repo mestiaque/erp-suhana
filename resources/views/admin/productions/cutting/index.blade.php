@@ -277,30 +277,104 @@
 @push('js')
 
 <script>
-$(document).ready(function() {
+// PI -> Order Selection
     $('#pi_select').on('change', function() {
         let pi_no = $(this).val();
+        let $orderSelect = $('#order_select');
         let $styleSelect = $('#style_select');
-        let $qtyLabel = $('#style_qty_label');
+        let $colorSelect = $('#color_select');
 
         if (pi_no) {
-            $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
-            $qtyLabel.text('');
+            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
+            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $('#order_qty_label').text('');
+            $('#style_qty_label').text('');
+            $('#color_qty_label').text('');
 
-            // আপনার রাউট অনুযায়ী URL পরিবর্তন করুন
-            $.get("{{ route('admin.cuttingAction', 'get-styles') }}", { pi_id: pi_no }, function(data) {
-                $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
-
+            $.get("{{ route('admin.cuttingAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
+                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
                 data.forEach(function(item) {
-                    // এখানে planning_id এবং style_qty ডাটা এট্রিবিউট হিসেবে রাখা হচ্ছে
-                    $styleSelect.append(`<option value="${item.style_no}" data-qty="${item.total_style_qty}" data-plan="${item.id}">${item.style_no}</option>`);
+                    $orderSelect.append('<option value="' + item.order_no + '" data-qty="' + item.total_order_qty + '">' + item.order_no + ' (' + item.total_order_qty + ')</option>');
                 });
             });
         } else {
-            $styleSelect.empty().append('<option value="">-- First Select PI --</option>').prop('disabled', true);
-            $qtyLabel.text('');
+            $orderSelect.empty().append('<option value="">-- First Select PI --</option>').prop('disabled', true);
+            $('#order_qty_label').text('');
         }
     });
+
+    // Order -> Style Selection
+    $('#order_select').on('change', function() {
+        let order_no = $(this).val();
+        let pi_no = $('#pi_select').val();
+        let $styleSelect = $('#style_select');
+        let $colorSelect = $('#color_select');
+        let selectedOrder = $(this).find('option:selected');
+
+        if (selectedOrder.data('qty')) {
+            $('#order_qty_label').text('Qty: ' + selectedOrder.data('qty'));
+        } else {
+            $('#order_qty_label').text('');
+        }
+
+        if (order_no && pi_no) {
+            $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $('#color_qty_label').text('');
+
+            $.get("{{ route('admin.cuttingAction', 'get-styles') }}", { pi_id: pi_no, order_no: order_no }, function(data) {
+                $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
+                data.forEach(function(item) {
+                    $styleSelect.append('<option value="' + item.style_no + '" data-qty="' + item.total_style_qty + '">' + item.style_no + '</option>');
+                });
+            });
+        } else {
+            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $('#style_qty_label').text('');
+        }
+    });
+
+    // Style -> Color Selection (updated)
+    $('#style_select').on('change', function() {
+        let style_no = $(this).val();
+        let pi_no = $('#pi_select').val();
+        let order_no = $('#order_select').val();
+        let $colorSelect = $('#color_select');
+        let selected = $(this).find('option:selected');
+
+        if (selected.data('qty')) {
+            $('#style_qty_label').text('Qty: ' + selected.data('qty'));
+        } else {
+            $('#style_qty_label').text('');
+        }
+
+        if (style_no && pi_no && order_no) {
+            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
+
+            $.get("{{ route('admin.cuttingAction', 'get-colors') }}", { pi_id: pi_no, order_no: order_no, style_no: style_no }, function(data) {
+                $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', false);
+                data.forEach(function(item) {
+                    $colorSelect.append('<option value="' + item.color_name + '" data-qty="' + item.total_color_qty + '">' + item.color_name + ' (' + item.total_color_qty + ')</option>');
+                });
+            });
+        } else {
+            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $('#color_qty_label').text('');
+        }
+    });
+
+    // Color selection - show color qty
+    $('#color_select').on('change', function() {
+        let selected = $(this).find('option:selected');
+        let qty = selected.data('qty');
+        if (qty) {
+            $('#color_qty_label').text('Qty: ' + qty);
+        } else {
+            $('#color_qty_label').text('');
+        }
+    });
+
 
     // স্টাইল সিলেক্ট করলে Qty লেবেলে দেখানো এবং কালার লোড
     $('#style_select').on('change', function() {
