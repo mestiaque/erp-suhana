@@ -139,13 +139,13 @@
 
 
                                 {{-- Delete --}}
-                                @can('accounts.delete')
+                                {{-- @can('accounts.delete')
                                 <a href="{{route('admin.accountsAction', ['delete', $method->id])}}"
                                 class="btn-custom danger"
                                 onclick="return confirm('Are You Want To Delete?')">
                                     <i class="bx bx-trash"></i>
                                 </a>
-                                @endcan
+                                @endcan --}}
 
                             </td>
 
