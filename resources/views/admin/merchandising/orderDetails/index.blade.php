@@ -128,12 +128,12 @@
                         <label class="form-label mb-0">Ship Date</label>
                         <div class="shipment-date-dropdown" id="shipmentDateDropdown">
                             <input type="hidden" name="shipment_all" id="shipment_all" value="{{ request()->query('shipment_all', request()->input('shipment_all', '1')) }}">
-                            
+
                             <div class="shipment-dropdown-trigger form-control form-control-sm">
                                 <span class="shipment-selected-text">All</span>
                                 <i class="fa fa-chevron-down shipment-dropdown-arrow"></i>
                             </div>
-                            
+
                             <div class="shipment-dropdown-menu">
                                 <div class="shipment-tree-container">
                                     @php
@@ -141,7 +141,7 @@
                                         $shipmentMonthInput = request()->query('shipment_month', request()->input('shipment_month', []));
                                         $shipmentDateInput = request()->query('shipment_date', request()->input('shipment_date', []));
                                         $shipmentAllInput = request()->query('shipment_all', request()->input('shipment_all', '1'));
-                                        
+
                                         // Ensure arrays
                                         $selectedYears = is_array($shipmentYearInput) ? $shipmentYearInput : [];
                                         $selectedMonths = is_array($shipmentMonthInput) ? $shipmentMonthInput : [];
@@ -335,6 +335,9 @@
 
                             <!-- New output columns to the right of Order Qty -->
                             <th>Cutting</th>
+                            <th>Finishing</th>
+                            <th>Iron</th>
+                            <th>Poly</th>
                             <th>Print &amp; Emb</th>
                             <th>Sewing Output</th>
                             <th>Packing</th>
@@ -376,6 +379,10 @@
                             <td class="sticky-col col-order">{{ $order->order_no ?? '--' }}</td>
                             <td class="sticky-col col-qty">{{ number_format($order->total_qty) }}</td>
                             <td>{{ number_format($order->getCutQty() ?? 0) }}</td>
+                            <td>{{ number_format($order->getFinishingQty() ?? 0) }}</td>
+                            <td>{{ number_format($order->getIronQty() ?? 0) }}</td>
+                            <td>{{ number_format($order->getPolyQty() ?? 0) }}</td>
+
                             <td>{{ number_format($order->print_emb_output ?? $order->print_emb ?? 0) }}</td>
                             <td>{{ number_format($order->getSewingQty() ?? 0) }}</td>
                             <td>{{ number_format($order->packing_output ?? $order->packing ?? 0) }}</td>
@@ -752,14 +759,14 @@ document.addEventListener('DOMContentLoaded', function () {
             var monthCheckboxes = document.querySelectorAll('input[name="shipment_month[]"]:checked');
             var dateCheckboxes = document.querySelectorAll('input[name="shipment_date[]"]:checked');
             var allCheckbox = document.querySelector('.shipment-all-checkbox');
-            
+
             if (allCheckbox && allCheckbox.checked) {
                 selectedText.textContent = 'All';
                 return;
             }
-            
+
             var selectedValues = [];
-            
+
             // Get selected dates
             if (dateCheckboxes.length > 0) {
                 dateCheckboxes.forEach(function(cb) {
@@ -770,7 +777,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectedValues.push(day + ' ' + monthName);
                 });
             }
-            
+
             // Get selected months
             if (monthCheckboxes.length > 0) {
                 monthCheckboxes.forEach(function(cb) {
@@ -780,14 +787,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectedValues.push(monthName + ' ' + parts[0]);
                 });
             }
-            
+
             // Get selected years
             if (yearCheckboxes.length > 0) {
                 yearCheckboxes.forEach(function(cb) {
                     selectedValues.push(cb.value);
                 });
             }
-            
+
             if (selectedValues.length > 0) {
                 var display = selectedValues.join(', ');
                 if (display.length > 20) {
@@ -877,7 +884,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.stopPropagation();
                 var container = this.nextElementSibling;
                 var icon = this.querySelector('.shipment-toggle-icon, .svg-inline--fa');
-                
+
                 if (container) {
                     if (container.style.display === 'none' || !container.style.display) {
                         container.style.display = 'block';
@@ -897,7 +904,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.stopPropagation();
                 var container = this.nextElementSibling;
                 var icon = this.querySelector('.shipment-toggle-icon, .svg-inline--fa');
-                
+
                 if (container) {
                     if (container.style.display === 'none' || !container.style.display) {
                         container.style.display = 'block';
@@ -917,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var monthHeader = dateItem.parentElement.previousElementSibling;
             var monthContainer = dateItem.closest('.shipment-dates-container');
             var yearContainer = dateItem.closest('.shipment-year-item').querySelector('.shipment-months-container');
-            
+
             if (monthContainer && monthHeader) {
                 monthContainer.style.display = 'block';
                 var monthIcon = monthHeader.querySelector('.shipment-toggle-icon');
@@ -940,13 +947,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-        
+
         // Expand year for selected months
         document.querySelectorAll('input[name="shipment_month[]"]:checked').forEach(function(cb) {
             var monthItem = cb.closest('.shipment-month-item');
             var monthHeader = monthItem.parentElement.previousElementSibling;
             var yearContainer = monthItem.closest('.shipment-year-item').querySelector('.shipment-months-container');
-            
+
             if (yearContainer) {
                 var yearHeader = yearContainer.previousElementSibling;
                 yearContainer.style.display = 'block';
@@ -959,7 +966,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-        
+
         // Update display text on page load
         updateDisplayText();
     })();

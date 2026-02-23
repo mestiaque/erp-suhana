@@ -12,6 +12,7 @@ return new class extends Migration
         if (!Schema::hasColumn('cuttings', 'order_no')) {
             Schema::table('cuttings', function (Blueprint $table) {
                 $table->string('order_no')->nullable()->after('pi_no');
+                $table->string('color_name')->nullable()->after('style_no');
             });
         }
 
@@ -72,7 +73,7 @@ return new class extends Migration
         Schema::dropIfExists('polies');
         Schema::dropIfExists('irons');
         Schema::dropIfExists('finishings');
-        
+
         if (Schema::hasColumn('cuttings', 'order_no')) {
             Schema::table('cuttings', function (Blueprint $table) {
                 $table->dropColumn('order_no');

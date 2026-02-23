@@ -15,6 +15,8 @@ class Cutting extends Model
         'pi_id',
         'pi_no',
         'style_no',
+        'order_no',
+        'color_name',
         'cutting_qty',
         'reject_qty',
         'cutting_date',

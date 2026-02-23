@@ -11,27 +11,23 @@ class ProformaInvoiceItem extends Model
     use HasFactory;
     use ActivityLoggable;
 
-    protected $guarded = [];
-
-    // columns
-    // id
-    // proforma_invoice_id
-    // order_no
-    // fabrication
-    // style_no
-    // order_qty
-    // unit_price
-    // total_price
-    // status
-    // addedby_id
-    // editedby_id
-    // created_at
-    // updated_at
-    // uom
-    // created_by
-    // edited_by
-    // deleted_by
-    // deleted_at
+    protected $fillable = [
+        'proforma_invoice_id',
+        'order_no',
+        'fabrication',
+        'style_no',
+        'order_qty',
+        'unit_price',
+        'total_price',
+        'status',
+        'addedby_id',
+        'editedby_id',
+        'uom',
+        'created_by',
+        'edited_by',
+        'deleted_by',
+        'deleted_at',
+    ];
 
     protected $casts = [
         'created_date' => 'date',

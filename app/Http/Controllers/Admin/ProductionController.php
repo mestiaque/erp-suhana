@@ -24,6 +24,7 @@ use App\Models\ProductionPlanning;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProformaInvoiceItem;
 use App\Http\Controllers\Controller;
+use App\Models\OrderDetailItem;
 use Illuminate\Support\Facades\Auth;
 
 class ProductionController extends Controller
@@ -1059,11 +1060,9 @@ class ProductionController extends Controller
         }
 
         if ($action == 'get-colors') {
-            // Get colors for selected style within a PI and Order
-            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
-                    ->where('order_no', $r->order_no)
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
                     ->where('style_no', $r->style_no)
-                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->select('color_name', DB::raw('SUM(qty) as total_color_qty'))
                     ->groupBy('color_name')
                     ->get();
 
@@ -1152,12 +1151,12 @@ class ProductionController extends Controller
         }
 
         if ($action == 'get-colors') {
-            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
-                    ->where('order_no', $r->order_no)
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
                     ->where('style_no', $r->style_no)
-                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->select('color_name', DB::raw('SUM(qty) as total_color_qty'))
                     ->groupBy('color_name')
                     ->get();
+
             return response()->json($colors);
         }
 
@@ -1242,12 +1241,12 @@ class ProductionController extends Controller
         }
 
         if ($action == 'get-colors') {
-            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
-                    ->where('order_no', $r->order_no)
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
                     ->where('style_no', $r->style_no)
-                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->select('color_name', DB::raw('SUM(qty) as total_color_qty'))
                     ->groupBy('color_name')
                     ->get();
+
             return response()->json($colors);
         }
 
@@ -1332,12 +1331,12 @@ class ProductionController extends Controller
         }
 
         if ($action == 'get-colors') {
-            $colors = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
-                    ->where('order_no', $r->order_no)
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
                     ->where('style_no', $r->style_no)
-                    ->select('color_name', DB::raw('SUM(order_qty) as total_color_qty'))
+                    ->select('color_name', DB::raw('SUM(qty) as total_color_qty'))
                     ->groupBy('color_name')
                     ->get();
+
             return response()->json($colors);
         }
 

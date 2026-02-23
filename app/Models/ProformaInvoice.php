@@ -11,36 +11,34 @@ class ProformaInvoice extends Model
     use HasFactory;
     use ActivityLoggable;
 
-    protected $guarded = [];
-
-    // columns
-    // id
-    // buyer_id
-    // buyer_name
-    // total_qty
-    // total_bill
-    // total_commission
-    // pi_no
-    // order_date
-    // terms
-    // status
-    // remarks
-    // addedby_id
-    // editedby_id
-    // created_at
-    // updated_at
-    // applicant
-    // applicant_bank
-    // first_beneficiary
-    // first_beneficiary_bank
-    // second_beneficiary
-    // second_beneficiary_bank
-    // notify_party
-    // buyer_info
-    // created_by
-    // edited_by
-    // deleted_by
-    // deleted_at
+    protected $fillable = [
+        'buyer_id',
+        'buyer_name',
+        'total_qty',
+        'total_bill',
+        'total_commission',
+        'pi_no',
+        'order_date',
+        'terms',
+        'status',
+        'remarks',
+        'addedby_id',
+        'editedby_id',
+        'applicant',
+        'applicant_bank',
+        'first_beneficiary',
+        'first_beneficiary_bank',
+        'second_beneficiary',
+        'second_beneficiary_bank',
+        'notify_party',
+        'buyer_info',
+        'created_at',
+        'updated_at',
+        'created_by',
+        'edited_by',
+        'deleted_by',
+        'deleted_at',
+    ];
 
     protected $casts = [
         'created_date' => 'date',

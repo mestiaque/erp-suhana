@@ -10,27 +10,25 @@ class OrderDetail extends Model
 {
     use HasFactory, ActivityLoggable;
 
-    protected $guarded = [];
-
-    // columns
-    // id
-    // buyer_id
-    // buyer_name
-    // merchant_id
-    // merchant_name
-    // style_no
-    // total_qty
-    // total_bill
-    // status
-    // company_name
-    // order_no
-    // shipment_date
-    // fabrication
-    // remarks
-    // created_by
-    // edited_by
-    // created_at
-    // updated_at
+    protected $fillable = [
+        'buyer_id',
+        'buyer_name',
+        'merchant_id',
+        'merchant_name',
+        'style_no',
+        'total_qty',
+        'total_bill',
+        'status',
+        'company_name',
+        'order_no',
+        'shipment_date',
+        'fabrication',
+        'remarks',
+        'created_by',
+        'edited_by',
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'shipment_date' => 'date',
@@ -94,16 +92,18 @@ class OrderDetail extends Model
 
     public function getCutQty()
     {
-        $piIds = $this->piItems()
-            ->where('style_no', $this->style_no)
-            ->pluck('proforma_invoice_id');
-
-        if ($piIds->isEmpty()) {
-            return 0;
-        }
-
-        return Cutting::whereIn('pi_id', $piIds)
-            ->where('style_no', $this->style_no)
-            ->sum('cutting_qty');
+        return Cutting::where('order_no', $this->order_no)->where('style_no', $this->style_no)->sum('cutting_qty');
+    }
+    public function getFinishingQty()
+    {
+        return Finishing::where('order_no', $this->order_no)->where('style_no', $this->style_no)->sum('finishing_qty');
+    }
+    public function getIronQty()
+    {
+        return Iron::where('order_no', $this->order_no)->where('style_no', $this->style_no)->sum('iron_qty');
+    }
+    public function getPolyQty()
+    {
+        return Poly::where('order_no', $this->order_no)->where('style_no', $this->style_no)->sum('poly_qty');
     }
 }

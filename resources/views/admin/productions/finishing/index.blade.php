@@ -13,7 +13,7 @@
         }
   }
 </style>
-@endsection
+@endpush
 @section('contents')
 
 @include(adminTheme().'alerts')
@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-md-5 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Style No, Color" class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Order No, Style No, Color" class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -56,6 +56,7 @@
                             <th style="width: 50px;">SL</th>
                             <th style="min-width: 120px;">Finishing Date</th>
                             <th style="min-width: 150px;">PI Number</th>
+                            <th style="min-width: 150px;">Order Number</th>
                             <th style="min-width: 150px;">Style Number</th>
                             <th style="min-width: 120px;">Color</th>
                             <th style="min-width: 120px;">Finishing Qty</th>
@@ -69,10 +70,9 @@
                         <tr>
                             <td>{{ $finishings->firstItem() + $i }}</td>
                             <td>{{ $fin->finishing_date ? $fin->finishing_date->format('d.m.Y') : '--' }}</td>
-                            <td class="font-weight-bold">{{ $fin->pi_no }}</td>
-                            <td>
-                                <span class="badge badge-info">{{ $fin->style_no }}</span>
-                            </td>
+                            <td class="">{{ $fin->pi_no }}</td>
+                            <td>{{ $fin->order_no }}</td>
+                            <td> {{ $fin->style_no }} </td>
                             <td>{{ $fin->color_name }}</td>
                             <td class="text-success font-weight-bold">{{ number_format($fin->finishing_qty) }} Pcs</td>
                             <td>{{ $fin->createdBy?->name }}</td>
@@ -97,7 +97,7 @@
                     @if($finishings->count() > 0)
                     <tfoot class="bg-light">
                         <tr>
-                            <th colspan="5" class="text-right">Total:</th>
+                            <th colspan="6" class="text-right">Total:</th>
                             <th class="text-success">{{ number_format($finishings->sum('finishing_qty')) }} Pcs</th>
                             <th colspan="3"></th>
                         </tr>
@@ -204,13 +204,18 @@
                         </div>
 
                         <div class="col-md-12 form-group">
+                            <label>Order Number*</label>
+                            <input type="text" value="{{ $fin->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <div class="col-md-12 form-group">
                             <label>Style Number*</label>
                             <input type="text" value="{{ $fin->style_no }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-12 form-group">
                             <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $fin->color_name }}" class="form-control">
+                            <input type="text" name="color_name" value="{{ $fin->color_name }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-6 form-group">

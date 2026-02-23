@@ -8,25 +8,22 @@ class OrderDetailItem extends Model
 {
     protected $table = 'order_detail_items';
 
-    protected $guarded = [];
-
-    //columns
-    // id
-    // order_detail_id
-    // color_name
-    // composition
-    // order_no
-    // style_no
-    // qty
-    // created_at
-    // updated_at
-    // item_name
-    // fabrication
-    // gsm
-
-    // shipment_date
-    // created_by
-    // edited_by
+    protected $fillable = [
+        'order_detail_id',
+        'color_name',
+        'composition',
+        'order_no',
+        'style_no',
+        'qty',
+        'item_name',
+        'fabrication',
+        'gsm',
+        'shipment_date',
+        'created_by',
+        'edited_by',
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'shipment_date' => 'date',

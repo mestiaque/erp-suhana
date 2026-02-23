@@ -11,26 +11,25 @@ class SewingOutput extends Model
     use HasFactory;
     use ActivityLoggable;
 
-    protected $guarded = [];
-
-    // columns
-    // id
-    // planning_id
-    // sewing_id
-    // floor_name
-    // line_name
-    // style_no
-    // capacity_hour
-    // date
-    // hour
-    // production
-    // addedby_id
-    // editedby_id
-    // created_at
-    // updated_at
+    protected $fillable = [
+        'planning_id',
+        'sewing_id',
+        'floor_name',
+        'line_name',
+        'style_no',
+        'capacity_hour',
+        'date',
+        'hour',
+        'production',
+        'addedby_id',
+        'editedby_id',
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
-        'created_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relationships

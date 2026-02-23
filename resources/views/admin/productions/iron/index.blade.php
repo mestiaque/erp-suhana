@@ -13,7 +13,7 @@
         }
   }
 </style>
-@endsection
+@endpush
 @section('contents')
 
 @include(adminTheme().'alerts')
@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-md-5 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Style No, Color" class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Order No, Style No, Color" class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -70,11 +70,9 @@
                         <tr>
                             <td>{{ $irons->firstItem() + $i }}</td>
                             <td>{{ $irn->iron_date ? $irn->iron_date->format('d.m.Y') : '--' }}</td>
-                            <td class="font-weight-bold">{{ $irn->pi_no }}</td>
-                            <td><span class="badge badge-primary">{{ $irn->order_no }}</span></td>
-                            <td>
-                                <span class="badge badge-info">{{ $irn->style_no }}</span>
-                            </td>
+                            <td class="">{{ $irn->pi_no }}</td>
+                            <td>{{ $irn->order_no }}</td>
+                            <td> {{ $irn->style_no }} </td>
                             <td>{{ $irn->color_name }}</td>
                             <td class="text-success font-weight-bold">{{ number_format($irn->iron_qty) }} Pcs</td>
                             <td>{{ $irn->createdBy?->name }}</td>
@@ -206,13 +204,18 @@
                         </div>
 
                         <div class="col-md-12 form-group">
+                            <label>Order Number*</label>
+                            <input type="text" value="{{ $irn->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <div class="col-md-12 form-group">
                             <label>Style Number*</label>
                             <input type="text" value="{{ $irn->style_no }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-12 form-group">
                             <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $irn->color_name }}" class="form-control">
+                            <input type="text" name="color_name" value="{{ $irn->color_name }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-6 form-group">
@@ -264,7 +267,7 @@ $(document).ready(function() {
         if (pi_no) {
             // Load Orders by PI
             $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
-            
+
             $.get("{{ route('admin.ironAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
                 $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
                 data.forEach(function(item) {

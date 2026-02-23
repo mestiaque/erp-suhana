@@ -13,7 +13,7 @@
         }
   }
 </style>
-@endsection
+@endpush
 @section('contents')
 
 @include(adminTheme().'alerts')
@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-md-5 mb-1">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Style No, Color" class="form-control" />
+                            <input type="text" name="search" value="{{ request()->search ?: '' }}" placeholder="PI No, Order No, Style No, Color" class="form-control" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -70,11 +70,9 @@
                         <tr>
                             <td>{{ $polies->firstItem() + $i }}</td>
                             <td>{{ $ply->poly_date ? $ply->poly_date->format('d.m.Y') : '--' }}</td>
-                            <td class="font-weight-bold">{{ $ply->pi_no }}</td>
-                            <td><span class="badge badge-primary">{{ $ply->order_no }}</span></td>
-                            <td>
-                                <span class="badge badge-info">{{ $ply->style_no }}</span>
-                            </td>
+                            <td class="">{{ $ply->pi_no }}</td>
+                            <td>{{ $ply->order_no }}</td>
+                            <td> {{ $ply->style_no }} </td>
                             <td>{{ $ply->color_name }}</td>
                             <td class="text-success font-weight-bold">{{ number_format($ply->poly_qty) }} Pcs</td>
                             <td>{{ $ply->createdBy?->name }}</td>
@@ -206,13 +204,18 @@
                         </div>
 
                         <div class="col-md-12 form-group">
+                            <label>Order Number*</label>
+                            <input type="text" value="{{ $ply->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <div class="col-md-12 form-group">
                             <label>Style Number*</label>
                             <input type="text" value="{{ $ply->style_no }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-12 form-group">
                             <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $ply->color_name }}" class="form-control">
+                            <input type="text" name="color_name" value="{{ $ply->color_name }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-6 form-group">
@@ -264,7 +267,7 @@ $(document).ready(function() {
         if (pi_no) {
             // Load Orders by PI
             $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
-            
+
             $.get("{{ route('admin.polyAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
                 $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
                 data.forEach(function(item) {
