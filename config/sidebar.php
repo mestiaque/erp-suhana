@@ -268,6 +268,13 @@ return [
                     'permission' => 'cutting'
                 ],
                 [
+                    'title'      => 'Cutting to Sewing',
+                    'icon'       => 'fa-solid fa-arrow-right',
+                    'route'      => '/admin/cutting-to-sewing',
+                    'icon_color' => 'text-warning',
+                    'permission' => 'cutting_to_sewing'
+                ],
+                [
                     'title'      => 'Finishing',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/finishing',

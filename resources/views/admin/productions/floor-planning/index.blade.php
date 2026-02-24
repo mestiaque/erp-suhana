@@ -61,6 +61,9 @@
         vertical-align: middle;
         background-color: #e9ecef;
     }
+    .smb-cell, .operator-cell, .helper-cell {
+        text-align: center;
+    }
 </style>
 @endpush
 
@@ -135,6 +138,9 @@
                             <th class="floor-header">COLOR</th>
                             <th class="floor-header">PO NO</th>
                             <th class="floor-header">ORDER QTY</th>
+                            <th class="floor-header">SMB</th>
+                            <th class="floor-header">OPR</th>
+                            <th class="floor-header">HELPER</th>
                             <th class="floor-header">SHIP DATE</th>
                             <th class="floor-header">TOTAL CUTTING</th>
                             <th class="floor-header">TOTAL INPUT</th>
@@ -305,6 +311,15 @@
 
                                             <!-- SHIP DATE - rowspan by style+color group -->
                                             <td rowspan="{{ $styleTotal }}">{{ $shipDate ? \Carbon\Carbon::parse($shipDate)->format('d.m.y') : '--' }}</td>
+                                            
+                                            <!-- SMB -->
+                                            <td rowspan="{{ $styleTotal }}" class="smb-cell">{{ $line->smb ?? '--' }}</td>
+                                            
+                                            <!-- OPERATORS -->
+                                            <td rowspan="{{ $styleTotal }}" class="operator-cell">{{ $line->operators ?? '--' }}</td>
+                                            
+                                            <!-- HELPERS -->
+                                            <td rowspan="{{ $styleTotal }}" class="helper-cell">{{ $line->helpers ?? '--' }}</td>
 
                                             <!-- TOTAL CUTTING - rowspan by style+color group -->
                                             <td rowspan="{{ $styleTotal }}" class="production-cell font-weight-bold">{{ number_format($totalCutting) }}</td>
@@ -336,7 +351,7 @@
                             @endforeach
                         @empty
                         <tr>
-                            <td colspan="{{ 12 + $daysInMonth }}" class="text-center text-muted">No Production Data Found</td>
+                            <td colspan="{{ 15 + $daysInMonth }}" class="text-center text-muted">No Production Data Found</td>
                         </tr>
                         @endforelse
                     </tbody>

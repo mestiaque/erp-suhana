@@ -40,7 +40,7 @@ class ProductionController extends Controller
             ->where('planning_month', 'LIKE', "%{$month}%")
             ->when($r->pi_no, fn($q) => $q->where('pi_no', $r->pi_no))
             ->when($r->order_no, fn($q) => $q->where('order_no', $r->order_no))
-            ->when($r->style_no, fn($q) => $q->where('style_no', 'LIKE', "%{$r->style_no}%%"))
+            ->when($r->style_no, fn($q) => $q->where('style_no', 'LIKE', "%{$r->style_no}%"))
             ->when($r->search, function($q) use($r) {
                 $search = $r->search;
                 $q->where(function($qq) use($search) {
@@ -767,6 +767,19 @@ class ProductionController extends Controller
                     'editedby_id' => auth()->id(),
                 ]
             );
+
+            return response()->json(['success' => true]);
+        }
+
+        // Update SMB, Operators, Helpers
+        if ($action == "update-manpower") {
+            $swing = ProductionSewing::findOrFail($r->swing_id);
+            $field = $r->field;
+            $value = $r->value;
+
+            if (in_array($field, ['smb', 'operators', 'helpers'])) {
+                $swing->update([$field => $value]);
+            }
 
             return response()->json(['success' => true]);
         }

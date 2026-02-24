@@ -228,6 +228,17 @@ return [
                     'all'    => 'All',
                 ],
             ],
+            'cutting_to_sewing' => [
+                'label'       => 'Cutting to Sewing',
+                'permissions' => [
+                    'list'   => 'List',
+                    'add'    => 'Create',
+                    'edit'   => 'Edit',
+                    'view'   => 'View',
+                    'delete' => 'Delete',
+                    'all'    => 'All',
+                ],
+            ],
             'finishing' => [
                 'label'       => 'Finishing',
                 'permissions' => [

@@ -10,15 +10,12 @@
         <h1>{{ isset($masterPlan) ? 'Edit Planning' : 'Create Planning' }}</h1>
         <ol class="breadcrumb">
             <li class="item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
-            <li class="item"><a href="{{ route('admin.productionPlanning') }}">Planning</a></li>
-            <li class="item">{{ isset($masterPlan) ? 'Edit Planning' : 'Create Planning' }}</li>
+            <li class="item"><a href="{{ route('admin.productionPlanning') }}">Master Planning</a></li>
+            <li class="item">{{ isset($masterPlan) ? 'Edit Master Planning' : 'Create Master Planning' }}</li>
         </ol>
     </div>
 
-    <div class="card mb-30">
-        <div class="card-header">
-            <h3>Master Planning</h3>
-        </div>
+    <div class="card mb-30 main-card">
 
         <div class="card-body">
             @include(adminTheme().'alerts')
@@ -83,7 +80,7 @@
                                     $pi_item_id = $colorItem?->orderDetail?->piItem?->id ?? null;
                                     $key = $pi_id.'__'.$colorItem->style_no.'__'.$colorItem->order_no.'__'.$colorItem->color_name;
                                 @endphp
-                                <div class="col-md-6 mb-2 style-item"
+                                <div class="col-md-4 mb-3 style-item"
                                      data-key="{{ $key }}"
                                      data-style="{{ $colorItem->style_no }}"
                                      data-buyer="{{ $colorItem->orderDetail->buyer_name ?? '' }}"
@@ -94,12 +91,14 @@
                                      data-pi_no="{{ $pi_no }}"
                                      data-colors='[{"color_name": "{{ $colorItem->color_name }}", "qty": {{ $colorItem->qty }}}]'>
                                     <div class="border p-2 rounded bg-light h-100 style-card">
-                                        <strong>{{ $colorItem->style_no }}</strong><br>
-                                        Buyer: {{ $colorItem->orderDetail->buyer_name ?? '--' }}<br>
-                                        Order: {{ $colorItem->order_no }}<br>
-                                        PI No : {{ $pi_no ?? '--' }}<br>
-                                        <span class="text-primary">Color: {{ $colorItem->color_name }}</span><br>
-                                        Qty: {{ $colorItem->qty }}
+                                        <table class="w-100 style-info-table">
+                                            <tr><td class="text-muted">Style</td><td class="font-weight-bold">{{ $colorItem->style_no }}</td></tr>
+                                            <tr><td class="text-muted">Buyer</td><td>{{ $colorItem->orderDetail->buyer_name ?? '--' }}</td></tr>
+                                            <tr><td class="text-muted">Order</td><td>{{ $colorItem->order_no }}</td></tr>
+                                            <tr><td class="text-muted">PI No</td><td>{{ $pi_no ?? '--' }}</td></tr>
+                                            <tr><td class="text-muted">Color</td><td class="text-primary">{{ $colorItem->color_name }}</td></tr>
+                                            <tr><td class="text-muted">Qty</td><td class="text-success font-weight-bold">{{ number_format($colorItem->qty) }}</td></tr>
+                                        </table>
                                     </div>
                                 </div>
                             @empty
@@ -120,25 +119,26 @@
                                     @php
                                         $key = $p->style_no.'__'.$p->order_no;
                                     @endphp
-                                    <div class="col-md-6 mb-2 selected-item"
+                                    <div class="col-md-4 mb-3 selected-item"
                                          data-key="{{ $key }}">
                                         <div class="border p-2 rounded h-100 style-card selected">
-                                            <button type="button"
-                                                    class="remove-btn remove-style"
-                                                    data-key="{{ $key }}">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-
-                                            <strong>{{ $p->style_no }}</strong><br>
-                                            Buyer: {{ $p->orderDetailItems->buyer_name ?? '--' }}<br>
-                                            Order: {{ $p->order_no }}<br>
-                                            PI No: {{ $p->pi_no ?? '--' }}<br>
-                                            @if($p->color_name)
-                                                <span class="text-primary">Color: {{ $p->color_name }}</span><br>
-                                                Qty: {{ $p->color_qty ?? $p->style_qty }}
-                                            @else
-                                                Qty: {{ $p->style_qty ?? 0 }}
-                                            @endif
+                                                <button type="button"
+                                                        class="remove-btn remove-style"
+                                                        data-key="{{ $key }}">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                                <table class="w-100 style-info-table">
+                                                    <tr><td class="text-muted">Style</td><td class="font-weight-bold">{{ $p->style_no }}</td></tr>
+                                                    <tr><td class="text-muted">Buyer</td><td>{{ $p->orderDetailItems->buyer_name ?? '--' }}</td></tr>
+                                                    <tr><td class="text-muted">Order</td><td>{{ $p->order_no }}</td></tr>
+                                                    <tr><td class="text-muted">PI No</td><td>{{ $p->pi_no ?? '--' }}</td></tr>
+                                                    @if($p->color_name)
+                                                        <tr><td class="text-muted">Color</td><td class="text-primary">{{ $p->color_name }}</td></tr>
+                                                        <tr><td class="text-muted">Qty</td><td class="text-success font-weight-bold">{{ number_format($p->color_qty ?? $p->style_qty) }}</td></tr>
+                                                    @else
+                                                        <tr><td class="text-muted">Qty</td><td class="text-success font-weight-bold">{{ number_format($p->style_qty ?? 0) }}</td></tr>
+                                                    @endif
+                                                </table>
 
                                             <input type="hidden" name="styles[{{ $index }}][style_no]" value="{{ $p->style_no }}">
                                             <input type="hidden" name="styles[{{ $index }}][order_no]" value="{{ $p->order_no }}">
@@ -156,7 +156,7 @@
                     </div>
 
                     {{-- SUBMIT --}}
-                    <div class="col-md-12 mt-3">
+                    <div class="col-md-12 mt-3 text-right">
                         <button type="submit" class="btn btn-success">
                             <i class="bx bx-check"></i>
                             {{ isset($masterPlan) ? 'Update Plan' : 'Create Plan' }}
@@ -171,34 +171,93 @@
 
 @push('css')
 <style>
+    .main-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 18px 25px;
+    }
+    .card-header h3 {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #fff;
+        margin: 0;
+    }
+    .row > div {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        padding: 20px 15px;
+    }
+    .col-md-5 {
+        border: none !important;
+    }
+    .col-md-2.mb-3 {
+        border: none !important;
+    }
     .style-card {
         position: relative;
         cursor: pointer;
-        transition: all 0.2s ease-in-out; /* smooth animation */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 14px;
+        background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        border: 2px solid #e2e8f0;
+        min-height: 140px;
+        font-size: 14px;
+        padding: 16px;
     }
-
     .style-card:hover {
-        transform: translateY(-3px) scale(1.02); /* subtle raise & zoom */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* soft shadow */
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 12px 28px rgba(49, 130, 206, 0.25);
+        border-color: #3182ce;
     }
-
     .style-card.selected {
-        border: 2px solid #28a745 !important;
-        background: #f6fff9;
+        border: 2px solid #38a169 !important;
+        background: linear-gradient(145deg, #f0fff4 0%, #c6f6d5 100%);
     }
-
+    .style-info-table {
+        font-size: 12px;
+    }
+    .style-info-table td {
+        padding: 3px 5px;
+        border-bottom: 1px solid #eee;
+    }
+    .style-info-table td:first-child {
+        color: #718096;
+        width: 25%;
+    }
+    .style-info-table td:last-child {
+        color: #2d3748;
+        font-weight: 600;
+    }
     .remove-btn {
         position: absolute;
-        bottom: 4px;
-        right: 6px;
+        top: 10px;
+        right: 10px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
         border: none;
-        background: transparent;
-        color: #dc3545;
+        background: #fed7d7;
+        color: #e53e3e;
         font-size: 14px;
         cursor: pointer;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
     }
-
-    /* Optional: smooth scrollbar for left grid */
+    .remove-btn:hover {
+        background: #e53e3e;
+        color: white;
+        transform: scale(1.15);
+    }
     .style-grid::-webkit-scrollbar {
         width: 6px;
     }
@@ -206,33 +265,75 @@
         background: #bbb;
         border-radius: 3px;
     }
-
-    /* Month selector styles */
     .selected-months-container {
         min-height: 40px;
-        padding: 8px;
+        padding: 10px;
         border: 1px solid #ced4da;
-        border-radius: 4px;
-        background: #fff;
+        border-radius: 6px;
+        background: #f9fafb;
+        margin-bottom: 8px;
     }
-
     .selected-month-badge {
         display: inline-flex !important;
         align-items: center;
-        padding: 5px 10px !important;
-        font-size: 13px !important;
+        padding: 6px 14px !important;
+        font-size: 14px !important;
+        border-radius: 8px;
+        background: #3182ce !important;
+        color: #fff !important;
+        margin-right: 6px;
+        margin-bottom: 6px;
+        box-shadow: 0 2px 6px rgba(60,60,90,0.07);
     }
-
     .selected-month-badge i {
-        margin-left: 5px;
+        margin-left: 7px;
+        font-size: 11px;
     }
-
     .selected-month-badge:hover {
-        background-color: #0056b3 !important;
+        background-color: #5a6fd6 !important;
     }
-
     .month-selector-dropdown select {
         margin-bottom: 5px;
+    }
+    .col-md-2.mb-3 label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+    }
+    .col-md-5 h6 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 15px;
+        font-size: 1.15rem;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .btn.btn-success {
+        font-size: 1.1rem;
+        padding: 12px 32px;
+        border-radius: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        border: none;
+    }
+    .btn.btn-success:hover {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(72, 187, 120, 0.5);
+    }
+    .main-card .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    @media (max-width: 900px) {
+        .main-card {
+            padding: 12px 4px;
+        }
+        .row > div {
+            padding: 8px 4px;
+        }
     }
 </style>
 
@@ -272,7 +373,7 @@ $(document).ready(function () {
             colorsData.forEach(function(color) {
 
                 let html = `
-                    <div class="col-md-6 mb-2 selected-item"
+                    <div class="col-md-4 mb-3 selected-item"
                          data-key="${key}">
                         <div class="border p-2 rounded h-100 style-card selected">
                             <button type="button"
@@ -280,13 +381,14 @@ $(document).ready(function () {
                                     data-key="${key}">
                                 <i class="fa fa-times"></i>
                             </button>
-
-                            <strong>${styleNo}</strong><br>
-                            Buyer: ${buyer}<br>
-                            Order: ${order_no}<br>
-                            PI No: ${pi_no ?? '--'}<br>
-                            <span class="text-primary">Color: ${color.color_name}</span><br>
-                            Qty: ${color.qty}
+                            <table class="w-100 style-info-table">
+                                <tr><td class="text-muted">Style</td><td class="font-weight-bold">${styleNo}</td></tr>
+                                <tr><td class="text-muted">Buyer</td><td>${buyer}</td></tr>
+                                <tr><td class="text-muted">Order</td><td>${order_no}</td></tr>
+                                <tr><td class="text-muted">PI No</td><td>${pi_no ?? '--'}</td></tr>
+                                <tr><td class="text-muted">Color</td><td class="text-primary">${color.color_name}</td></tr>
+                                <tr><td class="text-muted">Qty</td><td class="text-success font-weight-bold">${color.qty}</td></tr>
+                            </table>
 
                             <input type="hidden" name="styles[${rowIndex}][style_no]" value="${styleNo}">
                             <input type="hidden" name="styles[${rowIndex}][order_no]" value="${order_no}">
@@ -306,7 +408,7 @@ $(document).ready(function () {
 
             // No color case
             let html = `
-                <div class="col-md-6 mb-2 selected-item"
+                <div class="col-md-4 mb-3 selected-item"
                      data-key="${key}">
                     <div class="border p-2 rounded h-100 style-card selected">
                         <button type="button"
@@ -314,11 +416,12 @@ $(document).ready(function () {
                                 data-key="${key}">
                             <i class="fa fa-times"></i>
                         </button>
-
-                        <strong>${styleNo}</strong><br>
-                        Buyer: ${buyer}<br>
-                        Order: ${order_no}<br>
-                        Qty: ${qty}
+                        <table class="w-100 style-info-table">
+                            <tr><td class="text-muted">Style</td><td class="font-weight-bold">${styleNo}</td></tr>
+                            <tr><td class="text-muted">Buyer</td><td>${buyer}</td></tr>
+                            <tr><td class="text-muted">Order</td><td>${order_no}</td></tr>
+                            <tr><td class="text-muted">Qty</td><td class="text-success font-weight-bold">${qty}</td></tr>
+                        </table>
 
                         <input type="hidden" name="styles[${rowIndex}][style_no]" value="${styleNo}">
                         <input type="hidden" name="styles[${rowIndex}][order_no]" value="${order_no}">
