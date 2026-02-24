@@ -11,10 +11,23 @@ class ProductionSewing extends Model
     use HasFactory;
     use ActivityLoggable;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'planning_id',
+        'sewing_id',
+        'floor_name',
+        'line_name',
+        'style_no',
+        'color_name',
+        'capacity_hour',
+        'working_hours',
+        'status',
+        'created_at',
+        'updated_at'
+    ];
 
     protected $casts = [
-        'created_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relationships

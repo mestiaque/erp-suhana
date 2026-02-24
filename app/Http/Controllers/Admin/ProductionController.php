@@ -25,20 +25,27 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ProformaInvoiceItem;
 use App\Http\Controllers\Controller;
 use App\Models\OrderDetailItem;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class ProductionController extends Controller
 {
-    public function productionPlanning(Request $r)
+    public function productionPlanning(Request $r) // master planning
     {
         // ================= INDEX =================
-        $masterPlans = MasterPlanning::with('productions.style', 'creator')
+        // Show ProductionPlanning records with production metrics
+        $month = $r->month ?? now()->format('Y-m');
+
+        $productions = ProductionPlanning::with(['masterPlan', 'style'])
+            ->where('planning_month', 'LIKE', "%{$month}%")
+            ->when($r->pi_no, fn($q) => $q->where('pi_no', $r->pi_no))
+            ->when($r->order_no, fn($q) => $q->where('order_no', $r->order_no))
+            ->when($r->style_no, fn($q) => $q->where('style_no', 'LIKE', "%{$r->style_no}%%"))
             ->when($r->search, function($q) use($r) {
                 $search = $r->search;
-
-                $q->whereHas('productions', function($qq) use($search) {
-                    // search by pi_no or style_no
+                $q->where(function($qq) use($search) {
                     $qq->where('pi_no', 'LIKE', "%{$search}%")
+                    ->orWhere('order_no', 'LIKE', "%{$search}%")
                     ->orWhere('style_no', 'LIKE', "%{$search}%")
                     ->orWhereHas('style', function($qqq) use($search) {
                         $qqq->where('buyer_name', 'LIKE', "%{$search}%")
@@ -46,25 +53,23 @@ class ProductionController extends Controller
                     });
                 });
             })
-            ->when($r->startDate || $r->endDate, function($q) use($r) {
-                $from = $r->startDate ?: now()->format('Y-m-d');
-                $to   = $r->endDate ?: now()->format('Y-m-d');
-                $q->whereDate('created_at','>=',$from)
-                ->whereDate('created_at','<=',$to);
+            ->when($r->buyer, function($q) use($r) {
+                $q->whereHas('style', function($qq) use($r) {
+                    $qq->where('buyer_name', 'LIKE', "%{$r->buyer}%");
+                });
             })
-            ->when($r->status, fn($q) => $q->where('status',$r->status))
             ->latest()
             ->paginate(25)
             ->appends($r->all());
 
-        // ================= TOTALS =================
-        $totalsQuery = MasterPlanning::query();
+        // ================= FILTER OPTIONS =================
+        $piNos = ProductionPlanning::distinct()->pluck('pi_no')->filter()->sort()->values();
+        $orderNos = ProductionPlanning::distinct()->pluck('order_no')->filter()->sort()->values();
+        $styleNos = ProductionPlanning::distinct()->pluck('style_no')->filter()->sort()->values();
+        $buyers = OrderDetail::whereNotNull('buyer_name')->distinct()->pluck('buyer_name')->filter()->sort()->values();
 
-        if ($r->startDate || $r->endDate) {
-            $from = $r->startDate ?: now()->format('Y-m-d');
-            $to   = $r->endDate ?: now()->format('Y-m-d');
-            $totalsQuery->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-        }
+        // ================= TOTALS =================
+        $totalsQuery = ProductionPlanning::where('planning_month', 'LIKE', '%'.$r->month.'%');
 
         if ($r->status) {
             $totalsQuery->where('status', $r->status);
@@ -78,137 +83,248 @@ class ProductionController extends Controller
             ->selectRaw("COUNT(CASE WHEN status='cancelled' THEN 1 END) AS cancelled")
             ->first();
 
-        return view(adminTheme().'productions.planning.index', compact('masterPlans', 'totals'));
+        return view(adminTheme().'productions.planning.index', compact('productions', 'totals', 'piNos', 'orderNos', 'styleNos', 'buyers', 'month'));
     }
 
-    public function productionPlanningAction(Request $r, $action, $id = null)
+    public function productionPlanningAction(Request $r, $action, $id = null) // master planning action
     {
-        $productionStyleNos = ProductionPlanning::pluck('style_no')->filter()->map(fn($val) => trim($val))->toArray();
-        $styles = OrderDetail::where('status', 'confirmed') ->whereNotIn('style_no', $productionStyleNos) ->orderBy('id', 'desc') ->get();
+        try{
 
-        // ================= CREATE FORM =================
-        if($action == 'create') {
-            return view(adminTheme().'productions.planning.edit', [
-                'method' => 'store',
-                'styles' => $styles
-            ]);
-        }
+            // ১️⃣ Step: Already planned colors
+            $plannedColors = ProductionPlanning::query()
+                ->select('pi_item_id','style_no','order_no','color_name')
+                ->get()
+                ->map(function($p){
+                    return $p->pi_item_id.'__'.$p->style_no.'__'.$p->order_no.'__'.($p->color_name ?? '');
+                })
+                ->toArray();
 
-        // ================= STORE =================
-        if($action == 'store') {
-            $r->validate(['styles' => 'required|array|min:1']);
+            // ২️⃣ Step: All order detail items
+            $allColors = OrderDetailItem::orderBy('id','desc')->get();
 
+            // ৩️⃣ Step: Filter available colors
+            $colors = $allColors->filter(function($c) use ($plannedColors){
+                // pi_item_id relation দিয়ে বের করা
+                $pi_item_id = $c?->orderDetail?->piItem?->id ?? null;
 
-            $masterPlan = MasterPlanning::create([
-                'status' => 'pending',
-                'created_by' => auth()->id(),
-            ]);
+                // Key বানানো plannedColors-এর সাথে মিলানোর জন্য
+                $key = $pi_item_id.'__'.$c->style_no.'__'.$c->order_no.'__'.$c->color_name;
 
-            foreach($r->styles as $styleNo) {
-                $piItem = ProformaInvoiceItem::where('order_no', $styleNo['order_no'])->where('style_no', $styleNo['style_no'])->first();
-
-                ProductionPlanning::create([
-                    'master_plan_id' => $masterPlan->id,
-                    'style_no'       => $styleNo['style_no'],
-                    'pi_id'          => $piItem?->proforma_invoice_id ?? null,
-                    'pi_item_id'     => $piItem?->id,
-                    'pi_no'          => $piItem?->pi?->pi_no,
-                    'order_no'       => $styleNo['order_no'],
-                    'style_no'       => $styleNo['style_no'],
-                    'style_qty'      => $piItem->order_qty ?? 0,
-                    'status'         => 'pending',
-                ]);
-            }
-            session()->flash('success','Master Planning Created');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        // ================= FETCH MASTER PLAN =================
-        $masterPlan = MasterPlanning::with('productions.style')->find($id);
-
-        if(!$masterPlan){
-            session()->flash('error','Master Plan Not Found');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        // ================= VIEW =================
-        if($action=='view'){
-            return view(adminTheme().'productions.planning.view', compact('masterPlan'));
-        }
-
-        // ================= UPDATE =================
-        if($action=='update') {
-            $r->validate(['styles' => 'required|array|min:1']);
-
-            // delete existing children
-            $masterPlan->productions()->delete();
-
-            // recreate production plans
-            foreach($r->styles as $styleNo) {
-                $piItem = ProformaInvoiceItem::where('order_no', $styleNo['order_no'])->where('style_no', $styleNo['style_no'])->first();
-                ProductionPlanning::create([
-                    'master_plan_id' => $masterPlan->id,
-                    'style_no'       => $styleNo['style_no'],
-                    'pi_id'          => $piItem?->proforma_invoice_id ?? null,
-                    'pi_item_id'     => $piItem?->id,
-                    'pi_no'          => $piItem?->pi?->pi_no,
-                    'order_no'       => $styleNo['order_no'],
-                    'style_no'       => $styleNo['style_no'],
-                    'style_qty'      => $piItem->order_qty ?? 0,
-                    'status'         => 'pending',
-                ]);
-            }
-
-            $masterPlan->updated_by = auth()->id();
-            $masterPlan->save();
-
-            session()->flash('success','Master Planning Updated');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        // ================= DELETE =================
-        if ($action == 'delete') {
-            DB::transaction(function () use ($masterPlan) {
-                $productionPlannings = ProductionPlanning::where('master_plan_id', $masterPlan->id)->get();
-                foreach ($productionPlannings as $pp) {
-                    SewingOutput::where('planning_id', $pp->id)->delete();
-                    ProductionSewing::where('planning_id', $pp->id)->delete();
-                    $pp->delete();
-                }
-                $masterPlan->delete();
+                // যদি plannedColors এ না থাকে, keep
+                return !in_array($key, $plannedColors);
             });
 
-            session()->flash('success', 'Master Plan and all related data deleted successfully');
-            return redirect()->route('admin.productionPlanning');
-        }
+            // ================= CREATE FORM =================
+            if($action == 'create') {
+
+                return view(adminTheme().'productions.planning.edit', [
+                    'method' => 'store',
+                    'colors' => $colors,
+                    'planning_month' => $r->planning_month ?? now()->format('Y-m')
+                ]);
+            }
+
+            // ================= STORE =================
+            if($action == 'store') {
+                $r->validate([
+                    'styles' => 'required|array|min:1',
+                    'planning_month' => 'required',
+                ]);
+                $months = $r->planning_month;
+                if (is_string($months)) {
+                    $months = json_decode($months, true);
+                }
+
+                $masterPlan = MasterPlanning::create([
+                    'status' => 'pending',
+                    'created_by' => auth()->id(),
+                    'planning_month' => $months,
+                    'planning_no' => $pn = Carbon::now()->format('ym') .
+                                    str_pad(((int)substr(MasterPlanning::whereYear('created_at', now()->year)
+                                    ->whereMonth('created_at', now()->month)->max('planning_no') ?? 0, -4) + 1), 4, '0', STR_PAD_LEFT),
+                ]);
+
+                foreach($r->styles as $styleNo) {
+                    $piItem = ProformaInvoiceItem::find($styleNo['pi_item_id']);
+                    // If colors are provided, create separate planning for each color
+                    if(isset($styleNo['colors']) && is_array($styleNo['colors'])) {
+                        foreach($styleNo['colors'] as $color) {
+                            // Create planning for each selected month
+                            ProductionPlanning::create([
+                                'master_plan_id' => $masterPlan->id,
+                                'style_no'       => $styleNo['style_no'],
+                                'pi_id'          => $piItem?->proforma_invoice_id ?? null,
+                                'pi_item_id'     => $piItem?->id,
+                                'pi_no'          => $piItem?->pi?->pi_no,
+                                'order_no'       => $styleNo['order_no'],
+                                'style_no'       => $styleNo['style_no'],
+                                'style_qty'      => $piItem->order_qty ?? 0,
+                                'color_name'     => $color['color_name'] ?? null,
+                                'color_qty'      => $color['color_qty'] ?? 0,
+                                'status'         => 'pending',
+                                'planning_month' => $months,
+                            ]);
+                        }
+                    } else {
+                       throw new Exception('No colors provided for style: '.$styleNo['style_no']);
+                    }
+                }
+                session()->flash('success','Master Planning Created');
+                return redirect()->route('admin.productionPlanning');
+            }
+
+            // ================= FETCH MASTER PLAN =================
+            $masterPlan = MasterPlanning::with('productions.style')->find($id);
+
+            if(!$masterPlan){
+                session()->flash('error','Master Plan Not Found');
+                return redirect()->route('admin.productionPlanning');
+            }
+
+            // ================= VIEW =================
+            if($action=='view'){
+                return view(adminTheme().'productions.planning.view', compact('masterPlan'));
+            }
+
+            // ================= UPDATE =================
+            if($action=='update') {
+                $r->validate([
+                    'styles' => 'required|array|min:1',
+                    'planning_month' => 'required',
+                ]);
+
+                $months = $r->planning_month;
+                if (is_string($months)) {
+                    $months = json_decode($months, true);
+                }
+
+                // Update Master Plan
+                $masterPlan = MasterPlanning::findOrFail($id);
+                $masterPlan->update([
+                    'planning_month' => $months,
+                    'updated_by'     => auth()->id(),
+                ]);
+
+                // ১️⃣ Collect all current pi_item_id + color_name combination submitted by user
+                $submittedKeys = [];
+                foreach ($r->styles as $styleNo) {
+                    $piItemId = $styleNo['pi_item_id'];
+                    if(isset($styleNo['colors']) && is_array($styleNo['colors'])) {
+                        foreach($styleNo['colors'] as $color) {
+                            $submittedKeys[] = $piItemId.'__'.($color['color_name'] ?? '');
+                        }
+                    }
+                }
+
+                // ২️⃣ Delete removed entries
+                ProductionPlanning::where('master_plan_id', $masterPlan->id)
+                    ->whereNotIn(\DB::raw("CONCAT(pi_item_id,'__',color_name)"), $submittedKeys)
+                    ->delete();
+
+                // ৩️⃣ Add or update entries
+                foreach ($r->styles as $styleNo) {
+                    $piItem = ProformaInvoiceItem::find($styleNo['pi_item_id']);
+                    if(isset($styleNo['colors']) && is_array($styleNo['colors'])) {
+                        foreach($styleNo['colors'] as $color) {
+                            $existing = ProductionPlanning::where('master_plan_id', $masterPlan->id)
+                                ->where('pi_item_id', $piItem?->id)
+                                ->where('color_name', $color['color_name'] ?? null)
+                                ->first();
+
+                            if($existing) {
+                                // Update existing entry
+                                $existing->update([
+                                    'style_qty'      => $piItem->order_qty ?? 0,
+                                    'color_qty'      => $color['color_qty'] ?? 0,
+                                    'planning_month' => $months,
+                                    'status'         => 'pending',
+                                ]);
+                            } else {
+                                // Create new entry
+                                ProductionPlanning::create([
+                                    'master_plan_id' => $masterPlan->id,
+                                    'style_no'       => $styleNo['style_no'],
+                                    'pi_id'          => $piItem?->proforma_invoice_id ?? null,
+                                    'pi_item_id'     => $piItem?->id,
+                                    'pi_no'          => $piItem?->pi?->pi_no,
+                                    'order_no'       => $styleNo['order_no'],
+                                    'style_qty'      => $piItem->order_qty ?? 0,
+                                    'color_name'     => $color['color_name'] ?? null,
+                                    'color_qty'      => $color['color_qty'] ?? 0,
+                                    'status'         => 'pending',
+                                    'planning_month' => $months,
+                                ]);
+                            }
+                        }
+                    } else {
+                        throw new \Exception('No colors provided for style: '.$styleNo['style_no']);
+                    }
+                }
+
+                session()->flash('success','Master Planning Updated');
+                return redirect()->route('admin.productionPlanning');
+            }
+
+            // ================= DELETE =================
+            if ($action == 'delete') {
+                DB::transaction(function () use ($masterPlan) {
+                    $productionPlannings = ProductionPlanning::where('master_plan_id', $masterPlan->id)->get();
+                    foreach ($productionPlannings as $pp) {
+                        SewingOutput::where('planning_id', $pp->id)->delete();
+                        ProductionSewing::where('planning_id', $pp->id)->delete();
+                        $pp->delete();
+                    }
+                    $masterPlan->delete();
+                });
+
+                session()->flash('success', 'Master Plan and all related data deleted successfully');
+                return redirect()->route('admin.productionPlanning');
+            }
 
 
-        // ================= PRINT =================
-        if($action=='approve'){
-            $masterPlan->update([
-                'status' => 'approved',
-                'approved_at' => now(),
-                'approved_by' => Auth::id()
-            ]);
-            session()->flash('success','Master Planning Approved');
-            return redirect()->route('admin.productionPlanning');
-        }
+            // ================= PRINT =================
+            if($action=='approve'){
+                $masterPlan->update([
+                    'status' => 'approved',
+                    'approved_at' => now(),
+                    'approved_by' => Auth::id()
+                ]);
+                foreach($masterPlan->productions as $production){
+                    $production->update(['status' => 'approved']);
+                }
+                session()->flash('success','Master Planning Approved');
+                return redirect()->route('admin.productionPlanning');
+            }
 
-        // ================= EDIT =================
+            // ================= EDIT =================
 
-        return view(adminTheme().'productions.planning.edit', compact('masterPlan','styles'));
+            return view(adminTheme().'productions.planning.edit', compact('masterPlan','colors'));
+            } catch(Exception $e){
+                dd($e);
+                session()->flash('error', $e->getMessage());
+                return redirect()->route('admin.productionPlanning');
+            }
+
     }
 
-    public function floorPlanning(Request $r)
+    public function floorPlanning(Request $r) // floor planning
     {
-        // ================= INDEX =================
-        $masterPlans = MasterPlanning::with('productions.style', 'creator')
+        // মাস ফিল্টার
+        $month = $r->month ?? now()->format('Y-m');
+
+        // Get all active floor lines
+        $floorLines = Attribute::where('type', 4)->where('status', 'active')->orderBy('slug')->get();
+
+        // মাস অনুযায়ী প্ল্যান ফিল্টার
+        $plans = ProductionPlanning::with(['style', 'sewingLines'])
+            ->whereHas('masterPlan', function($q) {
+                $q->where('status', 'approved');
+            })
             ->when($r->search, function($q) use($r) {
                 $search = $r->search;
-
-                $q->whereHas('productions', function($qq) use($search) {
-                    // search by pi_no or style_no
+                $q->where(function($qq) use($search) {
                     $qq->where('pi_no', 'LIKE', "%{$search}%")
+                    ->orWhere('order_no', 'LIKE', "%{$search}%")
                     ->orWhere('style_no', 'LIKE', "%{$search}%")
                     ->orWhereHas('style', function($qqq) use($search) {
                         $qqq->where('buyer_name', 'LIKE', "%{$search}%")
@@ -216,44 +332,113 @@ class ProductionController extends Controller
                     });
                 });
             })
-            ->when($r->startDate || $r->endDate, function($q) use($r) {
-                $from = $r->startDate ?: now()->format('Y-m-d');
-                $to   = $r->endDate ?: now()->format('Y-m-d');
-                $q->whereDate('created_at','>=',$from)
-                ->whereDate('created_at','<=',$to);
+            ->when($r->line, function($q) use($r) {
+                $line = $r->line;
+                $q->whereHas('sewingLines', function($qq) use($line) {
+                    $qq->where('line_name', $line);
+                });
             })
-            ->when($r->status, fn($q) => $q->where('status',$r->status))
+            ->when($r->buyer, function($q) use($r) {
+                $q->whereHas('style', function($qq) use($r) {
+                    $qq->where('buyer_name', $r->buyer);
+                });
+            })
+            ->when($r->style_no, function($q) use($r) {
+                $q->where('style_no', $r->style_no);
+            })
+            ->when($r->order_no, function($q) use($r) {
+                $q->where('order_no', $r->order_no);
+            })
             ->where('status', 'approved')
-            ->latest()
-            ->paginate(25)
-            ->appends($r->all());
+            ->where('planning_month', 'like', "%{$month}%")
+            ->orderBy('style_no')
+            ->get();
 
-        // ================= TOTALS =================
-        $totalsQuery = MasterPlanning::query();
+        // Filter options
+        $lineOptions = Attribute::where('type', 4)->where('status', 'active')->orderBy('name')->get();
+        $buyers = ProductionPlanning::with('style')->get()->pluck('style.buyer_name')->filter()->unique()->sort()->values();
+        $styleNos = ProductionPlanning::distinct()->pluck('style_no')->filter()->sort()->values();
+        $orderNos = ProductionPlanning::distinct()->pluck('order_no')->filter()->sort()->values();
 
-        if ($r->startDate || $r->endDate) {
-            $from = $r->startDate ?: now()->format('Y-m-d');
-            $to   = $r->endDate ?: now()->format('Y-m-d');
-            $totalsQuery->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to);
-        }
+        // Get filter options
+        $lineOptions = Attribute::where('type', 4)->where('status', 'active')->orderBy('name')->get();
+        $buyers = ProductionPlanning::whereHas('masterPlan', function($q) { $q->where('status', 'approved'); })
+            ->with('style')
+            ->get()
+            ->pluck('style.buyer_name')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
-        if ($r->status) {
-            $totalsQuery->where('status', $r->status);
-        }
-
-        $totals = $totalsQuery
-            ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status='pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status='confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status='approved' THEN 1 END) AS approved")
-            ->selectRaw("COUNT(CASE WHEN status='cancelled' THEN 1 END) AS cancelled")
-            ->first();
-
-        return view(adminTheme().'productions.floor-planning.index', compact('masterPlans', 'totals'));
+        return view(adminTheme().'productions.floor-planning.index', compact('plans', 'floorLines', 'lineOptions', 'buyers', 'styleNos', 'orderNos', 'month'));
     }
 
-    public function floorPlanningAction(Request $r, $action, $id = null)
+    public function floorPlanningAction(Request $r, $action, $id = null) // floor planning action
     {
+        // ================= GET Productions for Create (Same format as edit) =================
+        if($action == 'get-productions'){
+            $masterPlan = MasterPlanning::with(['productions.sewingLines', 'productions.style'])->find($id);
+
+            if(!$masterPlan) return '<tr><td colspan="20">Master Plan not found</td></tr>';
+
+            $allLines = Attribute::where('type',4)->where('status','active')->orderBy('slug')->get();
+            $productions = $masterPlan->productions;
+
+            $html = '';
+
+            foreach($productions as $plan){
+                $html .= '<tr data-planid="'.$plan->id.'">';
+                $html .= '<td>'.$plan->style_no.'</td>';
+                $html .= '<td>'.($plan->style?->buyer_name ?? '--').'</td>';
+                $html .= '<td>'.$plan->order_no.'</td>';
+                $html .= '<td>'.($plan->color_name ?? '--').'</td>';
+                $html .= '<td><input type="hidden" class="style_qty" value="'.($plan->color_qty ?? $plan->style_qty ?? 0).'">'.number_format($plan->color_qty ?? $plan->style_qty ?? 0).'</td>';
+                $html .= '<td>'.($plan->style?->merchant_name ?? '--').'</td>';
+
+                // Line columns
+                foreach($allLines as $line){
+                    $exSew = $plan->sewingLines->where('line_name',$line->slug)->first();
+                    $html .= '<td>';
+                    $html .= '<div class="d-flex flex-column">';
+                    $html .= '<label><input type="checkbox" name="plans['.$plan->id.'][floor][]" value="'.$line->slug.'" class="lineCheckbox form-control form-control-sm" '.($exSew ? 'checked' : '').'></label>';
+                    $html .= '<label style="font-size:0.8rem;" class="mb-0">Capacity</label>';
+                    $html .= '<input type="number" name="plans['.$plan->id.'][capacity]['.$line->slug.']" value="'.($exSew->capacity_hour ?? $line->capacity ?? 0).'" class="lineCapacity mb-2 form-control form-control-sm">';
+                    $html .= '<label style="font-size:0.8rem;" class="mb-0">Hours</label>';
+                    $html .= '<input type="number" name="plans['.$plan->id.'][hours]['.$line->slug.']" value="'.($exSew->working_hours ?? 8).'" class="lineHours form-control form-control-sm">';
+                    $html .= '</div>';
+                    $html .= '</td>';
+                }
+
+                $html .= '<td>';
+                $html .= '<input type="datetime-local" class="form-control form-control-sm updateDate sewingStarDate" value="'.($plan->sewing_start ? Carbon::parse($plan->sewing_start)->format('Y-m-d\TH:i') : '').'" data-name="sewing_start">';
+                $html .= '</td>';
+                $html .= '<td>';
+                $html .= '<input type="datetime-local" readonly name="plans['.$plan->id.'][sewing_end]" class="form-control form-control-sm updateDate sewingEndDate" value="'.($plan->sewing_end ? Carbon::parse($plan->sewing_end)->format('Y-m-d\TH:i') : '').'" data-name="sewing_end">';
+                $html .= '</td>';
+                $html .= '<td class="totalTime"></td>';
+                $html .= '<td class="hourTarget"></td>';
+                $html .= '<td>';
+                $html .= '<input type="number" name="plans['.$plan->id.'][extra_time]" class="extraTime form-control form-control-sm" value="'.($plan->extra_time ?? 0).'">';
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+
+            return $html;
+        }
+
+        // ================= CREATE =================
+        if($action == 'create'){
+            // Get approved master plans that need floor planning
+            $masterPlans = MasterPlanning::with('productions.style', 'creator')
+                ->where('status', 'approved')
+                ->orWhere('status', 'confirmed')
+                ->latest()
+                ->get();
+
+            return view(adminTheme().'productions.floor-planning.create', compact('masterPlans'));
+        }
+
         if($action=='edit'){
             $masterPlan = MasterPlanning::find($id);
             $plans =ProductionPlanning::where('master_plan_id', $id)->get();
@@ -282,6 +467,11 @@ class ProductionController extends Controller
 
         if ($action == 'update') {
             $masterPlan = MasterPlanning::find($id);
+            // Update planning_month if provided
+            if ($r->filled('planning_month')) {
+                $masterPlan->planning_month = $r->planning_month;
+                $masterPlan->save();
+            }
             foreach($r->plans as $planId => $data){
                 $plan = $masterPlan->productions->find($planId);
                 if (!$plan) continue;
@@ -290,6 +480,10 @@ class ProductionController extends Controller
                 $plan->extra_time = $data['extra_time'] ?? 0;
                 $plan->sewing_end = $data['sewing_end'] ?? null;
                 $plan->status     = 'confirmed';
+                // Update planning_month for each plan
+                if ($r->filled('planning_month')) {
+                    $plan->planning_month = $r->planning_month;
+                }
                 $plan->save();
 
                 /* ---------------------------
@@ -332,6 +526,7 @@ class ProductionController extends Controller
                     }
 
                     $line->style_no      = $plan->style_no;
+                    $line->color_name    = $plan->color_name;
                     $line->capacity_hour = intval($floor['capacity']);
                     $line->working_hours = intval($floor['whours']);
                     $line->save();
@@ -389,399 +584,6 @@ class ProductionController extends Controller
             $totalWorkingHours = 0;
 
             return view(adminTheme().'productions.floor-planning.print', compact('masterPlan', 'totalCapacity', 'totalWorkingHours'));
-        }
-
-
-        return view(adminTheme().'productions.planning.edit', compact('plan', 'styles'));
-    }
-
-    public function productionPlanningActionXX(Request $r, $action, $id = null)
-    {
-
-
-        $productionStyleNos = ProductionPlanning::pluck('style_no')->filter() // removes null values -
-        ->map(fn($val) => trim($val)) // removes extra spaces
-        ->toArray();
-        $styles = OrderDetail::where('status', 'confirmed') ->whereNotIn('style_no', $productionStyleNos) ->orderBy('id', 'desc') ->get();
-        // ================= CREATE FORM =================
-        if ($action == 'create') {
-            return view(adminTheme().'productions.planning.edit', [
-                'method' => 'store',
-                'styles' => $styles
-            ]);
-        }
-
-        // ================= STORE =================
-        if ($action == 'store') {
-
-            $r->validate([
-                'styles' => 'required|array|min:1'
-            ]);
-
-            $uuid = Str::uuid();
-
-            foreach ($r->styles as $styleNo) {
-                ProductionPlanning::create([
-                    'uuid'     => $uuid,
-                    'style_no' => $styleNo,
-                    'status'   => 'pending',
-                ]);
-            }
-
-            session()->flash('success', 'Production Planning Created');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        // ================= FETCH BY UUID =================
-        $plans = ProductionPlanning::where('uuid', $id)->get();
-
-        if ($plans->isEmpty()) {
-            session()->flash('error', 'Plan Not Found');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        $plan = $plans->first(); // representative row
-
-        // ================= VIEW =================
-        if ($action == 'view') {
-            return view(adminTheme().'productions.planning.view', compact('plans', 'plan'));
-        }
-
-        // ================= UPDATE =================
-        if ($action == 'update') {
-
-            $r->validate([
-                'styles' => 'required|array|min:1'
-            ]);
-
-            ProductionPlanning::where('uuid', $id)->delete();
-
-            foreach ($r->styles as $styleNo) {
-                ProductionPlanning::create([
-                    'uuid'     => $id,
-                    'style_no' => $styleNo,
-                    'status'   => $plan->status,
-                ]);
-            }
-
-            session()->flash('success', 'Production Planning Updated');
-            return redirect()->route('admin.productionPlanningAction', ['view', $id]);
-        }
-
-        // ================= DELETE =================
-        if ($action == 'delete') {
-
-            foreach ($plans as $p) {
-                $p->sewingLines()->delete();
-            }
-
-            ProductionPlanning::where('uuid', $id)->delete();
-
-            session()->flash('success', 'Production Plan Deleted');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        // ================= PRINT =================
-        if ($action == 'print') {
-
-            $plans = ProductionPlanning::with(['style', 'sewingLines'])
-                ->where('uuid', $id)
-                ->get();
-
-            $totalCapacity = $plans->sum(fn ($p) => $p->sewingLines->sum('capacity_hour'));
-            $totalWorkingHours = $plans->sum(fn ($p) => $p->sewingLines->sum('working_hours'));
-
-            return view(
-                adminTheme().'productions.planning.print',
-                compact('plans', 'totalCapacity', 'totalWorkingHours')
-            );
-        }
-
-        // ================= EDIT =================
-        $styles = OrderDetail::where('status', 'confirmed')->get();
-
-        return view(adminTheme().'productions.planning.edit', compact('plan', 'styles'));
-    }
-
-    public function productionPlanningX(Request $r)
-    {
-
-        $orders =ProductionPlanning::latest()
-            ->where('status','<>','temp')
-            ->where(function($q) use ($r) {
-
-                // SEARCH
-                if ($r->search) {
-                    $search = $r->search;
-                    $q->where(function($qq) use ($search) {
-                        $qq->where('style_no', 'LIKE', "%{$search}%")
-                        ->orWhereHas('style',function($qqq) use ($search) {
-                            $qqq->orWhere('buyer_name', 'LIKE', "%{$search}%")
-                            ->orWhere('merchant_name', 'LIKE', "%{$search}%");
-                        });
-                    });
-                }
-
-                // DATE RANGE
-                if ($r->startDate || $r->endDate) {
-                    $from = $r->startDate ?: now()->format('Y-m-d');
-                    $to   = $r->endDate ?: now()->format('Y-m-d');
-
-                    $q->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-                }
-
-                // STATUS
-                if ($r->status) {
-                    $q->where('status', $r->status);
-                }
-            })
-            ->paginate(25)
-            ->appends($r->all());
-
-        if($r->has('print')){
-            $rows = [];
-            $totalOrders = 0;
-            $totalColors = 0;
-
-            foreach ($orders as $order) {
-
-                $items = $order->style?->items ?? collect();
-
-                $itemNames  = $items->pluck('item_name')->unique()->values()->implode(', ');
-                $colors     = $items->pluck('color_name')->unique()->values()->implode(', ');
-                $colorQty   = $items->pluck('qty')->sum();
-
-                foreach ($order->sewingLines as $line) {
-
-                    $rows[] = [
-                        'buyer'        => $order->style?->buyer_name,
-                        'customer'     => $order->style?->buyer_name,
-                        'style_no'     => $order->style_no,
-                        'description'  => $itemNames,
-                        'order_qty'    => number_format($order->style_qty),
-                        'colors'       => $colors,
-                        'color_qty'    => number_format($colorQty),
-                        'line'         => $line->line_name,
-                        'status'       => ucfirst($order->status),
-                        'fabrication'  => $order->fabrication,
-                        'start_time'   => $order->sewing_start
-                                            ? Carbon::parse($order->sewing_start)->format('d M, h:i A')
-                                            : null,
-                        'end_time'     => $order->sewing_end
-                                            ? Carbon::parse($order->sewing_end)->format('d M, h:i A')
-                                            : null,
-                    ];
-                }
-
-                $totalOrders += $order->style_qty;
-                $totalColors += $colorQty;
-            }
-
-            $rows = collect($rows)->sortBy('line')->values();
-
-
-            return view(adminTheme().'productions.planning.printList',compact('totalOrders','totalColors','rows'));
-        }
-
-        $totals = ProductionPlanning::whereNotIn('status', ['trash', 'temp'])
-            ->selectRaw("COUNT(*) AS total")
-            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending")
-            ->selectRaw("COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed")
-            ->selectRaw("COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved")
-            ->selectRaw("COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled")
-            ->first();
-
-        return view(adminTheme().'productions.planning.index',compact('orders','totals'));
-    }
-
-    public function productionPlanningActionX(Request $r, $action, $id = null)
-    {
-
-        if($action=='create'){
-            $plan =ProductionPlanning::where('status','temp')->where('addedby_id',Auth::id())->first();
-            if(!$plan){
-                $plan =new ProductionPlanning();
-                $plan->status='temp';
-                $plan->addedby_id=Auth::id();
-
-            }
-            $plan->created_at=Carbon::now();
-            $plan->save();
-            return redirect()->route('admin.productionPlanningAction',['edit',$plan->id]);
-        }
-
-        $plan = ProductionPlanning::find($id);
-        if(!$plan){
-            session()->flash('error', 'Plan Not Found');
-            return redirect()->route('admin.productionPlanning');
-        }
-
-        if($action=='view'){
-
-
-            return view(adminTheme().'productions.planning.view',compact('plan'));
-        }
-
-        if($action=='date-update'){
-
-            $fields = [
-                'cutting_start',
-                'cutting_end',
-                'sewing_start',
-                'sewing_end',
-                'packing_start',
-                'packing_end',
-                'shippment_start',
-                'shippment_end',
-            ];
-
-            if (in_array($r->dataName, $fields)){
-                $plan->{$r->dataName} = $r->dataValue; // Dynamic property
-                $plan->save();
-            }
-
-            return response()->json(['success'=>true,'view'=>'']);
-        }
-
-        if ($action == 'update') {
-            if ($r->pi_style_data) {
-                $parts = explode('|', $r->pi_style_data);
-                $plan->pi_id    = $parts[0] ?? null;
-                $plan->pi_no    = $parts[1] ?? null;
-                $plan->style_no = $parts[2] ?? null;
-            }
-            $plan->style_qty     = $r->style_qty ?: 0;
-            $plan->extra_time    = $r->extra_time ?: 0;
-            $plan->sewing_end    = $r->sewing_end;
-            $plan->working_hours = $r->totalHour;
-            $plan->status        = 'confirmed';
-            $plan->save();
-
-            /* ---------------------------
-            FLOOR DATA COLLECTION
-            ----------------------------*/
-            $selectedFloorData = collect($r->floor)->map(function($floorSlug) use ($r) {
-                return [
-                    'line'     => $floorSlug,
-                    'capacity' => $r->capacity[$floorSlug] ?? 0,
-                    'whours'   => $r->hours[$floorSlug] ?? 0,
-                ];
-            });
-
-            /* ---------------------------
-            DELETE REMOVED FLOORS
-            ----------------------------*/
-            $existingFloors = $plan->sewingLines()->pluck('line_name')->toArray();
-            $newFloors      = $selectedFloorData->pluck('line')->toArray();
-
-            $toDelete = array_diff($existingFloors, $newFloors);
-
-            if (!empty($toDelete)) {
-                $plan->sewingLines()->whereIn('line_name', $toDelete)->delete();
-            }
-
-            /* ---------------------------
-            INSERT / UPDATE FLOORS
-            ----------------------------*/
-            foreach ($selectedFloorData as $floor) {
-                $floorLine = Attribute::where('type', 4)
-                            ->where('slug', $floor['line'])
-                            ->first();
-
-                if (!$floorLine) continue;
-
-                $line = $plan->sewingLines()
-                        ->where('line_name', $floorLine->slug)
-                        ->first();
-
-                if (!$line) {
-                    $line = new ProductionSewing();
-                    $line->planning_id = $plan->id;
-                    $line->floor_name  = $floorLine->name;
-                    $line->line_name   = $floorLine->slug;
-                }
-
-                // UPDATE LINE-WISE capacity + working hour
-                $line->style_no      = $plan->style_no;
-                $line->capacity_hour = intval($floor['capacity']);
-                $line->working_hours = intval($floor['whours']);
-                $line->save();
-            }
-
-            /* ---------------------------
-                TOTAL HOURLY CAPACITY
-            ----------------------------*/
-            $plan->total_hourly_capacity = $plan->sewingLines()->sum('capacity_hour');
-
-
-            /* ---------------------------
-                TOTAL WORKING TIME CALC
-            ----------------------------*/
-            $totalMinutes = 0;
-
-            foreach ($selectedFloorData as $floor) {
-                $totalMinutes += intval($floor['whours']) * 60;
-            }
-
-            // add extra time
-            $totalMinutes += intval($plan->extra_time);
-
-            $hours   = floor($totalMinutes / 60);
-            $minutes = $totalMinutes % 60;
-
-            $plan->total_working_time = "{$hours}h - {$minutes}m";
-            $plan->save();
-
-            session()->flash('success', 'Production Planning Updated');
-            return redirect()->route('admin.productionPlanningAction', ['view', $plan->id]);
-        }
-
-        if($action=='delete'){
-            $plan->sewingLines()->delete();
-            $plan->delete();
-            session()->flash('success', 'Production Plan Deleted');
-            return redirect()->route('admin.productionPlanning');
-        }
-        // return $plan->sewingLines;
-        $productionStyleNos = ProductionPlanning::pluck('style_no')
-            ->filter() // removes null values
-            ->map(fn($val) => trim($val)) // removes extra spaces
-            ->toArray();
-
-
-
-
-
-
-        $styles = ProformaInvoiceItem::join('proforma_invoices', 'proforma_invoice_items.proforma_invoice_id', '=', 'proforma_invoices.id')
-            ->select(
-                'proforma_invoices.id as pi_id',
-                'proforma_invoices.pi_no',
-                'proforma_invoice_items.style_no',
-                \DB::raw('SUM(proforma_invoice_items.order_qty) as total_style_qty')
-            )
-            ->groupBy('proforma_invoices.id', 'proforma_invoices.pi_no', 'proforma_invoice_items.style_no')
-            ->get()
-            ->map(function($item) {
-                // ব্লেড ফাইলে সহজে দেখানোর জন্য একটি কাস্টম নাম (Label) তৈরি করা
-                $item->display_name = $item->pi_no . " | " . $item->style_no . " (" . number_format($item->total_style_qty) . ")";
-                return $item;
-            });
-
-
-
-        if($action == 'print'){
-            $plan = ProductionPlanning::with(['style', 'sewingLines'])->find($id);
-            if (!$plan) {
-                session()->flash('error', 'Plan Not Found');
-                return redirect()->route('admin.productionPlanning');
-            }
-            // Prepare summary data if needed
-            $totalCapacity = $plan->sewingLines->sum('capacity_hour');
-            $totalWorkingHours = $plan->sewingLines->sum('working_hours');
-
-            return view(adminTheme().'productions.planning.print', compact('plan', 'totalCapacity', 'totalWorkingHours'));
         }
 
 
@@ -931,7 +733,7 @@ class ProductionController extends Controller
                         $query->where('status', 0)
                             ->orWhere('status', 3);
                     })
-                    ->select('id', 'style_no')
+                    ->select('id', 'style_no', 'color_name')
                     ->get();
 
             if (!$swings || $swings->isEmpty()) {
@@ -953,6 +755,7 @@ class ProductionController extends Controller
                     'floor_name'    => $swing->floor_name,
                     'line_name'     => $swing->line_name,
                     'style_no'      => $swing->style_no,
+                    'color_name'    => $swing->color_name,
                     'capacity_hour' => $swing->capacity_hour,
                     'addedby_id'    => auth()->id(),
                     'sewing_id'     => $r->plan_id,

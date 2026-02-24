@@ -10,7 +10,19 @@ class MasterPlanning extends Model
 
     protected $table = 'master_planning';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'planning_month',
+        'planning_no',
+        'status',
+        'created_by',
+        'updated_by',
+        'approved_at',
+        'approved_by',
+    ];
+
+    protected $casts = [
+        'planning_month' => 'array',
+    ];
 
     // columns
     // id	status	created_by	updated_by	approved_at	approved_by	created_at	updated_at

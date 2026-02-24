@@ -1,0 +1,20 @@
+Buyer : Mr. X
+Order: 0001
+Style : S1
+
+
+
+Order Detail>> 1
+Buyer Name : PNL CO., LTD
+Brand / Customer : MARKLESS
+Merchandiser : TOFAYEL AHMED
+Style No : S00001Y
+Order / PO No : P00002Y
+Total Order Qnty : 2,000
+Shipment Date : 01 Apr 2026
+Fabrication : Interlock Fabric
+
+order detail items
+SL	Item Name	Composition	            GSM	Color Name	Qnty
+1	Hodie	    60%Cotton 40%Polyester	100	White	    1,000
+2	Hodie	    60%Cotton 40%Polyester	100	Black	    1,000

@@ -47,6 +47,7 @@
                             <tr>
                                 <th>SL</th>
                                 <th>Style</th>
+                                <th>Color</th>
                                 <th>Buyer</th>
                                 <th>Order No</th>
                                 <th>Qty</th>
@@ -62,9 +63,10 @@
                                 <tr>
                                     <td class="text-center">{{ $i+1 }}</td>
                                     <td>{{ $p->style_no }}</td>
+                                    <td>{{ $p->color_name ?? '--' }}</td>
                                     <td>{{ $p->orderDetailItems->buyer_name ?? '--' }}</td>
                                     <td>{{ $p->order_no }}</td>
-                                    <td class="text-right">{{ number_format($qty) }}</td>
+                                    <td class="text-right">{{ number_format($p->color_qty ?? $p->style_qty) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -81,6 +83,16 @@
 
             <!-- Footer -->
             <div class="modal-footer">
+                <a href="{{ route('admin.productionPlanningAction', ['edit', $plan->id]) }}" class="btn btn-primary">
+                    <i class="fa fa-edit"></i> Edit
+                </a>
+                <form action="{{ route('admin.productionPlanningAction', ['delete', $plan->id]) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">
+                        <i class="fa fa-trash"></i> Delete
+                    </button>
+                </form>
                 <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
             </div>
 

@@ -17,6 +17,7 @@ class SewingOutput extends Model
         'floor_name',
         'line_name',
         'style_no',
+        'color_name',
         'capacity_hour',
         'date',
         'hour',
