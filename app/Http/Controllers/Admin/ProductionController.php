@@ -83,6 +83,11 @@ class ProductionController extends Controller
             ->selectRaw("COUNT(CASE WHEN status='cancelled' THEN 1 END) AS cancelled")
             ->first();
 
+        // Check if print mode
+        if ($r->print == 1) {
+            return view(adminTheme().'productions.planning.print-index', compact('productions', 'totals', 'piNos', 'orderNos', 'styleNos', 'buyers', 'month'));
+        }
+
         return view(adminTheme().'productions.planning.index', compact('productions', 'totals', 'piNos', 'orderNos', 'styleNos', 'buyers', 'month'));
     }
 
@@ -353,6 +358,7 @@ class ProductionController extends Controller
             ->where('planning_month', 'like', "%{$month}%")
             ->orderBy('style_no')
             ->get();
+            // dd(ProductionPlanning::get());
 
         // Filter options
         $lineOptions = Attribute::where('type', 4)->where('status', 'active')->orderBy('name')->get();
@@ -370,6 +376,11 @@ class ProductionController extends Controller
             ->unique()
             ->sort()
             ->values();
+
+        // Check if print mode
+        if ($r->print == 1) {
+            return view(adminTheme().'productions.floor-planning.print-index', compact('plans', 'floorLines', 'lineOptions', 'buyers', 'styleNos', 'orderNos', 'month'));
+        }
 
         return view(adminTheme().'productions.floor-planning.index', compact('plans', 'floorLines', 'lineOptions', 'buyers', 'styleNos', 'orderNos', 'month'));
     }
@@ -406,6 +417,8 @@ class ProductionController extends Controller
                     $html .= '<input type="number" name="plans['.$plan->id.'][capacity]['.$line->slug.']" value="'.($exSew->capacity_hour ?? $line->capacity ?? 0).'" class="lineCapacity mb-2 form-control form-control-sm">';
                     $html .= '<label style="font-size:0.8rem;" class="mb-0">Hours</label>';
                     $html .= '<input type="number" name="plans['.$plan->id.'][hours]['.$line->slug.']" value="'.($exSew->working_hours ?? 8).'" class="lineHours form-control form-control-sm">';
+                    $html .= '<label style="font-size:0.8rem;" class="mb-0">Alloc. Qty</label>';
+                    $html .= '<input type="number" name="plans['.$plan->id.'][allocation_qty]['.$line->slug.']" value="'.($exSew->allocation_qty ?? 0).'" class="allocationQty form-control form-control-sm">';
                     $html .= '</div>';
                     $html .= '</td>';
                 }
@@ -494,6 +507,7 @@ class ProductionController extends Controller
                         'line'     => $floorSlug,
                         'capacity' => $data['capacity'][$floorSlug] ?? 0,
                         'whours'   => $data['hours'][$floorSlug] ?? 0,
+                        'allocation_qty' => $data['allocation_qty'][$floorSlug] ?? 0,
                     ];
                 });
 
@@ -529,6 +543,7 @@ class ProductionController extends Controller
                     $line->color_name    = $plan->color_name;
                     $line->capacity_hour = intval($floor['capacity']);
                     $line->working_hours = intval($floor['whours']);
+                    $line->allocation_qty = intval($floor['allocation_qty']);
                     $line->save();
                 }
 
@@ -551,14 +566,14 @@ class ProductionController extends Controller
             }
 
             session()->flash('success', 'Floor Planning Updated');
-            return redirect()->route('admin.floorPlanningAction', ['view', $masterPlan->id]);
+            return redirect()->route('admin.floorPlanning');
         }
 
         if ($action == 'delete') {
             $plan = Production::find($id); // or $masterPlan->productions()->find($id)
             if (!$plan) {
                 session()->flash('error', 'Production Plan not found');
-                return redirect()->route('admin.productionPlanning');
+                return redirect()->route('admin.floorPlanning');
             }
 
             // Delete related sewing lines first
@@ -568,7 +583,7 @@ class ProductionController extends Controller
             $plan->delete();
 
             session()->flash('success', 'Production Plan Deleted');
-            return redirect()->route('admin.productionPlanning');
+            return redirect()->route('admin.floorPlanning');
         }
 
         if($action == 'print'){

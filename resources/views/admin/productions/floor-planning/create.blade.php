@@ -31,10 +31,10 @@
                             @foreach($masterPlans as $mp)
                                 <option value="{{ $mp->id }}">
                                     {{ $mp->planning_no }} | 
-                                    @php $pis = $mp->productions->pluck('pi_no')->unique()->implode(', ') @endphp
-                                    ({{ $pis }}) |
+                                    @php $pis = $mp->productions->pluck('pi_no')->unique()->filter()->implode(', ') @endphp
+                                    ({{ $mp->productions->pluck('pi_no')->unique()->count() }} PI) |
                                     {{ $mp->productions->count() }} Styles |
-                                    Qty: {{ number_format($mp->productions->sum('style_qty')) }}
+                                    Qty: {{ number_format($mp->productions->sum(function($p) { return $p->color_qty ?? $p->style_qty; })) }}
                                 </option>
                             @endforeach
                         </select>
@@ -127,6 +127,7 @@ $(document).ready(function(){
         let start = new Date(startDateVal);
         let totalCapacity = 0;
         let totalDailyMinutes = 0;
+        let selectedLines = 0;
 
         row.find('td').each(function(){
             let td = $(this);
@@ -136,10 +137,31 @@ $(document).ready(function(){
                 let hours = Number(td.find('.lineHours').val()) || 0;
                 totalCapacity += cap;
                 totalDailyMinutes += hours * 60;
+                selectedLines++;
             }
         });
 
         if(totalCapacity === 0 || totalDailyMinutes === 0) return;
+
+        // Calculate allocation qty per line (divide equally among selected lines with remainder on last)
+        if(selectedLines > 0){
+            let baseQty = Math.floor(qty / selectedLines);
+            let remainder = qty % selectedLines;
+            
+            row.find('td').each(function(){
+                let td = $(this);
+                let checkbox = td.find('.lineCheckbox');
+                if(checkbox.length && checkbox.is(':checked')){
+                    let allocInput = td.find('.allocationQty');
+                    if(allocInput.length){
+                        // First 'remainder' lines get +1, rest get base qty
+                        let lineIndex = td.parent().find('td .lineCheckbox:checked').index(checkbox[0]);
+                        let allocation = baseQty + (lineIndex < remainder ? 1 : 0);
+                        allocInput.val(allocation);
+                    }
+                }
+            });
+        }
 
         row.find('.hourTarget').text(totalCapacity + '');
 

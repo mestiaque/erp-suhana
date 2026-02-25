@@ -184,6 +184,12 @@
                                 <td>{{ ucfirst($plan->status) }}</td>
                             </tr>
                             <tr>
+                                <td><b>Color</b></td>
+                                <td>{{ $plan->color_name ?? 'N/A' }}</td>
+                                <td><b>Color Qty</b></td>
+                                <td>{{ number_format($plan->color_qty ?? $plan->style_qty ?? 0) }}</td>
+                            </tr>
+                            <tr>
                                 <td><b>Quantity</b></td>
                                 <td>{{ $plan->style_qty }}</td>
                                 <td><b>Total Hourly Capacity</b></td>
@@ -216,8 +222,10 @@
                                 <tr>
                                     <th>Floor</th>
                                     <th>Line</th>
+                                    <th>Color</th>
                                     <th>Capacity/Hour</th>
                                     <th>Working Hours</th>
+                                    <th>Allocation Qty</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -225,16 +233,19 @@
                                 <tr>
                                     <td>{{ $line->floor_name }}</td>
                                     <td>{{ $line->line_name }}</td>
+                                    <td>{{ $line->color_name ?? $plan->color_name ?? 'N/A' }}</td>
                                     <td>{{ $line->capacity_hour }}</td>
                                     <td>{{ $line->working_hours }}</td>
+                                    <td>{{ $line->allocation_qty ?? 0 }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="2" style="text-align:center"><b>Total</b></td>
+                                    <td colspan="3" style="text-align:center"><b>Total</b></td>
                                     <td>{{ $plan->sewingLines->sum('capacity_hour') }}</td>
                                     <td>{{ $plan->sewingLines->sum('working_hours') }}</td>
+                                    <td>{{ $plan->sewingLines->sum('allocation_qty') }}</td>
                                 </tr>
                             </tfoot>
                         </table>

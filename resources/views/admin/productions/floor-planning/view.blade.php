@@ -73,12 +73,21 @@
                                                 <th class="text-muted">Order Quantity</th>
                                                 <td>
                                                     <strong class="text-primary styleQty">
-                                                        {{ number_format($plan?->style_qty ?? 0) }} Pcs
+                                                        {{ number_format($plan?->color_qty ?? $plan?->style_qty ?? 0) }} Pcs
                                                     </strong>
                                                     <input type="hidden"
                                                         name="style_qty"
                                                         value="{{ $plan?->style_qty ?? 0 }}"
                                                         class="style_qty">
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th class="text-muted">Color</th>
+                                                <td>
+                                                    <strong class="text-dark">
+                                                        {{ $plan->color_name ?? 'N/A' }}
+                                                    </strong>
                                                 </td>
                                             </tr>
 
@@ -156,6 +165,7 @@
                                                                         <th>Line</th>
                                                                         <th>Capacity / Hour (C/H)</th>
                                                                         <th>Working Hour (WH)</th>
+                                                                        <th>Allocation Qty</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -173,14 +183,15 @@
                                                                                     <td>{{ $line->slug }}</td>
                                                                                     <td>{{ $exSew?->capacity_hour ?? $line->capacity ?? 0 }}</td>
                                                                                     <td>{{ $exSew?->working_hours ?? 8 }}</td>
+                                                                                    <td>{{ $exSew?->allocation_qty ?? 0 }}</td>
                                                                                 </tr>
                                                                             @endif
                                                                         @endforeach
-                                                                    @endforeach
+                                                                    @endphp
 
                                                                     @if(!$hasData)
                                                                         <tr>
-                                                                            <td colspan="5" class="text-center text-muted">No Data Found</td>
+                                                                            <td colspan="6" class="text-center text-muted">No Data Found</td>
                                                                         </tr>
                                                                     @endif
                                                                 </tbody>

@@ -23,6 +23,7 @@ class ProductionSewing extends Model
         'operators',
         'helpers',
         'working_hours',
+        'allocation_qty',
         'status',
         'created_at',
         'updated_at'

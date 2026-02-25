@@ -39,13 +39,16 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Production Planning List</h3>
              <div class="dropdown d-flex">
+                 <a href="{{ route('admin.productionPlanning') }}?month={{ request('month') }}&pi_no={{ request('pi_no') }}&buyer={{ request('buyer') }}&order_no={{ request('order_no') }}&style_no={{ request('style_no') }}&status={{ request('status') }}&search={{ request('search') }}&print=1" target="_blank" class="btn btn-info btn-sm mr-1" style="padding:5px 15px;">
+                     <i class="bx bx-printer"></i> Print
+                 </a>
                  @can('production_planning.add')
-                  <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn-custom primary mr-1" style="padding:5px 15px;">
+                  <a href="{{ route('admin.productionPlanningAction','create') }}" class="btn btn-primary btn-sm mr-1" style="padding:5px 15px;">
                       <i class="bx bx-plus"></i> Add Planning
                   </a>
                  @endcan
 
-                  <a href="{{ route('admin.productionPlanning') }}" class="btn-custom yellow">
+                  <a href="{{ route('admin.productionPlanning') }}" class="btn btn-warning btn-sm">
                       <i class="bx bx-rotate-left"></i>
                   </a>
              </div>
@@ -325,12 +328,18 @@
                                     @endif
                                     <br>
                                 @php
-                                // dd($plan->masterPlan->planning_month);
-                                    $formatted = array_map(function($m) {
-                                        return date("M Y", strtotime($m . "-01"));
-                                    }, $plan->masterPlan->planning_month);
-                                    @endphp
-                                    <span>{!! implode(" <br> ", $formatted) !!}</span>
+                                // Ensure planning_month is an array
+                                    $planningMonth = $plan->masterPlan->planning_month ?? [];
+                                    if (is_string($planningMonth)) {
+                                        $planningMonth = json_decode($planningMonth, true) ?: [];
+                                    }
+                                    if (is_array($planningMonth) && count($planningMonth) > 0) {
+                                        $formatted = array_map(function($m) {
+                                            return date("M Y", strtotime($m . "-01"));
+                                        }, $planningMonth);
+                                        echo implode(" <br> ", $formatted);
+                                    }
+                                @endphp
                                 </td>
                             @endif
                             <!-- Action -->

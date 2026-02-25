@@ -73,7 +73,10 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Floor Planning - Daily Production Tracking</h3>
              <div class="dropdown d-flex">
-                 <a href="{{ route('admin.floorPlanningAction', 'create') }}" class="btn-custom primary mr-1" style="padding:5px 15px;">
+                 <a href="{{ route('admin.floorPlanning') }}?month={{ request('month', $month) }}&line={{ request('line') }}&buyer={{ request('buyer') }}&style_no={{ request('style_no') }}&order_no={{ request('order_no') }}&search={{ request('search') }}&print=1" target="_blank" class="btn btn-info btn-sm mr-1" style="padding:5px 15px;">
+                     <i class="bx bx-printer"></i> Print
+                 </a>
+                 <a href="{{ route('admin.floorPlanningAction', 'create') }}" class="btn btn-primary btn-sm mr-1" style="padding:5px 15px;">
                      <i class="bx bx-plus"></i> Add Planning
                  </a>
              </div>
@@ -138,9 +141,7 @@
                             <th class="floor-header">COLOR</th>
                             <th class="floor-header">PO NO</th>
                             <th class="floor-header">ORDER QTY</th>
-                            <th class="floor-header">SMB</th>
-                            <th class="floor-header">OPR</th>
-                            <th class="floor-header">HELPER</th>
+                            <th class="floor-header">ALLOC QTY</th>
                             <th class="floor-header">SHIP DATE</th>
                             <th class="floor-header">TOTAL CUTTING</th>
                             <th class="floor-header">TOTAL INPUT</th>
@@ -309,17 +310,10 @@
                                             <!-- ORDER QTY - rowspan by style+color group -->
                                             <td rowspan="{{ $styleTotal }}" class="font-weight-bold">{{ number_format($styleQty) }}</td>
 
+                                            <!-- ALLOCATION QTY -->
+                                            <td rowspan="{{ $styleTotal }}" class="production-cell font-weight-bold">{{ number_format($line->allocation_qty ?? 0) }}</td>
                                             <!-- SHIP DATE - rowspan by style+color group -->
                                             <td rowspan="{{ $styleTotal }}">{{ $shipDate ? \Carbon\Carbon::parse($shipDate)->format('d.m.y') : '--' }}</td>
-                                            
-                                            <!-- SMB -->
-                                            <td rowspan="{{ $styleTotal }}" class="smb-cell">{{ $line->smb ?? '--' }}</td>
-                                            
-                                            <!-- OPERATORS -->
-                                            <td rowspan="{{ $styleTotal }}" class="operator-cell">{{ $line->operators ?? '--' }}</td>
-                                            
-                                            <!-- HELPERS -->
-                                            <td rowspan="{{ $styleTotal }}" class="helper-cell">{{ $line->helpers ?? '--' }}</td>
 
                                             <!-- TOTAL CUTTING - rowspan by style+color group -->
                                             <td rowspan="{{ $styleTotal }}" class="production-cell font-weight-bold">{{ number_format($totalCutting) }}</td>
