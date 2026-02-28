@@ -291,6 +291,117 @@ class User extends Authenticatable
         return $this->admin ==  1;
     }
 
+    /**
+     * Check if user is Admin
+     * admin = admin true + customer true
+     */
+    public function isAdmin()
+    {
+        return $this->admin == 1 && $this->customer == 1;
+    }
+
+    /**
+     * Check if user is Super Admin
+     * super admin = admin true (customer can be false)
+     */
+    public function isSuperAdmin()
+    {
+        return $this->admin == 1;
+    }
+
+    /**
+     * Check if user is Employee
+     * employee = customer true (staff or not, but primarily customer flag)
+     */
+    public function isEmployee()
+    {
+        return $this->customer == 1;
+    }
+
+    /**
+     * Generate random password
+     */
+    public static function generatePassword($length = 8)
+    {
+        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+        $password = '';
+        $charactersLength = strlen($characters);
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $password;
+    }
+
+    /**
+     * Create Employee User
+     */
+    public static function createEmployee($name, $employeeId)
+    {
+        $password = self::generatePassword();
+        
+        $user = self::create([
+            'name' => $name,
+            'employee_id' => $employeeId,
+            'email' => $employeeId . '@company.com', // Auto-generate email from employee ID
+            'password' => bcrypt($password),
+            'password_show' => $password,
+            'customer' => true, // employee = customer true
+            'admin' => false,
+            'status' => 1,
+        ]);
+
+        return [
+            'user' => $user,
+            'password' => $password
+        ];
+    }
+
+    /**
+     * Create Admin User
+     */
+    public static function createAdmin($name, $email)
+    {
+        $password = self::generatePassword();
+        
+        $user = self::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => bcrypt($password),
+            'password_show' => $password,
+            'customer' => true, // admin = customer true
+            'admin' => true,     // admin = admin true
+            'status' => 1,
+        ]);
+
+        return [
+            'user' => $user,
+            'password' => $password
+        ];
+    }
+
+    /**
+     * Create Super Admin User
+     */
+    public static function createSuperAdmin($name, $email)
+    {
+        $password = self::generatePassword();
+        
+        $user = self::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => bcrypt($password),
+            'password_show' => $password,
+            'customer' => false, // super admin = customer false
+            'admin' => true,      // super admin = admin true
+            'status' => 1,
+        ]);
+
+        return [
+            'user' => $user,
+            'password' => $password
+        ];
+    }
+
     // for supplier only supplier true
     // for buyer only buyer true bakigula false
     // for staff only staff true bakigula false

@@ -254,7 +254,7 @@ return [
                     'permission'  => 'production_planning'
                 ],
                 [
-                    'title'      => 'Floor Plan',
+                    'title'      => 'Line Loading Plan',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/floor-planning',
                     'icon_color' => 'text-warning',
