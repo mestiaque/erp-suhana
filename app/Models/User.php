@@ -338,7 +338,7 @@ class User extends Authenticatable
     public static function createEmployee($name, $employeeId)
     {
         $password = self::generatePassword();
-        
+
         $user = self::create([
             'name' => $name,
             'employee_id' => $employeeId,
@@ -362,7 +362,7 @@ class User extends Authenticatable
     public static function createAdmin($name, $email)
     {
         $password = self::generatePassword();
-        
+
         $user = self::create([
             'name' => $name,
             'email' => $email,
@@ -385,7 +385,7 @@ class User extends Authenticatable
     public static function createSuperAdmin($name, $email)
     {
         $password = self::generatePassword();
-        
+
         $user = self::create([
             'name' => $name,
             'email' => $email,
