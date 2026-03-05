@@ -110,7 +110,7 @@ $(document).ready(function(){
 
                 // Initialize calculations for new rows
                 $('#planningTable tbody tr').each(function(){
-                    calculateRow($(this));
+                    calculateRow($(this), true);
                 });
             });
         } else {
@@ -118,9 +118,21 @@ $(document).ready(function(){
         }
     });
 
-    function calculateRow(row){
+    function calculateRow(row, useDefaultDate = false){
         let startDateVal = row.find('.sewingStarDate').val();
         let qty = Number(row.find('.style_qty').val());
+
+        // If no start date and useDefaultDate is true, use today as default
+        if(!startDateVal && useDefaultDate){
+            let today = new Date();
+            let year = today.getFullYear();
+            let month = String(today.getMonth() + 1).padStart(2, '0');
+            let day = String(today.getDate()).padStart(2, '0');
+            let hours = String(today.getHours()).padStart(2, '0');
+            let mins = String(today.getMinutes()).padStart(2, '0');
+            startDateVal = `${year}-${month}-${day}T${hours}:${mins}`;
+            row.find('.sewingStarDate').val(startDateVal);
+        }
 
         if(!startDateVal || qty <= 0) return;
 
@@ -200,12 +212,24 @@ $(document).ready(function(){
     }
 
     // Event listeners
-    $(document).on('change input', '.lineCheckbox, .lineCapacity, .lineHours, .extraTime, .sewingStarDate', function(){
+    $(document).on('change input', '.lineCheckbox, .lineCapacity, .lineHours, .extraTime', function(){
         let row = $(this).closest('tr');
-        calculateRow(row);
+        calculateRow(row, true);
     });
 
-    $("change", ".updateDate", function () {
+    // Separate handler for start date change - use default date when none selected
+    $(document).on('change', '.sewingStarDate', function(){
+        let row = $(this).closest('tr');
+        let startDateVal = $(this).val();
+        // If no start date selected, use default date
+        if (!startDateVal) {
+            calculateRow(row, true);
+        } else {
+            calculateRow(row, false);
+        }
+    });
+
+    $(document).on('change', '.updateDate', function () {
         let dataName = $(this).data("name");
         let planId = $(this).closest('tr').data('planid');
 

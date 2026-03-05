@@ -128,23 +128,26 @@
                         {{-- Tab 1: Transaction History (Ledger) --}}
                         <div class="tab-pane fade show active" id="pills-history" role="tabpanel">
 
-                            {{-- Filter Form --}}
-                            <form method="GET" action="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="mb-1">
-                                <div class="row g-2">
-                                    <div class="col-md-3">
-                                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by Title/Invoice/Transaction ID" value="{{ request('search') }}">
+                            {{-- Filter Form and Print Button --}}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <form method="GET" action="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="mb-0">
+                                    <div class="row g-2">
+                                        <div class="col-md-3">
+                                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by Title/Invoice/Transaction ID" value="{{ request('search') }}">
+                                        </div>
+                                        <div class="col-md-6 d-flex gap-2">
+                                            <input type="date" name="startDate" class="form-control form-control-sm" placeholder="Start Date" value="{{ request('startDate') }}">
+                                            <span class="text-muted" style="padding: 0.5rem"><i>TO</i></span>
+                                            <input type="date" name="endDate" class="form-control form-control-sm" placeholder="End Date" value="{{ request('endDate') }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="submit" class="btn btn-sm btn-primary me-2"><i class="bx bx-filter"></i> Filter</button>
+                                            <a href="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="btn btn-sm btn-secondary"><i class="bx bx-reset"></i> Reset</a>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6 d-flex gap-2">
-                                        <input type="date" name="startDate" class="form-control form-control-sm" placeholder="Start Date" value="{{ request('startDate') }}">
-                                        <span class="text-muted" style="padding: 0.5rem"><i>TO</i></span>
-                                        <input type="date" name="endDate" class="form-control form-control-sm" placeholder="End Date" value="{{ request('endDate') }}">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <button type="submit" class="btn btn-sm btn-primary me-2"><i class="bx bx-filter"></i> Filter</button>
-                                        <a href="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="btn btn-sm btn-secondary"><i class="bx bx-reset"></i> Reset</a>
-                                    </div>
-                                </div>
-                            </form>
+                                </form>
+                                <a href="{{ route('admin.suppliersAction', ['print', $user->id]) }}" target="_blank" class="btn btn-sm btn-success"><i class="bx bx-printer"></i> Print</a>
+                            </div>
 
                             <div class="table-responsive">
                                 <table class="table align-middle table-ledger">

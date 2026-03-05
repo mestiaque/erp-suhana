@@ -113,6 +113,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/purchases-damage-returns/{action}/{id?}',[PurchasesController::class,'purchasesDamageReturnAction'])->name('purchasesDamageReturnAction');
 
     Route::get('/bill-payments',[PurchasesController::class,'billPayment'])->name('billPayment');
+    Route::get('/bill-payments/print',[PurchasesController::class,'billPaymentPrint'])->name('billPaymentPrint');
     Route::any('/bill-payments/{action}/{id?}',[PurchasesController::class,'billPaymentAction'])->name('billPaymentAction');
 
     Route::get('/bill-collections',[PurchasesController::class,'billCollection'])->name('billCollection');

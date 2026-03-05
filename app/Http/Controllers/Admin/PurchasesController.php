@@ -812,6 +812,54 @@ class PurchasesController extends Controller
             $transactions = Transaction::where('user_id', $user->id)->where('type', 3)->orderBy('id','desc')->paginate(10);
             return view(adminTheme().'suppliers.viewUser', compact('user','orders','transactions','accountMethods','paymentMethods'));
         }
+        /* ================= PRINT TRANSACTION ================= */
+        if ($action == 'print') {
+            $user = User::findOrFail($id);
+
+            // Get all bills (no pagination for print)
+            $bills = $user->creditorBill()->get()->map(function($item) {
+                $item->type = 'bill';
+                $item->credit = $item->amount;
+                $item->debit = 0;
+                $item->date = $item->created_at;
+                $item->title = $item->title;
+                $item->note = $item->description;
+                return $item;
+            });
+
+            // Get all payments (no pagination for print)
+            $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
+                $item->type = 'payment';
+                $item->credit = 0;
+                $item->debit = $item->amount;
+                $item->date = $item->created_at;
+                $item->title = $item->transection_id;
+                $item->note = $item->billing_note;
+                return $item;
+            });
+
+            // Merge and sort by date (ascending for balance calculation)
+            $merged = $bills->merge($payments)->sortBy('date')->values();
+
+            // Calculate running balance
+            $balance = 0;
+            $merged = $merged->map(function($entry) use (&$balance) {
+                $balance = $balance + $entry->credit - $entry->debit;
+                $entry->balance = $balance;
+                return $entry;
+            });
+
+            // Reverse for descending display
+            $merged = $merged->sortByDesc('date')->values();
+
+            $ledgerEntries = $merged;
+            $totalPaid = Transaction::where('user_id', $user->id)->where('type', 3)->sum('amount');
+
+            return view('admin.suppliers.print', compact('user', 'ledgerEntries', 'totalPaid'));
+        }
+        /* ================= PRINT END ================= */
+
+
         /* ================= ADD BILL SUPPLIER ================= */
         if ($action == 'bill-entry') {
             $user = User::findOrFail($id);
@@ -1888,7 +1936,41 @@ class PurchasesController extends Controller
 
         $supplierIds = $supplierQuery->pluck('id');
 
-        /* ================= PAYMENTS ONLY ================= */
+        /* ================= BILLS (CREDITS) ================= */
+        $billsQuery = CreditorBill::whereIn('creditor_id', $supplierIds);
+
+        // title filter for bills
+        if ($r->title) {
+            $billsQuery->where('title', 'LIKE', "%{$r->title}%");
+        }
+
+        // date range filter for bills
+        if ($r->startDate || $r->endDate) {
+            $from = $r->startDate
+                ? Carbon::parse($r->startDate)->startOfDay()
+                : now()->startOfMonth();
+
+            $to = $r->endDate
+                ? Carbon::parse($r->endDate)->endOfDay()
+                : now();
+
+            $billsQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        $bills = $billsQuery->get()->map(function ($bill) {
+            $creditor = User::find($bill->creditor_id);
+            return (object) [
+                'type'        => 'bill',
+                'date'        => $bill->created_at,
+                'title'       => $bill->title,
+                'description' => $bill->description,
+                'credit'     => $bill->amount,
+                'debit'       => 0,
+                'user'        => $creditor,
+            ];
+        });
+
+        /* ================= PAYMENTS (DEBITS) ================= */
         $paymentsQuery = Transaction::whereIn('user_id', $supplierIds)
             ->where('type', 3) // supplier bill payment
             ->with('user');
@@ -1911,7 +1993,6 @@ class PurchasesController extends Controller
             $paymentsQuery->whereBetween('created_at', [$from, $to]);
         }
 
-        /* ================= GET & FORMAT ================= */
         $payments = $paymentsQuery
             ->latest()
             ->get()
@@ -1927,13 +2008,16 @@ class PurchasesController extends Controller
                 ];
             });
 
+        /* ================= MERGE BILLS & PAYMENTS ================= */
+        $merged = $bills->merge($payments)->sortByDesc('date')->values();
+
         /* ================= PAGINATION ================= */
         $perPage = 20;
         $page = request()->get('page', 1);
 
         $ledgerEntries = new \Illuminate\Pagination\LengthAwarePaginator(
-            $payments->forPage($page, $perPage),
-            $payments->count(),
+            $merged->forPage($page, $perPage),
+            $merged->count(),
             $perPage,
             $page,
             [
@@ -1942,16 +2026,113 @@ class PurchasesController extends Controller
             ]
         );
 
-        /* ================= TOTAL PAID ================= */
-        $totalPaid = Transaction::whereIn('user_id', $supplierIds)
-            ->where('type', 3)
-            ->sum('amount');
+        /* ================= TOTALS ================= */
+        $totalBills = $bills->sum('credit');
+        $totalPayments = $payments->sum('debit');
 
         return view(
             adminTheme().'suppliers.bill-payments',
-            compact('ledgerEntries', 'totalPaid')
+            compact('ledgerEntries', 'totalBills', 'totalPayments')
         );
     }
+
+
+    /* ================= BILL PAYMENT PRINT ================= */
+    public function billPaymentPrint(Request $r)
+    {
+        /* ================= SUPPLIERS ================= */
+        $supplierQuery = User::filterByType('supplier')
+            ->whereIn('status', [0, 1]);
+
+        // creditor name filter
+        if ($r->creditor_name) {
+            $supplierQuery->where(function ($q) use ($r) {
+                $q->where('name', 'LIKE', "%{$r->creditor_name}%")
+                ->orWhere('company_name', 'LIKE', "%{$r->creditor_name}%");
+            });
+        }
+
+        // creditor code filter (employee_id)
+        if ($r->creditor_code) {
+            $supplierQuery->where('employee_id', 'LIKE', "%{$r->creditor_code}%");
+        }
+
+        $supplierIds = $supplierQuery->pluck('id');
+
+        /* ================= BILLS (CREDITS) ================= */
+        $billsQuery = CreditorBill::whereIn('creditor_id', $supplierIds);
+
+        // date range filter for bills
+        if ($r->startDate || $r->endDate) {
+            $from = $r->startDate
+                ? Carbon::parse($r->startDate)->startOfDay()
+                : now()->startOfMonth();
+
+            $to = $r->endDate
+                ? Carbon::parse($r->endDate)->endOfDay()
+                : now();
+
+            $billsQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        $bills = $billsQuery->get()->map(function ($bill) {
+            $creditor = User::find($bill->creditor_id);
+            return (object) [
+                'type'        => 'bill',
+                'date'        => $bill->created_at,
+                'title'       => $bill->title,
+                'description' => $bill->description,
+                'credit'     => $bill->amount,
+                'debit'       => 0,
+                'user'        => $creditor,
+            ];
+        });
+
+        /* ================= PAYMENTS (DEBITS) ================= */
+        $paymentsQuery = Transaction::whereIn('user_id', $supplierIds)
+            ->where('type', 3)
+            ->with('user');
+
+        // title / transaction id filter
+        if ($r->title) {
+            $paymentsQuery->where('transection_id', 'LIKE', "%{$r->title}%");
+        }
+
+        // date range filter
+        if ($r->startDate || $r->endDate) {
+            $from = $r->startDate
+                ? Carbon::parse($r->startDate)->startOfDay()
+                : now()->startOfMonth();
+
+            $to = $r->endDate
+                ? Carbon::parse($r->endDate)->endOfDay()
+                : now();
+
+            $paymentsQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        $payments = $paymentsQuery->get()->map(function ($payment) {
+            return (object) [
+                'type'        => 'payment',
+                'date'        => $payment->created_at,
+                'title'       => $payment->transection_id,
+                'description' => $payment->billing_note,
+                'credit'      => 0,
+                'debit'       => $payment->amount,
+                'user'        => $payment->user,
+            ];
+        });
+
+        /* ================= MERGE BILLS & PAYMENTS ================= */
+        $merged = $bills->merge($payments)->sortByDesc('date')->values();
+
+        /* ================= TOTALS ================= */
+        $totalBills = $bills->sum('credit');
+        $totalPayments = $payments->sum('debit');
+
+        return view('admin.suppliers.bill-payment-print', compact('merged', 'totalBills', 'totalPayments'));
+    }
+    /* ================= BILL PAYMENT PRINT END ================= */
 
 
 

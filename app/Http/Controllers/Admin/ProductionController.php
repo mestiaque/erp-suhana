@@ -316,6 +316,7 @@ class ProductionController extends Controller
     {
         // মাস ফিল্টার
         $month = $r->month ?? now()->format('Y-m');
+        // dd($month);
 
         // Get all active floor lines
         $floorLines = Attribute::where('type', 4)->where('status', 'active')->orderBy('slug')->get();
@@ -355,6 +356,7 @@ class ProductionController extends Controller
                 $q->where('order_no', $r->order_no);
             })
             ->where('status', 'approved')
+            ->orWhere('status', 'confirmed')
             ->where('planning_month', 'like', "%{$month}%")
             ->orderBy('style_no')
             ->get();
