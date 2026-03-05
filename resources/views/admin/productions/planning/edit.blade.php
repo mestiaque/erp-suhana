@@ -1,5 +1,4 @@
 @extends(adminTheme().'layouts.app')
-
 @section('title')
 <title>{{ websiteTitle(isset($masterPlan) ? 'Master Planning Edit' : 'Master Planning Create') }}</title>
 @endsection
@@ -80,7 +79,7 @@
                                     $pi_item_id = $colorItem?->orderDetail?->piItem?->id ?? null;
                                     $key = $pi_id.'__'.$colorItem->style_no.'__'.$colorItem->order_no.'__'.$colorItem->color_name;
                                 @endphp
-                                <div class="col-md-4 mb-3 style-item"
+                                <div class="col-md-6 mb-3 style-item"
                                      data-key="{{ $key }}"
                                      data-style="{{ $colorItem->style_no }}"
                                      data-buyer="{{ $colorItem->orderDetail->buyer_name ?? '' }}"
@@ -119,7 +118,7 @@
                                     @php
                                         $key = $p->style_no.'__'.$p->order_no;
                                     @endphp
-                                    <div class="col-md-4 mb-3 selected-item"
+                                    <div class="col-md-6 mb-3 selected-item"
                                          data-key="{{ $key }}">
                                         <div class="border p-2 rounded h-100 style-card selected">
                                                 <button type="button"
@@ -373,7 +372,7 @@ $(document).ready(function () {
             colorsData.forEach(function(color) {
 
                 let html = `
-                    <div class="col-md-4 mb-3 selected-item"
+                    <div class="col-md-6 mb-3 selected-item"
                          data-key="${key}">
                         <div class="border p-2 rounded h-100 style-card selected">
                             <button type="button"
@@ -408,7 +407,7 @@ $(document).ready(function () {
 
             // No color case
             let html = `
-                <div class="col-md-4 mb-3 selected-item"
+                <div class="col-md-6 mb-3 selected-item"
                      data-key="${key}">
                     <div class="border p-2 rounded h-100 style-card selected">
                         <button type="button"
