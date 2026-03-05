@@ -354,10 +354,11 @@ class ProductionController extends Controller
             ->when($r->order_no, function($q) use($r) {
                 $q->where('order_no', $r->order_no);
             })
-            ->where('status', 'approved')
-            ->where('planning_month', 'like', "%{$month}%")
+            // ->where('status', 'approved')
+            // ->where('planning_month', 'like', "%{$month}%")
             ->orderBy('style_no')
             ->get();
+            dd($plans);
             // dd(ProductionPlanning::get());
 
         // Filter options
