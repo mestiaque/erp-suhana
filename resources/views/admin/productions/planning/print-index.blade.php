@@ -1,130 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Planning Print - {{ $month }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 10px;
-            padding: 10px;
-            background: white;
-        }
-        @media print {
-            body {
-                padding: 5px;
-            }
-            .no-print {
-                display: none !important;
-            }
-        }
-        .print-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-bottom: 2px solid #333;
-        }
-        .print-header h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .print-header h3 {
-            margin: 5px 0;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .print-header p {
-            margin: 3px 0;
-            font-size: 10px;
-            color: #666;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #333;
-            padding: 2px 3px;
-            text-align: center;
-            font-size: 9px;
-        }
-        th {
-            background: #f0f0f0 !important;
-            font-weight: bold;
-        }
-        .production-cell {
-            text-align: right;
-        }
-        .text-right {
-            text-align: right;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .text-success {
-            color: green;
-        }
-        .text-danger {
-            color: red;
-        }
-        .font-bold {
-            font-weight: bold;
-        }
-        .badge {
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 8px;
-        }
-        .badge-warning { background: #ffc107; }
-        .badge-info { background: #17a2b8; color: white; }
-        .badge-success { background: #28a745; color: white; }
-        .badge-danger { background: #dc3545; color: white; }
-        .badge-secondary { background: #6c757d; color: white; }
-    </style>
-</head>
-<body>
-    <div class="no-print" style="position:fixed; top:10px; right:10px; z-index:9999;">
-        <button onclick="window.location.href='{{ route('admin.productionPlanning') }}'" style="padding:8px 15px; background:#007bff; color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px; margin-right:5px;">
-            ← Back
-        </button>
-        <button onclick="window.print()" style="padding:8px 15px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;">
-            🖨️ Print
-        </button>
-    </div>
-
-    <div class="print-header">
-        <h2>{{ general()->title ?? 'Garments Factory' }}</h2>
-        <h3>Production Planning List</h3>
-        <p>Month: {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->format('F Y') }}</p>
-        @if(request()->pi_no)
-        <p><strong>PI:</strong> {{ request()->pi_no }}</p>
-        @endif
-        @if(request()->buyer)
-        <p><strong>Buyer:</strong> {{ request()->buyer }}</p>
-        @endif
-        @if(request()->order_no)
-        <p><strong>PO:</strong> {{ request()->order_no }}</p>
-        @endif
-        @if(request()->style_no)
-        <p><strong>Style:</strong> {{ request()->style_no }}</p>
-        @endif
-        @if(request()->status)
-        <p><strong>Status:</strong> {{ request()->status }}</p>
-        @endif
-        @if(request()->search)
-        <p><strong>Search:</strong> {{ request()->search }}</p>
-        @endif
-        <p><strong>Print Date:</strong> {{ now()->format('d-m-Y h:i A') }}</p>
-    </div>
-
+@extends('printMaster')
+@section('title', 'Production Planning')
+@section('contents')
     <table>
         <thead>
             <tr>
@@ -132,7 +8,7 @@
                 <th colspan="5" class="text-center">Style Details</th>
                 <th colspan="2" class="production-header">Cutting</th>
                 <th colspan="4" class="production-header">Sewing</th>
-                <th colspan="4" class="production-header">Finishing</th>
+                <th colspan="4" class="production-header">Finishing Receive</th>
                 <th colspan="2" class="production-header">Iron</th>
                 <th colspan="2" class="production-header">Poly</th>
                 <th rowspan="2" style="vertical-align: middle;">Balance</th>
@@ -149,13 +25,13 @@
                 <th>Total</th>
                 <!-- Sewing -->
                 <th>Today In</th>
-                <th>Today Out</th>
                 <th>Total In</th>
+                <th>Today Out</th>
                 <th>Total Out</th>
                 <!-- Finishing -->
                 <th>Today In</th>
-                <th>Today Out</th>
                 <th>Total In</th>
+                <th>Today Out</th>
                 <th>Total Out</th>
                 <!-- Iron -->
                 <th>Today</th>
@@ -261,14 +137,14 @@
 
                 <!-- Sewing -->
                 <td class="production-cell">{{ $sewingTodayIn > 0 ? number_format($sewingTodayIn) : '-' }}</td>
-                <td class="production-cell">{{ $sewingTodayOut > 0 ? number_format($sewingTodayOut) : '-' }}</td>
                 <td class="production-cell font-bold">{{ number_format($sewingTotalIn) }}</td>
+                <td class="production-cell">{{ $sewingTodayOut > 0 ? number_format($sewingTodayOut) : '-' }}</td>
                 <td class="production-cell font-bold">{{ number_format($sewingTotalOut) }}</td>
 
                 <!-- Finishing -->
                 <td class="production-cell">{{ $finishingTodayIn > 0 ? number_format($finishingTodayIn) : '-' }}</td>
-                <td class="production-cell">{{ $finishingTodayOut > 0 ? number_format($finishingTodayOut) : '-' }}</td>
                 <td class="production-cell font-bold">{{ number_format($finishingTotalIn) }}</td>
+                <td class="production-cell">{{ $finishingTodayOut > 0 ? number_format($finishingTodayOut) : '-' }}</td>
                 <td class="production-cell font-bold">{{ number_format($finishingTotalOut) }}</td>
 
                 <!-- Iron -->
@@ -304,5 +180,4 @@
             @endforelse
         </tbody>
     </table>
-</body>
-</html>
+@endsection

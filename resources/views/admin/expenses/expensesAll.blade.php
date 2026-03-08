@@ -335,7 +335,7 @@
     </div>
 </div>
 </div>
-
+{{-- @dd($lastAudit->audit_at) --}}
 @isset(json_decode(Auth::user()->permission->permission, true)['expenses']['add'])
 <!-- Add Modal -->
  <div class="modal fade text-left" id="AddExpense" tabindex="-1" role="dialog">
@@ -353,7 +353,7 @@
     	       <div class="row">
     	           <div class="col-md-6 form-group">
         			    <label for="name">Date* </label>
-                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{Carbon\Carbon::now()->format('Y-m-d')}}"  required="">
+                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{Carbon\Carbon::now()->format('Y-m-d')}}" min="{{ \Carbon\Carbon::parse($lastAudit->audit_at)->addDay()->format('Y-m-d') }}"  required="">
         				@if ($errors->has('created_at'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
         				@endif
@@ -482,7 +482,7 @@
     	       <div class="row">
     	           <div class="col-md-6 form-group">
         			    <label for="name">Date* </label>
-                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{$dpm->created_at->format('Y-m-d')}}"  required="">
+                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{$dpm->created_at->format('Y-m-d')}}" min="{{ \Carbon\Carbon::parse($lastAudit->audit_at)->addDay()->format('Y-m-d') }}"  required="">
         				@if ($errors->has('created_at'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
         				@endif

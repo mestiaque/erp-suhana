@@ -181,6 +181,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/procurement/pi-wise-fabric-status',[ProductionController::class,'piWiseFabricStatus'])->name('piWiseFabricStatus');
 
     Route::get('/daily-production',[ProductionController::class,'dailyProduction'])->name('dailyProduction');
+    Route::get('/daily-production-print',[ProductionController::class,'dailyProductionPrint'])->name('dailyProductionPrint');
     Route::any('/daily-production/{action}/{id?}',[ProductionController::class,'dailyProductionAction'])->name('dailyProductionAction');
     Route::get('/production-list',[ProductionController::class,'production'])->name('production');
     Route::any('/production-list/{action}/{id?}',[ProductionController::class,'productionAction'])->name('productionAction');
@@ -258,6 +259,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
         // 5. Commercial Invoice
         Route::get('/invoices', [CommercialController::class, 'invoice'])->name('invoice');
+        // Route::get('/invoices/create', [CommercialController::class, 'createInvoice'])->name('commercial.invoiceCreate');
+        // Route::post('/invoices/store', [CommercialController::class, 'invoiceAction'])->name('commercial.invoiceStore');
         Route::any('/invoices/{action}/{id?}', [CommercialController::class, 'invoiceAction'])->name('invoiceAction');
 
         // 6. Packing List

@@ -55,28 +55,37 @@
                         <tr>
                             <th style="width: 50px;">SL</th>
                             <th style="min-width: 120px;">Poly Date</th>
-                            <th style="min-width: 150px;">PI Number</th>
-                            <th style="min-width: 150px;">Order No</th>
+                            <th style="min-width: 150px;">Buyer</th>
                             <th style="min-width: 150px;">Style Number</th>
+                            <th style="min-width: 150px;">Order Number</th>
                             <th style="min-width: 120px;">Color</th>
-                            <th style="min-width: 120px;">Poly Qty</th>
+                            <th style="min-width: 100px;">Color Qty</th>
+                            <th style="min-width: 100px;">Poly Qty</th>
+                            <th style="min-width: 100px;">Total Poly</th>
+                            <th style="min-width: 100px;">Balance</th>
                             <th style="min-width: 150px;">Added By</th>
-                            <th style="min-width: 150px;">Remarks</th>
                             <th style="min-width: 100px; width: 100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($polies as $i => $ply)
+                        @php
+                            $colorQty = \App\Models\OrderDetailItem::where('order_no', $ply->order_no)->where('style_no', $ply->style_no)->where('color_name', $ply->color_name)->sum('qty');
+                            $totalPoly = \App\Models\Poly::where('order_no', $ply->order_no)->where('style_no', $ply->style_no)->where('color_name', $ply->color_name)->sum('poly_qty');
+                            $balance = $colorQty - $totalPoly;
+                        @endphp
                         <tr>
                             <td>{{ $polies->firstItem() + $i }}</td>
                             <td>{{ $ply->poly_date ? $ply->poly_date->format('d.m.Y') : '--' }}</td>
-                            <td class="">{{ $ply->pi_no }}</td>
-                            <td>{{ $ply->order_no }}</td>
-                            <td> {{ $ply->style_no }} </td>
+                            <td class="">{{ $ply->order_no ? App\Models\OrderDetail::where('order_no', $ply->order_no)->first()?->buyer_name : '--' }}</td>
+                            <td class="">{{ $ply->style_no }}</td>
+                            <td class="">{{ $ply->order_no }}</td>
                             <td>{{ $ply->color_name }}</td>
-                            <td class="text-success font-weight-bold">{{ number_format($ply->poly_qty) }} Pcs</td>
+                            <td>{{ number_format($colorQty) }}</td>
+                            <td class="text-success font-weight-bold">{{ number_format($ply->poly_qty) }}</td>
+                            <td class="text-primary font-weight-bold">{{ number_format($totalPoly) }}</td>
+                            <td class="text-danger font-weight-bold">{{ number_format($balance) }}</td>
                             <td>{{ $ply->createdBy?->name }}</td>
-                            <td><smalls>{{ $ply->remarks }}</smalls></td>
                             <td style="text-align: center;">
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditPoly_{{$ply->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
@@ -90,7 +99,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">No Poly Data Found</td>
+                            <td colspan="12" class="text-center">No Poly Data Found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -98,8 +107,9 @@
                     <tfoot class="bg-light">
                         <tr>
                             <th colspan="6" class="text-right">Total:</th>
-                            <th class="text-success">{{ number_format($polies->sum('poly_qty')) }} Pcs</th>
-                            <th colspan="3"></th>
+                            <th></th>
+                            <th class="text-success">{{ number_format($polies->sum('poly_qty')) }}</th>
+                            <th colspan="4"></th>
                         </tr>
                     </tfoot>
                     @endif
@@ -127,34 +137,38 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Buyer Selection (New Cascade) -->
                         <div class="col-md-12 form-group">
-                            <label>Select PI*</label>
-                            <select name="pi_no" id="poly_pi_select" class="form-control" required>
-                                <option value="">-- Choose PI --</option>
-                                @foreach($pis as $pi)
-                                    <option value="{{ $pi->id }}">{{ $pi->pi_no }}</option>
+                            <label>Select Buyer*</label>
+                            <select name="buyer_name" id="poly_buyer_select" class="form-control" required>
+                                <option value="">-- Choose Buyer --</option>
+                                @foreach($buyers as $buyer)
+                                    <option value="{{ $buyer }}">{{ $buyer }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-12 form-group">
-                            <label>Select Order (PO)* <span id="poly_order_qty_label" class="badge badge-primary"></span></label>
-                            <select name="order_no" id="poly_order_select" class="form-control" required disabled>
-                                <option value="">-- First Select PI --</option>
-                            </select>
-                        </div>
-
+                        <!-- Style Selection (AJAX loaded based on buyer) -->
                         <div class="col-md-12 form-group">
                             <label>Select Style* <span id="poly_style_qty_label" class="badge badge-warning"></span></label>
                             <select name="style_no" id="poly_style_select" class="form-control" required disabled>
-                                <option value="">-- Select Order First --</option>
+                                <option value="">-- Select Buyer First --</option>
                             </select>
                         </div>
 
+                        <!-- Order Selection (AJAX loaded based on style) -->
+                        <div class="col-md-12 form-group">
+                            <label>Select Order (PO)* <span id="poly_order_qty_label" class="badge badge-primary"></span></label>
+                            <select name="order_no" id="poly_order_select" class="form-control" required disabled>
+                                <option value="">-- Select Style First --</option>
+                            </select>
+                        </div>
+
+                        <!-- Color Selection (AJAX loaded) -->
                         <div class="col-md-12 form-group">
                             <label>Select Color* <span id="poly_color_qty_label" class="badge badge-info"></span></label>
                             <select name="color_name" id="poly_color_select" class="form-control" required disabled>
-                                <option value="">-- Select Style First --</option>
+                                <option value="">-- Select Order First --</option>
                             </select>
                         </div>
 
@@ -198,24 +212,33 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Hidden fields for update -->
+                        <input type="hidden" name="order_no" value="{{ $ply->order_no }}">
+                        <input type="hidden" name="color_name" value="{{ $ply->color_name }}">
+                        <input type="hidden" name="style_no" value="{{ $ply->style_no }}">
+                        
+                        <!-- Buyer (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>PI Number*</label>
-                            <input type="text" value="{{ $ply->pi_no }}" class="form-control" readonly>
+                            <label>Buyer</label>
+                            <input type="text" value="{{ App\Models\OrderDetail::where('order_no', $ply->order_no)->where('style_no', $ply->style_no)->first()?->buyer_name }}" class="form-control" readonly>
                         </div>
 
+                        <!-- Style (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Order Number*</label>
-                            <input type="text" value="{{ $ply->order_no }}" class="form-control" readonly>
-                        </div>
-
-                        <div class="col-md-12 form-group">
-                            <label>Style Number*</label>
+                            <label>Style</label>
                             <input type="text" value="{{ $ply->style_no }}" class="form-control" readonly>
                         </div>
 
+                        <!-- Order (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $ply->color_name }}" class="form-control" readonly>
+                            <label>Order</label>
+                            <input type="text" value="{{ $ply->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <!-- Color Name (Read Only) -->
+                        <div class="col-md-12 form-group">
+                            <label>Color</label>
+                            <input type="text" value="{{ $ply->color_name }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-6 form-group">
@@ -225,7 +248,7 @@
 
                         <div class="col-md-6 form-group">
                             <label>Poly Date</label>
-                            <input type="date" name="poly_date" class="form-control" value="{{ $ply->poly_date->format('Y-m-d') ?? date('Y-m-d') }}">
+                            <input type="date" name="poly_date" class="form-control" value="{{ $ply->poly_date ? $ply->poly_date->format('Y-m-d') : date('Y-m-d') }}">
                         </div>
 
                         <div class="col-md-12 form-group">
@@ -248,102 +271,97 @@
 @push('js')
 <script>
 $(document).ready(function() {
-    // Poly PI -> Order -> Style -> Color
-    $('#poly_pi_select').on('change', function() {
-        let pi_no = $(this).val();
+    // New Cascade: Buyer -> Style -> Order -> Color
+    
+    // Poly Buyer -> Style
+    $('#poly_buyer_select').on('change', function() {
+        let buyer = $(this).val();
+        let $styleSelect = $('#poly_style_select');
         let $orderSelect = $('#poly_order_select');
-        let $styleSelect = $('#poly_style_select');
         let $colorSelect = $('#poly_color_select');
-        let $orderQtyLabel = $('#poly_order_qty_label');
-        let $styleQtyLabel = $('#poly_style_qty_label');
 
-        // Reset downstream dropdowns
-        $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', true);
-        $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-        $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-        $orderQtyLabel.text('');
-        $styleQtyLabel.text('');
-
-        if (pi_no) {
-            // Load Orders by PI
-            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
-
-            $.get("{{ route('admin.polyAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
-                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
-                data.forEach(function(item) {
-                    $orderSelect.append(`<option value="${item.order_no}" data-qty="${item.total_order_qty}">${item.order_no}</option>`);
-                });
-            });
-        } else {
-            $orderSelect.empty().append('<option value="">-- First Select PI --</option>').prop('disabled', true);
-            $orderQtyLabel.text('');
-        }
-    });
-
-    // Poly Order -> Style
-    $('#poly_order_select').on('change', function() {
-        let order_no = $(this).val();
-        let pi_no = $('#poly_pi_select').val();
-        let $styleSelect = $('#poly_style_select');
-        let $colorSelect = $('#poly_color_select');
-        let $styleQtyLabel = $('#poly_style_qty_label');
-
-        // Reset downstream dropdowns
-        $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', true);
-        $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-        $styleQtyLabel.text('');
-
-        if (order_no && pi_no) {
-            let selectedOption = $(this).find('option:selected');
-            let orderQty = selectedOption.data('qty');
-            if (orderQty) {
-                $('#poly_order_qty_label').text('Qty: ' + orderQty);
-            }
-
+        if (buyer) {
             $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
+            $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $('#poly_order_qty_label').text('');
+            $('#poly_style_qty_label').text('');
+            $('#poly_color_qty_label').text('');
 
-            $.get("{{ route('admin.polyAction', 'get-styles') }}", { pi_id: pi_no, order_no: order_no }, function(data) {
+            $.get("{{ route('admin.polyAction', 'get-styles-by-buyer') }}", { buyer: buyer }, function(data) {
                 $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
                 data.forEach(function(item) {
-                    $styleSelect.append(`<option value="${item.style_no}" data-qty="${item.total_style_qty}">${item.style_no}</option>`);
+                    $styleSelect.append('<option value="' + item + '">' + item + '</option>');
                 });
             });
         } else {
-            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-            $styleQtyLabel.text('');
+            $styleSelect.empty().append('<option value="">-- Select Buyer First --</option>').prop('disabled', true);
+            $('#poly_style_qty_label').text('');
         }
     });
 
-    // Poly Style -> Color
+    // Poly Style -> Order
     $('#poly_style_select').on('change', function() {
         let style_no = $(this).val();
-        let order_no = $('#poly_order_select').val();
-        let pi_no = $('#poly_pi_select').val();
+        let buyer = $('#poly_buyer_select').val();
+        let $orderSelect = $('#poly_order_select');
         let $colorSelect = $('#poly_color_select');
-        let $qtyLabel = $('#poly_color_qty_label');
 
-        // Reset color dropdown
-        $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', true);
-        $qtyLabel.text('');
+        if (style_no && buyer) {
+            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $('#poly_color_qty_label').text('');
 
-        if (style_no && pi_no) {
-            let selectedOption = $(this).find('option:selected');
-            let styleQty = selectedOption.data('qty');
-            if (styleQty) {
-                $('#poly_style_qty_label').text('Qty: ' + styleQty);
-            }
-
-            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
-
-            $.get("{{ route('admin.polyAction', 'get-colors') }}", { pi_id: pi_no, style_no: style_no, order_no: order_no }, function(data) {
-                $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', false);
+            $.get("{{ route('admin.polyAction', 'get-orders-by-style') }}", { buyer: buyer, style_no: style_no }, function(data) {
+                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
                 data.forEach(function(item) {
-                    $colorSelect.append(`<option value="${item.color_name}" data-qty="${item.total_color_qty}">${item.color_name} (${item.total_color_qty})</option>`);
+                    $orderSelect.append('<option value="' + item.order_no + '" data-qty="' + item.total_qty + '">' + item.order_no + ' (' + item.total_qty + ')</option>');
                 });
             });
         } else {
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-            $qtyLabel.text('');
+            $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $('#poly_order_qty_label').text('');
+        }
+    });
+
+    // Poly Order -> Color
+    $('#poly_order_select').on('change', function() {
+        let order_no = $(this).val();
+        let style_no = $('#poly_style_select').val();
+        let buyer = $('#poly_buyer_select').val();
+        let $colorSelect = $('#poly_color_select');
+        let selectedOrder = $(this).find('option:selected');
+
+        if (selectedOrder.data('qty')) {
+            $('#poly_order_qty_label').text('Qty: ' + selectedOrder.data('qty'));
+        } else {
+            $('#poly_order_qty_label').text('');
+        }
+
+        if (order_no && style_no) {
+            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
+
+            $.get("{{ route('admin.polyAction', 'get-colors-by-order') }}",
+                { order_no: order_no, style_no: style_no },
+                function(data) {
+                    $colorSelect.empty()
+                        .append('<option value="">-- Select Color --</option>')
+                        .prop('disabled', false);
+
+                    data.forEach(function(item) {
+                        $colorSelect.append(
+                            '<option value="' + item.color_name +
+                            '" data-qty="' + item.total_qty + '">' +
+                            item.color_name + ' (' + item.total_qty + ')</option>'
+                        );
+                    });
+                }
+            );
+        } else {
+            $colorSelect.empty()
+                .append('<option value="">-- Select Order First --</option>')
+                .prop('disabled', true);
+            $('#poly_color_qty_label').text('');
         }
     });
 

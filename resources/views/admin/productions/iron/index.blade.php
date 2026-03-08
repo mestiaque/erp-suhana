@@ -55,28 +55,37 @@
                         <tr>
                             <th style="width: 50px;">SL</th>
                             <th style="min-width: 120px;">Iron Date</th>
-                            <th style="min-width: 150px;">PI Number</th>
-                            <th style="min-width: 150px;">Order No</th>
+                            <th style="min-width: 150px;">Buyer</th>
                             <th style="min-width: 150px;">Style Number</th>
+                            <th style="min-width: 150px;">Order Number</th>
                             <th style="min-width: 120px;">Color</th>
-                            <th style="min-width: 120px;">Iron Qty</th>
+                            <th style="min-width: 100px;">Color Qty</th>
+                            <th style="min-width: 100px;">Iron Qty</th>
+                            <th style="min-width: 100px;">Total Iron</th>
+                            <th style="min-width: 100px;">Balance</th>
                             <th style="min-width: 150px;">Added By</th>
-                            <th style="min-width: 150px;">Remarks</th>
                             <th style="min-width: 100px; width: 100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($irons as $i => $irn)
+                        @php
+                            $colorQty = \App\Models\OrderDetailItem::where('order_no', $irn->order_no)->where('style_no', $irn->style_no)->where('color_name', $irn->color_name)->sum('qty');
+                            $totalIron = \App\Models\Iron::where('order_no', $irn->order_no)->where('style_no', $irn->style_no)->where('color_name', $irn->color_name)->sum('iron_qty');
+                            $balance = $colorQty - $totalIron;
+                        @endphp
                         <tr>
                             <td>{{ $irons->firstItem() + $i }}</td>
                             <td>{{ $irn->iron_date ? $irn->iron_date->format('d.m.Y') : '--' }}</td>
-                            <td class="">{{ $irn->pi_no }}</td>
-                            <td>{{ $irn->order_no }}</td>
-                            <td> {{ $irn->style_no }} </td>
+                            <td class="">{{ $irn->order_no ? App\Models\OrderDetail::where('order_no', $irn->order_no)->first()?->buyer_name : '--' }}</td>
+                            <td class="">{{ $irn->style_no }}</td>
+                            <td class="">{{ $irn->order_no }}</td>
                             <td>{{ $irn->color_name }}</td>
-                            <td class="text-success font-weight-bold">{{ number_format($irn->iron_qty) }} Pcs</td>
+                            <td>{{ number_format($colorQty) }}</td>
+                            <td class="text-success font-weight-bold">{{ number_format($irn->iron_qty) }}</td>
+                            <td class="text-primary font-weight-bold">{{ number_format($totalIron) }}</td>
+                            <td class="text-danger font-weight-bold">{{ number_format($balance) }}</td>
                             <td>{{ $irn->createdBy?->name }}</td>
-                            <td><smalls>{{ $irn->remarks }}</smalls></td>
                             <td style="text-align: center;">
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditIron_{{$irn->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
@@ -90,7 +99,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">No Iron Data Found</td>
+                            <td colspan="12" class="text-center">No Iron Data Found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -98,8 +107,9 @@
                     <tfoot class="bg-light">
                         <tr>
                             <th colspan="6" class="text-right">Total:</th>
-                            <th class="text-success">{{ number_format($irons->sum('iron_qty')) }} Pcs</th>
-                            <th colspan="3"></th>
+                            <th></th>
+                            <th class="text-success">{{ number_format($irons->sum('iron_qty')) }}</th>
+                            <th colspan="4"></th>
                         </tr>
                     </tfoot>
                     @endif
@@ -127,34 +137,38 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Buyer Selection (New Cascade) -->
                         <div class="col-md-12 form-group">
-                            <label>Select PI*</label>
-                            <select name="pi_no" id="iron_pi_select" class="form-control" required>
-                                <option value="">-- Choose PI --</option>
-                                @foreach($pis as $pi)
-                                    <option value="{{ $pi->id }}">{{ $pi->pi_no }}</option>
+                            <label>Select Buyer*</label>
+                            <select name="buyer_name" id="iron_buyer_select" class="form-control" required>
+                                <option value="">-- Choose Buyer --</option>
+                                @foreach($buyers as $buyer)
+                                    <option value="{{ $buyer }}">{{ $buyer }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-12 form-group">
-                            <label>Select Order (PO)* <span id="iron_order_qty_label" class="badge badge-primary"></span></label>
-                            <select name="order_no" id="iron_order_select" class="form-control" required disabled>
-                                <option value="">-- First Select PI --</option>
-                            </select>
-                        </div>
-
+                        <!-- Style Selection (AJAX loaded based on buyer) -->
                         <div class="col-md-12 form-group">
                             <label>Select Style* <span id="iron_style_qty_label" class="badge badge-warning"></span></label>
                             <select name="style_no" id="iron_style_select" class="form-control" required disabled>
-                                <option value="">-- Select Order First --</option>
+                                <option value="">-- Select Buyer First --</option>
                             </select>
                         </div>
 
+                        <!-- Order Selection (AJAX loaded based on style) -->
+                        <div class="col-md-12 form-group">
+                            <label>Select Order (PO)* <span id="iron_order_qty_label" class="badge badge-primary"></span></label>
+                            <select name="order_no" id="iron_order_select" class="form-control" required disabled>
+                                <option value="">-- Select Style First --</option>
+                            </select>
+                        </div>
+
+                        <!-- Color Selection (AJAX loaded) -->
                         <div class="col-md-12 form-group">
                             <label>Select Color* <span id="iron_color_qty_label" class="badge badge-info"></span></label>
                             <select name="color_name" id="iron_color_select" class="form-control" required disabled>
-                                <option value="">-- Select Style First --</option>
+                                <option value="">-- Select Order First --</option>
                             </select>
                         </div>
 
@@ -198,24 +212,33 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Hidden fields for update -->
+                        <input type="hidden" name="order_no" value="{{ $irn->order_no }}">
+                        <input type="hidden" name="color_name" value="{{ $irn->color_name }}">
+                        <input type="hidden" name="style_no" value="{{ $irn->style_no }}">
+
+                        <!-- Buyer (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>PI Number*</label>
-                            <input type="text" value="{{ $irn->pi_no }}" class="form-control" readonly>
+                            <label>Buyer</label>
+                            <input type="text" value="{{ App\Models\OrderDetail::where('order_no', $irn->order_no)->where('style_no', $irn->style_no)->first()?->buyer_name }}" class="form-control" readonly>
                         </div>
 
+                        <!-- Style (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Order Number*</label>
-                            <input type="text" value="{{ $irn->order_no }}" class="form-control" readonly>
-                        </div>
-
-                        <div class="col-md-12 form-group">
-                            <label>Style Number*</label>
+                            <label>Style</label>
                             <input type="text" value="{{ $irn->style_no }}" class="form-control" readonly>
                         </div>
 
+                        <!-- Order (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $irn->color_name }}" class="form-control" readonly>
+                            <label>Order</label>
+                            <input type="text" value="{{ $irn->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <!-- Color Name (Read Only) -->
+                        <div class="col-md-12 form-group">
+                            <label>Color</label>
+                            <input type="text" value="{{ $irn->color_name }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-6 form-group">
@@ -225,7 +248,7 @@
 
                         <div class="col-md-6 form-group">
                             <label>Iron Date</label>
-                            <input type="date" name="iron_date" class="form-control" value="{{ $irn->iron_date->format('Y-m-d') ?? date('Y-m-d') }}">
+                            <input type="date" name="iron_date" class="form-control" value="{{ $irn->iron_date ? $irn->iron_date->format('Y-m-d') : date('Y-m-d') }}">
                         </div>
 
                         <div class="col-md-12 form-group">
@@ -248,102 +271,97 @@
 @push('js')
 <script>
 $(document).ready(function() {
-    // Iron PI -> Order -> Style -> Color
-    $('#iron_pi_select').on('change', function() {
-        let pi_no = $(this).val();
+    // New Cascade: Buyer -> Style -> Order -> Color
+
+    // Iron Buyer -> Style
+    $('#iron_buyer_select').on('change', function() {
+        let buyer = $(this).val();
+        let $styleSelect = $('#iron_style_select');
         let $orderSelect = $('#iron_order_select');
-        let $styleSelect = $('#iron_style_select');
         let $colorSelect = $('#iron_color_select');
-        let $orderQtyLabel = $('#iron_order_qty_label');
-        let $styleQtyLabel = $('#iron_style_qty_label');
 
-        // Reset downstream dropdowns
-        $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', true);
-        $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-        $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-        $orderQtyLabel.text('');
-        $styleQtyLabel.text('');
-
-        if (pi_no) {
-            // Load Orders by PI
-            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
-
-            $.get("{{ route('admin.ironAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
-                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
-                data.forEach(function(item) {
-                    $orderSelect.append(`<option value="${item.order_no}" data-qty="${item.total_order_qty}">${item.order_no}</option>`);
-                });
-            });
-        } else {
-            $orderSelect.empty().append('<option value="">-- First Select PI --</option>').prop('disabled', true);
-            $orderQtyLabel.text('');
-        }
-    });
-
-    // Iron Order -> Style
-    $('#iron_order_select').on('change', function() {
-        let order_no = $(this).val();
-        let pi_no = $('#iron_pi_select').val();
-        let $styleSelect = $('#iron_style_select');
-        let $colorSelect = $('#iron_color_select');
-        let $styleQtyLabel = $('#iron_style_qty_label');
-
-        // Reset downstream dropdowns
-        $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', true);
-        $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-        $styleQtyLabel.text('');
-
-        if (order_no && pi_no) {
-            let selectedOption = $(this).find('option:selected');
-            let orderQty = selectedOption.data('qty');
-            if (orderQty) {
-                $('#iron_order_qty_label').text('Qty: ' + orderQty);
-            }
-
+        if (buyer) {
             $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
+            $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $('#iron_order_qty_label').text('');
+            $('#iron_style_qty_label').text('');
+            $('#iron_color_qty_label').text('');
 
-            $.get("{{ route('admin.ironAction', 'get-styles') }}", { pi_id: pi_no, order_no: order_no }, function(data) {
+            $.get("{{ route('admin.ironAction', 'get-styles-by-buyer') }}", { buyer: buyer }, function(data) {
                 $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
                 data.forEach(function(item) {
-                    $styleSelect.append(`<option value="${item.style_no}" data-qty="${item.total_style_qty}">${item.style_no}</option>`);
+                    $styleSelect.append('<option value="' + item + '">' + item + '</option>');
                 });
             });
         } else {
-            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-            $styleQtyLabel.text('');
+            $styleSelect.empty().append('<option value="">-- Select Buyer First --</option>').prop('disabled', true);
+            $('#iron_style_qty_label').text('');
         }
     });
 
-    // Iron Style -> Color
+    // Iron Style -> Order
     $('#iron_style_select').on('change', function() {
         let style_no = $(this).val();
-        let order_no = $('#iron_order_select').val();
-        let pi_no = $('#iron_pi_select').val();
+        let buyer = $('#iron_buyer_select').val();
+        let $orderSelect = $('#iron_order_select');
         let $colorSelect = $('#iron_color_select');
-        let $qtyLabel = $('#iron_color_qty_label');
 
-        // Reset color dropdown
-        $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', true);
-        $qtyLabel.text('');
+        if (style_no && buyer) {
+            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $('#iron_color_qty_label').text('');
 
-        if (style_no && pi_no) {
-            let selectedOption = $(this).find('option:selected');
-            let styleQty = selectedOption.data('qty');
-            if (styleQty) {
-                $('#iron_style_qty_label').text('Qty: ' + styleQty);
-            }
-
-            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
-
-            $.get("{{ route('admin.ironAction', 'get-colors') }}", { pi_id: pi_no, style_no: style_no, order_no: order_no }, function(data) {
-                $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', false);
+            $.get("{{ route('admin.ironAction', 'get-orders-by-style') }}", { buyer: buyer, style_no: style_no }, function(data) {
+                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
                 data.forEach(function(item) {
-                    $colorSelect.append(`<option value="${item.color_name}" data-qty="${item.total_color_qty}">${item.color_name} (${item.total_color_qty})</option>`);
+                    $orderSelect.append('<option value="' + item.order_no + '" data-qty="' + item.total_qty + '">' + item.order_no + ' (' + item.total_qty + ')</option>');
                 });
             });
         } else {
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-            $qtyLabel.text('');
+            $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $('#iron_order_qty_label').text('');
+        }
+    });
+
+    // Iron Order -> Color
+    $('#iron_order_select').on('change', function() {
+        let order_no = $(this).val();
+        let style_no = $('#iron_style_select').val();
+        let buyer = $('#iron_buyer_select').val();
+        let $colorSelect = $('#iron_color_select');
+        let selectedOrder = $(this).find('option:selected');
+
+        if (selectedOrder.data('qty')) {
+            $('#iron_order_qty_label').text('Qty: ' + selectedOrder.data('qty'));
+        } else {
+            $('#iron_order_qty_label').text('');
+        }
+
+        if (order_no && style_no) {
+            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
+
+            $.get("{{ route('admin.ironAction', 'get-colors-by-order') }}",
+                { order_no: order_no, style_no: style_no },
+                function(data) {
+                    $colorSelect.empty()
+                        .append('<option value="">-- Select Color --</option>')
+                        .prop('disabled', false);
+
+                    data.forEach(function(item) {
+                        $colorSelect.append(
+                            '<option value="' + item.color_name +
+                            '" data-qty="' + item.total_qty + '">' +
+                            item.color_name + ' (' + item.total_qty + ')</option>'
+                        );
+                    });
+                }
+            );
+        } else {
+            $colorSelect.empty()
+                .append('<option value="">-- Select Order First --</option>')
+                .prop('disabled', true);
+            $('#iron_color_qty_label').text('');
         }
     });
 
@@ -360,3 +378,4 @@ $(document).ready(function() {
 });
 </script>
 @endpush
+

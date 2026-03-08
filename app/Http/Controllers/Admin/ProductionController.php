@@ -109,19 +109,21 @@ class ProductionController extends Controller
 
             // ৩️⃣ Step: Filter available colors
             $colors = $allColors->filter(function($c) use ($plannedColors){
-                // pi_item_id relation দিয়ে বের করা
+
                 $pi_item_id = $c?->orderDetail?->piItem?->id ?? null;
 
-                // Key বানানো plannedColors-এর সাথে মিলানোর জন্য
+                // ❗ pi_item_id না থাকলে skip
+                if(!$pi_item_id){
+                    return false;
+                }
+
                 $key = $pi_item_id.'__'.$c->style_no.'__'.$c->order_no.'__'.$c->color_name;
 
-                // যদি plannedColors এ না থাকে, keep
                 return !in_array($key, $plannedColors);
             });
 
             // ================= CREATE FORM =================
             if($action == 'create') {
-
                 return view(adminTheme().'productions.planning.edit', [
                     'method' => 'store',
                     'colors' => $colors,
@@ -305,7 +307,6 @@ class ProductionController extends Controller
 
             return view(adminTheme().'productions.planning.edit', compact('masterPlan','colors'));
             } catch(Exception $e){
-                dd($e);
                 session()->flash('error', $e->getMessage());
                 return redirect()->route('admin.productionPlanning');
             }
@@ -739,6 +740,34 @@ class ProductionController extends Controller
         return view(adminTheme().'productions.daily.index', compact('swings','startDate', 'floorLines'));
     }
 
+    public function dailyProductionPrint(Request $r)
+    {
+        $startDate = $r->startDate ? Carbon::parse($r->startDate) : now();
+        $today_date = $startDate->format('Y-m-d');
+
+        $floorLines = Attribute::where('type', 4)
+                    ->select('id', 'name', 'slug')
+                    ->orderBy('slug')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id'    => $item->id,
+                            'floor' => $item->name,
+                            'line'  => $item->slug,
+                            'key'   => $item->name . ' - ' . $item->slug,
+                        ];
+                    });
+
+        $swings = ProductionSewing::with(['planning', 'planning.style', 'outputs'])
+                        ->where('status', 1)
+                        ->get()
+                        ->groupBy(function ($item) {
+                            return $item->floor_name . ' - ' . $item->line_name;
+                        });
+
+        return view(adminTheme().'productions.daily.print-index', compact('swings','startDate', 'floorLines', 'today_date'));
+    }
+
     public function dailyProductionAction(Request $r, $action)
     {
         $startDate = $r->startDate? Carbon::parse($r->startDate) : now();
@@ -865,12 +894,62 @@ class ProductionController extends Controller
 
         $cuttings = $query->latest('cutting_date')->paginate(20);
         $pis = ProformaInvoice::whereNotNull('pi_no')->get();
-        return view('admin.productions.cutting.index', compact('cuttings', 'pis'));
+
+        // Get buyers for new cascade (Buyer -> Style -> Order -> Color)
+        $buyers = OrderDetail::whereNotNull('buyer_name')->distinct()->pluck('buyer_name')->filter()->sort()->values();
+
+        return view('admin.productions.cutting.index', compact('cuttings', 'pis', 'buyers'));
     }
 
     public function cuttingAction(Request $r, $action)
     {
+        // ================== GET BUYERS (New Cascade) ==================
+        if ($action == 'get-buyers') {
+            $buyers = OrderDetail::whereNotNull('buyer_name')
+                ->distinct()
+                ->pluck('buyer_name')
+                ->filter()
+                ->sort()
+                ->values();
 
+            return response()->json($buyers);
+        }
+
+        // ================== GET STYLES BY BUYER (New Cascade) ==================
+        if ($action == 'get-styles-by-buyer') {
+            $styles = OrderDetail::where('buyer_name', $r->buyer)
+                ->distinct()
+                ->pluck('style_no')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($styles);
+        }
+
+        // ================== GET ORDERS BY STYLE (New Cascade) ==================
+        if ($action == 'get-orders-by-style') {
+            $orders = OrderDetail::where('buyer_name', $r->buyer)
+                ->where('style_no', $r->style_no)
+                ->select('order_no', 'style_no', DB::raw('SUM(total_qty) as total_qty'))
+                ->groupBy('order_no', 'style_no')
+                ->get();
+
+            return response()->json($orders);
+        }
+
+        // ================== GET COLORS BY ORDER (New Cascade) ==================
+        if ($action == 'get-colors-by-order') {
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->select('color_name', DB::raw('SUM(qty) as total_qty'))
+                ->groupBy('color_name')
+                ->get();
+
+            return response()->json($colors);
+        }
+
+        // ================== LEGACY: Get orders based on PI (Keep for backward compatibility) ==================
         if ($action == 'get-orders') {
             // Get orders based on PI
             $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
@@ -903,17 +982,26 @@ class ProductionController extends Controller
         }
 
         if($action == 'create'){
-            $pi = ProformaInvoice::find($r->pi_no);
+            // Try to find PI from order details, or use null if not found
+            $orderDetail = OrderDetail::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->first();
+
+            $pi = null;
+            if ($orderDetail && $orderDetail->piItem) {
+                $pi = $orderDetail->piItem->pi;
+            }
+
             Cutting::create([
-                'pi_id'         => $pi->id,
-                'pi_no'         => $pi->pi_no,
+                'pi_id'         => $pi?->id,
+                'pi_no'         => $pi?->pi_no,
                 'order_no'      => $r->order_no,
                 'style_no'      => $r->style_no,
                 'color_name'    => $r->color_name,
-                'cutting_qty'  => $r->cutting_qty,
-                'cutting_date' => $r->cutting_date,
+                'cutting_qty'   => $r->cutting_qty,
+                'cutting_date'  => $r->cutting_date,
                 'remarks'       => $r->remarks,
-                'created_by'   => auth()->id(),
+                'created_by'    => auth()->id(),
             ]);
 
             return redirect()->back()->with('success', 'Cutting Record Added Successfully');
@@ -922,10 +1010,8 @@ class ProductionController extends Controller
         if ($action == "update") {
             $cut = Cutting::findorFail($r->id);
             $cut->update([
-                'order_no'      => $r->order_no,
-                'color_name'    => $r->color_name,
-                'cutting_qty'  => $r->cutting_qty,
-                'cutting_date' => $r->cutting_date,
+                'cutting_qty'   => $r->cutting_qty,
+                'cutting_date'  => $r->cutting_date,
                 'remarks'       => $r->remarks,
             ]);
             return redirect()->back()->with('success', 'Cutting Record Updated Successfully');
@@ -961,11 +1047,61 @@ class ProductionController extends Controller
         $finishings = $query->latest('finishing_date')->paginate(20);
         $pis = ProformaInvoice::whereNotNull('pi_no')->get();
 
-        return view('admin.productions.finishing.index', compact('finishings', 'pis'));
+        // Get buyers for new cascade (Buyer -> Style -> Order -> Color)
+        $buyers = OrderDetail::whereNotNull('buyer_name')->distinct()->pluck('buyer_name')->filter()->sort()->values();
+
+        return view('admin.productions.finishing.index', compact('finishings', 'pis', 'buyers'));
     }
 
     public function finishingAction(Request $r, $action)
     {
+        // ================== GET BUYERS (New Cascade) ==================
+        if ($action == 'get-buyers') {
+            $buyers = OrderDetail::whereNotNull('buyer_name')
+                ->distinct()
+                ->pluck('buyer_name')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($buyers);
+        }
+
+        // ================== GET STYLES BY BUYER (New Cascade) ==================
+        if ($action == 'get-styles-by-buyer') {
+            $styles = OrderDetail::where('buyer_name', $r->buyer)
+                ->distinct()
+                ->pluck('style_no')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($styles);
+        }
+
+        // ================== GET ORDERS BY STYLE (New Cascade) ==================
+        if ($action == 'get-orders-by-style') {
+            $orders = OrderDetail::where('buyer_name', $r->buyer)
+                ->where('style_no', $r->style_no)
+                ->select('order_no', 'style_no', DB::raw('SUM(total_qty) as total_qty'))
+                ->groupBy('order_no', 'style_no')
+                ->get();
+
+            return response()->json($orders);
+        }
+
+        // ================== GET COLORS BY ORDER (New Cascade) ==================
+        if ($action == 'get-colors-by-order') {
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->select('color_name', DB::raw('SUM(qty) as total_qty'))
+                ->groupBy('color_name')
+                ->get();
+
+            return response()->json($colors);
+        }
+
+        // ================== LEGACY: Get orders based on PI ==================
         if ($action == 'get-orders') {
             $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
                     ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
@@ -994,10 +1130,19 @@ class ProductionController extends Controller
         }
 
         if($action == 'create'){
-            $pi = ProformaInvoice::find($r->pi_no);
+            // Try to find PI from order details, or use null if not found
+            $orderDetail = OrderDetail::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->first();
+
+            $pi = null;
+            if ($orderDetail && $orderDetail->piItem) {
+                $pi = $orderDetail->piItem->pi;
+            }
+
             Finishing::create([
-                'pi_id'         => $pi->id,
-                'pi_no'         => $pi->pi_no,
+                'pi_id'         => $pi?->id,
+                'pi_no'         => $pi?->pi_no,
                 'order_no'      => $r->order_no,
                 'style_no'      => $r->style_no,
                 'color_name'    => $r->color_name,
@@ -1012,8 +1157,6 @@ class ProductionController extends Controller
         if ($action == 'update') {
             $fin = Finishing::findorFail($r->id);
             $fin->update([
-                'order_no'      => $r->order_no,
-                'color_name'    => $r->color_name,
                 'finishing_qty' => $r->finishing_qty,
                 'finishing_date'=> $r->finishing_date,
                 'remarks'       => $r->remarks,
@@ -1051,11 +1194,61 @@ class ProductionController extends Controller
         $irons = $query->latest('iron_date')->paginate(20);
         $pis = ProformaInvoice::whereNotNull('pi_no')->get();
 
-        return view('admin.productions.iron.index', compact('irons', 'pis'));
+        // Get buyers for new cascade (Buyer -> Style -> Order -> Color)
+        $buyers = OrderDetail::whereNotNull('buyer_name')->distinct()->pluck('buyer_name')->filter()->sort()->values();
+
+        return view('admin.productions.iron.index', compact('irons', 'pis', 'buyers'));
     }
 
     public function ironAction(Request $r, $action)
     {
+        // ================== GET BUYERS (New Cascade) ==================
+        if ($action == 'get-buyers') {
+            $buyers = OrderDetail::whereNotNull('buyer_name')
+                ->distinct()
+                ->pluck('buyer_name')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($buyers);
+        }
+
+        // ================== GET STYLES BY BUYER (New Cascade) ==================
+        if ($action == 'get-styles-by-buyer') {
+            $styles = OrderDetail::where('buyer_name', $r->buyer)
+                ->distinct()
+                ->pluck('style_no')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($styles);
+        }
+
+        // ================== GET ORDERS BY STYLE (New Cascade) ==================
+        if ($action == 'get-orders-by-style') {
+            $orders = OrderDetail::where('buyer_name', $r->buyer)
+                ->where('style_no', $r->style_no)
+                ->select('order_no', 'style_no', DB::raw('SUM(total_qty) as total_qty'))
+                ->groupBy('order_no', 'style_no')
+                ->get();
+
+            return response()->json($orders);
+        }
+
+        // ================== GET COLORS BY ORDER (New Cascade) ==================
+        if ($action == 'get-colors-by-order') {
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->select('color_name', DB::raw('SUM(qty) as total_qty'))
+                ->groupBy('color_name')
+                ->get();
+
+            return response()->json($colors);
+        }
+
+        // ================== LEGACY: Get orders based on PI ==================
         if ($action == 'get-orders') {
             $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
                     ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
@@ -1084,10 +1277,19 @@ class ProductionController extends Controller
         }
 
         if($action == 'create'){
-            $pi = ProformaInvoice::find($r->pi_no);
+            // Try to find PI from order details, or use null if not found
+            $orderDetail = OrderDetail::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->first();
+
+            $pi = null;
+            if ($orderDetail && $orderDetail->piItem) {
+                $pi = $orderDetail->piItem->pi;
+            }
+
             Iron::create([
-                'pi_id'         => $pi->id,
-                'pi_no'         => $pi->pi_no,
+                'pi_id'         => $pi?->id,
+                'pi_no'         => $pi?->pi_no,
                 'order_no'      => $r->order_no,
                 'style_no'      => $r->style_no,
                 'color_name'    => $r->color_name,
@@ -1102,8 +1304,6 @@ class ProductionController extends Controller
         if ($action == 'update') {
             $irn = Iron::findorFail($r->id);
             $irn->update([
-                'order_no'      => $r->order_no,
-                'color_name'    => $r->color_name,
                 'iron_qty'      => $r->iron_qty,
                 'iron_date'     => $r->iron_date,
                 'remarks'       => $r->remarks,
@@ -1141,11 +1341,61 @@ class ProductionController extends Controller
         $polies = $query->latest('poly_date')->paginate(20);
         $pis = ProformaInvoice::whereNotNull('pi_no')->get();
 
-        return view('admin.productions.poly.index', compact('polies', 'pis'));
+        // Get buyers for new cascade (Buyer -> Style -> Order -> Color)
+        $buyers = OrderDetail::whereNotNull('buyer_name')->distinct()->pluck('buyer_name')->filter()->sort()->values();
+
+        return view('admin.productions.poly.index', compact('polies', 'pis', 'buyers'));
     }
 
     public function polyAction(Request $r, $action)
     {
+        // ================== GET BUYERS (New Cascade) ==================
+        if ($action == 'get-buyers') {
+            $buyers = OrderDetail::whereNotNull('buyer_name')
+                ->distinct()
+                ->pluck('buyer_name')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($buyers);
+        }
+
+        // ================== GET STYLES BY BUYER (New Cascade) ==================
+        if ($action == 'get-styles-by-buyer') {
+            $styles = OrderDetail::where('buyer_name', $r->buyer)
+                ->distinct()
+                ->pluck('style_no')
+                ->filter()
+                ->sort()
+                ->values();
+
+            return response()->json($styles);
+        }
+
+        // ================== GET ORDERS BY STYLE (New Cascade) ==================
+        if ($action == 'get-orders-by-style') {
+            $orders = OrderDetail::where('buyer_name', $r->buyer)
+                ->where('style_no', $r->style_no)
+                ->select('order_no', 'style_no', DB::raw('SUM(total_qty) as total_qty'))
+                ->groupBy('order_no', 'style_no')
+                ->get();
+
+            return response()->json($orders);
+        }
+
+        // ================== GET COLORS BY ORDER (New Cascade) ==================
+        if ($action == 'get-colors-by-order') {
+            $colors = OrderDetailItem::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->select('color_name', DB::raw('SUM(qty) as total_qty'))
+                ->groupBy('color_name')
+                ->get();
+
+            return response()->json($colors);
+        }
+
+        // ================== LEGACY: Get orders based on PI ==================
         if ($action == 'get-orders') {
             $orders = ProformaInvoiceItem::where('proforma_invoice_id', $r->pi_id)
                     ->select('order_no', DB::raw('SUM(order_qty) as total_order_qty'))
@@ -1174,10 +1424,19 @@ class ProductionController extends Controller
         }
 
         if($action == 'create'){
-            $pi = ProformaInvoice::find($r->pi_no);
+            // Try to find PI from order details, or use null if not found
+            $orderDetail = OrderDetail::where('order_no', $r->order_no)
+                ->where('style_no', $r->style_no)
+                ->first();
+
+            $pi = null;
+            if ($orderDetail && $orderDetail->piItem) {
+                $pi = $orderDetail->piItem->pi;
+            }
+
             Poly::create([
-                'pi_id'         => $pi->id,
-                'pi_no'         => $pi->pi_no,
+                'pi_id'         => $pi?->id,
+                'pi_no'         => $pi?->pi_no,
                 'order_no'      => $r->order_no,
                 'style_no'      => $r->style_no,
                 'color_name'    => $r->color_name,
@@ -1192,8 +1451,6 @@ class ProductionController extends Controller
         if ($action == 'update') {
             $ply = Poly::findorFail($r->id);
             $ply->update([
-                'order_no'      => $r->order_no,
-                'color_name'    => $r->color_name,
                 'poly_qty'      => $r->poly_qty,
                 'poly_date'     => $r->poly_date,
                 'remarks'       => $r->remarks,

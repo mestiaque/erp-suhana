@@ -39,7 +39,6 @@
     .c3 { background: #ff001913 !important; }
 </style>
 @endpush
-
 @section('contents')
 <div class="flex-grow-1">
 
@@ -130,7 +129,7 @@
 
                             {{-- Filter Form and Print Button --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <form method="GET" action="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="mb-0">
+                                <form method="GET" action="{{ route('admin.suppliersAction', ['action' => 'bill-entry', 'id' => $user->id]) }}" class="mb-0">
                                     <div class="row g-2">
                                         <div class="col-md-3">
                                             <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by Title/Invoice/Transaction ID" value="{{ request('search') }}">
@@ -142,11 +141,13 @@
                                         </div>
                                         <div class="col-md-3">
                                             <button type="submit" class="btn btn-sm btn-primary me-2"><i class="bx bx-filter"></i> Filter</button>
-                                            <a href="{{ route('admin.suppliersAction', ['bill-entry', $user->id]) }}" class="btn btn-sm btn-secondary"><i class="bx bx-reset"></i> Reset</a>
+                                            <a href="{{ route('admin.suppliersAction', ['action' => 'bill-entry', 'id' => $user->id]) }}" class="btn btn-sm btn-secondary"><i class="bx bx-reset"></i> Reset</a>
                                         </div>
                                     </div>
                                 </form>
-                                <a href="{{ route('admin.suppliersAction', ['print', $user->id]) }}" target="_blank" class="btn btn-sm btn-success"><i class="bx bx-printer"></i> Print</a>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('admin.suppliersAction', ['action' => 'print-bill-entry', 'id' => $user->id]) }}" target="_blank" class="btn btn-sm btn-success"><i class="bx bx-printer"></i> Print</a>
+                                </div>
                             </div>
 
                             <div class="table-responsive">
@@ -165,7 +166,24 @@
                                         @foreach($ledgerEntries as $item)
                                         <tr class="{{ $item->type == 'payment' ? 'credit-row' : 'debit-row' }}">
                                             <td>{{ $item->date ? $item->date->format('d-m-Y') : '' }}</td>
-                                            <td>{{ $item->title }}</td>
+                                            <td>
+                                                {{ $item->title }}
+                                                @if($item->type == 'bill')
+                                                    @can('creditor.edit')
+                                                    <a href="{{ route('admin.suppliersAction', ['action' => 'bill-entry-edit', 'id' => $item->id]) }}" class="btn btn-sm btn-link text-primary" title="Edit Bill"><i class="bx bx-edit"></i></a>
+                                                    @endcan
+                                                    @can('creditor.delete')
+                                                    <a href="{{ route('admin.suppliersAction', ['action' => 'bill-entry-delete', 'id' => $item->id]) }}" class="btn btn-sm btn-link text-danger" title="Delete Bill" onclick="return confirm('Are you sure you want to delete this bill?')"><i class="bx bx-trash"></i></a>
+                                                    @endcan
+                                                @else
+                                                    @can('creditor.edit')
+                                                    <a href="{{ route('admin.suppliersAction', ['action' => 'bill-payment-edit', 'id' => $item->id]) }}" class="btn btn-sm btn-link text-primary" title="Edit Payment"><i class="bx bx-edit"></i></a>
+                                                    @endcan
+                                                    @can('creditor.delete')
+                                                    <a href="{{ route('admin.suppliersAction', ['action' => 'bill-payment-delete', 'id' => $item->id]) }}" class="btn btn-sm btn-link text-danger" title="Delete Payment" onclick="return confirm('Are you sure you want to delete this payment?')"><i class="bx bx-trash"></i></a>
+                                                    @endcan
+                                                @endif
+                                            </td>
                                             <td>{{ $item->note ?? '-' }}</td>
                                             <td class="text-right text-success">{{ $item->credit > 0 ? priceFullFormat($item->credit) : '-' }}</td>
                                             <td class="text-right text-danger">{{ $item->debit > 0 ? priceFullFormat($item->debit) : '-' }}</td>
@@ -181,7 +199,7 @@
 
                         {{-- Tab 2: Bill Entry Form --}}
                         <div class="tab-pane fade" id="pills-bill" role="tabpanel">
-                            <form action="{{ route('admin.suppliersAction',['bill-entry-post',$user->id]) }}" method="POST" class="p-3 border rounded">
+                            <form action="{{ route('admin.suppliersAction', ['action' => 'bill-entry-post', 'id' => $user->id]) }}" method="POST" class="p-3 border rounded">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -204,7 +222,7 @@
                         {{-- Tab 3: Payment Form --}}
                         <div class="tab-pane fade" id="pills-payment" role="tabpanel">
                             {{-- @can('creditor.payment') --}}
-                            <form id="paymentForm" action="{{ route('admin.suppliersAction',['bill-payment-store',$user->id]) }}" method="POST" enctype="multipart/form-data">
+                            <form id="paymentForm" action="{{ route('admin.suppliersAction', ['action' => 'bill-payment-store', 'id' => $user->id]) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" value="{{ $user->id }}" name="user_id" hidden readonly>
                                 <div class="row">

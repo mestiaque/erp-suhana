@@ -424,7 +424,10 @@ class AdminController extends Controller
                                     ->select(['id','name','amount'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
-        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches', 'to', 'from'));
+
+        $lastAudit = Expense::whereNotNull('audit_at')->latest()->first();
+
+        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches', 'to', 'from', 'lastAudit'));
     }
 
 

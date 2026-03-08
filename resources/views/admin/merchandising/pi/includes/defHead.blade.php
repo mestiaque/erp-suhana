@@ -14,8 +14,8 @@ $advisingBank =
 
 
 <div class="col-md-4 mb-3">
-    <label>Proforma Invoice No</label>
-    <input type="text" class="form-control " value="{{ $pi->pi_no ?? '' }}" placeholder="Proforma Invoice No" name="pi_no" >
+    <label>Proforma Invoice No <span class="text-danger">*</span></label>
+    <input type="text" class="form-control " value="{{ $pi->pi_no ?? '' }}" placeholder="Proforma Invoice No" name="pi_no" required>
 </div>
 
 <div class="col-md-4 mb-3">

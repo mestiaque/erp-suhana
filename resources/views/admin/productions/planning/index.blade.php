@@ -134,7 +134,7 @@
                             <th colspan="5" class="text-center">Style Details</th>
                             <th colspan="2" class="production-header">Cutting</th>
                             <th colspan="4" class="production-header">Sewing</th>
-                            <th colspan="4" class="production-header">Finishing</th>
+                            <th colspan="4" class="production-header">Finishing Receive</th>
                             <th colspan="2" class="production-header">Iron</th>
                             <th colspan="2" class="production-header">Poly</th>
                             <th rowspan="2" style="vertical-align: middle;">Balance</th>
@@ -152,13 +152,13 @@
                             <th>Total</th>
                             <!-- Sewing -->
                             <th>Today In</th>
-                            <th>Today Out</th>
                             <th>Total In</th>
+                            <th>Today Out</th>
                             <th>Total Out</th>
                             <!-- Finishing -->
                             <th>Today In</th>
-                            <th>Today Out</th>
                             <th>Total In</th>
+                            <th>Today Out</th>
                             <th>Total Out</th>
                             <!-- Iron -->
                             <th>Today</th>
@@ -292,14 +292,14 @@
 
                             <!-- Sewing -->
                             <td class="production-cell {{ $sewingTodayIn > 0 ? 'text-success' : '' }}">{{ $sewingTodayIn > 0 ? number_format($sewingTodayIn) : '-' }}</td>
-                            <td class="production-cell {{ $sewingTodayOut > 0 ? 'text-success' : '' }}">{{ $sewingTodayOut > 0 ? number_format($sewingTodayOut) : '-' }}</td>
                             <td class="production-cell font-weight-bold">{{ number_format($sewingTotalIn) }}</td>
+                            <td class="production-cell {{ $sewingTodayOut > 0 ? 'text-success' : '' }}">{{ $sewingTodayOut > 0 ? number_format($sewingTodayOut) : '-' }}</td>
                             <td class="production-cell font-weight-bold">{{ number_format($sewingTotalOut) }}</td>
 
                             <!-- Finishing -->
                             <td class="production-cell {{ $finishingTodayIn > 0 ? 'text-success' : '' }}">{{ $finishingTodayIn > 0 ? number_format($finishingTodayIn) : '-' }}</td>
-                            <td class="production-cell {{ $finishingTodayOut > 0 ? 'text-success' : '' }}">{{ $finishingTodayOut > 0 ? number_format($finishingTodayOut) : '-' }}</td>
                             <td class="production-cell font-weight-bold">{{ number_format($finishingTotalIn) }}</td>
+                            <td class="production-cell {{ $finishingTodayOut > 0 ? 'text-success' : '' }}">{{ $finishingTodayOut > 0 ? number_format($finishingTodayOut) : '-' }}</td>
                             <td class="production-cell font-weight-bold">{{ number_format($finishingTotalOut) }}</td>
 
                             <!-- Iron -->
@@ -353,10 +353,10 @@
                                         @can('production_planning.approve')
                                             <a href="{{ route('admin.productionPlanningAction',['approve',$plan->masterPlan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom success mr-1"><i class="bx bx-check"></i></a>
                                         @endcan
+                                        @can('production_planning.delete')
+                                            <a href="{{ route('admin.productionPlanningAction',['delete',$plan->masterPlan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
+                                        @endcan
                                     @endif
-                                    @can('production_planning.delete')
-                                        <a href="{{ route('admin.productionPlanningAction',['delete',$plan->masterPlan->id]) }}" onclick="return confirm('Are you sure?')" class="btn-custom danger mr-1"><i class="bx bx-trash"></i></a>
-                                    @endcan
                                 @else
                                 --
                                 @endif

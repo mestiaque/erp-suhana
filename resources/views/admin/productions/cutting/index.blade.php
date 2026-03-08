@@ -60,28 +60,37 @@
                         <tr>
                             <th style="width: 50px;">SL</th>
                             <th style="min-width: 120px;">Cutting Date</th>
-                            <th style="min-width: 150px;">PI Number</th>
-                            <th style="min-width: 150px;">Order Number</th>
+                            <th style="min-width: 150px;">Buyer</th>
                             <th style="min-width: 150px;">Style Number</th>
+                            <th style="min-width: 150px;">Order Number</th>
                             <th style="min-width: 120px;">Color</th>
-                            <th style="min-width: 120px;">Cutting Qty</th>
+                            <th style="min-width: 100px;">Color Qty</th>
+                            <th style="min-width: 100px;">Cutting Qty</th>
+                            <th style="min-width: 100px;">Total Cutting</th>
+                            <th style="min-width: 100px;">Balance</th>
                             <th style="min-width: 150px;">Added By</th>
-                            <th style="min-width: 150px;">Remarks</th>
                             <th style="min-width: 100px; width: 100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($cuttings as $i => $cut)
+                        @php
+                            $colorQty = \App\Models\OrderDetailItem::where('order_no', $cut->order_no)->where('style_no', $cut->style_no)->where('color_name', $cut->color_name)->sum('qty');
+                            $totalCutting = \App\Models\Cutting::where('order_no', $cut->order_no)->where('style_no', $cut->style_no)->where('color_name', $cut->color_name)->sum('cutting_qty');
+                            $balance = $colorQty - $totalCutting;
+                        @endphp
                         <tr>
                             <td>{{ $cuttings->firstItem() + $i }}</td>
                             <td>{{ $cut->cutting_date ? $cut->cutting_date->format('d.m.Y') : '--' }}</td>
-                            <td class="">{{ $cut->pi_no }}</td>
-                            <td class="">{{ $cut->order_no }}</td>
+                            <td class="">{{ $cut->order_no ? App\Models\OrderDetail::where('order_no', $cut->order_no)->first()?->buyer_name : '--' }}</td>
                             <td class="">{{ $cut->style_no }}</td>
+                            <td class="">{{ $cut->order_no }}</td>
                             <td>{{ $cut->color_name }}</td>
-                            <td class="text-success font-weight-bold">{{ number_format($cut->cutting_qty) }} Pcs</td>
+                            <td>{{ number_format($colorQty) }}</td>
+                            <td class="text-success font-weight-bold">{{ number_format($cut->cutting_qty) }}</td>
+                            <td class="text-primary font-weight-bold">{{ number_format($totalCutting) }}</td>
+                            <td class="text-danger font-weight-bold">{{ number_format($balance) }}</td>
                             <td>{{ $cut->createdBy?->name }}</td>
-                            <td><smalls>{{ $cut->remarks }}</smalls></td>
                             <td style="text-align: center;">
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditCutting_{{$cut->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
@@ -95,7 +104,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">No Cutting Data Found</td>
+                            <td colspan="12" class="text-center">No Cutting Data Found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -103,8 +112,9 @@
                     <tfoot class="bg-light">
                         <tr>
                             <th colspan="6" class="text-right">Total:</th>
-                            <th class="text-success">{{ number_format($cuttings->sum('cutting_qty')) }} Pcs</th>
-                            <th colspan="3"></th>
+                            <th></th>
+                            <th class="text-success">{{ number_format($cuttings->sum('cutting_qty')) }}</th>
+                            <th colspan="4"></th>
                         </tr>
                     </tfoot>
                     @endif
@@ -134,39 +144,38 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <!-- PI Selection -->
+                        <!-- Buyer Selection (New Cascade) -->
                         <div class="col-md-12 form-group">
-                            <label>Select PI*</label>
-                            <select name="pi_no" id="pi_select" class="form-control" required>
-                                <option value="">-- Choose PI --</option>
-                                @foreach($pis as $pi)
-                                    <option value="{{ $pi->id }}">{{ $pi->pi_no }}</option>
+                            <label>Select Buyer*</label>
+                            <select name="buyer_name" id="buyer_select" class="form-control" required>
+                                <option value="">-- Choose Buyer --</option>
+                                @foreach($buyers as $buyer)
+                                    <option value="{{ $buyer }}">{{ $buyer }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <!-- Order Selection (AJAX loaded) -->
-                        <div class="col-md-12 form-group">
-                            <label>Select Order (PO)* <span id="order_qty_label" class="badge badge-primary"></span></label>
-                            <select name="order_no" id="order_select" class="form-control" required disabled>
-                                <option value="">-- First Select PI --</option>
-                            </select>
-                        </div>
-
-                        <!-- Style Selection (AJAX loaded) -->
+                        <!-- Style Selection (AJAX loaded based on buyer) -->
                         <div class="col-md-12 form-group">
                             <label>Select Style* <span id="style_qty_label" class="badge badge-warning"></span></label>
                             <select name="style_no" id="style_select" class="form-control" required disabled>
-                                <option value="">-- Select Order First --</option>
+                                <option value="">-- Select Buyer First --</option>
                             </select>
-                            <input type="hidden" name="planning_id" id="planning_id">
+                        </div>
+
+                        <!-- Order Selection (AJAX loaded based on style) -->
+                        <div class="col-md-12 form-group">
+                            <label>Select Order (PO)* <span id="order_qty_label" class="badge badge-primary"></span></label>
+                            <select name="order_no" id="order_select" class="form-control" required disabled>
+                                <option value="">-- Select Style First --</option>
+                            </select>
                         </div>
 
                         <!-- Color Selection (AJAX loaded) -->
                         <div class="col-md-12 form-group">
                             <label>Select Color* <span id="color_qty_label" class="badge badge-info"></span></label>
                             <select name="color_name" id="color_select" class="form-control" required disabled>
-                                <option value="">-- Select Style First --</option>
+                                <option value="">-- Select Order First --</option>
                             </select>
                         </div>
 
@@ -212,34 +221,33 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <!-- PI Selection -->
+                        <!-- Hidden fields for update -->
+                        <input type="hidden" name="order_no" value="{{ $cut->order_no }}">
+                        <input type="hidden" name="color_name" value="{{ $cut->color_name }}">
+                        <input type="hidden" name="style_no" value="{{ $cut->style_no }}">
+                        
+                        <!-- Buyer (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Select PI*</label>
-                            <input type="text" value="{{ $cut->pi_no }}" class="form-control" readonly>
-                            {{-- <select name="pi_no" id="pi_select" class="form-control" required>
-                                <option value="">-- Choose PI --</option>
-                                @foreach($pis as $pi)
-                                    <option value="{{ $pi->id }}" {{ $pi->id == $cut->pi_id ? 'selected':'' }}>{{ $pi->pi_no }}</option>
-                                @endforeach
-                            </select> --}}
+                            <label>Buyer</label>
+                            <input type="text" value="{{ App\Models\OrderDetail::where('order_no', $cut->order_no)->where('style_no', $cut->style_no)->first()?->buyer_name }}" class="form-control" readonly>
                         </div>
 
-                        <!-- Order Selection (AJAX loaded) -->
+                        <!-- Style (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Select Order* <span id="order_qty_label" class="badge badge-warning"></span></label>
-                            <input type="text" value="{{ $cut->order_no }}" class="form-control" readonly>
-                        </div>
-
-                        <!-- Style Selection (AJAX loaded) -->
-                        <div class="col-md-12 form-group">
-                            <label>Select Style* <span id="style_qty_label" class="badge badge-warning"></span></label>
+                            <label>Style</label>
                             <input type="text" value="{{ $cut->style_no }}" class="form-control" readonly>
                         </div>
 
-                        <!-- Color Name -->
+                        <!-- Order (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $cut->color_name }}" class="form-control" readonly>
+                            <label>Order</label>
+                            <input type="text" value="{{ $cut->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <!-- Color Name (Read Only) -->
+                        <div class="col-md-12 form-group">
+                            <label>Color</label>
+                            <input type="text" value="{{ $cut->color_name }}" class="form-control" readonly>
                         </div>
 
                         <!-- Cutting Qty -->
@@ -251,7 +259,7 @@
                         <!-- Cutting Date -->
                         <div class="col-md-6 form-group">
                             <label>Cutting Date</label>
-                            <input type="date" name="cutting_date" class="form-control" value="{{ $cut->cutting_date->format('Y-m-d') ?? date('Y-m-d') }}">
+                            <input type="date" name="cutting_date" class="form-control" value="{{ $cut->cutting_date ? $cut->cutting_date->format('Y-m-d') : date('Y-m-d') }}">
                         </div>
 
                         <div class="col-md-12 form-group">
@@ -278,111 +286,106 @@
 @push('js')
 
 <script>
-// PI -> Order Selection
-    $('#pi_select').on('change', function() {
-        let pi_no = $(this).val();
-        let $orderSelect = $('#order_select');
-        let $styleSelect = $('#style_select');
-        let $colorSelect = $('#color_select');
+// New Cascade: Buyer -> Style -> Order -> Color
 
-        if (pi_no) {
-            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
-            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-            $('#order_qty_label').text('');
-            $('#style_qty_label').text('');
-            $('#color_qty_label').text('');
+// Buyer -> Style Selection
+$('#buyer_select').on('change', function() {
+    let buyer = $(this).val();
+    let $styleSelect = $('#style_select');
+    let $orderSelect = $('#order_select');
+    let $colorSelect = $('#color_select');
 
-            $.get("{{ route('admin.cuttingAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
-                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
-                data.forEach(function(item) {
-                    $orderSelect.append('<option value="' + item.order_no + '" data-qty="' + item.total_order_qty + '">' + item.order_no + ' (' + item.total_order_qty + ')</option>');
-                });
+    if (buyer) {
+        $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
+        $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+        $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+        $('#order_qty_label').text('');
+        $('#style_qty_label').text('');
+        $('#color_qty_label').text('');
+
+        $.get("{{ route('admin.cuttingAction', 'get-styles-by-buyer') }}", { buyer: buyer }, function(data) {
+            $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
+            data.forEach(function(item) {
+                $styleSelect.append('<option value="' + item + '">' + item + '</option>');
             });
-        } else {
-            $orderSelect.empty().append('<option value="">-- First Select PI --</option>').prop('disabled', true);
-            $('#order_qty_label').text('');
-        }
-    });
+        });
+    } else {
+        $styleSelect.empty().append('<option value="">-- Select Buyer First --</option>').prop('disabled', true);
+        $('#style_qty_label').text('');
+    }
+});
 
-    // Order -> Style Selection
-    $('#order_select').on('change', function() {
-        let order_no = $(this).val();
-        let pi_no = $('#pi_select').val();
-        let $styleSelect = $('#style_select');
-        let $colorSelect = $('#color_select');
-        let selectedOrder = $(this).find('option:selected');
+// Style -> Order Selection
+$('#style_select').on('change', function() {
+    let style_no = $(this).val();
+    let buyer = $('#buyer_select').val();
+    let $orderSelect = $('#order_select');
+    let $colorSelect = $('#color_select');
 
-        if (selectedOrder.data('qty')) {
-            $('#order_qty_label').text('Qty: ' + selectedOrder.data('qty'));
-        } else {
-            $('#order_qty_label').text('');
-        }
+    if (style_no && buyer) {
+        $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
+        $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+        $('#color_qty_label').text('');
 
-        if (order_no && pi_no) {
-            $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-            $('#color_qty_label').text('');
-
-            $.get("{{ route('admin.cuttingAction', 'get-styles') }}", { pi_id: pi_no, order_no: order_no }, function(data) {
-                $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
-                data.forEach(function(item) {
-                    $styleSelect.append('<option value="' + item.style_no + '" data-qty="' + item.total_style_qty + '">' + item.style_no + '</option>');
-                });
+        $.get("{{ route('admin.cuttingAction', 'get-orders-by-style') }}", { buyer: buyer, style_no: style_no }, function(data) {
+            $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
+            data.forEach(function(item) {
+                $orderSelect.append('<option value="' + item.order_no + '" data-qty="' + item.total_qty + '">' + item.order_no + ' (' + item.total_qty + ')</option>');
             });
-        } else {
-            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-            $('#style_qty_label').text('');
-        }
-    });
+        });
+    } else {
+        $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+        $('#order_qty_label').text('');
+    }
+});
 
-    // Style -> Color Selection
-    $('#style_select').on('change', function() {
-        let style_no = $(this).val();
-        let pi_no = $('#pi_select').val();
-        let order_no = $('#order_select').val();
-        let $colorSelect = $('#color_select');
-        let selected = $(this).find('option:selected');
+// Order -> Color Selection
+$('#order_select').on('change', function() {
+    let order_no = $(this).val();
+    let style_no = $('#style_select').val();
+    let buyer = $('#buyer_select').val();
+    let $colorSelect = $('#color_select');
+    let selectedOrder = $(this).find('option:selected');
 
-        if (selected.data('qty')) {
-            $('#style_qty_label').text('Qty: ' + selected.data('qty'));
-        } else {
-            $('#style_qty_label').text('');
-        }
+    if (selectedOrder.data('qty')) {
+        $('#order_qty_label').text('Qty: ' + selectedOrder.data('qty'));
+    } else {
+        $('#order_qty_label').text('');
+    }
 
-        if (style_no && pi_no && order_no) {
-            $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
+    if (order_no && style_no) {
+        $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
 
-            $.get("{{ route('admin.cuttingAction', 'get-colors') }}",
-                { pi_id: pi_no, order_no: order_no, style_no: style_no },
-                function(data) {
-                    $colorSelect.empty()
-                        .append('<option value="">-- Select Color --</option>')
-                        .prop('disabled', false);
+        $.get("{{ route('admin.cuttingAction', 'get-colors-by-order') }}",
+            { order_no: order_no, style_no: style_no },
+            function(data) {
+                $colorSelect.empty()
+                    .append('<option value="">-- Select Color --</option>')
+                    .prop('disabled', false);
 
-                    data.forEach(function(item) {
-                        $colorSelect.append(
-                            '<option value="' + item.color_name +
-                            '" data-qty="' + item.total_color_qty + '">' +
-                            item.color_name + ' (' + item.total_color_qty + ')</option>'
-                        );
-                    });
-                }
-            );
-        } else {
-            $colorSelect.empty()
-                .append('<option value="">-- Select Style First --</option>')
-                .prop('disabled', true);
-            $('#color_qty_label').text('');
-        }
-    });
+                data.forEach(function(item) {
+                    $colorSelect.append(
+                        '<option value="' + item.color_name +
+                        '" data-qty="' + item.total_qty + '">' +
+                        item.color_name + ' (' + item.total_qty + ')</option>'
+                    );
+                });
+            }
+        );
+    } else {
+        $colorSelect.empty()
+            .append('<option value="">-- Select Order First --</option>')
+            .prop('disabled', true);
+        $('#color_qty_label').text('');
+    }
+});
 
-    // Color selection - show color qty
-    $('#color_select').on('change', function() {
-        let selected = $(this).find('option:selected');
-        let qty = selected.data('qty');
-        $('#color_qty_label').text(qty ? 'Qty: ' + qty : '');
-    });
+// Color selection - show color qty
+$('#color_select').on('change', function() {
+    let selected = $(this).find('option:selected');
+    let qty = selected.data('qty');
+    $('#color_qty_label').text(qty ? 'Qty: ' + qty : '');
+});
 </script>
 
 @endpush

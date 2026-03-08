@@ -527,7 +527,7 @@ return [
                     'permission'  => 'creditor'
                 ],
                 [
-                    'title'       => 'Creditor Payment',
+                    'title'       => 'All Creditor Transactions',
                     'icon'        => 'fas fa-credit-card',
                     'route'       => '/admin/bill-payments',
                     'icon_color'  => 'text-warning',
@@ -567,13 +567,13 @@ return [
                     'icon_color'  => 'text-success',
                     'permission'  => 'employee'
                 ],
-                [
-                    'title'       => 'Staff List',
-                    'icon'        => 'fa-solid fa-user-tie',
-                    'route'       => '/admin/users/staff',
-                    'icon_color'  => 'text-success',
-                    'permission'  => 'staff'
-                ],
+                // [
+                //     'title'       => 'Staff List',
+                //     'icon'        => 'fa-solid fa-user-tie',
+                //     'route'       => '/admin/users/staff',
+                //     'icon_color'  => 'text-success',
+                //     'permission'  => 'staff'
+                // ],
                 [
                     'title'       => 'Admin List',
                     'icon'        => 'fa-solid fa-user-shield',

@@ -27,12 +27,12 @@
 .efficiency-medium { color: #FF9800; }
 .efficiency-low { color: #F44336; }
 .input-cell { padding: 2px !important; }
-.input-cell[contenteditable] { 
-    background-color: #fff3cd; 
+.input-cell[contenteditable] {
+    background-color: #fff3cd;
     cursor: text;
 }
-.input-cell[contenteditable]:focus { 
-    background-color: #343a40; 
+.input-cell[contenteditable]:focus {
+    background-color: #343a40;
     color: #fff;
     outline: none;
 }
@@ -52,9 +52,14 @@
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3>Daily Production</h3>
-            <a href="{{ route('admin.dailyProduction') }}" class="btn-custom yellow">
-                <i class="bx bx-rotate-left"></i>
-            </a>
+            <div>
+                <a href="{{ route('admin.dailyProductionPrint', ['startDate' => $startDate->format('Y-m-d')]) }}" target="_blank" class="btn-custom yellow">
+                    <i class="bx bx-printer"></i> Print
+                </a>
+                <a href="{{ route('admin.dailyProduction') }}" class="btn-custom yellow">
+                    <i class="bx bx-rotate-left"></i>
+                </a>
+            </div>
         </div>
 
         <div class="card-body">
@@ -90,6 +95,7 @@
             </div>
 
             @php
+                $serial = 1;
                 $maxWorkingTime = $swings->count()
                     ? $swings->flatten()->pluck('working_hours')->max()
                     : 9;
@@ -115,14 +121,18 @@
                 <table class="table table-bordered table-striped mb-0">
                     <thead class="deliRport">
                         <tr>
+                            <th rowspan="2">SL</th>
                             <th rowspan="2">Line</th>
                             <th rowspan="2">Buyer</th>
                             <th rowspan="2">Order</th>
+                            <th rowspan="2">Order Qty</th>
                             <th rowspan="2">Style</th>
                             <th rowspan="2">Color</th>
+                            <th rowspan="2">Color Qty</th>
+                            <th rowspan="2">Alloc Qty</th>
                             <th rowspan="2">Target</th>
-                            <th rowspan="2">Hours</th>
-                            <th rowspan="2" class="input-cell">SMB</th>
+                            <th rowspan="2">Hour</th>
+                            <th rowspan="2" class="input-cell">SMV</th>
                             <th rowspan="2" class="input-cell">Operator</th>
                             <th rowspan="2" class="input-cell">Helper</th>
                             <th rowspan="2">Manpower</th>
@@ -151,63 +161,71 @@
                     </thead>
 
                     <tbody>
-                    {{-- ================= ALL FLOOR LINES LOOP ================= --}}
-                    @foreach($floorLines as $line)
-                        @php
-                            $lineKey    = $line['floor'].' - '.$line['line'];
-                            $lineSwings = $swings[$lineKey] ?? collect();
-                        @endphp
+                    @php
+                                $serial = 1;
+                            @endphp
 
-                        {{-- ================= RUNNING PRODUCTION ================= --}}
-                        @if($lineSwings->count())
-                            @foreach($lineSwings as $swing)
+                            {{-- ================= ALL FLOOR LINES LOOP ================= --}}
+                            @foreach($floorLines as $line)
                                 @php
-                                    $style_no = $swing?->planning?->style_no;
-                                    $unique_styles[] = $style_no;
-                                    $unique_orders[] = $swing?->planning?->style?->order_no;
-
-                                    $today_total = 0;
-                                    for($h=$startHour; $h<$startHour + $swing->working_hours; $h++){
-                                        if(!$swing->isBreakHour($h)){
-                                            $today_total += $swing->getProductionHour($h, $today_date);
-                                        }
-                                    }
-
-                                    $previous_total = $swing->outputs()
-                                        ->where('date','<',$today_date)
-                                        ->sum('production');
-
-                                    $grand_total = $today_total + $previous_total;
-
-                                    $sum_target   += $swing->capacity_hour;
-                                    $sum_today    += $today_total;
-                                    $sum_previous += $previous_total;
-                                    $sum_grand    += $grand_total;
-                                    $style_qty = $swing?->planning?->style_qty;
-                                    
-                                    // SMB, Operator, Helper
-                                    $smb = $swing->smb ?? 0;
-                                    $operators = $swing->operators ?? 0;
-                                    $helpers = $swing->helpers ?? 0;
-                                    $manpower = $operators + $helpers;
-                                    $workingHours = $swing->working_hours ?? 8;
-                                    
-                                    // Calculations
-                                    $totalWorkingMinutes = $manpower * $workingHours * 60;
-                                    $totalProductionMinutes = $today_total * $smb;
-                                    $efficiency = $totalWorkingMinutes > 0 
-                                        ? round(($totalProductionMinutes / $totalWorkingMinutes) * 100, 1) 
-                                        : 0;
+                                    $lineKey    = $line['floor'].' - '.$line['line'];
+                                    $lineSwings = $swings[$lineKey] ?? collect();
                                 @endphp
-                                <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}" data-swing-id="{{ $swing->id }}">
-                                    <td>{{ $lineKey }}</td>
-                                    <td>{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
-                                    <td>{{ $swing?->planning?->order_no ?? '--' }}</td>
-                                    <td>{{ $style_no }}</td>
-                                    <td>{{ $swing?->planning?->color_name ?? '--' }}</td>
-                                    <td class="target">{{ $swing->capacity_hour }}</td>
-                                    <td>{{ $workingHours }}</td>
-                                    
+
+                                {{-- ================= RUNNING PRODUCTION ================= --}}
+                                @if($lineSwings->count())
+                                    @foreach($lineSwings as $swing)
+                                        @php
+                                            $style_no = $swing?->planning?->style_no;
+                                            $unique_styles[] = $style_no;
+                                            $unique_orders[] = $swing?->planning?->style?->order_no;
+
+                                            $today_total = 0;
+                                            for($h=$startHour; $h<$startHour + $swing->working_hours; $h++){
+                                                if(!$swing->isBreakHour($h)){
+                                                    $today_total += $swing->getProductionHour($h, $today_date);
+                                                }
+                                            }
+
+                                            $previous_total = $swing->outputs()
+                                                ->where('date','<',$today_date)
+                                                ->sum('production');
+
+                                            $grand_total = $today_total + $previous_total;
+
+                                            $sum_target   += $swing->capacity_hour;
+                                            $sum_today    += $today_total;
+                                            $sum_previous += $previous_total;
+                                            $sum_grand    += $grand_total;
+                                            $style_qty = $swing?->planning?->style_qty;
+
+                                            // SMB, Operator, Helper
+                                            $smb = $swing->smb ?? 0;
+                                            $operators = $swing->operators ?? 0;
+                                            $helpers = $swing->helpers ?? 0;
+                                            $manpower = $operators + $helpers;
+                                            $workingHours = $swing->working_hours ?? 8;
+
+                                            // Calculations
+                                            $totalWorkingMinutes = $manpower * $workingHours * 60;
+                                            $totalProductionMinutes = $today_total * $smb;
+                                            $efficiency = $totalWorkingMinutes > 0
+                                                ? round(($totalProductionMinutes / $totalWorkingMinutes) * 100, 1)
+                                                : 0;
+                                        @endphp
+                                        <tr data-style-qty="{{ $style_qty }}" data-style="{{ $style_no }}" data-swing-id="{{ $swing->id }}">
+                                            <td>{{ $serial++ }}</td>
+                                            <td>{{ $lineKey }}</td>
+                                            <td>{{ $swing?->planning?->style?->buyer_name ?? '--' }}</td>
+                                            <td>{{ $swing?->planning?->order_no ?? '--' }}</td>
+                                            <td>{{ number_format($style_qty) }}</td>
+                                            <td>{{ $style_no }}</td>
+                                            <td>{{ $swing?->planning?->color_name ?? '--' }}</td>
+                                            <td>{{ number_format($swing?->planning?->color_qty ?? 0) }}</td>
+                                            <td>{{ number_format($swing->allocation_qty ?? 0) }}</td>
+                                            <td class="target">{{ $swing->capacity_hour }}</td>
+                                            <td>{{ $workingHours }}</td>
+
                                     <!-- SMB Input -->
                                     <td class="input-cell" contenteditable="true"
                                         data-field="smb"
@@ -215,7 +233,7 @@
                                         data-original="{{ $smb }}">
                                         {{ $smb }}
                                     </td>
-                                    
+
                                     <!-- Operator Input -->
                                     <td class="input-cell" contenteditable="true"
                                         data-field="operators"
@@ -223,7 +241,7 @@
                                         data-original="{{ $operators }}">
                                         {{ $operators }}
                                     </td>
-                                    
+
                                     <!-- Helper Input -->
                                     <td class="input-cell" contenteditable="true"
                                         data-field="helpers"
@@ -231,7 +249,7 @@
                                         data-original="{{ $helpers }}">
                                         {{ $helpers }}
                                     </td>
-                                    
+
                                     <!-- Total Manpower -->
                                     <td class="manpower-cell font-weight-bold">{{ $manpower }}</td>
 
@@ -267,18 +285,18 @@
                                     <td class="previous">{{ $previous_total }}</td>
                                     <td class="grand">{{ $grand_total }}</td>
                                     <td class="balance" style="color:#ff0000b5">{{ $style_qty - $grand_total }}</td>
-                                    
+
                                     <!-- Working Minutes -->
                                     <td class="working-min">{{ number_format($totalWorkingMinutes) }}</td>
-                                    
+
                                     <!-- Production Minutes -->
                                     <td class="prod-min">{{ number_format($totalProductionMinutes) }}</td>
-                                    
+
                                     <!-- Efficiency -->
                                     <td class="efficiency-cell {{ $efficiency >= 100 ? 'efficiency-high' : ($efficiency >= 80 ? 'efficiency-medium' : 'efficiency-low') }}">
                                         {{ $efficiency }}%
                                     </td>
-                                    
+
                                     <td>
                                         <a href="{{ route('admin.dailyProductionAction',['status-update','s_id'=>$swing->id, 'startDate'=>$today_date]) }}"
                                         class="btn-custom success"
@@ -292,8 +310,9 @@
                         {{-- ================= IDLE LINE ================= --}}
                         @else
                             <tr style="background:#f8f9fa" >
+                                <td>-</td>
                                 <td>{{ $lineKey }}</td>
-                                <td colspan="{{ 4 + $maxWorkingTime + 12 }}"
+                                <td colspan="{{ 9 + $maxWorkingTime + 12 }}"
                                     class="text-center text-muted">
                                     No Production Running
                                 </td>
@@ -313,7 +332,7 @@
                                 }
                             }
                         }
-                        
+
                         // Calculate summary efficiency
                         $sum_working_min = 0;
                         $sum_prod_min = 0;
@@ -329,7 +348,7 @@
                             $helpers = $swing->helpers ?? 0;
                             $manpower = $operators + $helpers;
                             $workingHours = $swing->working_hours ?? 8;
-                            
+
                             $sum_working_min += $manpower * $workingHours * 60;
                             $sum_prod_min += $today_total * $smb;
                         }
@@ -337,13 +356,13 @@
                     @endphp
 
                     <tr class="summary-hourly" style="font-weight:bold;background:#eef3ff">
+                        <td>SL</td>
                         <td>Lines: {{ $swings->count() }}</td>
                         <td>Styles: {{ count(array_unique($unique_styles)) }}</td>
                         <td>Orders: {{ count(array_unique($unique_orders)) }}</td>
-                        <td colspan="2"></td>
-                        <td>{{ $sum_target }}</td>
                         <td colspan="4"></td>
-                        <td></td>
+                        <td>{{ $sum_target }}</td>
+                        <td colspan="6"></td>
 
                         @for($h=$startHour; $h<$endHour; $h++)
                             <td class="hourly-sum" data-hour="{{ $h }}">{{ $hourly_sums[$h] }}</td>
@@ -421,20 +440,20 @@ $(document).ready(function(){
 
             row.find('.today').text(today);
             row.find('.grand').text(grand);
-            
+
             // Update efficiency calculations
             let smb = parseFloat(row.find('.input-cell[data-field="smb"]').text().trim()) || 0;
             let operators = parseInt(row.find('.input-cell[data-field="operators"]').text().trim()) || 0;
             let helpers = parseInt(row.find('.input-cell[data-field="helpers"]').text().trim()) || 0;
             let manpower = operators + helpers;
-            
+
             // Get working hours from the row
             let workingHours = parseInt(row.find('td:nth-child(7)').text()) || 8;
-            
+
             let workingMin = manpower * workingHours * 60;
             let prodMin = today * smb;
             let efficiency = workingMin > 0 ? Math.round((prodMin / workingMin) * 100 * 10) / 10 : 0;
-            
+
             row.find('.working-min').text(workingMin.toLocaleString());
             row.find('.prod-min').text(prodMin.toLocaleString());
             let effCell = row.find('.efficiency-cell');
@@ -456,29 +475,29 @@ $(document).ready(function(){
 
         // Update summary
         let sum_today = 0, sum_prev = 0, sum_grand = 0, sum_balance = 0, sum_working_min = 0, sum_prod_min = 0;
-        
+
         $('tbody tr').each(function(){
             let row = $(this);
             if(!row.find('.today').length) return;
-            
+
             sum_today += parseInt(row.find('.today').text()) || 0;
             sum_prev += parseInt(row.find('.previous').text()) || 0;
             sum_grand += parseInt(row.find('.grand').text()) || 0;
             sum_working_min += parseInt(row.find('.working-min').text().replace(/,/g, '')) || 0;
             sum_prod_min += parseInt(row.find('.prod-min').text().replace(/,/g, '')) || 0;
         });
-        
+
         for(let s in styleBalances){
             sum_balance += styleBalances[s].style_qty - styleBalances[s].grand;
         }
-        
+
         let sum_efficiency = sum_working_min > 0 ? Math.round((sum_prod_min / sum_working_min) * 100 * 10) / 10 : 0;
 
         $('#sum-today').text(sum_today);
         $('#sum-prev').text(sum_prev);
         $('#sum-grand').text(sum_grand);
         $('#sum-balance').text(sum_balance);
-        
+
         // Update summary efficiency
         let summaryRow = $('tr.summary-hourly');
         summaryRow.find('td:nth-child(14)').text(sum_working_min.toLocaleString());
@@ -524,9 +543,9 @@ $(document).ready(function(){
         let field = cell.data('field');
         let swingId = cell.data('swing-id');
         let value = cell.text().trim();
-        
+
         cell.text(value);
-        
+
         $.post('{{ route("admin.dailyProductionAction", ["action"=>"update-manpower"]) }}', {
             _token: '{{ csrf_token() }}',
             swing_id: swingId,

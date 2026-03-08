@@ -83,7 +83,7 @@
                                 <td>{{ $budget->created_by ? $budget->creator?->name ?? $budget->created_by : '--' }}</td>
                                 <td>
                                     @can('budget.view')
-                                        <a href="{{ route('admin.budgetAction', ['view', $budget->id]) }}" class="btn btn-sm btn-warning"><i class="fa fa-eye"></i></a>
+                                        <a href="{{ route('admin.budgetAction', ['view', $budget->id]) }}" class="btn btn-sm btn-warning" target="_blank"><i class="fa fa-eye"></i></a>
                                     @endcan
                                     @can('budget.edit')
                                         <a href="{{ route('admin.budgetAction', ['edit', $budget->id]) }}" class="btn btn-sm btn-success"><i class="bx bx-edit"></i></a>

@@ -55,28 +55,37 @@
                         <tr>
                             <th style="width: 50px;">SL</th>
                             <th style="min-width: 120px;">Finishing Date</th>
-                            <th style="min-width: 150px;">PI Number</th>
-                            <th style="min-width: 150px;">Order Number</th>
+                            <th style="min-width: 150px;">Buyer</th>
                             <th style="min-width: 150px;">Style Number</th>
+                            <th style="min-width: 150px;">Order Number</th>
                             <th style="min-width: 120px;">Color</th>
-                            <th style="min-width: 120px;">Finishing Qty</th>
+                            <th style="min-width: 100px;">Color Qty</th>
+                            <th style="min-width: 100px;">Finishing Qty</th>
+                            <th style="min-width: 100px;">Total Finishing</th>
+                            <th style="min-width: 100px;">Balance</th>
                             <th style="min-width: 150px;">Added By</th>
-                            <th style="min-width: 150px;">Remarks</th>
                             <th style="min-width: 100px; width: 100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($finishings as $i => $fin)
+                        @php
+                            $colorQty = \App\Models\OrderDetailItem::where('order_no', $fin->order_no)->where('style_no', $fin->style_no)->where('color_name', $fin->color_name)->sum('qty');
+                            $totalFinishing = \App\Models\Finishing::where('order_no', $fin->order_no)->where('style_no', $fin->style_no)->where('color_name', $fin->color_name)->sum('finishing_qty');
+                            $balance = $colorQty - $totalFinishing;
+                        @endphp
                         <tr>
                             <td>{{ $finishings->firstItem() + $i }}</td>
                             <td>{{ $fin->finishing_date ? $fin->finishing_date->format('d.m.Y') : '--' }}</td>
-                            <td class="">{{ $fin->pi_no }}</td>
+                            <td class="">{{ $fin->order_no ? App\Models\OrderDetail::where('order_no', $fin->order_no)->first()?->buyer_name : '--' }}</td>
+                            <td>{{ $fin->style_no }}</td>
                             <td>{{ $fin->order_no }}</td>
-                            <td> {{ $fin->style_no }} </td>
                             <td>{{ $fin->color_name }}</td>
-                            <td class="text-success font-weight-bold">{{ number_format($fin->finishing_qty) }} Pcs</td>
+                            <td>{{ number_format($colorQty) }}</td>
+                            <td class="text-success font-weight-bold">{{ number_format($fin->finishing_qty) }}</td>
+                            <td class="text-primary font-weight-bold">{{ number_format($totalFinishing) }}</td>
+                            <td class="text-danger font-weight-bold">{{ number_format($balance) }}</td>
                             <td>{{ $fin->createdBy?->name }}</td>
-                            <td><smalls>{{ $fin->remarks }}</smalls></td>
                             <td style="text-align: center;">
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#EditFinishing_{{$fin->id}}" class="btn-custom success">
                                     <i class="bx bx-edit"></i>
@@ -90,7 +99,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">No Finishing Data Found</td>
+                            <td colspan="12" class="text-center">No Finishing Data Found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -98,8 +107,9 @@
                     <tfoot class="bg-light">
                         <tr>
                             <th colspan="6" class="text-right">Total:</th>
-                            <th class="text-success">{{ number_format($finishings->sum('finishing_qty')) }} Pcs</th>
-                            <th colspan="3"></th>
+                            <th></th>
+                            <th class="text-success">{{ number_format($finishings->sum('finishing_qty')) }}</th>
+                            <th colspan="4"></th>
                         </tr>
                     </tfoot>
                     @endif
@@ -127,34 +137,38 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Buyer Selection (New Cascade) -->
                         <div class="col-md-12 form-group">
-                            <label>Select PI*</label>
-                            <select name="pi_no" id="finishing_pi_select" class="form-control" required>
-                                <option value="">-- Choose PI --</option>
-                                @foreach($pis as $pi)
-                                    <option value="{{ $pi->id }}">{{ $pi->pi_no }}</option>
+                            <label>Select Buyer*</label>
+                            <select name="buyer_name" id="finishing_buyer_select" class="form-control" required>
+                                <option value="">-- Choose Buyer --</option>
+                                @foreach($buyers as $buyer)
+                                    <option value="{{ $buyer }}">{{ $buyer }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-12 form-group">
-                            <label>Select Order (PO)* <span id="finishing_order_qty_label" class="badge badge-primary"></span></label>
-                            <select name="order_no" id="finishing_order_select" class="form-control" required disabled>
-                                <option value="">-- First Select PI --</option>
-                            </select>
-                        </div>
-
+                        <!-- Style Selection (AJAX loaded based on buyer) -->
                         <div class="col-md-12 form-group">
                             <label>Select Style* <span id="finishing_style_qty_label" class="badge badge-warning"></span></label>
                             <select name="style_no" id="finishing_style_select" class="form-control" required disabled>
-                                <option value="">-- Select Order First --</option>
+                                <option value="">-- Select Buyer First --</option>
                             </select>
                         </div>
 
+                        <!-- Order Selection (AJAX loaded based on style) -->
+                        <div class="col-md-12 form-group">
+                            <label>Select Order (PO)* <span id="finishing_order_qty_label" class="badge badge-primary"></span></label>
+                            <select name="order_no" id="finishing_order_select" class="form-control" required disabled>
+                                <option value="">-- Select Style First --</option>
+                            </select>
+                        </div>
+
+                        <!-- Color Selection (AJAX loaded) -->
                         <div class="col-md-12 form-group">
                             <label>Select Color* <span id="finishing_color_qty_label" class="badge badge-info"></span></label>
                             <select name="color_name" id="finishing_color_select" class="form-control" required disabled>
-                                <option value="">-- Select Style First --</option>
+                                <option value="">-- Select Order First --</option>
                             </select>
                         </div>
 
@@ -198,24 +212,33 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Hidden fields for update -->
+                        <input type="hidden" name="order_no" value="{{ $fin->order_no }}">
+                        <input type="hidden" name="color_name" value="{{ $fin->color_name }}">
+                        <input type="hidden" name="style_no" value="{{ $fin->style_no }}">
+                        
+                        <!-- Buyer (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>PI Number*</label>
-                            <input type="text" value="{{ $fin->pi_no }}" class="form-control" readonly>
+                            <label>Buyer</label>
+                            <input type="text" value="{{ App\Models\OrderDetail::where('order_no', $fin->order_no)->where('style_no', $fin->style_no)->first()?->buyer_name }}" class="form-control" readonly>
                         </div>
 
+                        <!-- Style (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Order Number*</label>
-                            <input type="text" value="{{ $fin->order_no }}" class="form-control" readonly>
-                        </div>
-
-                        <div class="col-md-12 form-group">
-                            <label>Style Number*</label>
+                            <label>Style</label>
                             <input type="text" value="{{ $fin->style_no }}" class="form-control" readonly>
                         </div>
 
+                        <!-- Order (Read Only) -->
                         <div class="col-md-12 form-group">
-                            <label>Color Name*</label>
-                            <input type="text" name="color_name" value="{{ $fin->color_name }}" class="form-control" readonly>
+                            <label>Order</label>
+                            <input type="text" value="{{ $fin->order_no }}" class="form-control" readonly>
+                        </div>
+
+                        <!-- Color Name (Read Only) -->
+                        <div class="col-md-12 form-group">
+                            <label>Color</label>
+                            <input type="text" value="{{ $fin->color_name }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-6 form-group">
@@ -225,7 +248,7 @@
 
                         <div class="col-md-6 form-group">
                             <label>Finishing Date</label>
-                            <input type="date" name="finishing_date" class="form-control" value="{{ $fin->finishing_date->format('Y-m-d') ?? date('Y-m-d') }}">
+                            <input type="date" name="finishing_date" class="form-control" value="{{ $fin->finishing_date ? $fin->finishing_date->format('Y-m-d') : date('Y-m-d') }}">
                         </div>
 
                         <div class="col-md-12 form-group">
@@ -248,38 +271,64 @@
 @push('js')
 <script>
 $(document).ready(function() {
-    // Finishing PI -> Order
-    $('#finishing_pi_select').on('change', function() {
-        let pi_no = $(this).val();
-        let $orderSelect = $('#finishing_order_select');
+    // New Cascade: Buyer -> Style -> Order -> Color
+    
+    // Finishing Buyer -> Style
+    $('#finishing_buyer_select').on('change', function() {
+        let buyer = $(this).val();
         let $styleSelect = $('#finishing_style_select');
+        let $orderSelect = $('#finishing_order_select');
         let $colorSelect = $('#finishing_color_select');
 
-        if (pi_no) {
-            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
-            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+        if (buyer) {
+            $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
+            $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
             $('#finishing_order_qty_label').text('');
             $('#finishing_style_qty_label').text('');
             $('#finishing_color_qty_label').text('');
 
-            $.get("{{ route('admin.finishingAction', 'get-orders') }}", { pi_id: pi_no }, function(data) {
-                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
+            $.get("{{ route('admin.finishingAction', 'get-styles-by-buyer') }}", { buyer: buyer }, function(data) {
+                $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
                 data.forEach(function(item) {
-                    $orderSelect.append(`<option value="${item.order_no}" data-qty="${item.total_order_qty}">${item.order_no} (${item.total_order_qty})</option>`);
+                    $styleSelect.append('<option value="' + item + '">' + item + '</option>');
                 });
             });
         } else {
-            $orderSelect.empty().append('<option value="">-- First Select PI --</option>').prop('disabled', true);
+            $styleSelect.empty().append('<option value="">-- Select Buyer First --</option>').prop('disabled', true);
+            $('#finishing_style_qty_label').text('');
+        }
+    });
+
+    // Finishing Style -> Order
+    $('#finishing_style_select').on('change', function() {
+        let style_no = $(this).val();
+        let buyer = $('#finishing_buyer_select').val();
+        let $orderSelect = $('#finishing_order_select');
+        let $colorSelect = $('#finishing_color_select');
+
+        if (style_no && buyer) {
+            $orderSelect.html('<option>Loading Orders...</option>').prop('disabled', true);
+            $colorSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
+            $('#finishing_color_qty_label').text('');
+
+            $.get("{{ route('admin.finishingAction', 'get-orders-by-style') }}", { buyer: buyer, style_no: style_no }, function(data) {
+                $orderSelect.empty().append('<option value="">-- Select Order --</option>').prop('disabled', false);
+                data.forEach(function(item) {
+                    $orderSelect.append('<option value="' + item.order_no + '" data-qty="' + item.total_qty + '">' + item.order_no + ' (' + item.total_qty + ')</option>');
+                });
+            });
+        } else {
+            $orderSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
             $('#finishing_order_qty_label').text('');
         }
     });
 
-    // Finishing Order -> Style
+    // Finishing Order -> Color
     $('#finishing_order_select').on('change', function() {
         let order_no = $(this).val();
-        let pi_no = $('#finishing_pi_select').val();
-        let $styleSelect = $('#finishing_style_select');
+        let style_no = $('#finishing_style_select').val();
+        let buyer = $('#finishing_buyer_select').val();
         let $colorSelect = $('#finishing_color_select');
         let selectedOrder = $(this).find('option:selected');
 
@@ -289,48 +338,29 @@ $(document).ready(function() {
             $('#finishing_order_qty_label').text('');
         }
 
-        if (order_no && pi_no) {
-            $styleSelect.html('<option>Loading Styles...</option>').prop('disabled', true);
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
-            $('#finishing_color_qty_label').text('');
-
-            $.get("{{ route('admin.finishingAction', 'get-styles') }}", { pi_id: pi_no, order_no: order_no }, function(data) {
-                $styleSelect.empty().append('<option value="">-- Select Style --</option>').prop('disabled', false);
-                data.forEach(function(item) {
-                    $styleSelect.append(`<option value="${item.style_no}" data-qty="${item.total_style_qty}">${item.style_no}</option>`);
-                });
-            });
-        } else {
-            $styleSelect.empty().append('<option value="">-- Select Order First --</option>').prop('disabled', true);
-            $('#finishing_style_qty_label').text('');
-        }
-    });
-
-    // Finishing Style -> Color
-    $('#finishing_style_select').on('change', function() {
-        let style_no = $(this).val();
-        let pi_no = $('#finishing_pi_select').val();
-        let order_no = $('#finishing_order_select').val();
-        let $colorSelect = $('#finishing_color_select');
-        let selected = $(this).find('option:selected');
-
-        if (selected.data('qty')) {
-            $('#finishing_style_qty_label').text('Qty: ' + selected.data('qty'));
-        } else {
-            $('#finishing_style_qty_label').text('');
-        }
-
-        if (style_no && pi_no && order_no) {
+        if (order_no && style_no) {
             $colorSelect.html('<option>Loading Colors...</option>').prop('disabled', true);
 
-            $.get("{{ route('admin.finishingAction', 'get-colors') }}", { pi_id: pi_no, order_no: order_no, style_no: style_no }, function(data) {
-                $colorSelect.empty().append('<option value="">-- Select Color --</option>').prop('disabled', false);
-                data.forEach(function(item) {
-                    $colorSelect.append(`<option value="${item.color_name}" data-qty="${item.total_color_qty}">${item.color_name} (${item.total_color_qty})</option>`);
-                });
-            });
+            $.get("{{ route('admin.finishingAction', 'get-colors-by-order') }}",
+                { order_no: order_no, style_no: style_no },
+                function(data) {
+                    $colorSelect.empty()
+                        .append('<option value="">-- Select Color --</option>')
+                        .prop('disabled', false);
+
+                    data.forEach(function(item) {
+                        $colorSelect.append(
+                            '<option value="' + item.color_name +
+                            '" data-qty="' + item.total_qty + '">' +
+                            item.color_name + ' (' + item.total_qty + ')</option>'
+                        );
+                    });
+                }
+            );
         } else {
-            $colorSelect.empty().append('<option value="">-- Select Style First --</option>').prop('disabled', true);
+            $colorSelect.empty()
+                .append('<option value="">-- Select Order First --</option>')
+                .prop('disabled', true);
             $('#finishing_color_qty_label').text('');
         }
     });

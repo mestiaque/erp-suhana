@@ -1,32 +1,8 @@
-@extends('admin.layouts.print-master')
-@section('title', websiteTitle('Print Transaction - ' . $user->name))
+@extends('printMaster')
+@section('title', ('Creditor Statement - ' . $user->name))
 
-@section('back_route', route('admin.suppliersAction', ['bill-entry', $user->id]))
-
-@section('content')
-<div style="text-align: center; margin-bottom: 20px;">
-    <!-- Company Logo -->
-    @if(general()->logo)
-    <img src="{{ asset(general()->logo()) }}" alt="Company Logo" style="max-width: 80px; max-height: 80px;">
-    @endif
-    
-    <!-- Company Name -->
-    <h4 style="margin: 5px 0; font-weight: bold;">{{ general()->title }}</h4>
-    
-    <!-- Company Address -->
-    <p style="margin: 0; font-size: 11px;">
-        {{ general()->address_one }}
-        {{ general()->address_two ? ', ' . general()->address_two : '' }}
-        {{ general()->city ? ', ' . general()->city : '' }}
-        {{ general()->country ? ', ' . general()->country : '' }}
-    </p>
-    <p style="margin: 0; font-size: 11px;">
-        {{ general()->mobile ? 'Mobile: ' . general()->mobile : '' }}
-        {{ general()->email ? ' | Email: ' . general()->email : '' }}
-    </p>
-</div>
-
-<div style="border-top: 2px solid #333; border-bottom: 1px solid #333; padding: 8px 0; margin-bottom: 15px;">
+@section('contents')
+<div style="">
     <table style="width: 100%;">
         <tr>
             <td style="width: 50%; vertical-align: top;">
@@ -98,17 +74,5 @@
             </td>
         </tr>
     </table>
-</div>
-
-<div style="margin-top: 30px; padding-top: 20px; display: flex; justify-content: space-between; font-size: 11px;">
-    <div style="text-align: center;">
-        <div style="border-top: 1px solid #333; width: 150px; padding-top: 5px;">Prepared By</div>
-    </div>
-    <div style="text-align: center;">
-        <div style="border-top: 1px solid #333; width: 150px; padding-top: 5px;">Checked By</div>
-    </div>
-    <div style="text-align: center;">
-        <div style="border-top: 1px solid #333; width: 150px; padding-top: 5px;">Approved By</div>
-    </div>
 </div>
 @endsection

@@ -798,10 +798,15 @@ class PurchasesController extends Controller
         }
 
         /* ================= FIND SUPPLIER ================= */
-        $user = User::filterByType('supplier')->whereIn('status', [0,1])->find($id);
-        if (!$user && $action != 'create') {
-            Session()->flash('error', 'Creditor not found.');
-            return redirect()->route('admin.suppliers');
+        // Skip user lookup for actions that work with bill/payment IDs, not user IDs
+        $skipUserLookup = ['bill-entry-edit', 'bill-entry-update', 'bill-entry-delete', 'bill-payment-edit', 'bill-payment-update', 'bill-payment-delete'];
+        
+        if (!in_array($action, $skipUserLookup)) {
+            $user = User::filterByType('supplier')->whereIn('status', [0,1])->find($id);
+            if (!$user && $action != 'create') {
+                Session()->flash('error', 'Creditor not found.');
+                return redirect()->route('admin.suppliers');
+            }
         }
 
         /* ================= VIEW SUPPLIER ================= */
@@ -858,6 +863,56 @@ class PurchasesController extends Controller
             return view('admin.suppliers.print', compact('user', 'ledgerEntries', 'totalPaid'));
         }
         /* ================= PRINT END ================= */
+
+
+        /* ================= PRINT BILL ENTRY (with printMaster) ================= */
+        if ($action == 'print-bill-entry') {
+            $user = User::findOrFail($id);
+
+            // Get all bills (no pagination for print)
+            $bills = $user->creditorBill()->get()->map(function($item) {
+                $item->type = 'bill';
+                $item->credit = $item->amount;
+                $item->debit = 0;
+                $item->date = $item->created_at;
+                $item->title = $item->title;
+                $item->note = $item->description;
+                return $item;
+            });
+
+            // Get all payments (no pagination for print)
+            $payments = Transaction::where('user_id', $user->id)->where('type', 3)->get()->map(function($item) {
+                $item->type = 'payment';
+                $item->credit = 0;
+                $item->debit = $item->amount;
+                $item->date = $item->created_at;
+                $item->title = $item->transection_id;
+                $item->note = $item->billing_note;
+                return $item;
+            });
+
+            // Merge and sort by date (ascending for balance calculation)
+            $merged = $bills->merge($payments)->sortBy('date')->values();
+
+            // Calculate running balance
+            $balance = 0;
+            $merged = $merged->map(function($entry) use (&$balance) {
+                $balance = $balance + $entry->credit - $entry->debit;
+                $entry->balance = $balance;
+                return $entry;
+            });
+
+            // Reverse for descending display
+            $merged = $merged->sortByDesc('date')->values();
+
+            $ledgerEntries = $merged;
+            $totalPurchases = $user->creditorBill()->sum('amount');
+            $totalPaid = Transaction::where('user_id', $user->id)->where('type', 3)->sum('amount');
+            $netDue = $totalPurchases - $totalPaid;
+
+            return view('admin.suppliers.print-bill-entry', compact('user', 'ledgerEntries', 'totalPurchases', 'totalPaid', 'netDue'));
+        }
+        /* ================= PRINT BILL ENTRY END ================= */
 
 
         /* ================= ADD BILL SUPPLIER ================= */
@@ -1037,7 +1092,7 @@ class PurchasesController extends Controller
             $user->balance = ($user->balance - $oldAmount) + $r->amount;
             $user->save();
 
-            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+            return redirect()->route('admin.suppliersAction', ['bill-entry', $bill->creditor_id])
                             ->with('success', 'Bill updated successfully!');
         }
 
@@ -1052,7 +1107,7 @@ class PurchasesController extends Controller
 
             $bill->delete();
 
-            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+            return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id])
                             ->with('success', 'Bill deleted successfully!');
         }
 
@@ -1213,7 +1268,7 @@ class PurchasesController extends Controller
                 uploadFile($r->attachment, $transaction->id, 9, 1);
             }
 
-            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+            return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id])
                             ->with('success','Payment updated successfully!');
         }
 
@@ -1238,7 +1293,7 @@ class PurchasesController extends Controller
 
             $transaction->delete();
 
-            return redirect()->route('admin.suppliersAction', ['view', $user->id])
+            return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id])
                             ->with('success','Payment deleted successfully!');
         }
 
