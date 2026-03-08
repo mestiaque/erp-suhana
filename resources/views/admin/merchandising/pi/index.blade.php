@@ -83,7 +83,8 @@
                     $actions[] = [
                         'label'=>'<i class="fa fa-file"></i> Invoice',
                         'href'=>route('admin.proformaInvoiceAction',['invoice',$pi->id]),
-                        'tag'=>'a'
+                        'tag'=>'a',
+                        'target'=>'_blank'
                     ];
                 }
                 if(can('proforma_invoice.edit')){

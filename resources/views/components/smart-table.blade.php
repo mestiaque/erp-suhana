@@ -217,6 +217,10 @@
                 // if(a.tag==='a'){ el.href=a.href || '#'; el.target='blank'; }
                 el.className='list-group-item list-group-item-action';
                 el.innerHTML=a.label;
+                //target blank for links
+                if(a.tag==='a' && a.target === '_blank'){
+                    el.setAttribute('target', '_blank');
+                }
                 actionList.appendChild(el);
             });
 
