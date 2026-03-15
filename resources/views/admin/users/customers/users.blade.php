@@ -34,7 +34,7 @@
                  <div class="accordionx-content">
                      <form action="{{route('admin.usersCustomer')}}">
                         <div class="row">
-                            <div class="col-md-5 mb-1">
+                            <div class="col-md-2 mb-1">
                                 <div class="input-group">
                                     <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
                                     <input type="date" value="{{request()->endDate?:''}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
@@ -48,9 +48,49 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-5 mb-1">
+                            <div class="col-md-2 mb-1">
+                                <select class="form-control" name="designation_id">
+                                    <option value="">Select Designation</option>
+                                    @if(isset($designations))
+                                    @foreach($designations as $designation)
+                                    <option value="{{$designation->id}}" {{request()->designation_id==$designation->id?'selected':''}} >{{$designation->name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-1">
+                                <select class="form-control" name="department_id">
+                                    <option value="">Select Department</option>
+                                    @if(isset($departments))
+                                    @foreach($departments as $department)
+                                    <option value="{{$department->id}}" {{request()->department_id==$department->id?'selected':''}} >{{$department->name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-1">
+                                <select class="form-control" name="shift_id">
+                                    <option value="">Select Shift</option>
+                                    @if(isset($shifts))
+                                    @foreach($shifts as $shift)
+                                    <option value="{{$shift->id}}" {{request()->shift_id==$shift->id?'selected':''}} >{{$shift->name_of_shift}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-1">
+                                <select class="form-control" name="employee_type">
+                                    <option value="">Select Employee Type</option>
+                                    @if(isset($emp_types))
+                                    @foreach($emp_types as $type)
+                                    <option value="{{$type->id}}" {{request()->employee_type==$type->id?'selected':''}} >{{$type->name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-1">
                                 <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
+                                    <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile, Employee ID" class="form-control {{$errors->has('search')?'error':''}}" />
                                     <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                                 </div>
                             </div>
@@ -118,8 +158,11 @@
                             <th style="min-width: 100px; width: 100px;">ID Number</th>
                             <th style="min-width: 150px;">Mobile / Email</th>
                             <th style="min-width: 100px;">Designation</th>
+                            <th style="min-width: 100px;">Department</th>
+                            <th style="min-width: 80px;">Shift</th>
                             <th style="min-width: 90px;">Join Date</th>
-                            <th style="min-width: 80px; width: 80px;">Action</th>
+                            <th style="min-width: 70px;">Status</th>
+                            <th style="min-width: 70px; width: 70px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,7 +213,28 @@
                                 <span style="color: #FF9800;">No Designation</span>
                                 @endif
                             </td>
+                            <td>
+                                @if($user->department)
+                                <span style="color: #009688;">{{$user->department->name}}</span>
+                                @else
+                                <span style="color: #FF9800;">--</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($user->shift)
+                                <span style="color: #2196F3;">{{$user->shift->name_of_shift}}</span>
+                                @else
+                                <span style="color: #FF9800;">--</span>
+                                @endif
+                            </td>
                             <td>{{$user->created_at->format('d.m.Y')}}</td>
+                            <td>
+                                @if($user->status == 1)
+                                <span class="badge badge-success">Active</span>
+                                @else
+                                <span class="badge badge-warning">Inactive</span>
+                                @endif
+                            </td>
                             <td style="padding: 8px 5px; text-align: center;">
                                 @if(can('employee.edit')  || can('employee.delete'))
                                     @can('employee.edit')

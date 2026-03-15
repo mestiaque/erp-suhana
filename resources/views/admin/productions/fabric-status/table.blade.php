@@ -65,7 +65,14 @@
         <tr>
             <td>1</td>
             {{-- BUYER --}}
-            <td>{{ $pi->dyeingBookings->first()->buyer_name ?? ($pi->buyer->buyer_name ?? $pi->buyer_name) }}</td>
+            <td>
+                @php
+                    $dyeingBooking = $pi->dyeingBookings->first();
+                    // Try: dyeingBooking->buyer_name, then $pi->buyer->name, then $pi->buyer_name
+                    $buyerName = $dyeingBooking->buyer_name ?? ($pi->buyer?->name ?? ($pi->buyer_name ?? '--'));
+                @endphp
+                {{ $buyerName }}
+            </td>
 
             {{-- PI NO --}}
             <td>{{ $pi->pi_no }}</td>

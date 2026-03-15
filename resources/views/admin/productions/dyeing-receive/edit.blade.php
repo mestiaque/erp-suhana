@@ -32,13 +32,13 @@
             <form method="POST"
                 action="{{ route(
                     'admin.dyeingReceiveAction',
-                    [$action == 'store' ? 'store' : 'update', $receive->receive_no ?? null]
+                    [$action == 'store' ? 'store' : 'update', $receive?->receive_no ?? 0]
                 ) }}">
                 @csrf
 
                 {{-- hidden fields --}}
-                <input type="hidden" name="pi_id" id="pi_id_hidden" value="{{ $receive->pi_id ?? '' }}">
-                <input type="hidden" name="booking_no" id="booking_no_hidden" value="{{ $receive->booking_no ?? '' }}">
+                <input type="hidden" name="pi_id" id="pi_id_hidden" value="{{ $receive?->pi_id ?? '' }}">
+                <input type="hidden" name="booking_no" id="booking_no_hidden" value="{{ $receive?->booking_no ?? '' }}">
 
                 <div class="row">
 
@@ -59,7 +59,7 @@
                         @else
                             <input type="text"
                                    class="form-control"
-                                   value="{{ $receive->pi->pi_no ?? '' }}"
+                                   value="{{ $receive?->pi?->pi_no ?? '' }}"
                                    readonly>
                         @endif
                     </div>
@@ -89,7 +89,7 @@
                         <input type="text"
                                name="challan_no"
                                class="form-control"
-                               value="{{ $receive->challan_no ?? '' }}">
+                               value="{{ $receive?->challan_no ?? '' }}">
                     </div>
 
                     {{-- Receive Date --}}
@@ -98,7 +98,7 @@
                         <input type="date"
                                name="receive_date"
                                class="form-control"
-                               value="{{ $receive->receive_date ?? date('Y-m-d') }}"
+                               value="{{ $receive?->receive_date ?? date('Y-m-d') }}"
                                required>
                     </div>
                 </div>

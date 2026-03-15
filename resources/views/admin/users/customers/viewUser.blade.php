@@ -1,265 +1,624 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('User Profile View')}}</title>
+<title>{{websiteTitle('My Profile')}}</title>
 @endsection
-
 @push('css')
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<style>
-    .profileTable tr th{
-        padding:5px 8px;
+<style type="text/css">
+    .ProfileImage {
+        width: 150px;
+        height: 150px;
+                min-width: 140px;
+        min-height: 140px;
+        border-radius: 50%;
+        /* object-fit: fill; */
+        border: 4px solid rgba(255,255,255,0.5);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    .profileTable tr td{
-        padding:5px 8px;
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 10px 40px;
+        border-radius: 15px;
+        color: white;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
     }
-    .info ul {
-        list-style: none;
-        padding: 0;
-        margin-top: 15px;
+    .profile-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .info ul li{
-        margin:10px 0;
-    }
-    .info ul li span b {
+    .profile-header p {
         font-size: 14px;
+        opacity: 0.95;
     }
-
-    .info ul li i {
-        font-size: 20px;
+    .profile-header .badge {
+        font-size: 12px;
+        padding: 5px 12px;
     }
-
-    .info ul li span {
-        line-height: 18px;
+    .profile-header .btn-light {
+        color: #667eea;
+        font-weight: 600;
+        border-radius: 25px;
+        padding: 10px 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
     }
-    .fileTable tr td {
-        padding: 5px;
-    }
-
-    .fileTable tr th {
-        padding: 5px;
-    }
-    .nav-tabs .nav-link {
-        font-size: 15px;
-        font-weight: bold;
+    .profile-header .btn-light:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        color: #764ba2;
     }
     .nav-tabs .nav-link.active {
-        color: #495057;
-        background-color: #e9ecef;
-        border-color: #dee2e6 #dee2e6 #fff;
+        background-color: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    .nav-tabs .nav-link {
+        color: #333;
+        font-weight: 500;
+        border-radius: 8px 8px 0 0;
+        margin-right: 3px;
+    }
+    .nav-tabs .nav-link:hover {
+        border-color: #667eea;
+        color: #667eea;
     }
 
-
-
-    .status a {
-        background: #f2f2f2;
-        padding: 3px 15px;
-        display: inline-block;
-        margin-bottom: 5px;
-        border-radius: 5px;
-        color: #4c4a4a;
-        font-weight: bold;
+    .nav-tabs .nav-link.active:hover {
+        background-color: #ffffff;
+        color: #667eea !important;
     }
-    .summery .info {
-        width: 200px;
-        display: inline-block;
-        border: 1px solid #dfdbdb;
-        margin: 5px;
-        padding: 5px 15px;
-        border-radius: 5px;
-        background: #f8f8fa;
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid #f0f0f0;
     }
-
-    .summery .info h3 {
-        font-size: 18px;
-        margin: 0;
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-
-    .summery .info span {
-        font-size: 26px;
-        font-weight: bold;
+    .info-value {
+        color: #333;
+        font-size: 14px;
+        margin-top: 2px;
+        font-weight: 500;
     }
-
-    .dropdown-toggle::after{
-        display:none;
+    .section-title {
+        color: #667eea;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #667eea;
+        font-size: 16px;
     }
-
-    @media only screen and (max-width: 678px) {
-        .nav-tabs .nav-item {
-            width: 50%;
-            text-align: center;
-            border: 1px solid #e7e7e7;
-        }
-        .summery .info {
-            width: 100%;
-        }
+    .tab-content {
+        background: white;
+        border-radius: 0 0 12px 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
+        border-top: none;
+    }
+    .nav-tabs {
+        border-bottom: none;
+        background: #f8f9fa;
+        padding: 10px 10px 0 10px;
+        border-radius: 12px 12px 0 0;
     }
 </style>
-
 @endpush
 @section('contents')
-<!-- Breadcrumb Area -->
-<div class="breadcrumb-area">
-    <h1>Profile View</h1>
-    <ol class="breadcrumb">
-        <li class="item">
-            <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
-        </li>
-        <li class="item"><a href="{{route('admin.usersCustomer')}}">Employee List</a></li>
-        <li class="item">Profile View</li>
-    </ol>
-</div>
 
 @include(adminTheme().'alerts')
+
 <div class="flex-grow-1">
+
+    <!-- Profile Header -->
     <div class="row">
         <div class="col-md-12">
-             <!-- Start -->
-            <div class="card mb-30">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                     <h3>{{$user->name}} - Profile View</h3>
-                     <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}"  class="btn-custom yellow"><i class="bx bx-edit"></i> Edit</a>
+            <div class="profile-header">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <div class="position-relative">
+                            <img src="{{asset($user->image())}}" class="ProfileImage" alt="" />
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <h2 class="mb-2 text-white">{{$user->name}}</h2>
+                        @if($user->designation)
+                        <p class="mb-1"><i class="bx bx-briefcase mr-2"></i> {{$user->designation->name}}</p>
+                        @endif
+                        <p class="mb-1"><i class="bx bx-id-card mr-2"></i> Employee ID: <strong>{{$user->employee_id}}</strong></p>
+                        @if($user->department)
+                        <p class="mb-1"><i class="bx bx-buildings mr-2"></i> {{$user->department->name}}</p>
+                        @endif
+                        <p class="mb-1"><i class="bx bx-calendar mr-2"></i> Join Date: {{$user->created_at->format('d M Y')}}</p>
+                        <div class="mt-2">
+                            @if($user->permission)
+                            <span class="badge badge-light mr-1">{{$user->permission->name}}</span>
+                            @endif
+                            <span class="badge {{$user->status ? 'badge-success' : 'badge-warning'}}">
+                                {{$user->status ? 'Active' : 'Inactive'}}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-right">
+                        <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn btn-light btn-md">
+                            <i class="bx bx-edit"></i> Edit Profile
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body">
+            </div>
+        </div>
+    </div>
 
-                    <ul class="nav nav-tabs">
-                      <li class="nav-item">
-                        <a class="nav-link {{$action=='view'?'active':''}}" href="{{route('admin.usersCustomerAction',['view',$user->id])}}">Information</a>
-                      </li>
+    <!-- Tab Navigation -->
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="basic-tab" data-toggle="tab" href="#basic" role="tab">
+                        <i class="bx bx-user"></i> Basic Info
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="personal-tab" data-toggle="tab" href="#personal" role="tab">
+                        <i class="bx bx-heart"></i> Personal
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab">
+                        <i class="bx bx-phone"></i> Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="job-tab" data-toggle="tab" href="#job" role="tab">
+                        <i class="bx bx-briefcase"></i> Job Info
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="salary-tab" data-toggle="tab" href="#salary" role="tab">
+                        <i class="bx bx-money"></i> Salary
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="documents-tab" data-toggle="tab" href="#documents" role="tab">
+                        <i class="bx bx-file"></i> Documents
+                    </a>
+                </li>
+            </ul>
 
-                    </ul>
-                    <br>
+            <!-- Tab Content -->
+            <div class="tab-content" id="profileTabsContent">
 
+                <!-- Basic Information Tab -->
+                <div class="tab-pane fade show active" id="basic" role="tabpanel">
                     <div class="row">
-                        <div class="col-md-4">
-                            <img src="{{asset($user->image())}}" style="max-height:200px;"><br>
-                            <div class="info">
-                                <ul>
-                                    <li class="d-flex"><i class="bx bx-user mr-2 pt-2"></i> <span><b>ID</b><br>{{$user->employee_id}}</span></li>
-                                    <li class="d-flex"><i class="bx bx-mobile mr-2 pt-2"></i> <span><b>Mobile</b><br>{{$user->mobile}}</span></li>
-                                    <li class="d-flex"><i class="bx bx-envelope mr-2 pt-2"></i><span><b>Email</b><br>{{$user->email}}</span></li>
-                                    <li class="d-flex"><i class="bx bx-check-shield mr-2 pt-2"></i><span><span><b>Designation</b><br>{{$user->designation?$user->designation->name:''}}</span></li>
-                                    <li class="d-flex"><i class="bx bx-briefcase mr-2 pt-2"></i> <span><span><b>Department</b><br>{{$user->department?$user->department->name:''}}</span></li>
-                                </ul>
-                                <div class="content">
-                                    {{$user->profile}}
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Basic Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Employee ID</div>
+                                        <div class="info-value">{{$user->employee_id}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Employee Name</div>
+                                        <div class="info-value">{{$user->name}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Name (Bangla)</div>
+                                        <div class="info-value">{{$user->bn_name ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Gender</div>
+                                        <div class="info-value">{{$user->gender ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Date of Birth</div>
+                                        <div class="info-value">{{$user->dob ? Carbon\Carbon::parse($user->dob)->format('d M Y') : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Blood Group</div>
+                                        <div class="info-value">{{$user->blood_group ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Religion</div>
+                                        <div class="info-value">{{$user->religion ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Marital Status</div>
+                                        <div class="info-value">{{ucfirst($user->marital_status ?? 'N/A')}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Mobile Number</div>
+                                        <div class="info-value">{{$user->mobile ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Email Address</div>
+                                        <div class="info-value">{{$user->email ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Nationality</div>
+                                        <div class="info-value">{{$user->nationality ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Home District</div>
+                                        <div class="info-value">{{$user->home_district ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Report To</div>
+                                        <div class="info-value">{{$user->report_to ?? 'N/A'}}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-8">
-                            <h4>Profile Information:</h4>
-                            <div class="table-responsive">
-                                <table class="table table-borderless profileTable">
-                                    <tr>
-                                        <th style="width: 150px;min-width: 150px;">Name</th>
-                                        <th style="width: 20px;min-width: 20px;">:</th>
-                                        <td>{{$user->name}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Address</th>
-                                        <th>:</th>
-                                        <td>{{$user->fullAddress()}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Present Address</th>
-                                        <th>:</th>
-                                        <td>{{$user->address_line2}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Gender</th>
-                                        <th>:</th>
-                                        <td>{{$user->gender}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Date Of Birth</th>
-                                        <th>:</th>
-                                        <td>{{$user->dob?Carbon\Carbon::parse($user->dob)->format('d M Y'):''}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Marital Status</th>
-                                        <th>:</th>
-                                        <td>{{$user->marital_status}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Employment</th>
-                                        <th>:</th>
-                                        <td>{{$user->employment_status}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>User Status</th>
-                                        <th>:</th>
-                                        <td>
-                                            @if($user->status)
-                                            <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
-                                                <i class="bx bx-check-circle"></i>
-                                            </span>
-                                            @else
-                                            <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
-                                                <i class="bx bx-x"></i>
-                                            </span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Join Date</th>
-                                        <th>:</th>
-                                        <td>{{$user->created_at->format('d M Y')}}</td>
-                                    </tr>
-                                </table>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Physical Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Height (Cm)</div>
+                                        <div class="info-value">{{$user->height ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Weight (KG)</div>
+                                        <div class="info-value">{{$user->weight ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Distinguished Mark</div>
+                                        <div class="info-value">{{$user->distinguished_mark ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-12">
-                            <br>
-                            <h4>Attach Document:</h4>
-                            <div class="table-responsive">
-                                <table class="table table-bordered fileTable">
-                                    <thead>
-                                        <tr>
-                                           <th style="min-width: 60px;width: 60px;">SL</th>
-                                           <th style="min-width: 150px;width: 150px;">Attachment</th>
-                                           <th style="min-width: 200px;" >Title</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if($user->galleryFiles->count() > 0)
-                                        @foreach($user->galleryFiles as $i=>$file)
-                                        <tr>
-                                            <td>{{$i+1}}</td>
-                                            <td>
-                                                @if($file->file_url)
-                                                <a href="{{asset($file->file_url)}}" title="{{$file->file_name}}" download="">Download File</a>
-                                                @else
-                                                <span>No Attachment</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                {{$file->file_name}}
-                                            </td>
 
-                                        </tr>
-                                        @endforeach
-                                        @else
-                                        <tr>
-                                            <td style="text-align:center;" colspan="3">No Attachment File</td>
-                                        </tr>
-                                        @endif
-                                    </tbody>
-                                </table>
+                            <div class="info-card">
+                                <h5 class="section-title">Education</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Education Qualification</div>
+                                        <div class="info-value">{{$user->education ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Type of Work</div>
+                                        <div class="info-value">{{$user->work_type ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
+                <!-- Personal Information Tab -->
+                <div class="tab-pane fade" id="personal" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Family Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Father's Name</div>
+                                        <div class="info-value">{{$user->father_name ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Father's Name (Bangla)</div>
+                                        <div class="info-value">{{$user->father_name_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Mother's Name</div>
+                                        <div class="info-value">{{$user->mother_name ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Mother's Name (Bangla)</div>
+                                        <div class="info-value">{{$user->mother_name_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Spouse Name</div>
+                                        <div class="info-value">{{$user->spouse_name ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Spouse Name (Bangla)</div>
+                                        <div class="info-value">{{$user->spouse_name_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="info-label">No of Boys</div>
+                                        <div class="info-value">{{$user->boys ?? '0'}}</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="info-label">No of Girls</div>
+                                        <div class="info-value">{{$user->girls ?? '0'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Nominee Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Nominee Name</div>
+                                        <div class="info-value">{{$user->nominee ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Nominee Name (Bangla)</div>
+                                        <div class="info-value">{{$user->nominee_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Relation</div>
+                                        <div class="info-value">{{$user->nominee_relation ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Nominee Age</div>
+                                        <div class="info-value">{{$user->nominee_age ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <div class="info-card">
+                                <h5 class="section-title">Other Information</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Reference - 1</div>
+                                        <div class="info-value">{{$user->reference_1 ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Reference - 2</div>
+                                        <div class="info-value">{{$user->reference_2 ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Other Information</div>
+                                        <div class="info-value">{{$user->other_information ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Tab -->
+                <div class="tab-pane fade" id="contact" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Present Address</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Address</div>
+                                        <div class="info-value">{{$user->present_address ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Address (Bangla)</div>
+                                        <div class="info-value">{{$user->present_address_bn ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Permanent Address</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Address</div>
+                                        <div class="info-value">{{$user->permanent_address ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Address (Bangla)</div>
+                                        <div class="info-value">{{$user->permanent_address_bn ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Emergency Contact</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Emergency Mobile</div>
+                                        <div class="info-value">{{$user->emergency_mobile ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Emergency Contact Relation</div>
+                                        <div class="info-value">{{$user->emergency_relation ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Information Tab -->
+                <div class="tab-pane fade" id="job" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Job Details</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Designation</div>
+                                        <div class="info-value">{{$user->designation ? $user->designation->name : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Department</div>
+                                        <div class="info-value">{{$user->department ? $user->department->name : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Division</div>
+                                        <div class="info-value">{{$user->division ? $user->division->name : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Section</div>
+                                        <div class="info-value">{{$user->section ? $user->section->name : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Line Number</div>
+                                        <div class="info-value">{{$user->line ? $user->line->name : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Shift</div>
+                                        <div class="info-value">{{$user->shift ? $user->shift->name_of_shift : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Employee Type</div>
+                                        <div class="info-value">{{$user->employeeType ? $user->employeeType->name : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Placement/Location</div>
+                                        <div class="info-value">{{$user->location ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Joining Date</div>
+                                        <div class="info-value">{{$user->created_at ? $user->created_at->format('d M Y') : 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Account Status</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">User Status</div>
+                                        <div class="info-value">
+                                            @if($user->status)
+                                            <span class="badge badge-success">Active</span>
+                                            @else
+                                            <span class="badge badge-warning">Inactive</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Employment Status</div>
+                                        <div class="info-value">{{$user->employment_status ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary Tab -->
+                <div class="tab-pane fade" id="salary" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Salary Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Salary Type</div>
+                                        <div class="info-value">{{$user->salary_type ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Gross Salary</div>
+                                        <div class="info-value">{{$user->gross_salary ? number_format($user->gross_salary, 2) : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Basic Salary</div>
+                                        <div class="info-value">{{$user->basic_salary ? number_format($user->basic_salary, 2) : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">House Rent</div>
+                                        <div class="info-value">{{$user->house_rent ? number_format($user->house_rent, 2) : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Medical Allowance</div>
+                                        <div class="info-value">{{$user->medical_allowance ? number_format($user->medical_allowance, 2) : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Transport Allowance</div>
+                                        <div class="info-value">{{$user->transport_allowance ? number_format($user->transport_allowance, 2) : 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Food Allowance</div>
+                                        <div class="info-value">{{$user->food_allowance ? number_format($user->food_allowance, 2) : 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Recent Salary History</h5>
+                                {{-- @if($user->salarySheets->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Month</th>
+                                                <th>Year</th>
+                                                <th>Gross</th>
+                                                <th>Net</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($user->salarySheets()->orderBy('year', 'desc')->orderBy('month', 'desc')->limit(6)->get() as $salary)
+                                            <tr>
+                                                <td>{{$salary->month}}</td>
+                                                <td>{{$salary->year}}</td>
+                                                <td>{{number_format($salary->gross_salary, 2)}}</td>
+                                                <td>{{number_format($salary->net_salary, 2)}}</td>
+                                                <td>
+                                                    @if($salary->payment_status == 'paid')
+                                                    <span class="badge badge-success">Paid</span>
+                                                    @else
+                                                    <span class="badge badge-warning">Pending</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @else
+                                <p class="text-muted">No salary history available</p>
+                                @endif --}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Tab -->
+                <div class="tab-pane fade" id="documents" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="section-title">Identity Documents</h5>
+                                <div class="row">
+                                    @if($user->galleryFiles->count() > 0)
+                                        @foreach($user->galleryFiles as $file)
+                                            <div class="col-md-12 mb-3">
+                                                <div class="info-label">{{$file->file_name}}</div>
+                                                <div class="info-value"><a href="{{asset($file->file_url)}}" title="{{$file->file_name}}" download="">Download File</a></div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="col-md-12 mb-3">
+                                            <div class="info-label">No Attachment File</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
+
+
+
 </div>
 
 
-
 @endsection
-@push('js')
 
+@push('js')
 
 @endpush

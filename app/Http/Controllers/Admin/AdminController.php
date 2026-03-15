@@ -2,52 +2,54 @@
 
 namespace App\Http\Controllers\Admin;
 
-use DB;
-use Pdf;
-use Str;
-use File;
-use Hash;
-use Image;
-use Artisan;
-use Session;
-use Validator;
-use Carbon\Carbon;
-use App\Models\Lead;
-use App\Models\Note;
-use App\Models\Post;
-use App\Models\Task;
-use App\Models\User;
-use App\Models\Media;
-use App\Models\Order;
-use App\Models\Visit;
-use App\Models\Review;
-use App\Models\Salary;
-use Redirect,Response;
+use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\Attribute;
 use App\Models\Company;
+use App\Models\CompanyMachinery;
+use App\Models\CompanyPerson;
 use App\Models\Country;
 use App\Models\Expense;
-use App\Models\General;
-use App\Models\Meeting;
-use App\Models\Service;
-use App\Models\Attribute;
-use App\Models\OrderItem;
-use App\Models\PostExtra;
 use App\Models\ExpenseIou;
+use App\Models\General;
+use App\Models\Lead;
 use App\Models\LeadPerson;
-use App\Models\Permission;
-use App\Models\ActivityLog;
+use App\Models\Media;
+use App\Models\Meeting;
+use App\Models\Note;
+use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\Transaction;
-use Illuminate\Support\Arr;
-use App\Models\UserLocation;
-use Illuminate\Http\Request;
-use App\Models\CompanyPerson;
+use App\Models\OrderItem;
+use App\Models\payroll\Shift;
+use App\Models\Permission;
+use App\Models\Post;
 use App\Models\PostAttribute;
-use Illuminate\Validation\Rule;
-use App\Models\CompanyMachinery;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Models\PostExtra;
+use App\Models\Review;
+use App\Models\Salary;
+use App\Models\Service;
+use App\Models\Task;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\UserLocation;
+use App\Models\Visit;
+use Artisan;
+use Carbon\Carbon;
+use DB;
+use Hash;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
+use Image;
+use Pdf;
+use Redirect,Response;
+use Str;
+use Validator;
 
 class AdminController extends Controller
 {
@@ -2230,57 +2232,6 @@ class AdminController extends Controller
 
     }
 
-    public function accountsStatementX(Request $r){
-        $user = Auth::user()->accounts;
-        $firstAccount = Auth::user()->accounts()->first() ?? null;
-        $from = $r->startDate?Carbon::parse($r->startDate):Carbon::now()->subDays(30);
-        $to = $r->endDate?Carbon::parse($r->endDate):Carbon::now();
-        $method =Attribute::with('user')->where('type',10)->find($r?->account_id ?? $firstAccount?->id);
-        $openingBalance=0;
-        $availableBalance=0;
-        $transections=null;
-        if($method){
-            $openingBalance = Transaction::where('account_id', $method->id)
-            ->where('status','success')  // ✅ ADD THIS LINE
-            ->whereDate('created_at', '<', $from)
-            ->selectRaw("
-                            SUM(
-                                CASE
-                                    WHEN type IN (0,1) THEN amount
-                                    WHEN type IN (3,4,5,6,7) THEN -amount
-                                    ELSE 0
-                                END
-                            ) as balance
-                        ")
-                        ->value('balance') ?? 0;
-
-
-            $transections = Transaction::whereDate('created_at', '>=', $from)
-            ->where('status','success')
-            ->whereDate('created_at', '<=', $to)
-            ->where('account_id', $method->id)
-            ->whereIn('type', [0,1,3,4,5,6,7])
-            ->orderBy('created_at')
-            ->get();
-
-            $balance = $openingBalance;
-            $transections->map(function ($t) use (&$balance) {
-                if (in_array($t->type, [0,1])) {
-                    $balance += $t->amount;
-                } else {
-                    $balance -= $t->amount;
-                }
-                $t->running_balance = $balance;
-                return $t;
-            });
-            $availableBalance = $balance;
-        }
-        $accounts =Attribute::with('user')->where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
-
-        return view(adminTheme().'accounts.accountsStatement',compact('accounts','method','openingBalance','availableBalance','transections','from','to'));
-    }
-
-
     public function accountsStatement(Request $r) {
         $user = Auth::user();
 
@@ -2807,7 +2758,7 @@ class AdminController extends Controller
       if($r->action){
         if($r->checkid){
 
-        $datas=Attribute::latest()->where('type',3)->whereIn('id',$r->checkid)->get();
+        $datas=Attribute::latest()->where('type',0)->whereIn('id',$r->checkid)->get();
 
         foreach($datas as $data){
 
@@ -2819,7 +2770,7 @@ class AdminController extends Controller
               $data->save();
             }elseif($r->action==5){
 
-              $medias =Media::latest()->where('src_type',3)->where('src_id',$data->id)->get();
+              $medias =Media::latest()->where('src_type',0)->where('src_id',$data->id)->get();
               foreach($medias as $media){
                 if(File::exists($media->file_url)){
                   File::delete($media->file_url);
@@ -4471,224 +4422,307 @@ class AdminController extends Controller
     // Users Customer Action (Create, Edit, Update, Password, Soft Delete, Restore, Force Delete)
     public function usersCustomerAction(Request $r, $action, $id = null)
     {
-        $authId = auth()->id();
-        // RESTORE SOFT DELETED USER
-        if ($action == 'restore') {
-            $user = User::onlyTrashed()->find($id);
-            if (!$user) {
-                Session()->flash('error', 'User not found or already restored!');
-                return redirect()->back();
-            }
-            $user->restore();
-            Session()->flash('success', 'User restored successfully!');
-            return redirect()->back();
-        }
+        try{
 
-        // FORCE DELETE USER
-        if ($action == 'force-delete') {
-            if ($id == $authId) {
-                Session()->flash('error', 'You cannot force delete yourself!');
-                return redirect()->back();
-            }
-            $user = User::onlyTrashed()->find($id);
-            if ($user) {
-                $userFiles = Media::where('src_type', 6)->where('src_id', $user->id)->get();
-                foreach ($userFiles as $media) {
-                    if (File::exists($media->file_url)) {
-                        File::delete($media->file_url);
-                    }
-                    $media->delete();
-                }
-                $user->forceDelete();
-            }
-            Session()->flash('success', 'User permanently deleted!');
-            return redirect()->back();
-        }
-
-        // CREATE USER
-        if ($action == 'create' && $r->isMethod('post')) {
-
-            $r->validate([
-                'name'         => 'required|max:100',
-                'company_name' => 'nullable|max:100',
-                'email'        => 'nullable|email|max:100',
-                'mobile'       => 'nullable|max:100',
-                'country'      => 'nullable|max:100',
-                'address'      => 'nullable|max:500',
-            ]);
-            // Check for existing user by mobile
-            $existingUser = User::where('mobile', $r->mobile)->first();
-
-            // Check for soft-deleted user with same mobile
-            $trashedUser = User::withTrashed()->where('mobile', $r->mobile)->first();
-            if ($trashedUser && !$existingUser) {
-                Session()->flash('info', 'This mobile number is associated with a soft-deleted account.');
-                return redirect()->back();
-            }
-
-            // Check for existing user by email only if email provided
-            if (!empty($r->email)) {
-                $existingUserByEmail = User::where('email', $r->email)->first();
-                if ($existingUserByEmail) {
-                    Session()->flash('info', 'This email is already in use.');
+            $authId = auth()->id();
+            // RESTORE SOFT DELETED USER
+            if ($action == 'restore') {
+                $user = User::onlyTrashed()->find($id);
+                if (!$user) {
+                    Session()->flash('error', 'User not found or already restored!');
                     return redirect()->back();
                 }
-            }
-
-            // If mobile/email already exist, do not forcefully change roles
-            if ($existingUser) {
-                Session()->flash('info', 'Mobile already in use.');
+                $user->restore();
+                Session()->flash('success', 'User restored successfully!');
                 return redirect()->back();
             }
-
-            $password = Str::random(8);
-            $user = new User();
-            $user->name          = $r->name;
-            $user->mobile        = $r->mobile;
-            $user->email         = $r->email;
-            $user->country_text  = $r->country;
-            $user->company_name  = $r->company_name;
-            $user->address_line1 = $r->address;
-            $user->password_show = $password;
-            $user->password      = Hash::make($password);
-
-            $user->setTypes('customer'); // if you already have setTypes method
-            $user->save();
-
-            Session()->flash('success', 'Employee registered successfully!');
-            return redirect()->route('admin.usersCustomerAction', ['view', $user->id]);
-        }
-
-
-        $user = User::whereIn('status', [0,1])->find($id);
-        if (!$user) {
-            Session()->flash('error', 'User not found.');
-            return redirect()->route('admin.usersCustomer');
-        }
-
-        // UPDATE USER PROFILE
-        if ($action == 'update' && $r->isMethod('post')) {
-            $r->validate([
-                'name' => 'required|max:100',
-                'email' => 'nullable|max:100|unique:users,email,' . $user->id,
-                'mobile' => 'required|max:20|unique:users,mobile,' . $user->id,
-                'date_of_birth' => 'nullable|date',
-                'gender' => 'nullable|max:10',
-                'marital_status' => 'nullable|max:20',
-                'present_address' => 'nullable|max:200',
-                'address' => 'nullable|max:191',
-                'division' => 'nullable|numeric',
-                'district' => 'nullable|numeric',
-                'city' => 'nullable|numeric',
-                'designation' => 'nullable|numeric',
-                'department' => 'nullable|numeric',
-                'employee_id' => 'nullable|max:100',
-                'profile' => 'nullable|max:1000',
-                'salary_type' => 'required|max:100',
-                'salary_amount' => 'nullable|numeric',
-                'employment_status' => 'nullable|max:100',
-                'exited_at' => 'nullable|date|max:50',
-                'created_at' => 'nullable|date|max:50',
-                'role' => 'nullable|numeric',
-                'postal_code' => 'nullable|max:20',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            ]);
-
-            $user->fill([
-                'name' => $r->name,
-                'mobile' => $r->mobile,
-                'email' => $r->email,
-                'gender' => $r->gender,
-                'marital_status' => $r->marital_status,
-                'dob' => $r->date_of_birth,
-                'address_line1' => $r->address,
-                'address_line2' => $r->present_address,
-                'division' => $r->division,
-                'district' => $r->district,
-                'city' => $r->city,
-                'postal_code' => $r->postal_code,
-                'designation_id' => $r->designation,
-                'department_id' => $r->department,
-                'employee_id' => $r->employee_id,
-                'permission_id' => $r->role,
-                'salary_amount' => $r->salary_amount ?: 0,
-                'profile' => $r->profile,
-                'salary_type' => $r->salary_type ?: 'Monthly',
-                'employment_status' => $r->employment_status ?: 'Monthly',
-                'created_at' => $r->created_at ?: Carbon::now(),
-                'exited_at' => $r->exited_at,
-                'status' => $r->status ? true : false,
-                'login_status' => $r->login_status ? true : false,
-            ]);
-
-            // নিজের আইডি না হলে রিকোয়েস্টের রোল নেবে, আর নিজের আইডি হলে আগের রোলটাই রেখে দিবে
-            $user->permission_id = ($user->id !== $authId) ? $r->role : $user->permission_id;
-
-            // এরপর সেভ করুন
-            $user->save();
-
-            if ($r->password) {
-                $user->password_show = $r->password;
-                $user->password = Hash::make($r->password);
+    
+            // FORCE DELETE USER
+            if ($action == 'force-delete') {
+                if ($id == $authId) {
+                    Session()->flash('error', 'You cannot force delete yourself!');
+                    return redirect()->back();
+                }
+                $user = User::onlyTrashed()->find($id);
+                if ($user) {
+                    $userFiles = Media::where('src_type', 6)->where('src_id', $user->id)->get();
+                    foreach ($userFiles as $media) {
+                        if (File::exists($media->file_url)) {
+                            File::delete($media->file_url);
+                        }
+                        $media->delete();
+                    }
+                    $user->forceDelete();
+                }
+                Session()->flash('success', 'User permanently deleted!');
+                return redirect()->back();
             }
-
-            // Image upload
-            if ($r->hasFile('image')) {
-                $file = $r->image;
-                uploadFile($file, $user->id, 6, 1, Auth::id());
-            }
-            $user->setTypes('customer');
-
-            $user->save();
-            Session()->flash('success', 'User updated successfully!');
-            return redirect()->back();
-        }
-
-        // PASSWORD CHANGE
-        if ($action == 'change-password' && $r->isMethod('post')) {
-            $validator = Validator::make($r->all(), [
-                'old_password' => 'required|string|min:8',
-                'password' => 'required|string|min:8|confirmed|different:old_password',
-            ]);
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-            if (Hash::check($r->old_password, $user->password)) {
-                $user->password_show = $r->password;
-                $user->password = Hash::make($r->password);
+    
+            // CREATE USER
+            if ($action == 'create' && $r->isMethod('post')) {
+    
+                $r->validate([
+                    'name'         => 'required|max:100',
+                    'company_name' => 'nullable|max:100',
+                    'email'        => 'nullable|email|max:100',
+                    'mobile'       => 'nullable|max:100',
+                    'country'      => 'nullable|max:100',
+                    'address'      => 'nullable|max:500',
+                ]);
+                // Check for existing user by mobile
+                $existingUser = User::where('mobile', $r->mobile)->first();
+    
+                // Check for soft-deleted user with same mobile
+                $trashedUser = User::withTrashed()->where('mobile', $r->mobile)->first();
+                if ($trashedUser && !$existingUser) {
+                    Session()->flash('info', 'This mobile number is associated with a soft-deleted account.');
+                    return redirect()->back();
+                }
+    
+                // Check for existing user by email only if email provided
+                if (!empty($r->email)) {
+                    $existingUserByEmail = User::where('email', $r->email)->first();
+                    if ($existingUserByEmail) {
+                        Session()->flash('info', 'This email is already in use.');
+                        return redirect()->back();
+                    }
+                }
+    
+                // If mobile/email already exist, do not forcefully change roles
+                if ($existingUser) {
+                    Session()->flash('info', 'Mobile already in use.');
+                    return redirect()->back();
+                }
+    
+                $password = Str::random(8);
+                $user = new User();
+                $user->name          = $r->name;
+                $user->mobile        = $r->mobile;
+                $user->email         = $r->email;
+                $user->country_text  = $r->country;
+                $user->company_name  = $r->company_name;
+                $user->address_line1 = $r->address;
+                $user->password_show = $password;
+                $user->password      = Hash::make($password);
+    
+                $user->setTypes('customer'); // if you already have setTypes method
                 $user->save();
-                Session()->flash('success', 'Password changed successfully!');
-            } else {
-                Session()->flash('error', 'Current password does not match!');
+    
+                Session()->flash('success', 'Employee registered successfully!');
+                return redirect()->route('admin.usersCustomerAction', ['view', $user->id]);
             }
-            return redirect()->back();
-        }
-
-        // SOFT DELETE
-        if ($action == 'delete') {
-
-            if ($user->id == $authId) {
-                Session()->flash('error', 'You cannot delete your own account!');
+    
+    
+            $user = User::whereIn('status', [0,1])->find($id);
+            if (!$user) {
+                Session()->flash('error', 'User not found.');
+                return redirect()->route('admin.usersCustomer');
+            }
+    
+            // UPDATE USER PROFILE
+            if ($action == 'update' && $r->isMethod('post')) {
+                $r->validate([
+                    'name' => 'required|max:100',
+                    'email' => 'nullable|max:100|unique:users,email,' . $user->id,
+                    'mobile' => 'required|max:20|unique:users,mobile,' . $user->id,
+                    'date_of_birth' => 'nullable|date',
+                    'gender' => 'nullable|max:10',
+                    'marital_status' => 'nullable|max:20',
+                    'present_address' => 'nullable|max:200',
+                    'address' => 'nullable|max:191',
+                    'division' => 'nullable|numeric',
+                    'district' => 'nullable|numeric',
+                    'city' => 'nullable|numeric',
+                    'designation' => 'nullable|numeric',
+                    'department' => 'nullable|numeric',
+                    'employee_id' => 'nullable|max:100',
+                    'profile' => 'nullable|max:1000',
+                    'salary_type' => 'nullable|max:100',
+                    'salary_amount' => 'nullable|numeric',
+                    'employment_status' => 'nullable|max:100',
+                    'exited_at' => 'nullable|date|max:50',
+                    'created_at' => 'nullable|date|max:50',
+                    'role' => 'nullable|numeric',
+                    'postal_code' => 'nullable|max:20',
+                    'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]);
+    
+                $user->fill([
+                    'name' => $r->name,
+                    'mobile' => $r->mobile,
+                    'email' => $r->email,
+                    'gender' => $r->gender,
+                    'marital_status' => $r->marital_status ?? 'Single',
+                    'dob' => $r->date_of_birth,
+                    'address_line1' => $r->address,
+                    'address_line2' => $r->present_address,
+                    'division' => $r->division,
+                    'district' => $r->district,
+                    'city' => $r->city,
+                    'postal_code' => $r->postal_code,
+                    'designation_id' => $r->designation,
+                    'department_id' => $r->department,
+                    'employee_id' => $r->employee_id,
+                    'permission_id' => $r->role,
+                    'salary_amount' => $r->salary_amount ?: 0,
+                    'profile' => $r->profile,
+                    'salary_type' => $r->salary_type ?: 'Monthly',
+                    'employment_status' => $r->employment_status ?: 'Monthly',
+                    'created_at' => $r->created_at ?: Carbon::now(),
+                    'exited_at' => $r->exited_at,
+                    'status' => $r->status ? true : false,
+                    'login_status' => $r->login_status ? true : false,
+                ]);
+    
+                // নিজের আইডি না হলে রিকোয়েস্টের রোল নেবে, আর নিজের আইডি হলে আগের রোলটাই রেখে দিবে
+                $user->permission_id = ($user->id !== $authId) ? $r->role : $user->permission_id;
+    
+                // এরপর সেভ করুন
+                $user->save();
+    
+                if ($r->password) {
+                    $user->password_show = $r->password;
+                    $user->password = Hash::make($r->password);
+                }
+    
+                // Image upload
+                if ($r->hasFile('image')) {
+                    $file = $r->image;
+                    uploadFile($file, $user->id, 6, 1, Auth::id());
+                }
+                $user->setTypes('customer');
+    
+                $user->save();
+                Session()->flash('success', 'User updated successfully!');
                 return redirect()->back();
             }
-            $user->deleted_by = auth()->id();
-            $user->save();
-            $user->delete();
-            Session()->flash('success', 'User soft deleted successfully!');
-            return redirect()->back();
+    
+            // PASSWORD CHANGE
+            if ($action == 'change-password' && $r->isMethod('post')) {
+                $validator = Validator::make($r->all(), [
+                    'old_password' => 'required|string|min:8',
+                    'password' => 'required|string|min:8|confirmed|different:old_password',
+                ]);
+                if ($validator->fails()) {
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+                if (Hash::check($r->old_password, $user->password)) {
+                    $user->password_show = $r->password;
+                    $user->password = Hash::make($r->password);
+                    $user->save();
+                    Session()->flash('success', 'Password changed successfully!');
+                } else {
+                    Session()->flash('error', 'Current password does not match!');
+                }
+                return redirect()->back();
+            }
+    
+            // SOFT DELETE
+            if ($action == 'delete') {
+    
+                if ($user->id == $authId) {
+                    Session()->flash('error', 'You cannot delete your own account!');
+                    return redirect()->back();
+                }
+                $user->deleted_by = auth()->id();
+                $user->save();
+                $user->delete();
+                Session()->flash('success', 'User soft deleted successfully!');
+                return redirect()->back();
+            }
+    
+            if($action=='edit'){
+                $departments   = Attribute::latest()->filterBy('department')->where('status','<>','temp')->get();
+                $designations  = Attribute::latest()->filterBy('designation')->where('status','<>','temp')->get();
+                $divisions     = Attribute::latest()->filterBy('divisions')->where('status', '<>', 'temp')->get();
+                $grades        = Attribute::latest()->filterBy('grades')->where('status', '<>', 'temp')->get();
+                $lines         = Attribute::latest()->filterBy('line_number')->where('status', '<>', 'temp')->get();
+                $sections      = Attribute::latest()->filterBy('sections')->where('status', '<>', 'temp')->get();
+                $emp_types     = Attribute::latest()->where('type', 16)->where('status', '<>', 'temp')->get();
+                $shifts        = Shift::latest()->get();
+    
+                $roles =Permission::latest()->where('status','active')->get();
+    
+                return view(adminTheme().'users.customers.editUser', compact('user','departments','designations','divisions','grades','lines','sections','shifts','roles', 'emp_types'));
+    
+            }
+    
+            if ($action == 'user-document') {
+                $fileAction = $r->file_action;
+                $fileId = $r->file_id ?? null;
+    
+                if ($fileAction == 'addfile') {
+                    Media::create([
+                        'src_id' => $user->id,
+                        'src_type' => 6,
+                        'use_Of_file' => 3,
+                        'addedby_id' => Auth::id(),
+                    ]);
+                }
+    
+                if (in_array($fileAction, ['removeData', 'removeFile']) && $fileId) {
+                    $file = $user->galleryFiles()->find($fileId);
+                    if($file && File::exists($file->file_url)) File::delete($file->file_url);
+    
+                    if ($fileAction == 'removeData') $file?->delete();
+                    if ($fileAction == 'removeFile') {
+                        $file?->update([
+                            'file_url'=>null,'file_path'=>null,'alt_text'=>null,'file_rename'=>null,'file_size'=>null
+                        ]);
+                    }
+                }
+    
+                if ($fileAction == 'updateTitle' && $fileId) {
+                    $file = $user->galleryFiles()->find($fileId);
+                    if($file) $file->update(['file_name'=>$r->title]);
+                }
+    
+                if ($fileAction == 'updateFile' && $fileId && $r->hasFile('file')) {
+                    $fileData = $user->galleryFiles()->find($fileId);
+                    if ($fileData) {
+                        if(File::exists($fileData->file_url)) File::delete($fileData->file_url);
+    
+                        $file = $r->file;
+                        $ext = $file->getClientOriginalExtension();
+                        $size = $file->getSize();
+                        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        $folder = now()->format('M_Y');
+                        $imgName = time().'.'.uniqid().'.'.$ext;
+                        $path = "medies/".$folder;
+                        $fullPath = "".$path.'/'.$imgName;
+    
+                        $fileData->update([
+                            'alt_text' => Str::limit($name,250),
+                            'file_rename' => $imgName,
+                            'file_size' => $size,
+                            'file_type' => match(strtolower($ext)){
+                                'png','jpeg','jpg','gif','svg','webp'=>1,
+                                'pdf'=>2,
+                                'docx'=>3,
+                                'zip','rar'=>4,
+                                'mp4','webm','mov','wmv'=>5,
+                                'mp3'=>6,
+                                default => 0
+                            },
+                            'file_url' => $fullPath,
+                            'file_path' => $path
+                        ]);
+    
+                        $file->move(public_path($path), $imgName);
+                    }
+                }
+                $view = view(adminTheme().'users.customers.includes.userFiles', compact('user'))->render();
+                return response()->json(['success'=>true, 'view'=>$view]);
+            }
+    
+            // Return view
+            $startDate = $r->startDate ? Carbon::parse($r->startDate) : Carbon::now()->startOfMonth();
+            $endDate = $r->endDate ? Carbon::parse($r->endDate) : Carbon::now();
+    
+            return view(adminTheme().'users.customers.viewUser',compact('user','action','startDate','endDate'));
+        }catch(\Exception $e){
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
-
-        // Return view
-        $startDate = $r->startDate ? Carbon::parse($r->startDate) : Carbon::now()->startOfMonth();
-        $endDate = $r->endDate ? Carbon::parse($r->endDate) : Carbon::now();
-        $designations=Attribute::latest()->where('type',2)->where('status','<>','temp')->get();
-        $departments=Attribute::latest()->where('type',3)->where('status','<>','temp')->get();
-        $roles = Permission::where('status','active')->get();
-
-        if( $action == 'view' ){
-            return view(adminTheme() . 'users.customers.viewUser', compact('user', 'action', 'startDate', 'endDate', 'designations','departments', 'roles'));
-        }
-        return view(adminTheme() . 'users.customers.editUser', compact('user', 'action', 'startDate', 'endDate', 'designations','departments', 'roles'));
     }
 
 
@@ -5172,6 +5206,964 @@ class AdminController extends Controller
     }
 
     // Setting Function End
+
+    public function employeeType(Request $r){
+
+
+      // Filter Action Start
+      if($r->action){
+        if($r->checkid){
+
+        $datas=Attribute::latest()->where('type',16)->whereIn('id',$r->checkid)->get();
+
+        foreach($datas as $data){
+
+            if($r->action==1){
+              $data->status='active';
+              $data->save();
+            }elseif($r->action==2){
+              $data->status='inactive';
+              $data->save();
+            }elseif($r->action==5){
+
+              $medias =Media::latest()->where('src_type',16)->where('src_id',$data->id)->get();
+              foreach($medias as $media){
+                if(File::exists($media->file_url)){
+                  File::delete($media->file_url);
+                }
+                $media->delete();
+              }
+
+              $data->delete();
+            }
+
+        }
+
+        Session()->flash('success','Action Successfully Completed!');
+
+        }else{
+          Session()->flash('info','Please Need To Select Minimum One Post');
+        }
+
+        return redirect()->back();
+      }
+
+      //Filter Action End
+
+      $employeeTypes=Attribute::latest()->where('type',16)->where('status','<>','temp')
+        ->where(function($q) use ($r) {
+
+          if($r->search){
+              $q->where('name','LIKE','%'.$r->search.'%');
+          }
+
+          if($r->status){
+             $q->where('status',$r->status);
+          }
+
+      })
+      ->select(['id','name','slug','type','description','created_at','addedby_id','status'])
+      ->paginate(25)->appends([
+        'search'=>$r->search,
+        'status'=>$r->status,
+      ]);
+
+      //Total Count Results
+      $totals = DB::table('attributes')
+      ->where('type',16)
+      ->selectRaw('count(*) as total')
+      ->selectRaw("count(case when status = 'active' then 1 end) as active")
+      ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+      ->first();
+
+      return view(adminTheme().'payroll.employee-types.employeeTypesAll',compact('employeeTypes','totals'));
+
+    }
+
+    public function employeeTypeAction(Request $r,$action,$id=null){
+      // Add EmployeeType Action Start
+      if($action=='create'){
+
+        $check = $r->validate([
+            'name' => 'required|max:100',
+            'description' => 'nullable|max:1000',
+        ]);
+
+        $employeeType =Attribute::where('type',16)->where('status','temp')->where('addedby_id',Auth::id())->first();
+        if(!$employeeType){
+          $employeeType =new Attribute();
+        }
+        $employeeType->name=$r->name;
+        $employeeType->description=$r->description;
+        $employeeType->type =16;
+        $employeeType->status ='active';
+        $employeeType->addedby_id =Auth::id();
+        $employeeType->save();
+
+        $slug =Str::slug($r->name);
+         if($slug==null){
+          $employeeType->slug=$employeeType->id;
+         }else{
+          if(Attribute::where('type',16)->where('slug',$slug)->whereNotIn('id',[$employeeType->id])->count() >0){
+          $employeeType->slug=$slug.'-'.$employeeType->id;
+          }else{
+          $employeeType->slug=$slug;
+          }
+        }
+        $employeeType->save();
+
+        Session()->flash('success','Your Are Successfully Added');
+        return redirect()->back();
+
+      }
+
+      // Add EmployeeType Action End
+
+
+      $employeeType =Attribute::where('type',16)->find($id);
+      if(!$employeeType){
+        Session()->flash('error','This Employee Type Are Not Found');
+        return redirect()->route('admin.employeeTypes');
+      }
+
+      //Check Authorized User
+      $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
+      if($allPer && $employeeType->addedby_id!=Auth::id()){
+        Session()->flash('error','You are unauthorized Try!!');
+        return redirect()->route('admin.employeeTypes');
+      }
+
+      // Update EmployeeType Action Start
+      if($action=='update'){
+
+        $check = $r->validate([
+            'name' => 'required|max:191',
+            'seo_title' => 'nullable|max:200',
+            'seo_desc' => 'nullable|max:250',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $employeeType->name=$r->name;
+        $employeeType->short_description=$r->short_description;
+        $employeeType->description=$r->description;
+        $employeeType->seo_title=$r->seo_title;
+        $employeeType->short_description=$r->short_description;
+        $employeeType->seo_keyword=$r->seo_keyword;
+
+        ///////Image UploadStart////////////
+
+        if($r->hasFile('image')){
+          $file =$r->image;
+          $src  =$employeeType->id;
+          $srcType  =3;
+          $fileUse  =1;
+          $author=Auth::id();
+          uploadFile($file,$src,$srcType,$fileUse,$author);
+        }
+
+        ///////Image Upload End////////////
+
+        ///////Banner Upload End////////////
+
+        if($r->hasFile('banner')){
+
+          $file =$r->banner;
+          $src  =$employeeType->id;
+          $srcType  =3;
+          $fileUse  =2;
+          $author=Auth::id();
+          uploadFile($file,$src,$srcType,$fileUse,$author);
+
+        }
+
+        ///////Banner Upload End////////////
+
+        $slug =Str::slug($r->name);
+         if($slug==null){
+          $employeeType->slug=$employeeType->id;
+         }else{
+          if(Attribute::where('type',16)->where('slug',$slug)->whereNotIn('id',[$employeeType->id])->count() >0){
+          $employeeType->slug=$slug.'-'.$employeeType->id;
+          }else{
+          $employeeType->slug=$slug;
+          }
+        }
+
+        $employeeType->status =$r->status?'active':'inactive';
+        $employeeType->fetured =$r->fetured?1:0;
+        $employeeType->editedby_id =Auth::id();
+        $employeeType->save();
+
+        Session()->flash('success','Your Are Successfully Updated');
+        return redirect()->back();
+
+      }
+
+      // Update EmployeeType Action End
+
+
+      // Delete EmployeeType Action Start
+      if($action=='delete'){
+        $medias =Media::latest()->where('src_type',16)->where('src_id',$employeeType->id)->get();
+        foreach($medias as $media){
+          if(File::exists($media->file_url)){
+            File::delete($media->file_url);
+          }
+          $media->delete();
+        }
+
+        $employeeType->delete();
+
+        Session()->flash('success','Your Are Successfully Deleted');
+        return redirect()->route('admin.employeeTypes');
+
+      }
+      // Delete EmployeeType Action End
+      return redirect()->back();
+
+    }
+
+
+    // divisions
+    public function divisions(Request $r){
+        if($r->action){
+            if($r->checkid){
+
+            $datas=Attribute::latest()->where('type', 27)->whereIn('id',$r->checkid)->get();
+
+            foreach($datas as $data){
+
+                if($r->action==1){
+                $data->status='active';
+                $data->save();
+                }elseif($r->action==2){
+                $data->status='inactive';
+                $data->save();
+                }elseif($r->action==5){
+
+                $medias =Media::latest()->where('src_type',27)->where('src_id',$data->id)->get();
+                foreach($medias as $media){
+                    if(File::exists($media->file_url)){
+                    File::delete($media->file_url);
+                    }
+                    $media->delete();
+                }
+
+                $data->delete();
+                }
+
+            }
+
+            Session()->flash('success','Action Successfully Completed!');
+
+            }else{
+            Session()->flash('info','Please Need To Select Minimum One Post');
+            }
+
+            return redirect()->back();
+        }
+
+
+        $divisions=Attribute::latest()->where('type',27)->where('status','<>','temp')
+            ->where(function($q) use ($r) {
+
+            if($r->search){
+                $q->where('name','LIKE','%'.$r->search.'%');
+            }
+
+            if($r->status){
+                $q->where('status',$r->status);
+            }
+
+        })
+        ->select(['id','name','slug','type','description','created_at','addedby_id','status','fetured'])
+        ->paginate(25)->appends([
+            'search'=>$r->search,
+            'status'=>$r->status,
+        ]);
+
+
+        $totals = DB::table('attributes')
+        ->where('type',27)
+        ->selectRaw('count(*) as total')
+        ->selectRaw("count(case when status = 'active' then 1 end) as active")
+        ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+        ->first();
+
+        return view(adminTheme().'payroll.divisions.divisionsAll',compact('divisions','totals'));
+
+    }
+
+    public function divisionsAction(Request $r,$action,$id=null){
+
+        if($action=='create'){
+            $check = $r->validate([
+                'name' => 'required|max:100',
+                'description' => 'nullable|max:1000',
+            ]);
+
+            $division =Attribute::where('type',27)->where('status','temp')->where('addedby_id',Auth::id())->first();
+            if(!$division){
+            $division =new Attribute();
+            }
+
+            $division->name=$r->name;
+            $division->description=$r->description;
+            $division->type =27;
+            $division->status ='active';
+            $division->addedby_id =Auth::id();
+            $division->save();
+
+            $slug =Str::slug($r->name);
+            if($slug==null){
+            $division->slug=$division->id;
+            }else{
+            if(Attribute::where('type',27)->where('slug',$slug)->whereNotIn('id',[$division->id])->count() >0){
+            $division->slug=$slug.'-'.$division->id;
+            }else{
+            $division->slug=$slug;
+            }
+            }
+            $division->save();
+
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+
+        }
+
+
+        $division =Attribute::where('type',27)->find($id);
+        if(!$division){
+            Session()->flash('error','This Division Are Not Found');
+            return redirect()->route('admin.admin.divisions');
+        }
+
+        $allPer = empty(json_decode(Auth::user()->permission->permission, true)['brands']['all']);
+        if($allPer && $division->addedby_id!=Auth::id()){
+            Session()->flash('error','You are unauthorized Try!!');
+            return redirect()->route('admin.admin.divisions');
+        }
+
+
+        if($action=='update'){
+
+            $check = $r->validate([
+                'name' => 'required|max:191',
+                'seo_title' => 'nullable|max:200',
+                'seo_desc' => 'nullable|max:250',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            $division->name=$r->name;
+            $division->short_description=$r->short_description;
+            $division->description=$r->description;
+            $division->seo_title=$r->seo_title;
+            $division->short_description=$r->short_description;
+            $division->seo_keyword=$r->seo_keyword;
+
+                if($r->hasFile('image')){
+                $file =$r->image;
+                $src  =$division->id;
+                $srcType  =11;
+                $fileUse  =1;
+                $author=Auth::id();
+                uploadFile($file,$src,$srcType,$fileUse,$author);
+                }
+
+
+                if($r->hasFile('banner')){
+
+                $file =$r->banner;
+                $src  =$division->id;
+                $srcType  =27;
+                $fileUse  =2;
+                $author=Auth::id();
+                uploadFile($file,$src,$srcType,$fileUse,$author);
+
+                }
+
+                $slug =Str::slug($r->name);
+                if($slug==null){
+                $division->slug=$division->id;
+                }else{
+                if(Attribute::where('type',27)->where('slug',$slug)->whereNotIn('id',[$division->id])->count() >0){
+                $division->slug=$slug.'-'.$division->id;
+                }else{
+                $division->slug=$slug;
+                }
+                }
+                $division->status =$r->status?'active':'inactive';
+                $division->fetured =$r->fetured?1:0;
+                $division->editedby_id =Auth::id();
+                $division->save();
+
+                Session()->flash('success','Your Are Successfully Done');
+                return redirect()->back();
+
+        }
+
+
+        if($action=='delete'){
+            $medias =Media::latest()->where('src_type',27)->where('src_id',$division->id)->get();
+                foreach($medias as $media){
+                if(File::exists($media->file_url)){
+                    File::delete($media->file_url);
+                }
+                $media->delete();
+                }
+
+                $division->delete();
+
+                Session()->flash('success','Your Are Successfully Done');
+                return redirect()->route('admin.admin.divisions');
+        }
+
+        return redirect()->back();
+
+    }
+    // end divisions
+
+    // grades
+    public function grades(Request $r){
+
+        if($r->action){
+            if($r->checkid){
+
+            $datas=Attribute::latest()->where('type',28)->whereIn('id',$r->checkid)->get();
+
+            foreach($datas as $data){
+
+                if($r->action==1){
+                $data->status='active';
+                $data->save();
+                }elseif($r->action==2){
+                $data->status='inactive';
+                $data->save();
+                }elseif($r->action==5){
+
+                $medias =Media::latest()->where('src_type',18)->where('src_id',$data->id)->get();
+                foreach($medias as $media){
+                    if(File::exists($media->file_url)){
+                    File::delete($media->file_url);
+                    }
+                    $media->delete();
+                }
+
+                $data->delete();
+                }
+
+            }
+
+            Session()->flash('success','Action Successfully Completed!');
+
+            }else{
+            Session()->flash('info','Please Need To Select Minimum One Post');
+            }
+
+            return redirect()->back();
+        }
+
+
+        $grades=Attribute::latest()->where('type',28)->where('status','<>','temp')
+            ->where(function($q) use ($r) {
+
+            if($r->search){
+                $q->where('name','LIKE','%'.$r->search.'%');
+            }
+
+            if($r->status){
+                $q->where('status',$r->status);
+            }
+
+        })
+        ->select(['id','name','slug','type','description','created_at','addedby_id','status','fetured'])
+        ->paginate(25)->appends([
+            'search'=>$r->search,
+            'status'=>$r->status,
+        ]);
+
+
+        $totals = DB::table('attributes')
+        ->where('type',28)
+        ->selectRaw('count(*) as total')
+        ->selectRaw("count(case when status = 'active' then 1 end) as active")
+        ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+        ->first();
+
+        return view(adminTheme().'payroll.grades.gradesAll',compact('grades','totals'));
+
+    }
+
+    public function gradesAction(Request $r,$action,$id=null){
+
+        if($action=='create'){
+            $check = $r->validate([
+                'name' => 'required|max:100',
+                'json' => 'nullable',
+            ]);
+
+            $grade =Attribute::where('type',28)->where('status','temp')->where('addedby_id',Auth::id())->first();
+            if(!$grade){
+            $grade =new Attribute();
+            }
+
+            $grade->name=$r->name;
+            $grade->description=json_encode($r->json);
+            $grade->type =28;
+            $grade->status ='active';
+            $grade->addedby_id =Auth::id();
+            $grade->save();
+
+            $slug =Str::slug($r->name);
+            if($slug==null){
+            $grade->slug=$grade->id;
+            }else{
+            if(Attribute::where('type',28)->where('slug',$slug)->whereNotIn('id',[$grade->id])->count() >0){
+            $grade->slug=$slug.'-'.$grade->id;
+            }else{
+            $grade->slug=$slug;
+            }
+            }
+            $grade->save();
+
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+
+        }
+
+
+        $grade =Attribute::where('type',28)->find($id);
+        if(!$grade){
+            Session()->flash('error','This Grade Are Not Found');
+            return redirect()->route('admin.admin.grades');
+        }
+
+        $allPer = empty(json_decode(Auth::user()->permission->permission, true)['brands']['all']);
+        if($allPer && $grade->addedby_id!=Auth::id()){
+            Session()->flash('error','You are unauthorized Try!!');
+            return redirect()->route('admin.admin.grades');
+        }
+
+
+        if($action=='update'){
+
+            $check = $r->validate([
+                'name' => 'required|max:191',
+            ]);
+
+            $grade->name=$r->name;
+            $grade->description=json_encode($r->json);
+
+            $slug =Str::slug($r->name);
+            if($slug==null){
+                $grade->slug=$grade->id;
+            }else{
+                if(Attribute::where('type',28)->where('slug',$slug)->whereNotIn('id',[$grade->id])->count() >0){
+                $grade->slug=$slug.'-'.$grade->id;
+                }else{
+                $grade->slug=$slug;
+                }
+            }
+
+            $grade->status =$r->status?'active':'inactive';
+            $grade->editedby_id =Auth::id();
+            $grade->save();
+
+            Session()->flash('success','Your Are Successfully Done');
+            return redirect()->back();
+
+        }
+
+
+        if($action=='delete'){
+            $medias =Media::latest()->where('src_type',18)->where('src_id',$grade->id)->get();
+                foreach($medias as $media){
+                if(File::exists($media->file_url)){
+                    File::delete($media->file_url);
+                }
+                $media->delete();
+                }
+
+                $grade->delete();
+
+                Session()->flash('success','Your Are Successfully Done');
+                return redirect()->route('admin.admin.grades');
+        }
+
+        return redirect()->back();
+
+    }
+    // end grades
+
+
+        // sections
+    public function sections(Request $r){
+
+          if($r->action){
+            if($r->checkid){
+
+            $datas=Attribute::latest()->where('type',29)->whereIn('id',$r->checkid)->get();
+
+            foreach($datas as $data){
+
+                if($r->action==1){
+                  $data->status='active';
+                  $data->save();
+                }elseif($r->action==2){
+                  $data->status='inactive';
+                  $data->save();
+                }elseif($r->action==5){
+
+                  $medias =Media::latest()->where('src_type',29)->where('src_id',$data->id)->get();
+                  foreach($medias as $media){
+                    if(File::exists($media->file_url)){
+                      File::delete($media->file_url);
+                    }
+                    $media->delete();
+                  }
+
+                  $data->delete();
+                }
+
+            }
+
+            Session()->flash('success','Action Successfully Completed!');
+
+            }else{
+              Session()->flash('info','Please Need To Select Minimum One Post');
+            }
+
+            return redirect()->back();
+          }
+
+
+          $sections=Attribute::latest()->where('type',29)->where('status','<>','temp')
+            ->where(function($q) use ($r) {
+
+              if($r->search){
+                  $q->where('name','LIKE','%'.$r->search.'%');
+              }
+
+              if($r->status){
+                 $q->where('status',$r->status);
+              }
+
+          })
+          ->select(['id','name','slug','type','description','created_at','addedby_id','status','fetured'])
+          ->paginate(25)->appends([
+            'search'=>$r->search,
+            'status'=>$r->status,
+          ]);
+
+          $totals = DB::table('attributes')
+          ->where('type',29)
+          ->selectRaw('count(*) as total')
+          ->selectRaw("count(case when status = 'active' then 1 end) as active")
+          ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+          ->first();
+
+          return view(adminTheme().'payroll.sections.sectionsAll',compact('sections','totals'));
+
+    }
+
+    public function sectionsAction(Request $r,$action,$id=null){
+
+          if($action=='create'){
+            $check = $r->validate([
+                'name' => 'required|max:100',
+                'description' => 'nullable|max:1000',
+            ]);
+
+            $section =Attribute::where('type',29)->where('status','temp')->where('addedby_id',Auth::id())->first();
+            if(!$section){
+              $section =new Attribute();
+            }
+
+            $section->name=$r->name;
+            $section->description=$r->description;
+            $section->type =29;
+            $section->status ='active';
+            $section->addedby_id =Auth::id();
+            $section->save();
+
+             $slug =Str::slug($r->name);
+             if($slug==null){
+              $section->slug=$section->id;
+             }else{
+              if(Attribute::where('type',29)->where('slug',$slug)->whereNotIn('id',[$section->id])->count() >0){
+              $section->slug=$slug.'-'.$section->id;
+              }else{
+              $section->slug=$slug;
+              }
+            }
+            $section->save();
+
+            Session()->flash('success','Your Are Successfully Added');
+            return redirect()->back();
+
+          }
+
+          $section =Attribute::where('type',29)->find($id);
+          if(!$section){
+            Session()->flash('error','Not Found');
+            return redirect()->route('admin.sections');
+          }
+
+          $allPer = empty(json_decode(Auth::user()->permission->permission, true)['brands']['all']);
+          if($allPer && $section->addedby_id!=Auth::id()){
+            Session()->flash('error','Unauthorized');
+            return redirect()->route('admin.sections');
+          }
+
+          if($action=='update'){
+
+              $check = $r->validate([
+                  'name' => 'required|max:191',
+                  'seo_title' => 'nullable|max:200',
+                  'seo_desc' => 'nullable|max:250',
+                  'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                  'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+              ]);
+
+              $section->name=$r->name;
+              $section->short_description=$r->short_description;
+              $section->description=$r->description;
+              $section->seo_title=$r->seo_title;
+              $section->short_description=$r->short_description;
+              $section->seo_keyword=$r->seo_keyword;
+
+
+                if($r->hasFile('image')){
+                  uploadFile($file,$section->id,14,1,Auth::id());
+                }
+
+                if($r->hasFile('banner')){
+                  uploadFile($file,$section->id,14,2,Auth::id());
+                }
+
+
+                 $slug =Str::slug($r->name);
+                 if($slug==null){
+                  $section->slug=$section->id;
+                 }else{
+                  if(Attribute::where('type',29)->where('slug',$slug)->whereNotIn('id',[$section->id])->count() >0){
+                  $section->slug=$slug.'-'.$section->id;
+                  }else{
+                  $section->slug=$slug;
+                  }
+                }
+
+                $section->status =$r->status?'active':'inactive';
+                $section->fetured =$r->fetured?1:0;
+                $section->editedby_id =Auth::id();
+                $section->save();
+
+                Session()->flash('success','Your Are Successfully Done');
+                return redirect()->back();
+
+          }
+
+          if($action=='delete'){
+              $medias =Media::latest()->where('src_type',14)->where('src_id',$section->id)->get();
+                foreach($medias as $media){
+                  if(File::exists($media->file_url)){
+                    File::delete($media->file_url);
+                  }
+                  $media->delete();
+                }
+
+                $section->delete();
+
+                Session()->flash('success','Your Are Successfully Done');
+                return redirect()->route('admin.sections');
+          }
+
+          return redirect()->back();
+    }
+    // end sections
+
+    // shifts
+    public function shifts(Request $r)
+    {
+        // Bulk Actions
+        if ($r->action && $r->checkid) {
+            $shifts = Shift::whereIn('id', $r->checkid)->get();
+
+            foreach ($shifts as $shift) {
+                switch ($r->action) {
+                    case 1: // Activate
+                        $shift->status = 'active';
+                        $shift->save();
+                        break;
+                    case 2: // Deactivate
+                        $shift->status = 'inactive';
+                        $shift->save();
+                        break;
+                    case 5: // Delete
+                        // Delete associated media
+                        $medias = Media::where('src_type', 15)->where('src_id', $shift->id)->get();
+                        foreach ($medias as $media) {
+                            if (File::exists($media->file_url)) {
+                                File::delete($media->file_url);
+                            }
+                            $media->delete();
+                        }
+                        $shift->delete();
+                        break;
+                }
+            }
+
+            Session::flash('success', 'Action Successfully Completed!');
+            return redirect()->back();
+        } elseif ($r->action) {
+            Session::flash('info', 'Please select at least one shift.');
+            return redirect()->back();
+        }
+
+        // Filters
+        $shifts = Shift::latest()
+            ->when($r->search, function($q) use ($r) {
+                $q->where('name_of_shift', 'LIKE', '%' . $r->search . '%');
+            })
+            ->when($r->status, function($q) use ($r) {
+                $q->where('status', $r->status);
+            })
+            ->paginate(25)
+            ->appends($r->only(['search','status']));
+
+        // Totals
+        $totals = Shift::selectRaw('count(*) as total')
+            ->selectRaw("count(case when status = 'active' then 1 end) as active")
+            ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+            ->first();
+
+        return view(adminTheme().'payroll.shifts.shiftsAll', compact('shifts', 'totals'));
+    }
+
+    // Function to handle the form creation and updating logic
+    public function shiftsAction(Request $r, $action, $id = null)
+    {
+        try {
+            // Show form
+            if ($action == 'form') {
+                $shift = $id ? Shift::find($id) : null;
+                if ($id && !$shift) {
+                    Session::flash('error', 'Shift not found.');
+                    return redirect()->route('admin.shifts');
+                }
+                return view(adminTheme().'payroll.shifts.create_edit', compact('shift'));
+            }
+
+            // Validation
+            $validatedData = $r->validate([
+                'name_of_shift' => 'required|string|max:100',
+                'name_of_shift_bn' => 'nullable|string|max:100',
+                'shift_starting_time' => 'required',
+                'red_marking_on' => 'required',
+                'shift_closing_time' => 'required',
+                'shift_closing_time_next_day' => 'nullable|boolean',
+                'over_time_allowed_up_to' => 'required',
+                'over_time_allowed_up_to_next_day' => 'nullable|boolean',
+                'over_time_1_allowed_up_to' => 'required',
+                'over_time_1_allowed_up_to_next_day' => 'nullable|boolean',
+                'card_accept_from' => 'required',
+                'card_accept_to' => 'required',
+                'card_accept_to_next_day' => 'nullable|boolean',
+                'meal_option' => 'nullable|string',
+                'tiffin_allowance' => 'nullable|numeric',
+                'no_lunch_hour_holiday' => 'nullable|boolean',
+                'dinner_allowance' => 'nullable|boolean',
+                'dinner_count_option' => 'nullable|string',
+                'double_shift' => 'nullable|boolean',
+                'weekly_overtime_allowed' => 'nullable',
+                'weekly_ot_sat' => 'nullable',
+                'weekly_ot_sun' => 'nullable',
+                'weekly_ot_mon' => 'nullable',
+                'weekly_ot_tue' => 'nullable',
+                'weekly_ot_wed' => 'nullable',
+                'weekly_ot_thu' => 'nullable',
+            ]);
+
+            // Fix boolean fields properly
+            $booleanFields = [
+                'shift_closing_time_next_day',
+                'over_time_allowed_up_to_next_day',
+                'over_time_1_allowed_up_to_next_day',
+                'card_accept_to_next_day',
+                'no_lunch_hour_holiday',
+                'dinner_allowance',
+                'double_shift',
+            ];
+
+            foreach ($booleanFields as $field) {
+                $validatedData[$field] = $r->boolean($field);
+            }
+
+            if ($action == 'store') {
+                $shift = new Shift($validatedData);
+                $shift->addedby_id = Auth::id();
+                $shift->status = 'active';
+                $shift->save();
+
+                Session::flash('success', 'Shift created successfully!');
+                return redirect()->route('admin.shifts');
+            }
+
+            if ($action == 'update') {
+                $shift = Shift::find($id);
+                if (!$shift) {
+                    Session::flash('error', 'Shift not found.');
+                    return redirect()->route('admin.shifts');
+                }
+
+                // Optional: Permission check
+                $userPerm = json_decode(Auth::user()->permission->permission ?? '{}', true);
+                $allPer = empty($userPerm['brands']['all']);
+                if ($allPer && $shift->addedby_id != Auth::id()) {
+                    Session::flash('error', 'Unauthorized');
+                    return redirect()->route('admin.shifts');
+                }
+
+                $shift->update($validatedData);
+                $shift->editedby_id = Auth::id();
+                $shift->save();
+
+                Session::flash('success', 'Shift updated successfully!');
+                return redirect()->route('admin.shifts');
+            }
+
+            if ($action == 'delete') {
+                $shift = Shift::find($id);
+                if (!$shift) {
+                    Session::flash('error', 'Shift not found.');
+                    return redirect()->route('admin.shifts');
+                }
+
+                // Delete related media
+                $medias = Media::where('src_type', 15)->where('src_id', $shift->id)->get();
+                foreach ($medias as $media) {
+                    if (File::exists($media->file_url)) {
+                        File::delete($media->file_url);
+                    }
+                    $media->delete();
+                }
+
+                $shift->delete();
+                Session::flash('success', 'Shift deleted successfully.');
+                return redirect()->route('admin.shifts');
+            }
+
+            return redirect()->back();
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Laravel validation exception
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
+        }
+    }
 
 
 

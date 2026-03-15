@@ -312,6 +312,32 @@ class Attribute extends Model
     }
 
 
+    public function scopeFilterBy($query, $type)
+    {
+        $types = [
+            'branch' => 0,
+            'company' => 1,
+            'designation' => 2,
+            'department' => 3,
+            'line_number' => 4,
+            'expenses_type' => 5,
+            'purchase_goods_item_unit' => 6,
+            'purchase_item_category' => 7,
+            'menus' => 8,
+            'payment_methods' => 9,
+            'accounts' => 10,
+            'fabrication' => 11,
+            'composition' => 12,
+            'employee_type' => 16,
+            'divisions' => 27,
+            'grades' => 28,
+            'sections' => 29,
+        ];
+
+        return $query->where('type', $types[$type] ?? null);
+    }
+
+
 
 
 }

@@ -2739,6 +2739,7 @@ class ProductionController extends Controller
                 'buyer',
                 'items',
                 'yarnBookings.receives',
+                'knittingBookings.receives',
                 'dyeingBookings'
             ])->find($piId);
 

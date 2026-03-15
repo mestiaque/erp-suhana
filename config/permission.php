@@ -607,5 +607,14 @@ return [
             ],
 
         ],
+
+        'Development' =>[
+            'dev' => [
+                'label'       => 'Development',
+                'permissions' => [
+                    'all'    => 'All',
+                ],
+            ],
+        ],
     ],
 ];

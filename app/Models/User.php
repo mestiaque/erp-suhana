@@ -15,73 +15,114 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    //Models Information Data
-    /********
-     *
-     *
-     *  ------------------------
-     *  Status==0=Inactive, 1=Active, 2=draft
-     * ------------------------
-     *
-     * Column:
-     *
-     * id               =bigint(20):None,
-     * permission_id    =int(11):null,
-     * name             =varchar(100):null,
-     * email            =varchar(100):null,
-     * mobile           =varchar(20):null,
-     * profile          =text:null,
-     * full_address     =text:null,
-     * address_line1    =text:null,
-     * address_line2    =text:null,
-     * postal_address   =varchar(250):null,
-     * postal_code      =varchar(20):null,
-     * city             =int(4):null,
-     * district         =int(4):null,
-     * division         =int(4):null,
-     * country          =int(4):null,
-     * dob              =timestamp:null,
-     * gender           =varchar(10):null,
-     * status           =tinyint(1):1,
-     * fetured          =tinyint(1):0,
-     * email_verified_at=tinyint(1):0,
-     * password         =varchar(255):none,
-     * password_show    =varchar(191):null,
-     * remember_token   =varchar(100):null,
-     * api_token        =varchar(100):null,
-     * device_key       =varchar(255):null,
-     * verify_code      =varchar(100):null,
-     * verify_code_status=tinyint(1):0,
-     * balance          =float(10,2):0.00,
-     * subscriber       =tinyint(1):0,
-     * customer         =tinyint(1):1,
-     * business         =tinyint(1):0,
-     * admin            =tinyint(1):0,
-     * addedby_id       =bigint(20):0,
-     * addedby_at       =timestamp:null,
-     * created_at       =timestamp:null
-     * updated_at       =timestamp:null
-     *
-     *
-     *
-     ****/
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
+        'permission_id',
         'name',
+        'bn_name',
         'email',
+        'mobile',
+        'profile',
+        'photo',
+        'signature',
+        'address_line1',
+        'address_line2',
+        'postal_address',
+        'location',
+        'postal_code',
+        'city',
+        'district',
+        'division',
+        'country',
+        'dob',
+        'gender',
+        'grade_lavel',
+        'marital_status',
+        'designation_id',
+        'division_id',
+        'section_id',
+        'shift_id',
+        'line_number',
+        'report_to',
+        'father_name',
+        'father_name_bn',
+        'mother_name',
+        'mother_name_bn',
+        'spouse_name',
+        'spouse_name_bn',
+        'boys',
+        'girls',
+        'blood_group',
+        'religion',
+        'education',
+        'work_type',
+        'birth_registration',
+        'passport_no',
+        'driving_license',
+        'etin',
+        'distinguished_mark',
+        'height',
+        'weight',
+        'home_district',
+        'nationality',
+        'emergency_mobile',
+        'emergency_relation',
+        'other_information',
+        'reference_1',
+        'reference_2',
+        'nominee',
+        'nominee_bn',
+        'nominee_relation',
+        'nominee_age',
+        'present_address',
+        'present_address_bn',
+        'permanent_address',
+        'permanent_address_bn',
+        'salary_type',
+        'employee_id',
+        'employee_type',
+        'department_id',
+        'employment_status',
+        'employee_status',
+        'nid_number',
+        'login_status',
+        'status',
+        'fetured',
+        'email_verified_at',
         'password',
+        'password_show',
+        'remember_token',
+        'reset_remember',
+        'api_token',
+        'device_key',
+        'verify_code',
+        'verify_code_status',
+        'gross_salary',
+        'basic_salary',
+        'house_rent',
+        'medical_allowance',
+        'transport_allowance',
+        'food_allowance',
+        'conveyance_allowance',
+        'provident_fund',
+        'balance',
+        'subscriber',
+        'customer',
+        'supplier',
+        'engineer',
+        'admin',
+        'super_admin',
+        'latitude',
+        'longitude',
+        'addedby_id',
+        'addedby_at',
+        'exited_at',
+        'created_at',
+        'joining_date',
+        'confirmation_date',
+        'retirement_date',
+        'updated_at',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -291,16 +332,6 @@ class User extends Authenticatable
         return $this->admin ==  1;
     }
 
-    // for supplier only supplier true
-    // for buyer only buyer true bakigula false
-    // for staff only staff true bakigula false
-    // for admin only admin true bakigula false
-    // for customer, customer true, admin true bakigula false
-    // for merchandiser , merchandiser true and admin true, customer true bakigula false
-
-
-    // In User.php (Model)
-    // example: User::filterByType('admin')->get();
     public function scopeFilterByType($query, $type)
     {
         return match ($type) {

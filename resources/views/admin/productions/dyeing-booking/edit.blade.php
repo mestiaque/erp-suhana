@@ -38,7 +38,7 @@
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>Buyer Name</label>
-                        <input type="text" name="buyer_name" readonly class="form-control buyer_name" value="{{ $booking->pi->buyer?->name ?? '' }}">
+                        <input type="text" name="buyer_name" readonly class="form-control buyer_name" value="{{ $booking?->pi?->buyer?->name ?? ($booking?->buyer_name ?? '') }}">
                     </div>
 
                     {{-- <div class="col-md-3 mb-3">

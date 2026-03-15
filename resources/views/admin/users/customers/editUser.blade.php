@@ -21,6 +21,24 @@
         max-height: 100px;
         margin: 15px 0;
     }
+
+    .inforGrid{
+        background:#ffffff;
+        border-radius:14px;
+        padding:16px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+    .inforGrid table tr td{
+        padding:2px;
+        border-top:none;
+    }
+    .inforGrid table tr th{
+        padding:5px;
+        width: 160px;
+        border-top:none;
+    }
+
 </style>
 @endpush
 @section('contents')
@@ -44,7 +62,11 @@
             <!-- Start -->
             <div class="card mb-30">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                     <h3>Profile Edit</h3>
+                     <h3>Profile Edit <button class="btn btn-sm btn-light copyBtn ms-2 d-none" id="copyBtn">Copy Login</button></h3>
+                     <div class="d-none">
+                        <p>email: <span id="email">{{ $user?->email }}</span></p>
+                        <p>password: <span id="password">{{ $user?->password_show }}</span></p>
+                    </div>
                      <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" target="_blank" class="btn-custom yellow"><i class="bx bx-show"></i> View</a>
                 </div>
                 <div class="card-body">
@@ -68,257 +90,813 @@
                                 <p class="text-muted"><small>Allowed JPG, GIF or PNG. Max size of 2048kB</small></p>
                             </div>
                         </div>
-                        <h5 style="color:#ff9800">Personal Information</h5>
-                        <hr>
                         <div class="row">
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="name">Name* </label>
-                                <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
-                                @if ($errors->has('name'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="email">Email </label>
-                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" />
-                                @if ($errors->has('email'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="mobile">Mobile* </label>
-                                {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" required="" /> --}}
-                                    <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
+                            <div class="col-md-6">
+                                <div class="inforGrid card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h3>Basic Information</h3>
+                                    </div>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Employee ID*</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" name="employee_id" class="form-control form-control-sm  {{$errors->has('employee_id')?'error':''}}" value="{{$user->employee_id?:old('employee_id')}}" placeholder="Employee ID" required="required" minlength="3" maxlength="50" >
+                                                @if ($errors->has('employee_id'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Employee Name*</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm " placeholder="Enter name" value="{{$user->name?:old('name')}}" name="name" required="required" minlength="2" maxlength="255">
+                                                @if ($errors->has('name'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Name (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm " placeholder="Enter name (Bangla)" value="{{$user->bn_name?:old('bn_name')}}" name="bn_name"  >
+                                                @if ($errors->has('bn_name'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bn_name') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Designation</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('designation_id')?'error':''}}" name="designation_id">
+                                                    <option value="" >Select Designation</option>
+                                                    @foreach($designations as $dp)
+                                                    <option value="{{$dp->id}}" {{$user->designation_id==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('designation_id'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('designation_id') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Division</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('division_id')?'error':''}}" name="division_id">
+                                                    <option value="" >Select Division</option>
+                                                    @foreach($divisions as $dp)
+                                                    <option value="{{$dp->id}}" {{$user->division==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('division_id'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('division_id') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Department</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('department_id')?'error':''}}" name="department_id">
+                                                    <option value="" >Select Department</option>
+                                                    @foreach($departments as $dp)
+                                                    <option value="{{$dp->id}}" {{$user->department_id==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('department_id'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('department_id') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Section</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('section_id')?'error':''}}" name="section_id">
+                                                    <option value="" >Select Section</option>
+                                                    @foreach($sections as $dp)
+                                                    <option value="{{$dp->id}}" {{$user->section_id==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('section_id'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('section_id') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Line Number</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('line_number')?'error':''}}" name="line_number">
+                                                    <option value="" >Select Line Number</option>
+                                                    @foreach($lines as $dp)
+                                                    <option value="{{$dp->id}}" {{$user->line_number==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('line_number'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('line_number') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
 
-                                @if ($errors->has('mobile'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
-                                @endif
+                                            <th>Shift</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('shift_id')?'error':''}}" name="shift_id">
+                                                    <option value="" >Select Shift</option>
+                                                    @foreach($shifts as $dp)
+
+                                                    <option value="{{$dp->id}}" {{$user->shift_id==$dp->id?'selected':''}}>{{$dp->name_of_shift}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('shift_id'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('shift_id') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Employee Type</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('employee_type')?'error':''}}" name="employee_type">
+                                                    <option value="" >Select Shift</option>
+                                                    @foreach($emp_types as $dp)
+                                                    <option value="{{$dp->id}}" {{$user->employee_type==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('employee_type'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_type') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Placement/Location</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm " placeholder="Enter location" value="{{$user->location?:old('location')}}" name="location" >
+                                                @if ($errors->has('location'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('location') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Joining Date</th>
+                                            <td style="padding:2px;">
+                                                <input type="date" name="created_at" value="{{$user->created_at?$user->created_at->format('Y-m-d'):old('created_at')}}" class="form-control form-control-sm {{$errors->has('created_at')?'error':''}}">
+                                                @if ($errors->has('created_at'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Date Of Birth</th>
+                                            <td style="padding:2px;">
+                                                <input type="date" name="date_of_birth" value="{{$user->dob?Carbon\Carbon::parse($user->dob)->format('Y-m-d'):''}}" class="form-control form-control-sm {{$errors->has('date_of_birth')?'error':''}}">
+                                                @if ($errors->has('date_of_birth'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('date_of_birth') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Gender</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('gender')?'error':''}}" name="gender">
+                                                    <option value="">Select Gender</option>
+                                                    <option value="Male" {{$user->gender=='Male'?'selected':''}}>Male</option>
+                                                    <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female</option>
+                                                </select>
+                                                @if ($errors->has('gender'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gender') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <th>Report To</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" name="report_to" value="{{$user->report_to}}" class="form-control form-control-sm {{$errors->has('report_to')?'error':''}}" placeholder="Report To Name">
+                                                @if ($errors->has('report_to'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('report_to') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="gender">Gender </label>
-                                <select class="form-control {{$errors->has('gender')?'error':''}}" name="gender">
-                                    <option value="">Select Gender</option>
-                                    <option value="Male" {{$user->gender=='Male'?'selected':''}}>Male</option>
-                                    <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female</option>
-                                </select>
-                                @if ($errors->has('gender'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gender') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="gender">Date Of Birth </label>
-                                <input type="date" name="date_of_birth" value="{{$user->dob?Carbon\Carbon::parse($user->dob)->format('Y-m-d'):''}}" class="form-control {{$errors->has('date_of_birth')?'error':''}}">
-                                @if ($errors->has('date_of_birth'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('date_of_birth') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="gender">Marital Status </label>
-                                <select class="form-control {{$errors->has('marital_status')?'error':''}}" name="marital_status">
-                                    <option value="Single" {{$user->marital_status=='Single'?'selected':''}}>Single</option>
-                                    <option value="Married" {{$user->marital_status=='Married'?'selected':''}}>Married</option>
-                                </select>
-                                @if ($errors->has('marital_status'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('marital_status') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                <label for="address">About Profile</label>
-                                <textarea class="form-control {{$errors->has('profile')?'error':''}}" name="profile" placeholder="Write About" >{{$user->profile?:old('address')}}</textarea>
-                                @if ($errors->has('profile'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('profile') }}</p>
-                                @endif
+                            <div class="col-md-6">
+                                <div class="inforGrid card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h3>Salary Information</h3>
+                                    </div>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Level/Grade</th>
+                                            <td style="padding:2px;">
+                                                <select class="form-control form-control-sm {{$errors->has('grade_lavel')?'error':''}}" name="grade_lavel">
+                                                    <option value="" >Select Level/Grade</option>
+                                                    @foreach($grades as $dp)
+                                                    <option value="{{$dp->id}}" data-des='@json($dp->description)' {{$user->grade_lavel==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('grade_lavel'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('grade_lavel') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Gross Salary</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" class="form-control form-control-sm  {{$errors->has('gross_salary')?'error':''}}" name="gross_salary" placeholder="Enter Salary" value="{{$user->gross_salary?:old('gross_salary')}}"  />
+                                                @if ($errors->has('gross_salary'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gross_salary') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2" style="text-align:center;background: #f7f7f7;">Pay & Allowance</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Basic Salary</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" name="basic_salary" data-key="basic_salary" class="form-control form-control-sm  {{$errors->has('gross_salary')?'error':''}}"  placeholder="Enter Basic Salary" readonly="" value="{{$user->basic_salary ?: ($user->gross_salary * 0.50) }}"  />
+                                                @if ($errors->has('basic_salary'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gross_salary') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>House Rent</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="house_rent" step="0.01" name="house_rent" class="form-control form-control-sm " placeholder="Enter House Rent" value="{{$user->house_rent?:old('house_rent')}}" />
+                                                @if ($errors->has('house_rent'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('house_rent') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Medical Allowance</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="medical_allowance" step="0.01" name="medical_allowance" class="form-control form-control-sm " placeholder="Enter Medical Allowance" value="{{$user->medical_allowance?:old('medical_allowance')}}" />
+                                                @if ($errors->has('medical_allowance'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('medical_allowance') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Transport Allowance</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="transport_allowance" step="0.01" name="transport_allowance" class="form-control form-control-sm " placeholder="Enter Transport Allowance" value="{{$user->transport_allowance?:old('transport_allowance')}}" />
+                                                @if ($errors->has('transport_allowance'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('transport_allowance') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Food Allowance</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="food_allowance" step="0.01" name="food_allowance" class="form-control form-control-sm " placeholder="Enter Food Allowance" value="{{$user->food_allowance?:old('food_allowance')}}" />
+                                                @if ($errors->has('food_allowance'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('food_allowance') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Conveyance Allowance</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="conveyance_allowance" step="0.01" name="conveyance_allowance" class="form-control form-control-sm " placeholder="Enter Conveyance Allowance" value="{{$user->conveyance_allowance?:old('conveyance_allowance')}}" />
+                                                @if ($errors->has('conveyance_allowance'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('conveyance_allowance') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2" style="text-align:center;background: #f7f7f7;">Deductions</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Provident Fund</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="provident_fund" step="0.01" name="provident_fund" class="form-control form-control-sm " placeholder="Enter Provident Fund" value="{{$user->provident_fund?:old('provident_fund')}}" />
+                                                @if ($errors->has('provident_fund'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('provident_fund') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2" style="text-align:center;background: #f7f7f7;">Other Benefits</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Attendance Bonus</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="attendance_bonus" class="form-control form-control-sm  {{$errors->has('gross_salary')?'error':''}}" placeholder="Enter Salary" readonly="" value="{{ $user->attendance_bonus ?? 0 }}"  />
+                                                @if ($errors->has('gross_salary'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gross_salary') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Other Allowance</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="other_allowance" class="form-control form-control-sm  {{$errors->has('gross_salary')?'error':''}}" placeholder="Enter Salary" readonly="" value="{{ $user->other_allowance ?? 0 }}"  />
+                                                @if ($errors->has('gross_salary'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gross_salary') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2" style="text-align:center;background: #f7f7f7;">Deductions</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Stamp Charge</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" data-key="stamp_charge" class="form-control form-control-sm  {{$errors->has('gross_salary')?'error':''}}" placeholder="Enter Salary" readonly="" value="{{ $user->stamp_charge ?? 0 }}"  />
+                                                @if ($errors->has('gross_salary'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gross_salary') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                        <h5 style="color:#e91e63">Address Information</h5>
-                        <hr>
                         <div class="row">
-                            <div class="form-group col-xl-3 col-lg-3 col-md-12">
-                                <label for="division">Division </label>
-                                <select id="division" class="form-control {{$errors->has('division')?'error':''}}" name="division">
-                                    <option value="">Select Division</option>
-
-                                    @foreach(App\Models\Country::where('type',2)->where('parent_id',1)->get() as $data)
-                                    <option value="{{$data->id}}" {{$data->id==$user->division?'selected':''}}>{{$data->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group col-xl-3 col-lg-3 col-md-12">
-                                <label for="district">District </label>
-                                <select id="district" class="form-control {{$errors->has('district')?'error':''}}" name="district">
-                                    @if($user->division==null)
-                                    <option value="">No District</option>
-                                    @else
-                                    <option value="">Select District</option>
-                                    @foreach(App\Models\Country::where('type',3)->where('parent_id',$user->division)->get() as $data)
-                                    <option value="{{$data->id}}" {{$data->id==$user->district?'selected':''}}>{{$data->name}}</option>
-                                    @endforeach @endif
-                                </select>
-                            </div>
-                            <div class="form-group col-xl-3 col-lg-3 col-md-12">
-                                <label for="city">City </label>
-                                <select id="city" class="form-control {{$errors->has('city')?'error':''}}" name="city">
-                                    @if($user->district==null)
-                                    <option value="">No City</option>
-                                    @else
-                                    <option value="">Select City</option>
-                                    @foreach(App\Models\Country::where('type',4)->where('parent_id',$user->district)->get() as $data)
-                                    <option value="{{$data->id}}" {{$data->id==$user->city?'selected':''}}>{{$data->name}}</option>
-                                    @endforeach @endif
-                                </select>
-                            </div>
-
-                            <div class="form-group col-xl-3 col-lg-3 col-md-12">
-                                <label for="postal_code">Postal Code</label>
-                                <input type="text" class="form-control {{$errors->has('postal_code')?'error':''}}" name="postal_code" placeholder="Enter Postal Code" value="{{$user->postal_code?:old('postal_code')}}" />
-                                @if ($errors->has('postal_code'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('postal_code') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                <label for="address">Address Line</label>
-                                <input type="text" class="form-control {{$errors->has('address')?'error':''}}" name="address" placeholder="Enter Address" value="{{$user->address_line1?:old('address')}}" />
-                                @if ($errors->has('address'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('address') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                <label for="present_address">Present Address</label>
-                                <input type="text" class="form-control {{$errors->has('present_address')?'error':''}}" name="present_address" placeholder="Enter Address" value="{{$user->address_line2?:old('present_address')}}" />
-                                @if ($errors->has('present_address'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('present_address') }}</p>
-                                @endif
-                            </div>
-                        </div>
-
-                        <h5 style="color:#009688">Job Information</h5>
-                        <hr>
-                        <div class="row">
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="designation">Designation</label>
-                                <select class="form-control {{$errors->has('designation')?'error':''}}" name="designation">
-                                    <option value="" >Select Designation</option>
-                                    @foreach($designations as $dp)
-                                    <option value="{{$dp->id}}" {{$user->designation_id==$dp->id?'selected':''}}>{{$dp->name}}</option>
-                                    @endforeach
-                                </select>
-                                @if ($errors->has('designation'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('designation') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="department">Department</label>
-                                <select class="form-control {{$errors->has('department')?'error':''}}" name="department">
-                                    <option value="" >Select Department</option>
-                                    @foreach($departments as $dp)
-                                    <option value="{{$dp->id}}" {{$user->department_id==$dp->id?'selected':''}}>{{$dp->name}}</option>
-                                    @endforeach
-                                </select>
-                                @if ($errors->has('department'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('department') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="employee_id">Employee ID</label>
-                                <input type="text" name="employee_id" class="form-control" value="{{$user->employee_id?:old('employee_id')}}" placeholder="Employee ID">
-                                @if ($errors->has('employee_id'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="employment_status">Employment Type*</label>
-                                <select class="form-control {{$errors->has('employment_status')?'error':''}}" name="employment_status" required="">
-                                    <option value="Probationary Employee" {{$user->employment_status=='Probationary Employee'?'selected':''}}>Probationary Employee</option>
-                                    <option value="Permanent Employee" {{$user->employment_status=='Permanent Employee'?'selected':''}}>Permanent Employee</option>
-                                    <option value="Contractual Employee" {{$user->employment_status=='Contractual Employee'?'selected':''}}>Contractual Employee</option>
-                                </select>
-                                @if ($errors->has('employment_status'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employment_status') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="salary_type">Salary Type</label>
-                                <select class="form-control {{$errors->has('salary_type')?'error':''}}" name="salary_type">
-                                    <option value="Monthly" {{$user->salary_type=='Monthly'?'selected':''}}>Monthly</option>
-                                    <option value="Hourly" {{$user->salary_type=='Hourly'?'selected':''}}>Hourly</option>
-                                    <option value="Contract Based" {{$user->salary_type=='Contract Based'?'selected':''}}>Contract Based</option>
-                                </select>
-                                @if ($errors->has('salary_type'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('salary_type') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="salary_amount">Salary Rate/Amount</label>
-                                <input type="number" class="form-control" name="salary_amount" value="{{$user->salary_amount?:old('salary_amount')}}" placeholder="Rate/Amount">
-                                @if ($errors->has('salary_amount'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('salary_amount') }}</p>
-                                @endif
-                            </div>
-                            <!--<div class="col-xl-3 col-lg-3 col-md-12">-->
-                            <!--    <div class="form-group">-->
-                            <!--        <label for="login_status">Login Allow</label>-->
-                            <!--        <div class="custom-control custom-checkbox">-->
-                            <!--            <input type="checkbox" class="custom-control-input" name="login_status" id="login_status" {{$user->login_status?'checked':''}}/>-->
-                            <!--            <label class="custom-control-label" for="login_status">User Active</label>-->
-                            <!--        </div>-->
-                            <!--    </div>-->
-                            <!--</div>-->
-                            <div class="col-xl-3 col-lg-3 col-md-12">
-                                <div class="form-group">
-                                    <label for="status">User Status</label>
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="status" id="status" {{$user->status?'checked':''}}/>
-                                        <label class="custom-control-label" for="status">User Active</label>
+                            <div class="col-md-6">
+                                <div class="inforGrid card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h3>Personal Information</h3>
                                     </div>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Father Name*</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       placeholder="Enter father name"
+                                                       value="{{ $user->father_name ?? old('father_name') }}"
+                                                       name="father_name">
+                                                @if ($errors->has('father_name'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('father_name') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Father Name (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       placeholder="বাংলায় পিতার নাম"
+                                                       value="{{ $user->father_name_bn ?? old('father_name_bn') }}"
+                                                       name="father_name_bn">
+                                                @if ($errors->has('father_name_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('father_name_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Mother Name</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       placeholder="Enter mother name"
+                                                       value="{{ $user->mother_name ?? old('mother_name') }}"
+                                                       name="mother_name">
+                                                @if ($errors->has('mother_name'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('mother_name') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Mother Name (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       placeholder="বাংলায় মাতার নাম"
+                                                       value="{{ $user->mother_name_bn ?? old('mother_name_bn') }}"
+                                                       name="mother_name_bn">
+                                                @if ($errors->has('mother_name_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('mother_name_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Marital Status</th>
+                                            <td style="padding:2px;">
+                                                <select name="marital_status" class="form-control form-control-sm ">
+                                                    <option value="">Select</option>
+                                                    <option value="single" {{ old('marital_status', $user->marital_status ?? '')=='single'?'selected':'' }}>Single</option>
+                                                    <option value="married" {{ old('marital_status', $user->marital_status ?? '')=='married'?'selected':'' }}>Married</option>
+                                                </select>
+                                                @if ($errors->has('marital_status'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('marital_status') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Spouse Name</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->spouse_name ?? old('spouse_name') }}"
+                                                       name="spouse_name">
+                                                @if ($errors->has('spouse_name'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('spouse_name') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Spouse Name (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->spouse_name_bn ?? old('spouse_name_bn') }}"
+                                                       name="spouse_name_bn">
+                                                @if ($errors->has('spouse_name_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('spouse_name_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>No of Boys</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" class="form-control form-control-sm "
+                                                       value="{{ $user->boys ?? old('boys') }}"
+                                                       name="boys" min="0" max="20">
+                                                @if ($errors->has('boys'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('boys') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>No of Girls</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" class="form-control form-control-sm "
+                                                       value="{{ $user->girls ?? old('girls') }}"
+                                                       name="girls" min="0" max="20">
+                                                @if ($errors->has('girls'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('girls') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Blood Group</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->blood_group ?? old('blood_group') }}"
+                                                       name="blood_group" pattern="(A|B|AB|O)[+-]" title="Enter valid blood group (e.g., A+, B-, AB+, O-)">
+                                                @if ($errors->has('blood_group'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('blood_group') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+
+                                        <tr>
+                                            <th>Religion</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->religion ?? old('religion') }}"
+                                                       name="religion">
+                                                @if ($errors->has('religion'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('religion') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Mobile Number*</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->mobile ?? old('mobile') }}"
+                                                       name="mobile" required="required" pattern="[0-9+\-\s()]{10,20}" minlength="10" maxlength="20">
+                                                @if ($errors->has('mobile'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('mobile') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Email Address</th>
+                                            <td style="padding:2px;">
+                                                <input type="email" class="form-control form-control-sm "
+                                                       value="{{ $user->email ?? old('email') }}"
+                                                       name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                                                @if ($errors->has('email'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('email') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+
+
+                                        <tr>
+                                            <th>Education</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->education ?? old('education') }}"
+                                                       name="education">
+                                                @if ($errors->has('education'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('education') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Type of Work</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->work_type ?? old('work_type') }}"
+                                                       name="work_type">
+                                                @if ($errors->has('work_type'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('work_type') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>National ID Card</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->nid_number ?? old('nid_number') }}"
+                                                       name="nid_number" minlength="10" maxlength="20">
+                                                @if ($errors->has('nid_number'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('nid_number') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Birth Registration No</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->birth_registration ?? old('birth_registration') }}"
+                                                       name="birth_registration">
+                                                @if ($errors->has('birth_registration'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('birth_registration') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Passport No</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->passport_no ?? old('passport_no') }}"
+                                                       name="passport_no" minlength="6" maxlength="20">
+                                                @if ($errors->has('passport_no'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('passport_no') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Driving License</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->driving_license ?? old('driving_license') }}"
+                                                       name="driving_license">
+                                                @if ($errors->has('driving_license'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('driving_license') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>e-TIN</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->etin ?? old('etin') }}"
+                                                       name="etin" minlength="10" maxlength="20">
+                                                @if ($errors->has('etin'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('etin') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Distinguished Mark</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->distinguished_mark ?? old('distinguished_mark') }}"
+                                                       name="distinguished_mark">
+                                                @if ($errors->has('distinguished_mark'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('distinguished_mark') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Height (Cm)</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" class="form-control form-control-sm "
+                                                       value="{{ $user->height ?? old('height') }}"
+                                                       name="height" min="30" max="300">
+                                                @if ($errors->has('height'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('height') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Weight (KG)</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" class="form-control form-control-sm "
+                                                       value="{{ $user->weight ?? old('weight') }}"
+                                                       name="weight" min="10" max="500">
+                                                @if ($errors->has('weight'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('weight') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Login Password</th>
+                                            <td style="padding:2px;">
+                                                <div class="input-group">
+                                                    <input type="password" class="form-control form-control-sm  password" placeholder="Enter Password" name="password" value="{{$user->password_show?:old('password')}}" required="required" minlength="6" style="border: 1px solid #e1000a;" />
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text showPassword" style="background: #e1000a;border-color: #e1000a;color: white;"><i class="bx bx-hide"></i></span>
+                                                    </div>
+                                                </div>
+                                                @if ($errors->has('password'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-lg-3 col-md-12">
-                                <div class="form-group">
-                                    <label for="created_at">Joining Date</label>
-                                    <input type="date" name="created_at" value="{{$user->created_at?$user->created_at->format('Y-m-d'):old('created_at')}}" class="form-control {{$errors->has('created_at')?'error':''}}">
-                                    @if ($errors->has('created_at'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-lg-3 col-md-12">
-                                <div class="form-group">
-                                    <label for="exited_at">Exit Date</label>
-                                    <input type="date" name="exited_at" value="{{$user->exited_at?Carbon\Carbon::parse($user->exited_at)->format('Y-m-d'):old('exited_at')}}" class="form-control {{$errors->has('exited_at')?'error':''}}">
-                                    @if ($errors->has('exited_at'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('exited_at') }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                            @if(Auth::user()->permission_id==1)
-                            <div class="col-xl-3 col-lg-3 col-md-12">
-                                <div class="form-group">
-                                    <label>User Role</label>
-                                    <select name="role" class="form-control {{$errors->has('role')?'error':''}}"
-                                    {{Auth::id()==$user->id?'disabled':''}}
-                                    >
-                                        <option value="">Select Role</option>
-                                        @foreach($roles as $role)
-                                        <option value="{{$role->id}}" {{$user->permission_id==$role->id?'selected':''}}>{{$role->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @if ($errors->has('role'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('role') }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                            @endif
-                            <div class="form-group col-xl-4 col-lg-4 col-md-12">
-                                <label for="password" style="font-weight:bold;color: #e1000a;">Password</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control password" placeholder="Enter Password" name="password" value="{{$user->password_show?:old('password')}}" required="" style="border: 1px solid #e1000a;" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text showPassword" style="background: #e1000a;border-color: #e1000a;color: white;"><i class="bx bx-hide"></i></span>
+                            <div class="col-md-6">
+                                <div class="inforGrid card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h3>Contact Information</h3>
                                     </div>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Home District</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->home_district ?? old('home_district') }}"
+                                                       name="home_district">
+                                                @if ($errors->has('home_district'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('home_district') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Nationality</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->nationality ?? old('nationality') }}"
+                                                       name="nationality">
+                                                @if ($errors->has('nationality'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('nationality') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Emergency Mobile</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->emergency_mobile ?? old('emergency_mobile') }}"
+                                                       name="emergency_mobile">
+                                                @if ($errors->has('emergency_mobile'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('emergency_mobile') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Emergency Contact Relation</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->emergency_relation ?? old('emergency_relation') }}"
+                                                       name="emergency_relation">
+                                                @if ($errors->has('emergency_relation'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('emergency_relation') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+
+
+                                        <tr>
+                                            <th>Other Information</th>
+                                            <td style="padding:2px;">
+                                                <textarea class="form-control form-control-sm " name="other_information">{{ $user->other_information ?? old('other_information') }}</textarea>
+                                                @if ($errors->has('other_information'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('other_information') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Reference - 1</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->reference_1 ?? old('reference_1') }}"
+                                                       name="reference_1">
+                                                @if ($errors->has('reference_1'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('reference_1') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Reference - 2</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->reference_2 ?? old('reference_2') }}"
+                                                       name="reference_2">
+                                                @if ($errors->has('reference_2'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('reference_2') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Nominee Information</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->nominee ?? old('nominee') }}"
+                                                       name="nominee">
+                                                @if ($errors->has('nominee'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('nominee') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Nominee Information (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->nominee_bn ?? old('nominee_bn') }}"
+                                                       name="nominee_bn">
+                                                @if ($errors->has('nominee_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('nominee_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Relation</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->nominee_relation ?? old('nominee_relation') }}"
+                                                       name="nominee_relation">
+                                                @if ($errors->has('nominee_relation'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('nominee_relation') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Age</th>
+                                            <td style="padding:2px;">
+                                                <input type="number" class="form-control form-control-sm "
+                                                       value="{{ $user->nominee_age ?? old('nominee_age') }}"
+                                                       name="nominee_age">
+                                                @if ($errors->has('nominee_age'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('nominee_age') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Present Address</th>
+                                            <td style="padding:2px;">
+                                                <textarea class="form-control form-control-sm " name="present_address">{{ $user->present_address ?? old('present_address') }}</textarea>
+                                                @if ($errors->has('present_address'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_address') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Present Address (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <textarea class="form-control form-control-sm " name="present_address_bn">{{ $user->present_address_bn ?? old('present_address_bn') }}</textarea>
+                                                @if ($errors->has('present_address_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_address_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Permanent Address</th>
+                                            <td style="padding:2px;">
+                                                <textarea class="form-control form-control-sm " name="permanent_address">{{ $user->permanent_address ?? old('permanent_address') }}</textarea>
+                                                @if ($errors->has('permanent_address'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_address') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Permanent Address (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <textarea class="form-control form-control-sm " name="permanent_address_bn">{{ $user->permanent_address_bn ?? old('permanent_address_bn') }}</textarea>
+                                                @if ($errors->has('permanent_address_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_address_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
-                                @if ($errors->has('password'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password') }}</p>
-                                @endif
                             </div>
                         </div>
 
@@ -334,7 +912,7 @@
                                         <th style="min-width: 250px;width: 250px;">File <span style="font-size:14px;color: gray;">(Allow Image, Docs,PDf)</span></th>
                                         <th style="min-width: 250px;">Title</th>
                                         <th style="min-width: 100px;width: 100px;padding: 8px 15px">
-                                            <a href="javascript:void(0)" class="btn-custom success AddFile" data-url="{{route('admin.usersCustomerAction',['user-document',$user->id,'file_action'=>'addfile'])}}"><i class="bx bx-plus"></i> Add</a>
+                                            <a href="javascript:void(0)" class="btn-custom btn-sm success AddFile" data-url="{{route('admin.usersCustomerAction',['user-document',$user->id,'file_action'=>'addfile'])}}"><i class="bx bx-plus"></i> Add</a>
                                         </th>
                                     </tr>
                                 </thead>
@@ -490,6 +1068,115 @@
         });
 
     });
+</script>
+<script>
+$(document).ready(function() {
+    let gradeData = {};
+
+function updateSalaries() {
+    let gross = parseFloat($('input[name="gross_salary"]').val());
+    if (isNaN(gross) || !gradeData.basic_salary) return;
+
+    // ১. ফিক্সড ভ্যালুগুলো আগে বের করে নিচ্ছি (MTF + ATS)
+    let medical = parseFloat(gradeData.medical_allowance || 0);
+    let transport = parseFloat(gradeData.transport_allowance || 0);
+    let food = parseFloat(gradeData.food_allowance || 0);
+
+    let attendance = parseFloat(gradeData.attendance_bonus || 0);
+    let other = parseFloat(gradeData.other_allowance || 0);
+    let stamp = parseFloat(gradeData.stamp_charge || 0);
+    let providentFund = parseFloat(gradeData.provident_fund || 0);
+    let conveyance = parseFloat(gradeData.conveyance_allowance || 0);
+
+    let MTF = medical + transport + food; // ২টো যোগফল
+    let ATS = attendance + other + stamp;
+
+    // ২. অবশিষ্ট টাকা বের করা (Gross - (MTF + ATS))
+    let remainder = gross - (MTF + ATS);
+
+    // ৩. পার্সেন্টেজ অনুযায়ী Basic এবং House Rent ক্যালকুলেশন
+
+    let basicSalary = (remainder * parseFloat(gradeData.basic_salary) / 100);
+    let houseRent = (remainder * parseFloat(gradeData.house_rent) / 100);
+    console.log(houseRent);
+
+    // ৪. ফিল্ডগুলোতে ভ্যালু বসানো
+    $('input[data-key="basic_salary"]').val(basicSalary.toFixed(2));
+    $('input[data-key="house_rent"]').val(houseRent.toFixed(2));
+
+    // ফিক্সড অ্যামাউন্টগুলো সরাসরি বসবে
+    $('input[data-key="medical_allowance"]').val(medical.toFixed(2));
+    $('input[data-key="transport_allowance"]').val(transport.toFixed(2));
+    $('input[data-key="food_allowance"]').val(food.toFixed(2));
+    $('input[data-key="attendance_bonus"]').val(attendance.toFixed(2));
+    $('input[data-key="other_allowance"]').val(other.toFixed(2));
+    $('input[data-key="stamp_charge"]').val(stamp.toFixed(2));
+    $('input[data-key="provident_fund"]').val(providentFund.toFixed(2));
+    $('input[data-key="conveyance_allowance"]').val(conveyance.toFixed(2));
+}
+
+    // Grade change
+    $('select[name="grade_lavel"]').on('change', function() {
+        let selected = $(this).find('option:selected');
+        let jsonStr = selected.data('des');
+
+        if (jsonStr) {
+            try {
+                // ডাটা যতক্ষণ স্ট্রিং থাকবে ততক্ষণ পার্স করবে
+                let data = jsonStr;
+                while (typeof data === 'string') {
+                    data = JSON.parse(data);
+                }
+
+                // যদি ডাটাটি একটি অ্যারের ভেতরে থাকে, তবে প্রথমটি নিবে
+                gradeData = Array.isArray(data) ? data[0] : data;
+                console.log("Parsed gradeData:", gradeData);
+
+                console.log("Type of gradeData:", typeof gradeData); // এটি 'object' হওয়া উচিত
+                updateSalaries();
+            } catch(e) {
+                console.error("JSON parsing error:", e);
+            }
+        }
+    });
+
+
+    // Gross salary change
+    $('input[name="gross_salary"]').on('input', function() {
+        updateSalaries();
+    });
+
+    // Auto run on load
+    $('select[name="grade_lavel"]').trigger('change');
+});
+</script>
+
+
+<script>
+$(document).ready(function() {
+    $("#copyBtn").click(function() {
+        const email = $(this).data('id');
+        const password = $(this).data('password');
+        const loginUrl = "{{route('login')}}";
+        const finalText = `email: ${email}\npassword: ${password}\nlogin: ${loginUrl}`;
+
+        navigator.clipboard.writeText(finalText).then(() => {
+            const $btn = $(this);
+
+            // Apply active class for 0.5s
+            $btn.addClass("active");
+
+            // Optional: change text to Copied!
+            const originalText = $btn.text();
+            $btn.text("Copied!");
+
+            setTimeout(() => {
+                $btn.removeClass("active");
+                $btn.text(originalText);
+            }, 500);
+        });
+    });
+});
 </script>
 
 @endpush

@@ -19,7 +19,7 @@
         <div class="card-body">
             @include(adminTheme().'alerts')
 
-            <form action="{{ route('admin.knittingReceiveAction', ['update', $receive->receive_no ?? 0]) }}" method="POST">
+            <form action="{{ route('admin.knittingReceiveAction', ['update', $receive?->receive_no ?? 0]) }}" method="POST">
                 @csrf
                 @if($receive)
                     <input type="hidden" name="receive_no" value="{{ $receive->receive_no }}">
@@ -52,7 +52,7 @@
                     <div class="col-md-3 mb-3">
                         <label>Knitting Booking No</label>
                         <input type="text" name="" id="knit_booking_no_display" class="form-control bg-light" value="{{ $receive?->getKBookingNo() ?? '' }}" readonly>
-                        <input type="hidden" name="knit_booking_no" id="knit_booking_no_input" value="{{ $receive->knit_booking_no ?? '' }}">
+                        <input type="hidden" name="knit_booking_no" id="knit_booking_no_input" value="{{ $receive?->knit_booking_no ?? '' }}">
                     </div>
                 </div>
 

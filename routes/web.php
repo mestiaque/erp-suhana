@@ -204,26 +204,25 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/orders',[OrderController::class,'orders'])->name('orders');
     Route::any('/orders/{action}/{id?}',[OrderController::class,'ordersAction'])->name('ordersAction');
 
-    //end buyer order
 
-    // Floor Route
-    Route::get('/hr/floor-lines',[AdminController::class,'floorLines'])->name('floorLines');
-    Route::any('/hr/floor-lines/{action}/{id?}',[AdminController::class,'floorLinesAction'])->name('floorLinesAction');
-    // Floor Route End
-
-    // Branch Route
-    Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs');
+    Route::get('/hr/branchs',[AdminController::class,'branchs'])->name('branchs'); //0
     Route::any('/hr/branchs/{action}/{id?}',[AdminController::class,'branchsAction'])->name('branchsAction');
-    // Branch Route End
-
-    // Department Route
-    Route::get('/hr/departments',[AdminController::class,'departments'])->name('departments');
-    Route::any('/hr/departments/{action}/{id?}',[AdminController::class,'departmentsAction'])->name('departmentsAction');
-    // Department Route End
-
-    // Designation Route
-    Route::get('/hr/designations',[AdminController::class,'designations'])->name('designations');
+    Route::get('/hr/designations',[AdminController::class,'designations'])->name('designations'); //2
     Route::any('/hr/designations/{action}/{id?}',[AdminController::class,'designationsAction'])->name('designationsAction');
+    Route::get('/hr/departments',[AdminController::class,'departments'])->name('departments'); //3
+    Route::any('/hr/departments/{action}/{id?}',[AdminController::class,'departmentsAction'])->name('departmentsAction');
+    Route::get('/hr/floor-lines',[AdminController::class,'floorLines'])->name('floorLines'); //4
+    Route::any('/hr/floor-lines/{action}/{id?}',[AdminController::class,'floorLinesAction'])->name('floorLinesAction');
+    Route::get('/hr/employee-types',[AdminController::class,'employeeType'])->name('employeeType'); //16
+    Route::any('/hr/employee-types/{action}/{id?}',[AdminController::class,'employeeTypeAction'])->name('employeeTypeAction');
+    Route::get('/hr/divisions',[AdminController::class,'divisions'])->name('divisions');//27
+    Route::any('/hr/divisions/{action}/{id?}',[AdminController::class,'divisionsAction'])->name('divisionsAction');
+    Route::get('/hr/grades',[AdminController::class,'grades'])->name('grades');//28
+    Route::any('/hr/grades/{action}/{id?}',[AdminController::class,'gradesAction'])->name('gradesAction');
+    Route::get('/hr/sections',[AdminController::class,'sections'])->name('sections'); //29
+    Route::any('/hr/sections/{action}/{id?}',[AdminController::class,'sectionsAction'])->name('sectionsAction');
+    Route::get('/hr/shifts',[AdminController::class,'shifts'])->name('shifts');
+    Route::any('/hr/shifts/{action}/{id?}',[AdminController::class,'shiftsAction'])->name('shiftsAction');
 
     //Accounts Management End
 
@@ -319,6 +318,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
 
     Route::get('/roadmap', [PostsController::class, 'roadmap']);
+
+
+    include(__DIR__ . '/payroll.php');
 
 
 });

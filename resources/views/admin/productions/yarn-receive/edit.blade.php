@@ -34,7 +34,7 @@
                                 data-url="{{ route('admin.yarnReceiveAction', 'pi-select') }}" required>
                             <option value="">-- Select PI --</option>
                             @foreach($pis as $pi)
-                                <option value="{{ $pi->id }}" {{ (isset($receive) && $items->first()->pi_id == $pi->id) ? 'selected' : '' }}>
+                                <option value="{{ $pi->id }}" {{ (isset($receive) && $items->isNotEmpty() && $items->first()?->pi_id == $pi->id) ? 'selected' : '' }}>
                                     {{ $pi->pi_no }}
                                 </option>
                             @endforeach

@@ -211,18 +211,11 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="{{asset('admin/assets/js/inword.js')}}"></script>
 <script>
     // window.print();
     document.getElementById('PrintAction').addEventListener('click', function () {
         window.print();
     });
-
-    var amount = Number($('#total_amount_input').val());
-    console.log(amount);
-    var words = toWords(amount);
-    $('#total_amount_word').html(words + ' Taka Only');
-
 </script>
 
 </body>
