@@ -44,11 +44,11 @@
             </div>
         </form>
 
-        <ul class="statuslist mb-3">
+        {{-- <ul class="statuslist mb-3">
             <li><a href="{{ route('admin.commercial.packingList') }}" class="{{ !request()->status ? 'active' : '' }}">All ({{ $statusCounts['total'] }})</a></li>
             <li><a href="{{ route('admin.commercial.packingList', ['status' => 1]) }}" class="{{ request()->status == 1 ? 'active' : '' }}">Pending ({{ $statusCounts['pending'] }})</a></li>
             <li><a href="{{ route('admin.commercial.packingList', ['status' => 2]) }}" class="{{ request()->status == 2 ? 'active' : '' }}">Shipped ({{ $statusCounts['shipped'] }})</a></li>
-        </ul>
+        </ul> --}}
 
         <div class="table-responsive">
             <table class="table table-striped">

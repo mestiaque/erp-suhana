@@ -374,13 +374,13 @@ return [
                     'icon_color' => 'text-warning',
                     'permission' => 'general'
                 ],
-                [
-                    'title'      => 'Commercial Reports',
-                    'icon'       => 'fa-solid fa-arrow-right',
-                    'route'      => '/admin/commercial/reports',
-                    'icon_color' => 'text-warning',
-                    'permission' => 'general'
-                ],
+                // [
+                //     'title'      => 'Commercial Reports',
+                //     'icon'       => 'fa-solid fa-arrow-right',
+                //     'route'      => '/admin/commercial/reports',
+                //     'icon_color' => 'text-warning',
+                //     'permission' => 'general'
+                // ],
             ]
         ],
     ],

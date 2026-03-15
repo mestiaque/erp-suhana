@@ -25,7 +25,8 @@
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3>Bank BTB LC List</h3>
-        <a href="{{ route('admin.commercial.btbLcAction', 'create') }}" class="btn-custom primary"><i class="bx bx-plus"></i> Add New LC</a>
+        <a href="#" class="btn-custom primary"><i class="bx bx-plus"></i> Add New LC</a>
+        {{-- <a href="{{ route('admin.commercial.btbLcAction', 'create') }}" class="btn-custom primary"><i class="bx bx-plus"></i> Add New LC</a> --}}
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
