@@ -66,7 +66,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Commercial Invoice List</h3>
              <div class="dropdown">
-                <a href="{{ route('admin.commercial.commercial.invoiceCreate') }}" class="btn-custom primary" style="padding:5px 15px;">
+                <a href="{{ route('admin.commercial.invoiceCreate') }}" class="btn-custom primary" style="padding:5px 15px;">
                     <i class="bx bx-plus"></i> Add New Invoice
                 </a>
                 <a href="{{ route('admin.commercial.invoice') }}" class="btn-custom yellow">

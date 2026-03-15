@@ -258,8 +258,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
         // 5. Commercial Invoice
         Route::get('/invoices', [CommercialController::class, 'invoice'])->name('invoice');
-        // Route::get('/invoices/create', [CommercialController::class, 'createInvoice'])->name('commercial.invoiceCreate');
-        // Route::post('/invoices/store', [CommercialController::class, 'invoiceAction'])->name('commercial.invoiceStore');
+        Route::get('/invoices/create', [CommercialController::class, 'createInvoice'])->name('invoiceCreate');
+        Route::post('/invoices/store', [CommercialController::class, 'invoiceAction'])->name('invoiceStore');
         Route::any('/invoices/{action}/{id?}', [CommercialController::class, 'invoiceAction'])->name('invoiceAction');
 
         // 6. Packing List
