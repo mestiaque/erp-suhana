@@ -36,12 +36,16 @@
                         <div class="row">
                             <div class="col-md-2 mb-1">
                                 <div class="input-group">
-                                    <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control {{$errors->has('startDate')?'error':''}}" />
-                                    <input type="date" value="{{request()->endDate?:''}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
+                                    <label for="" class="mb-0">Joining Date</label>
+                                    <div class="d-flex">
+                                        <input type="date" name="joining_start" value="{{request()->joining_start?:''}}" class="form-control form-control-sm" title="Joining Date From" />
+                                        <input type="date" name="joining_end" value="{{request()->joining_end?:''}}" class="form-control form-control-sm" title="Joining Date To" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-1">
-                                <select class="form-control" name="role_id">
+                                <label for="" class="mb-0">Role</label>
+                                <select class="form-control form-control-sm" name="role_id">
                                     <option value="">Select Role</option>
                                     @foreach($roles as $role)
                                     <option value="{{$role->id}}" {{request()->role_id==$role->id?'selected':''}} >{{$role->name}}</option>
@@ -49,7 +53,19 @@
                                 </select>
                             </div>
                             <div class="col-md-2 mb-1">
-                                <select class="form-control" name="designation_id">
+                                <label for="" class="mb-0">Division</label>
+                                <select class="form-control form-control-sm" name="division_id">
+                                    <option value="">Select Division</option>
+                                    @if(isset($divisions))
+                                    @foreach($divisions as $division)
+                                    <option value="{{$division->id}}" {{request()->division_id==$division->id?'selected':''}} >{{$division->name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-1">
+                                <label for="" class="mb-0">Designation</label>
+                                <select class="form-control form-control-sm" name="designation_id">
                                     <option value="">Select Designation</option>
                                     @if(isset($designations))
                                     @foreach($designations as $designation)
@@ -59,7 +75,8 @@
                                 </select>
                             </div>
                             <div class="col-md-2 mb-1">
-                                <select class="form-control" name="department_id">
+                                <label for="" class="mb-0">Department</label>
+                                <select class="form-control form-control-sm" name="department_id">
                                     <option value="">Select Department</option>
                                     @if(isset($departments))
                                     @foreach($departments as $department)
@@ -69,7 +86,19 @@
                                 </select>
                             </div>
                             <div class="col-md-2 mb-1">
-                                <select class="form-control" name="shift_id">
+                                <label for="" class="mb-0">Section</label>
+                                <select class="form-control form-control-sm" name="section_id">
+                                    <option value="">Select Section</option>
+                                    @if(isset($sections))
+                                    @foreach($sections as $section)
+                                    <option value="{{$section->id}}" {{request()->section_id==$section->id?'selected':''}} >{{$section->name}}</option>
+                                    @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-1">
+                                <label for="" class="mb-0">Shift</label>
+                                <select class="form-control form-control-sm" name="shift_id">
                                     <option value="">Select Shift</option>
                                     @if(isset($shifts))
                                     @foreach($shifts as $shift)
@@ -79,19 +108,23 @@
                                 </select>
                             </div>
                             <div class="col-md-2 mb-1">
-                                <select class="form-control" name="employee_type">
+                                <label for="" class="mb-0">Employee Type</label>
+                                <select class="form-control form-control-sm" name="employee_type">
                                     <option value="">Select Employee Type</option>
-                                    @if(isset($emp_types))
-                                    @foreach($emp_types as $type)
+                                    @if(isset($empTypes))
+                                    @foreach($empTypes as $type)
                                     <option value="{{$type->id}}" {{request()->employee_type==$type->id?'selected':''}} >{{$type->name}}</option>
                                     @endforeach
                                     @endif
                                 </select>
                             </div>
                             <div class="col-md-4 mb-1">
+                                <label for="" class="mb-0">Search</label>
                                 <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile, Employee ID" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                                    <div class="d-flex w-100">
+                                        <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile, Employee ID" class="form-control form-control-sm {{$errors->has('search')?'error':''}}" />
+                                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -106,7 +139,7 @@
                 <div class="col-md-4">
                     @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
                     <div class="input-group mb-1">
-                        <select class="form-control form-control-sm rounded-0" name="action" required="">
+                        <select class="form-control form-control-sm form-control form-control-sm-sm rounded-0" name="action" required="">
                             <option value="">Select Action</option>
                             @can('employee.edit')
                             <option value="1">Active</option>
@@ -159,7 +192,10 @@
                             <th style="min-width: 150px;">Mobile / Email</th>
                             <th style="min-width: 100px;">Designation</th>
                             <th style="min-width: 100px;">Department</th>
+                            <th style="min-width: 100px;">Section</th>
+                            <th style="min-width: 100px;">Division</th>
                             <th style="min-width: 80px;">Shift</th>
+                            <th style="min-width: 110px;">Employee Type</th>
                             <th style="min-width: 90px;">Join Date</th>
                             <th style="min-width: 70px;">Status</th>
                             <th style="min-width: 70px; width: 70px;">Action</th>
@@ -207,27 +243,55 @@
                             <td>{{ $user->employee_id ?? '--' }}</td>
                             <td>{{$user->mobile ?? $user->email ?? '--'}}</td>
                             <td>
-                                @if($user->designation)
-                                <span style="color: #009688;font-weight: bold;">{{$user->designation->name}}</span>
+                                @php($designationName = $user->designation->name ?? ($designationsMap[$user->designation_id] ?? null))
+                                @if($designationName)
+                                <span style="color: #009688;font-weight: bold;">{{$designationName}}</span>
                                 @else
                                 <span style="color: #FF9800;">No Designation</span>
                                 @endif
                             </td>
                             <td>
-                                @if($user->department)
-                                <span style="color: #009688;">{{$user->department->name}}</span>
+                                @php($departmentName = $user->department->name ?? ($departmentsMap[$user->department_id] ?? null))
+                                @if($departmentName)
+                                <span style="color: #009688;">{{$departmentName}}</span>
                                 @else
                                 <span style="color: #FF9800;">--</span>
                                 @endif
                             </td>
                             <td>
-                                @if($user->shift)
-                                <span style="color: #2196F3;">{{$user->shift->name_of_shift}}</span>
+                                @php($sectionName = $sectionsMap[$user->section_id] ?? null)
+                                @if($sectionName)
+                                <span style="color: #009688;">{{$sectionName}}</span>
                                 @else
                                 <span style="color: #FF9800;">--</span>
                                 @endif
                             </td>
-                            <td>{{$user->created_at->format('d.m.Y')}}</td>
+                            <td>
+                                @php($divisionName = $divisionsMap[$user->division] ?? null)
+                                @if($divisionName)
+                                <span style="color: #009688;">{{$divisionName}}</span>
+                                @else
+                                <span style="color: #FF9800;">--</span>
+                                @endif
+                            </td>
+                            <td>
+                                @php($shiftName = $shiftsMap[$user->shift_id] ?? null)
+                                @if($shiftName)
+                                <span style="color: #2196F3;">{{$shiftName}}</span>
+                                @else
+                                <span style="color: #FF9800;">--</span>
+                                @endif
+                            </td>
+                            <td>
+                                @php($employeeTypeName = $empTypesMap[$user->employee_type] ?? null)
+                                @if($employeeTypeName)
+                                <span style="color: #009688;">{{$employeeTypeName}}</span>
+                                @else
+                                <span style="color: #FF9800;">--</span>
+                                @endif
+                            </td>
+                            {{-- @dd($user) --}}
+                            <td>{{$user->joining_date ? \Carbon\Carbon::parse($user->joining_date)->format('d.m.Y') : '--'}}</td>
                             <td>
                                 @if($user->status == 1)
                                 <span class="badge badge-success">Active</span>
@@ -280,7 +344,7 @@
 	   		<div class="form-group">
 			 <label for="name">Name* </label>
              <div class="controls">
-                 <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
+                 <input type="text" class="form-control form-control-sm {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
 				@if ($errors->has('name'))
 				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
 				@endif
@@ -289,8 +353,8 @@
 			 <div class="form-group">
 				<label for="name">Mobile* </label>
 				<div class="controls">
-					{{-- <input type="mobile" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required> --}}
-                    <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" required>
+					{{-- <input type="mobile" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required> --}}
+                    <input type="tel" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" required>
 
 					@if ($errors->has('mobile'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
@@ -300,7 +364,7 @@
 			 <div class="form-group">
 				<label for="name">Email </label>
 				<div class="controls">
-					<input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
+					<input type="email" class="form-control form-control-sm {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
 					@if ($errors->has('email'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
 					@endif

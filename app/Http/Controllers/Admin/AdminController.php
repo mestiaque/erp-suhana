@@ -33,6 +33,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserLocation;
 use App\Models\Visit;
+use App\Services\UserService;
 use Artisan;
 use Carbon\Carbon;
 use DB;
@@ -4325,6 +4326,20 @@ class AdminController extends Controller
     // Users Customer List + Bulk Actions
     public function usersCustomer(Request $r)
     {
+        $departments = Attribute::latest()->filterBy('department')->where('status','<>','temp')->get(['id', 'name']);
+        $designations = Attribute::latest()->filterBy('designation')->where('status','<>','temp')->get(['id', 'name']);
+        $divisions = Attribute::latest()->filterBy('divisions')->where('status','<>','temp')->get(['id', 'name']);
+        $sections = Attribute::latest()->filterBy('sections')->where('status','<>','temp')->get(['id', 'name']);
+        $empTypes = Attribute::latest()->filterBy('employee_type')->where('status','<>','temp')->get(['id', 'name']);
+        $shifts = Shift::latest()->get(['id', 'name_of_shift']);
+
+        $departmentsMap = $departments->pluck('name', 'id');
+        $designationsMap = $designations->pluck('name', 'id');
+        $divisionsMap = $divisions->pluck('name', 'id');
+        $sectionsMap = $sections->pluck('name', 'id');
+        $empTypesMap = $empTypes->pluck('name', 'id');
+        $shiftsMap = $shifts->pluck('name_of_shift', 'id');
+
         // Bulk Actions
         if ($r->action) {
             if ($r->checkid) {
@@ -4369,11 +4384,13 @@ class AdminController extends Controller
 
         // Query Users
         $usersQuery = User::latest()->filterByType('customer')
+            ->with(['permission', 'designation', 'department'])
             ->where(function ($q) use ($r) {
                 if ($r->search) {
                     $q->where('name', 'LIKE', '%' . $r->search . '%')
                     ->orWhere('email', 'LIKE', '%' . $r->search . '%')
-                    ->orWhere('mobile', 'LIKE', '%' . $r->search . '%');
+                    ->orWhere('mobile', 'LIKE', '%' . $r->search . '%')
+                    ->orWhere('employee_id', 'LIKE', '%' . $r->search . '%');
                 }
                 if ($r->status) {
                     $q->where('status', $r->status == 'inactive' ? 0 : 1);
@@ -4381,11 +4398,35 @@ class AdminController extends Controller
                 if ($r->role_id) {
                     $q->where('permission_id', $r->role_id);
                 }
+                if ($r->division_id) {
+                    $q->where('division', $r->division_id);
+                }
+                if ($r->designation_id) {
+                    $q->where('designation_id', $r->designation_id);
+                }
+                if ($r->department_id) {
+                    $q->where('department_id', $r->department_id);
+                }
+                if ($r->section_id) {
+                    $q->where('section_id', $r->section_id);
+                }
+                if ($r->shift_id) {
+                    $q->where('shift_id', $r->shift_id);
+                }
+                if ($r->employee_type) {
+                    $q->where('employee_type', $r->employee_type);
+                }
                 if ($r->startDate || $r->endDate) {
                     $from = $r->startDate ?? Carbon::now()->format('Y-m-d');
                     $to = $r->endDate ?? Carbon::now()->format('Y-m-d');
                     $q->whereDate('created_at', '>=', $from)
                     ->whereDate('created_at', '<=', $to);
+                }
+                if ($r->joining_start || $r->joining_end) {
+                    $from = $r->joining_start ?? Carbon::now()->format('Y-m-d');
+                    $to = $r->joining_end ?? Carbon::now()->format('Y-m-d');
+                    $q->whereDate('joining_date', '>=', $from)
+                    ->whereDate('joining_date', '<=', $to);
                 }
             });
 
@@ -4397,10 +4438,11 @@ class AdminController extends Controller
         }
 
         $users = $usersQuery->select([
-            'id','permission_id','name','email','employee_id','designation_id','mobile','created_at','addedby_id','status','deleted_by','deleted_at'
+            'id','permission_id','name','email','employee_id','designation_id','department_id','section_id','shift_id','employee_type','division','joining_date','mobile','created_at','addedby_id','status','deleted_by','deleted_at'
         ])
         ->paginate(25)
         ->appends($r->all());
+        // dd($users);
 
         $totals = User::withTrashed()->filterByType('customer')
             ->whereIn('status', [0,1])
@@ -4415,9 +4457,26 @@ class AdminController extends Controller
         if ($r->view == 'deleted') {
             return view(adminTheme() . 'users.customers.users_deleted', compact('users', 'totals', 'roles'));
         } else {
-            return view(adminTheme() . 'users.customers.users', compact('users', 'totals', 'roles'));
+            return view(adminTheme() . 'users.customers.users', compact(
+                'users',
+                'totals',
+                'roles',
+                'departments',
+                'designations',
+                'divisions',
+                'sections',
+                'empTypes',
+                'shifts',
+                'departmentsMap',
+                'designationsMap',
+                'divisionsMap',
+                'sectionsMap',
+                'empTypesMap',
+                'shiftsMap'
+            ));
         }
     }
+
 
     // Users Customer Action (Create, Edit, Update, Password, Soft Delete, Restore, Force Delete)
     public function usersCustomerAction(Request $r, $action, $id = null)
@@ -4521,80 +4580,20 @@ class AdminController extends Controller
     
             // UPDATE USER PROFILE
             if ($action == 'update' && $r->isMethod('post')) {
-                $r->validate([
-                    'name' => 'required|max:100',
-                    'email' => 'nullable|max:100|unique:users,email,' . $user->id,
-                    'mobile' => 'required|max:20|unique:users,mobile,' . $user->id,
-                    'date_of_birth' => 'nullable|date',
-                    'gender' => 'nullable|max:10',
-                    'marital_status' => 'nullable|max:20',
-                    'present_address' => 'nullable|max:200',
-                    'address' => 'nullable|max:191',
-                    'division' => 'nullable|numeric',
-                    'district' => 'nullable|numeric',
-                    'city' => 'nullable|numeric',
-                    'designation' => 'nullable|numeric',
-                    'department' => 'nullable|numeric',
-                    'employee_id' => 'nullable|max:100',
-                    'profile' => 'nullable|max:1000',
-                    'salary_type' => 'nullable|max:100',
-                    'salary_amount' => 'nullable|numeric',
-                    'employment_status' => 'nullable|max:100',
-                    'exited_at' => 'nullable|date|max:50',
-                    'created_at' => 'nullable|date|max:50',
-                    'role' => 'nullable|numeric',
-                    'postal_code' => 'nullable|max:20',
-                    'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                ]);
-    
-                $user->fill([
-                    'name' => $r->name,
-                    'mobile' => $r->mobile,
-                    'email' => $r->email,
-                    'gender' => $r->gender,
-                    'marital_status' => $r->marital_status ?? 'Single',
-                    'dob' => $r->date_of_birth,
-                    'address_line1' => $r->address,
-                    'address_line2' => $r->present_address,
-                    'division' => $r->division,
-                    'district' => $r->district,
-                    'city' => $r->city,
-                    'postal_code' => $r->postal_code,
-                    'designation_id' => $r->designation,
-                    'department_id' => $r->department,
-                    'employee_id' => $r->employee_id,
-                    'permission_id' => $r->role,
-                    'salary_amount' => $r->salary_amount ?: 0,
-                    'profile' => $r->profile,
-                    'salary_type' => $r->salary_type ?: 'Monthly',
-                    'employment_status' => $r->employment_status ?: 'Monthly',
-                    'created_at' => $r->created_at ?: Carbon::now(),
-                    'exited_at' => $r->exited_at,
-                    'status' => $r->status ? true : false,
-                    'login_status' => $r->login_status ? true : false,
-                ]);
-    
-                // নিজের আইডি না হলে রিকোয়েস্টের রোল নেবে, আর নিজের আইডি হলে আগের রোলটাই রেখে দিবে
-                $user->permission_id = ($user->id !== $authId) ? $r->role : $user->permission_id;
-    
-                // এরপর সেভ করুন
-                $user->save();
-    
-                if ($r->password) {
-                    $user->password_show = $r->password;
-                    $user->password = Hash::make($r->password);
+                try {
+                    $userService = app(UserService::class);
+                    $r->validate($userService->getUpdateValidationRules($user->id));
+                    $userService->update($r, $user);
+                    $user->settypes('customer');
+                    $user->save();
+
+                    Session()->flash('success', 'Update Successful!');
+                    return redirect()->back();
+
+                } catch (\Exception $e) {
+
+                    return redirect()->back()->withErrors(['error' => $e->getMessage()]);
                 }
-    
-                // Image upload
-                if ($r->hasFile('image')) {
-                    $file = $r->image;
-                    uploadFile($file, $user->id, 6, 1, Auth::id());
-                }
-                $user->setTypes('customer');
-    
-                $user->save();
-                Session()->flash('success', 'User updated successfully!');
-                return redirect()->back();
             }
     
             // PASSWORD CHANGE

@@ -138,6 +138,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'addedby_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'joining_date' => 'datetime',
     ];
 
     public function identities() {
@@ -176,6 +177,78 @@ class User extends Authenticatable
     public function salaries(){
         return $this->hasMany(Salary::class,'user_id');
     }
+
+    public function scopeHideDev($query)
+    {
+        $hiddenIds = [7]; // যেগুলো hide করতে চাও
+        return $query->whereNotIn('id', $hiddenIds);
+    }
+
+    public function employeeEducation()
+    {
+        return $this->hasMany(EmployeeEducation::class);
+    }
+
+    public function employeeTraining()
+    {
+        return $this->hasMany(EmployeeTraining::class);
+    }
+
+    public function employeeExperience()
+    {
+        return $this->hasMany(EmployeeExperience::class);
+    }
+
+    public function employeeBankInfo()
+    {
+        return $this->hasMany(EmployeeBank::class);
+    }
+
+    public function roasters()
+    {
+        return $this->hasMany(Roaster::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class);
+    }
+
+    public function leaveBalances()
+    {
+        return $this->hasMany(LeaveBalance::class);
+    }
+
+    public function salarySheets()
+    {
+        return $this->hasMany(SalarySheet::class);
+    }
+
+    public function increments()
+    {
+        return $this->hasMany(EmployeeIncrement::class);
+    }
+
+    public function terminations()
+    {
+        return $this->hasMany(Termination::class);
+    }
+
+    public function retirements()
+    {
+        return $this->hasMany(EmployeeRetirement::class);
+    }
+
+    public function probations()
+    {
+        return $this->hasMany(Probation::class);
+    }
+
 
 
     // public function sales(){

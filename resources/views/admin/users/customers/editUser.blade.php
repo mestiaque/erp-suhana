@@ -186,7 +186,7 @@
                                                 <select class="form-control form-control-sm {{$errors->has('line_number')?'error':''}}" name="line_number">
                                                     <option value="" >Select Line Number</option>
                                                     @foreach($lines as $dp)
-                                                    <option value="{{$dp->id}}" {{$user->line_number==$dp->id?'selected':''}}>{{$dp->name}}</option>
+                                                    <option value="{{$dp->id}}" {{$user->line_number==$dp->id?'selected':''}}>{{$dp->name}} Line-{{$dp->slug}}</option>
                                                     @endforeach
                                                 </select>
                                                 @if ($errors->has('line_number'))
@@ -236,9 +236,9 @@
                                         <tr>
                                             <th>Joining Date</th>
                                             <td style="padding:2px;">
-                                                <input type="date" name="created_at" value="{{$user->created_at?$user->created_at->format('Y-m-d'):old('created_at')}}" class="form-control form-control-sm {{$errors->has('created_at')?'error':''}}">
-                                                @if ($errors->has('created_at'))
-                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
+                                                <input type="date" name="joining_date" value="{{$user->joining_date?$user->joining_date->format('Y-m-d'):old('joining_date')}}" class="form-control form-control-sm {{$errors->has('joining_date')?'error':''}}">
+                                                @if ($errors->has('joining_date'))
+                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('joining_date') }}</p>
                                                 @endif
                                             </td>
                                         </tr>

@@ -451,7 +451,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="info-label">Division</div>
-                                        <div class="info-value">{{$user->division ? $user->division->name : 'N/A'}}</div>
+                                        <div class="info-value">{{$user->divisions ? $user->divisions->name : 'N/A'}}</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="info-label">Section</div>
