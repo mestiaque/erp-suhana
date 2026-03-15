@@ -25,12 +25,12 @@
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3>Export Realization List</h3>
-        <a href="{{ route('admin.commercial.exportRealizationAction', 'create') }}" class="btn-custom primary"><i class="bx bx-plus"></i> Add New</a>
+        {{-- <a href="{{ route('admin.commercial.exportRealizationAction', 'create') }}" class="btn-custom primary"><i class="bx bx-plus"></i> Add New</a> --}}
     </div>
     <div class="card-body">
         @include(adminTheme().'alerts')
 
-        <form action="{{ route('admin.commercial.exportRealization') }}" method="GET" class="mb-3">
+        {{-- <form action="{{ route('admin.commercial.exportRealization') }}" method="GET" class="mb-3">
             <div class="row">
                 <div class="col-md-4"><input type="text" name="search" value="{{ request()->search }}" placeholder="Search Invoice No" class="form-control"></div>
                 <div class="col-md-3">
@@ -43,14 +43,14 @@
                 </div>
                 <div class="col-md-2"><button type="submit" class="btn btn-success">Search</button></div>
             </div>
-        </form>
-
+        </form> --}}
+{{-- 
         <ul class="statuslist mb-3">
             <li><a href="{{ route('admin.commercial.exportRealization') }}" class="{{ !request()->status ? 'active' : '' }}">All ({{ $statusCounts['total'] }})</a></li>
             <li><a href="{{ route('admin.commercial.exportRealization', ['status' => 1]) }}" class="{{ request()->status == 1 ? 'active' : '' }}">Pending ({{ $statusCounts['pending'] }})</a></li>
             <li><a href="{{ route('admin.commercial.exportRealization', ['status' => 2]) }}" class="{{ request()->status == 2 ? 'active' : '' }}">Partial ({{ $statusCounts['partial'] }})</a></li>
             <li><a href="{{ route('admin.commercial.exportRealization', ['status' => 3]) }}" class="{{ request()->status == 3 ? 'active' : '' }}">Realized ({{ $statusCounts['realized'] }})</a></li>
-        </ul>
+        </ul> --}}
 
         <div class="table-responsive">
             <table class="table table-striped">
