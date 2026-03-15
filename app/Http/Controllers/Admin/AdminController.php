@@ -959,7 +959,8 @@ class AdminController extends Controller
                             }
 
                         })
-                        ->orderBy('id','desc')
+                        // ->orderBy('id','desc')
+                        ->latest()
                         ->get();
         $paymentMethods =Attribute::where('type',9)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
         $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
