@@ -32,12 +32,13 @@
 
         <form action="{{ route('admin.commercial.pricingList') }}" method="GET" class="mb-3">
             <div class="row">
-                <div class="col-md-4"><input type="text" name="search" value="{{ request()->search }}" placeholder="Search Ref No" class="form-control"></div>
+                <div class="col-md-4"><input type="text" name="search" value="{{ request()->search }}" placeholder="Search Price List No" class="form-control"></div>
                 <div class="col-md-3">
                     <select name="status" class="form-control">
                         <option value="all">All Status</option>
                         <option value="1" {{ request()->status == 1 ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ request()->status === '0' ? 'selected' : '' }}>Inactive</option>
+                        <option value="2" {{ request()->status == 2 ? 'selected' : '' }}>Expired</option>
+                        <option value="3" {{ request()->status == 3 ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </div>
                 <div class="col-md-2"><button type="submit" class="btn btn-success">Search</button></div>
@@ -47,24 +48,24 @@
         <ul class="statuslist mb-3">
             <li><a href="{{ route('admin.commercial.pricingList') }}" class="{{ !request()->status ? 'active' : '' }}">All ({{ $statusCounts['total'] }})</a></li>
             <li><a href="{{ route('admin.commercial.pricingList', ['status' => 1]) }}" class="{{ request()->status == 1 ? 'active' : '' }}">Active ({{ $statusCounts['active'] }})</a></li>
-            <li><a href="{{ route('admin.commercial.pricingList', ['status' => 0]) }}" class="{{ request()->status === '0' ? 'active' : '' }}">Inactive ({{ $statusCounts['inactive'] }})</a></li>
+            <li><a href="{{ route('admin.commercial.pricingList', ['status' => 2]) }}" class="{{ request()->status == 2 ? 'active' : '' }}">Expired ({{ $statusCounts['expired'] }})</a></li>
+            <li><a href="{{ route('admin.commercial.pricingList', ['status' => 3]) }}" class="{{ request()->status == 3 ? 'active' : '' }}">Cancelled ({{ $statusCounts['cancelled'] }})</a></li>
         </ul>
 
         <div class="table-responsive">
             <table class="table table-striped">
-                <thead><tr><th>SL</th><th>Ref No</th><th>Buyer</th><th>Style No</th><th>Item Name</th><th>Unit Price</th><th>Currency</th><th>Valid Till</th><th>Status</th><th>Action</th></tr></thead>
+                <thead><tr><th>SL</th><th>Price List No</th><th>Buyer</th><th>Effective Date</th><th>Expiry Date</th><th>Season</th><th>Year</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
                     @forelse($records as $index => $record)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td><a href="{{ route('admin.commercial.pricingListAction', ['view', $record->id]) }}">{{ $record->ref_no }}</a></td>
+                        <td>{{ $records->firstItem() + $index }}</td>
+                        <td><a href="{{ route('admin.commercial.pricingListAction', ['view', $record->id]) }}">{{ $record->price_list_no }}</a></td>
                         <td>{{ $record->buyer_name }}</td>
-                        <td>{{ $record->style_no }}</td>
-                        <td>{{ $record->item_name }}</td>
-                        <td>{{ number_format($record->unit_price, 2) }}</td>
-                        <td>{{ $record->currency }}</td>
-                        <td>{{ $record->valid_till ? \Carbon\Carbon::parse($record->valid_till)->format('d M Y') : '' }}</td>
-                        <td><span class="badge badge-{{ $record->status ? 'success' : 'warning' }}">{{ $record->status ? 'Active' : 'Inactive' }}</span></td>
+                        <td>{{ $record->effective_date ? \Carbon\Carbon::parse($record->effective_date)->format('d M Y') : '' }}</td>
+                        <td>{{ $record->expiry_date ? \Carbon\Carbon::parse($record->expiry_date)->format('d M Y') : '' }}</td>
+                        <td>{{ $record->season }}</td>
+                        <td>{{ $record->year }}</td>
+                        <td>{{ $record->status_label }}</td>
                         <td>
                             <a href="{{ route('admin.commercial.pricingListAction', ['view', $record->id]) }}" class="btn btn-sm btn-info"><i class="bx bx-show"></i></a>
                             <a href="{{ route('admin.commercial.pricingListAction', ['edit', $record->id]) }}" class="btn btn-sm btn-success"><i class="bx bx-edit"></i></a>
@@ -72,7 +73,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="10" class="text-center">No records found</td></tr>
+                    <tr><td colspan="9" class="text-center">No records found</td></tr>
                     @endforelse
                 </tbody>
             </table>

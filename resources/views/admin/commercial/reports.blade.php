@@ -59,10 +59,10 @@
                 <div class="report-card">
                     <h4>Invoice Reports</h4>
                     <ul>
-                        <li><a href="{{ route('admin.commercial.invoices', ['type' => 'all']) }}">All Invoices <span>{{ $invoiceCounts['all'] }}</span></a></li>
-                        <li><a href="{{ route('admin.commercial.invoices', ['status' => 1]) }}">Pending Invoices <span>{{ $invoiceCounts['pending'] }}</span></a></li>
-                        <li><a href="{{ route('admin.commercial.invoices', ['status' => 2]) }}">Confirmed Invoices <span>{{ $invoiceCounts['confirmed'] }}</span></a></li>
-                        <li><a href="{{ route('admin.commercial.invoices', ['status' => 3]) }}">Shipped Invoices <span>{{ $invoiceCounts['shipped'] }}</span></a></li>
+                        <li><a href="{{ route('admin.commercial.invoice') }}">All Invoices <span>{{ $invoiceCounts['all'] }}</span></a></li>
+                        <li><a href="{{ route('admin.commercial.invoice', ['status' => 1]) }}">Pending Invoices <span>{{ $invoiceCounts['pending'] }}</span></a></li>
+                        <li><a href="{{ route('admin.commercial.invoice', ['status' => 2]) }}">Confirmed Invoices <span>{{ $invoiceCounts['confirmed'] }}</span></a></li>
+                        <li><a href="{{ route('admin.commercial.invoice', ['status' => 3]) }}">Shipped Invoices <span>{{ $invoiceCounts['shipped'] }}</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -80,10 +80,10 @@
                 <div class="report-card">
                     <h4>Export Reports</h4>
                     <ul>
-                        <li><a href="{{ route('admin.commercial.proformaInvoice') }}">Proforma Invoices <span>{{ $totalPIs }}</span></a></li>
+                        <li><a href="{{ route('admin.commercial.pi') }}">Proforma Invoices <span>{{ $totalPIs }}</span></a></li>
                         <li><a href="{{ route('admin.commercial.packingList') }}">Packing Lists <span>{{ $totalPLs }}</span></a></li>
                         <li><a href="{{ route('admin.commercial.shippingDocs') }}">Shipping Documents <span>{{ $totalSBs }}</span></a></li>
-                        <li><a href="{{ route('admin.commercial.exportRealization') }}">Export Realization <span>{{ $totalRealizations }}</span></a></li>
+                        <li><a href="{{ route('admin.commercial.realization') }}">Export Realization <span>{{ $totalRealizations }}</span></a></li>
                     </ul>
                 </div>
             </div>

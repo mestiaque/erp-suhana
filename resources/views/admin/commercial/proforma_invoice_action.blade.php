@@ -70,7 +70,7 @@
                 <div class="row">
                     <div class="col-md-3"><div class="form-group"><label>PI Date</label><input type="date" name="pi_date" value="{{ $action == 'edit' ? $record->pi_date : '' }}" class="form-control"></div></div>
                     <div class="col-md-3"><div class="form-group"><label>Delivery Date</label><input type="date" name="delivery_date" value="{{ $action == 'edit' ? $record->delivery_date : '' }}" class="form-control"></div></div>
-                    <div class="col-md-3"><div class=">Style Noform-group"><label</label><input type="text" name="style_no" value="{{ $action == 'edit' ? $record->style_no : '' }}" class="form-control"></div></div>
+                    <div class="col-md-3"><div class="form-group"><label>Style No</label><input type="text" name="style_no" value="{{ $action == 'edit' ? $record->style_no : '' }}" class="form-control"></div></div>
                     <div class="col-md-3"><div class="form-group"><label>Order No</label><input type="text" name="order_no" value="{{ $action == 'edit' ? $record->order_no : '' }}" class="form-control"></div></div>
                 </div>
             </div>
