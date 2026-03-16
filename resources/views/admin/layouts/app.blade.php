@@ -416,6 +416,7 @@
       </script>
 
       @stack('js')
+      @include('components.loader')
    </body>
    <!-- END: Body-->
  </html>

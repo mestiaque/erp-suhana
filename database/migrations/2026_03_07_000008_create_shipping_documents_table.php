@@ -22,7 +22,7 @@ return new class extends Migration
             // Document Details
             $table->date('issue_date')->nullable();
             $table->string('shipment_type')->nullable(); // Air, Sea, Land
-            $table->string(' vessel_name')->nullable();
+            $table->string('vessel_name')->nullable();
             $table->string('flight_no')->nullable();
             $table->date('departure_date')->nullable();
             $table->date('arrival_date')->nullable();

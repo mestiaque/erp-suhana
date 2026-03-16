@@ -10,9 +10,7 @@ use App\Models\ExportLc;
 use App\Models\CommercialPurchaseOrder;
 use App\Models\CommercialProformaInvoice;
 use App\Models\PricingList;
-use App\Models\PricingListItem;
 use App\Models\PackingList;
-use App\Models\PackingListItem;
 use App\Models\ShippingDocument;
 use App\Models\ExportRealization;
 use App\Models\User;
@@ -222,7 +220,7 @@ class CommercialController extends Controller
         $units = Attribute::where('type', 1)->orderBy('name')->get();
 
         $action = 'edit';
-        $route = route('invoiceAction', ['update', $invoice->id]);
+        $route = route('admin.commercial.invoiceAction', ['update', $invoice->id]);
 
         return view(adminTheme() . 'commercial.invoices_action', compact('invoice', 'buyers', 'units', 'action', 'route'));
     }
@@ -529,9 +527,14 @@ class CommercialController extends Controller
     {
         $query = PricingList::with(['buyer', 'creator']);
         if ($request->filled('search')) { $query->where('price_list_no', 'like', '%' . $request->search . '%'); }
-        if ($request->filled('status') && $request->status != 'all') { $query->where('status', $request->status); }
+        if ($request->filled('status') && $request->status != 'all') { $query->where('status', (int) $request->status); }
         $records = $query->orderBy('id', 'desc')->paginate(20);
-        $statusCounts = ['total' => PricingList::count(), 'active' => PricingList::where('status', 1)->count(), 'inactive' => PricingList::where('status', 0)->count()];
+        $statusCounts = [
+            'total' => PricingList::count(),
+            'active' => PricingList::where('status', 1)->count(),
+            'expired' => PricingList::where('status', 2)->count(),
+            'cancelled' => PricingList::where('status', 3)->count(),
+        ];
         return view(adminTheme().'commercial.pricing_list', compact('records', 'statusCounts'));
     }
 
@@ -578,14 +581,15 @@ class CommercialController extends Controller
         if ($action === 'delete' && $id) { PackingList::findOrFail($id)->delete(); return back()->with('success', 'Record deleted'); }
         if (in_array($action, ['store', 'update']) && $request->isMethod('post')) {
             $record = $action === 'store' ? new PackingList() : PackingList::findOrFail($id);
-            $record->packing_list_no = $request->packing_list_no ?? PackingList::generatePackingListNo();
+            $record->packing_list_no = $request->packing_list_no ?? $request->pl_no ?? PackingList::generatePackingListNo();
             $record->invoice_id = $request->invoice_id; $record->invoice_no = $request->invoice_no;
             $record->buyer_id = $request->buyer_id; $record->buyer_name = $request->buyer_name;
-            $record->packing_date = $request->packing_date; $record->shipment_date = $request->shipment_date;
+            $record->packing_date = $request->packing_date ?? $request->pl_date; $record->shipment_date = $request->shipment_date;
             $record->shipment_from = $request->shipment_from; $record->shipment_to = $request->shipment_to;
             $record->vessel_flight_no = $request->vessel_flight_no; $record->container_no = $request->container_no; $record->seal_no = $request->seal_no;
-            $record->total_cartons = $request->total_cartons ?? 0; $record->net_weight = $request->net_weight ?? 0; $record->gross_weight = $request->gross_weight ?? 0;
-            $record->total_volume = $request->total_volume ?? 0;
+            $record->total_cartons = $request->total_cartons ?? $request->total_ctn ?? 0;
+            $record->net_weight = $request->net_weight ?? 0; $record->gross_weight = $request->gross_weight ?? 0;
+            $record->total_volume = $request->total_volume ?? $request->total_cbm ?? 0;
             $record->status = $request->status ?? 1; $record->remarks = $request->remarks;
             $record->created_by = $action === 'store' ? Auth::id() : $record->created_by;
             $record->edited_by = $action === 'update' ? Auth::id() : null;
@@ -616,10 +620,10 @@ class CommercialController extends Controller
         if ($action === 'delete' && $id) { ShippingDocument::findOrFail($id)->delete(); return back()->with('success', 'Record deleted'); }
         if (in_array($action, ['store', 'update']) && $request->isMethod('post')) {
             $record = $action === 'store' ? new ShippingDocument() : ShippingDocument::findOrFail($id);
-            $record->doc_no = $request->doc_no ?? ShippingDocument::generateDocNo();
+            $record->doc_no = $request->doc_no ?? $request->sb_no ?? ShippingDocument::generateDocNo();
             $record->invoice_id = $request->invoice_id; $record->invoice_no = $request->invoice_no;
             $record->buyer_id = $request->buyer_id; $record->buyer_name = $request->buyer_name;
-            $record->issue_date = $request->issue_date; $record->shipment_type = $request->shipment_type;
+            $record->issue_date = $request->issue_date ?? $request->sb_date; $record->shipment_type = $request->shipment_type;
             $record->vessel_name = $request->vessel_name; $record->flight_no = $request->flight_no;
             $record->departure_date = $request->departure_date; $record->arrival_date = $request->arrival_date;
             $record->port_of_loading = $request->port_of_loading; $record->port_of_discharge = $request->port_of_discharge;
@@ -663,9 +667,10 @@ class CommercialController extends Controller
             $record->buyer_id = $request->buyer_id; $record->buyer_name = $request->buyer_name;
             $record->submission_date = $request->submission_date; $record->realization_date = $request->realization_date;
             $record->bank_name = $request->bank_name; $record->bank_branch = $request->bank_branch;
-            $record->invoice_value = $request->invoice_value ?? 0; $record->realized_value = $request->realized_value ?? 0;
+            $record->invoice_value = $request->invoice_value ?? 0;
+            $record->realized_value = $request->realized_value ?? $request->realized_amount ?? 0;
             $record->discount = $request->discount ?? 0; $record->bank_charges = $request->bank_charges ?? 0;
-            $record->net_realized = ($request->realized_value ?? 0) - ($request->discount ?? 0) - ($request->bank_charges ?? 0);
+            $record->net_realized = ($record->realized_value ?? 0) - ($request->discount ?? 0) - ($request->bank_charges ?? 0);
             $record->currency = $request->currency ?? 'USD'; $record->exchange_rate = $request->exchange_rate ?? 1;
             $record->realized_in_bdt = $record->net_realized * $record->exchange_rate;
             $record->status = $request->status ?? 1; $record->remarks = $request->remarks;
@@ -681,17 +686,51 @@ class CommercialController extends Controller
     public function reports()
     {
         $invoices = CommercialInvoice::with('buyer')->get();
+        $totalInvoices = $invoices->count();
         $totalInvoiceValue = $invoices->sum('grand_total');
         $totalInBdt = $invoices->sum('total_in_bdt');
+        $currency = 'USD';
+
+        $invoiceCounts = [
+            'all' => $totalInvoices,
+            'pending' => $invoices->where('status', 1)->count(),
+            'confirmed' => $invoices->where('status', 2)->count(),
+            'shipped' => $invoices->where('status', 3)->count(),
+        ];
 
         $exportLcs = ExportLc::with('buyer')->get();
         $totalLcValue = $exportLcs->sum('lc_value');
         $totalRealized = $exportLcs->sum('realized_value');
+        $totalExportLCs = $exportLcs->count();
 
         $btbLcs = BankBtbLc::with('supplier')->get();
         $totalBtbValue = $btbLcs->sum('lc_value');
         $totalBtbUsed = $btbLcs->sum('used_value');
+        $totalBTBLCs = $btbLcs->count();
 
-        return view(adminTheme().'commercial.reports', compact('totalInvoiceValue', 'totalInBdt', 'totalLcValue', 'totalRealized', 'totalBtbValue', 'totalBtbUsed'));
+        $totalPOs = CommercialPurchaseOrder::count();
+        $totalPIs = CommercialProformaInvoice::count();
+        $totalPLs = PackingList::count();
+        $totalSBs = ShippingDocument::count();
+        $totalRealizations = ExportRealization::count();
+
+        return view(adminTheme().'commercial.reports', compact(
+            'currency',
+            'totalInvoices',
+            'invoiceCounts',
+            'totalInvoiceValue',
+            'totalInBdt',
+            'totalLcValue',
+            'totalRealized',
+            'totalBtbValue',
+            'totalBtbUsed',
+            'totalBTBLCs',
+            'totalExportLCs',
+            'totalPOs',
+            'totalPIs',
+            'totalPLs',
+            'totalSBs',
+            'totalRealizations'
+        ));
     }
 }

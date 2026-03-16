@@ -16,46 +16,26 @@
 
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h3>PL No: {{ $record->pl_no }}</h3>
+        <h3>Packing List No: {{ $record->packing_list_no }}</h3>
         <div>
             <a href="{{ route('admin.commercial.packingListAction', ['edit', $record->id]) }}" class="btn btn-success"><i class="bx bx-edit"></i> Edit</a>
             <a href="{{ route('admin.commercial.packingList') }}" class="btn btn-secondary">Back</a>
         </div>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h5>Packing Information</h5>
-                <table class="table table-borderless">
-                    <tr><th width="150">PL No</th><td>{{ $record->pl_no }}</td></tr>
-                    <tr><th>Invoice No</th><td>{{ $record->invoice_no }}</td></tr>
-                    <tr><th>Buyer</th><td>{{ $record->buyer_name }}</td></tr>
-                    <tr><th>PL Date</th><td>{{ $record->pl_date ? \Carbon\Carbon::parse($record->pl_date)->format('d M Y') : '' }}</td></tr>
-                    <tr><th>Total CTN</th><td>{{ number_format($record->total_ctn, 2) }}</td></tr>
-                    <tr><th>Total Qty</th><td>{{ number_format($record->total_qty, 2) }}</td></tr>
-                    <tr><th>Status</th><td><span class="badge badge-{{ $record->status == 1 ? 'warning' : 'success' }}">{{ $record->status_label }}</span></td></tr>
-                </table>
-            </div>
-            <div class="col-md-6">
-                <h5>Weight Details</h5>
-                <table class="table table-borderless">
-                    <tr><th width="150">Net Weight</th><td>{{ number_format($record->net_weight, 2) }} kg</td></tr>
-                    <tr><th>Gross Weight</th><td>{{ number_format($record->gross_weight, 2) }} kg</td></tr>
-                    <tr><th>Carton Size</th><td>{{ $record->carton_size }}</td></tr>
-                    <tr><th>Carton Weight</th><td>{{ $record->carton_weight }} kg</td></tr>
-                    <tr><th>Total CBM</th><td>{{ number_format($record->total_cbm, 2) }}</td></tr>
-                    <tr><th>Created At</th><td>{{ $record->created_at->format('d M Y') }}</td></tr>
-                </table>
-            </div>
-        </div>
-        @if($record->remarks)
-        <div class="row mt-3">
-            <div class="col-md-12">
-                <h5>Remarks</h5>
-                <p>{{ $record->remarks }}</p>
-            </div>
-        </div>
-        @endif
+        <table class="table table-borderless">
+            <tr><th width="220">Packing List No</th><td>{{ $record->packing_list_no }}</td></tr>
+            <tr><th>Invoice No</th><td>{{ $record->invoice_no }}</td></tr>
+            <tr><th>Buyer</th><td>{{ $record->buyer_name }}</td></tr>
+            <tr><th>Packing Date</th><td>{{ $record->packing_date ? \Carbon\Carbon::parse($record->packing_date)->format('d M Y') : '' }}</td></tr>
+            <tr><th>Shipment Date</th><td>{{ $record->shipment_date ? \Carbon\Carbon::parse($record->shipment_date)->format('d M Y') : '' }}</td></tr>
+            <tr><th>Total Cartons</th><td>{{ number_format($record->total_cartons) }}</td></tr>
+            <tr><th>Net Weight</th><td>{{ number_format($record->net_weight, 2) }} kg</td></tr>
+            <tr><th>Gross Weight</th><td>{{ number_format($record->gross_weight, 2) }} kg</td></tr>
+            <tr><th>Total Volume</th><td>{{ number_format($record->total_volume, 4) }}</td></tr>
+            <tr><th>Status</th><td>{{ $record->status_label }}</td></tr>
+            <tr><th>Remarks</th><td>{{ $record->remarks }}</td></tr>
+        </table>
     </div>
 </div>
 @endsection
