@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Termination;
+use App\Models\payroll\Termination;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,15 +35,15 @@ class TerminationController extends Controller
         }
 
         $terminations = $query->paginate(20);
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
 
-        return view(adminTheme().'terminations.index', compact('terminations', 'users'));
+        return view(adminTheme().'payroll.terminations.index', compact('terminations', 'users'));
     }
 
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view(adminTheme().'terminations.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view(adminTheme().'payroll.terminations.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -71,8 +71,8 @@ class TerminationController extends Controller
     public function edit($id)
     {
         $termination = Termination::findOrFail($id);
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view(adminTheme().'terminations.edit', compact('termination', 'users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view(adminTheme().'payroll.terminations.edit', compact('termination', 'users'));
     }
 
     public function update(Request $request, $id)

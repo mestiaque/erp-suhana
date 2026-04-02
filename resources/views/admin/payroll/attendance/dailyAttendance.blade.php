@@ -12,12 +12,7 @@
 <div class="flex-grow-1">
     @include(adminTheme().'alerts')
     <!-- Filters -->
-    <div class="attendance-filters pt-0">
-        <form action="{{ route('admin.dailyAttendance') }}" method="GET" class="row g-3 align-items-end">
-
-
-                <!-- Stats -->
-            <div class="row mb-3 w-100">
+                <div class="row  mb-3 w-100">
                 {{-- Employees --}}
                 <div class="col-md-3">
                     <div class="card shadow-sm border-0" style="background: #007bff38">
@@ -82,9 +77,14 @@
                     </div>
                 </div>
             </div>
+    <div class="attendance-filters pt-0">
+        <form action="{{ route('admin.dailyAttendance') }}" method="GET" class="row g-3 align-items-end">
 
 
-            <hr class="text-muted">
+                <!-- Stats -->
+
+
+
 
             <div class="col-md-2">
                 <label for="startDate" class="form-label mb-0">Start Date</label>
@@ -150,6 +150,7 @@
                 <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-search"></i> Search</button>
                 <a href="{{ route('admin.dailyAttendance') }}" class="btn btn-warning btn-sm"><i class="bx bx-rotate-left"></i> Reset</a>
             </div>
+
             <div class=" text-end col-md-3 offset-md-3 text-right">
                 <a href="{{ route('admin.dailyAttendanceExport', request()->query()) }}" target="_blank" class="btn btn-success btn-sm">
                     <i class="bx bx-file"></i> Export Excel
@@ -179,7 +180,7 @@
                         <tr>
                             <th>SL</th>
                             <th>Name</th>
-                            <th>ID</th>
+                            <th>Emp. ID</th>
                             <th>Designation</th>
                             <th>Department</th>
                             <th>Employee Type</th>
@@ -189,13 +190,16 @@
                             <th>Status</th>
                             <th>Date</th>
                             <th>Map</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($finalData as $key => $row)
                         <tr>
                             <td>{{ $key + 1 }}</td>
-                            <td>{{ $row['name'] }}</td>
+                            <td class="d-flex align-items-center gap-2">
+                                {!! $row['avatar'] !!}
+                                {{ $row['name'] }}</td>
                             <td>{{ $row['employee_id'] ?? '--' }}</td>
                             <td>{{ $row['designation'] ?? '--' }}</td>
                             <td>{{ $row['department'] ?? '--' }}</td>
@@ -223,9 +227,45 @@
                                 <a href="{{ $row['map_url'] }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
                                 @else -- @endif
                             </td>
+                            <td>
+                                @if(!empty($row['attendance_id']))
+                                    <details>
+                                        <summary class="btn btn-sm btn-info" style="list-style:none;cursor:pointer;">Edit</summary>
+                                        <form action="{{ route('admin.dailyAttendance.update', $row['attendance_id']) }}" method="POST" class="mt-2" style="min-width:260px;">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="date" value="{{ $row['date'] }}">
+                                            <div class="mb-1">
+                                                <input type="time" name="in_time" class="form-control form-control-sm" value="{{ $row['in_time'] != '--' ? \Carbon\Carbon::createFromFormat('h:i A', $row['in_time'])->format('H:i') : '' }}" required>
+                                            </div>
+                                            <div class="mb-1">
+                                                <input type="time" name="out_time" class="form-control form-control-sm" value="{{ $row['out_time'] != '--' ? \Carbon\Carbon::createFromFormat('h:i A', $row['out_time'])->format('H:i') : '' }}" required>
+                                            </div>
+                                            <div class="mb-1">
+                                                <select name="status" class="form-control form-control-sm" required>
+                                                    <option value="Present" {{ $row['status'] == 'Present' ? 'selected' : '' }}>Present</option>
+                                                    <option value="Late" {{ $row['status'] == 'Late' ? 'selected' : '' }}>Late</option>
+                                                    <option value="Absent" {{ $row['status'] == 'Absent' ? 'selected' : '' }}>Absent</option>
+                                                    <option value="Leave" {{ $row['status'] == 'Leave' ? 'selected' : '' }}>Leave</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-1">
+                                                <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Remarks (optional)">
+                                            </div>
+                                            <button type="submit" class="btn btn-sm btn-primary w-100">Update</button>
+                                        </form>
+                                    </details>
+                                @elseif($row['status'] == 'Absent')
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#absentToManualModal{{ $key }}">
+                                        Add
+                                    </button>
+                                @else
+                                    <span class="text-muted">No Edit</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
-                        <tr><td colspan="12" class="text-center">No attendance found</td></tr>
+                        <tr><td colspan="13" class="text-center">No attendance found</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -244,6 +284,52 @@
         </div>
     </div>
 </div>
+
+@foreach($finalData as $key => $row)
+    @if(empty($row['attendance_id']) && $row['status'] == 'Absent')
+        <div class="modal fade" id="absentToManualModal{{ $key }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('admin.attendance.manual.store') }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Attendance Request</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="user_id" value="{{ $row['id'] }}">
+                            <div class="mb-2">
+                                <label class="form-label">Employee</label>
+                                <input type="text" class="form-control form-control-sm" value="{{ $row['name'] }} ({{ $row['employee_id'] ?? 'N/A' }})" disabled>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Date</label>
+                                <input type="date" name="date" class="form-control form-control-sm" value="{{ $row['date'] }}" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">In Time</label>
+                                <input type="time" name="in_time" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Out Time</label>
+                                <input type="time" name="out_time" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Remarks</label>
+                                <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Optional remarks">
+                            </div>
+                            <small class="text-muted">This request will be counted as attendance only after approval.</small>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Submit for Approval</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
 
 @push('js')
 @endpush

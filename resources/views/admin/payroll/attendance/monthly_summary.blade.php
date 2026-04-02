@@ -6,10 +6,10 @@
 @push('css')
 <style>
     .report-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .day-cell { 
-        text-align: center; 
-        font-size: 10px; 
-        padding: 4px !important; 
+    .day-cell {
+        text-align: center;
+        font-size: 10px;
+        padding: 4px !important;
         min-width: 35px;
         vertical-align: middle;
     }
@@ -21,13 +21,25 @@
     }
     .present { background: #d4edda !important; }
     .absent { background: #f8d7da !important; }
-    .leave { background: #fff3cd !important; }
+    .late { background: #fff3cd !important; }
+    .leave { background: #f5cdff !important; }
     .holiday { background: #cce5ff !important; }
+    .offday { background: #ffffff !important; }
+    .incomplete { background: #0000002b !important; }
     .status-p { color: #28a745; font-weight: bold; }
     .status-a { color: #dc3545; font-weight: bold; }
     .status-l { color: #ffc107; font-weight: bold; }
+    .status-lv { color: #6f42c1; font-weight: bold; }
     .status-h { color: #17a2b8; font-weight: bold; }
-    .status-dash { color: #6c757d; }
+    .status-i { color: #3d3d3d; font-weight: bold; }
+    .status-dash { color: #0000008e; }
+    .stat-present { background: #d4edda; color: #28a745; }
+    .stat-absent { background: #f8d7da; color: #dc3545; }
+    .stat-leave { background: #f5cdff; color: #6f42c1; }
+    .stat-late { background: #fff3cd; color: #ffc107; }
+    .stat-holiday { background: #cce5ff; color: #17a2b8; }
+    .stat-incomplete { background: #0000002b; color: #3d3d3d; }
+
     .employee-cell {
         min-width: 150px;
     }
@@ -56,18 +68,14 @@
     .summary-stats {
         display: flex;
         gap: 15px;
-        margin-bottom: 15px;
+        margin-bottom: 5px;
     }
     .stat-item {
-        padding: 8px 15px;
+        padding: 2px 15px;
         border-radius: 4px;
         font-size: 12px;
         font-weight: 600;
     }
-    .stat-present { background: #d4edda; color: #28a745; }
-    .stat-absent { background: #f8d7da; color: #dc3545; }
-    .stat-leave { background: #fff3cd; color: #ffc107; }
-    .stat-holiday { background: #cce5ff; color: #17a2b8; }
     @media print {
         .no-print { display: none !important; }
         .report-card { box-shadow: none; }
@@ -95,26 +103,15 @@
         <form action="{{ route('admin.attendance.monthly.summary') }}" method="GET" class="row g-3 mb-3">
             <div class="col-md-2">
                 <label>Start Date</label>
-                <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}" class="form-control" required>
+                <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}" class="form-control form-control-sm" required>
             </div>
             <div class="col-md-2">
                 <label>End Date</label>
-                <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}" class="form-control" required>
-            </div>
-            <div class="col-md-2">
-                <label>Department</label>
-                <select name="department_id" class="form-control">
-                    <option value="">All Departments</option>
-                    @foreach($departments ?? [] as $dept)
-                    <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
-                        {{ $dept->name }}
-                    </option>
-                    @endforeach
-                </select>
+                <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}" class="form-control form-control-sm" required>
             </div>
             <div class="col-md-2">
                 <label>Employee</label>
-                <select name="employee_id" class="form-control">
+                <select name="employee_id" class="form-control form-control-sm">
                     <option value="">All Employees</option>
                     @foreach($allEmployees ?? [] as $emp)
                     <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
@@ -123,36 +120,30 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-2">
-                <label>&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Generate</button>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-sm btn-primary mr-2"><i class="bx bx-search"></i> Load</button>
+                <a href="{{ route('admin.attendance.monthly.summary') }}" class="btn btn-sm btn-secondary mr-2"><i class="bx bx-reset"></i> Reset</a>
             </div>
-            <div class="col-md-2">
-                <label>&nbsp;</label>
-                <button type="button" onclick="window.print()" class="btn btn-success w-100">
-                    <i class="bx bx-printer"></i> Print
-                </button>
-            </div>
-            <div class="col-md-2">
-                <label>&nbsp;</label>
-                <a href="{{ route('admin.attendance.export', array_merge(request()->all(), ['format' => 'excel'])) }}" class="btn btn-info w-100" target="_blank">
-                    <i class="bx bx-file"></i> Export Excel
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <a href="{{ route('admin.attendance.monthly.summary.print', request()->all()) }}" target="_blank" class="btn btn-sm btn-success mr-2"><i class="bx bx-printer"></i> Print</a>
+                <a href="{{ route('admin.attendance.monthly.summary.export', request()->all()) }}" class="btn btn-sm btn-info w" target="_blank">
+                    <i class="bx bx-file"></i> Excel
                 </a>
             </div>
         </form>
-
-        <div class="summary-stats">
-            <div class="stat-item stat-present">P = Present</div>
-            <div class="stat-item stat-absent">A = Absent</div>
-            <div class="stat-item stat-leave">L = Leave</div>
-            <div class="stat-item stat-holiday">H = Holiday/Weekly Off</div>
-            <div class="stat-item stat-absent">- = Absent (No Record)</div>
-        </div>
     </div>
 
     <div class="report-card">
-        <div class="d-flex justify-content-between mb-3">
-            <h5>Attendance: {{ $startDate->format('d M Y') }} to {{ $endDate->format('d M Y') }}</h5>
+        <div class="d-flex justify-content-between mb-">
+            <h6>Attendance: {{ $startDate->format('d M Y') }} to {{ $endDate->format('d M Y') }}</h6>
+                    <div class="summary-stats">
+            <div class="stat-item stat-present">P = Present</div>
+            <div class="stat-item stat-absent">A = Absent</div>
+            <div class="stat-item stat-late">L = Late</div>
+            <div class="stat-item stat-leave">L = Leave</div>
+            <div class="stat-item stat-holiday">H = Holiday/Weekly Off</div>
+            <div class="stat-item stat-incomplete">I = Incomplete</div>
+        </div>
             <span class="text-muted">Total Days: {{ count($dateRange) }}</span>
         </div>
 
@@ -161,7 +152,6 @@
                 <thead>
                     <tr>
                         <th rowspan="2" class="employee-cell">Employee</th>
-                        <th rowspan="2">Dept</th>
                         @foreach($dateRange as $date)
                         <th class="day-header" title="{{ $date->format('l') }}">
                             {{ $date->format('j') }}<br>
@@ -170,8 +160,10 @@
                         @endforeach
                         <th rowspan="2" class="text-center">P</th>
                         <th rowspan="2" class="text-center">A</th>
-                        <th rowspan="2" class="text-center">L</th>
+                        <th rowspan="2" class="text-center">LT</th>
+                        <th rowspan="2" class="text-center">LV</th>
                         <th rowspan="2" class="text-center">H</th>
+                        <th rowspan="2" class="text-center">I</th>
                     </tr>
                     <tr>
                         @foreach($dateRange as $date)
@@ -184,16 +176,13 @@
                 <tbody>
                     @forelse($reportData ?? [] as $index => $data)
                     <tr>
-                        <td>
-                            @if($data['employee']->photo)
-                                <img src="{{ asset($data['employee']->photo) }}" alt="{{ $data['employee']->name }}" class="table-avatar">
-                            @else
-                                <span class="table-avatar-placeholder">{{ substr($data['employee']->name, 0, 1) }}</span>
-                            @endif
-                            <strong>{{ $data['employee']->name }}</strong><br>
-                            <small class="text-muted">{{ $data['employee']->employee_id ?? 'N/A' }}</small>
+                        <td class="employee-cell d-flex align-items-center">
+                                {!! $data['employee']->getAvt() !!}
+                            <div>
+                                <strong>{{ $data['employee']->name }}</strong><br>
+                                <small class="text-muted">{{ $data['employee']->employee_id ?? 'N/A' }}</small>
+                            </div>
                         </td>
-                        <td><small>{{ $data['employee']->department->name ?? 'N/A' }}</small></td>
                         @foreach($data['daily_data'] as $dayData)
                         <td class="day-cell {{ $dayData['status_class'] }}">
                             @if($dayData['status'] == 'P')
@@ -201,9 +190,11 @@
                             @elseif($dayData['status'] == 'A')
                                 <span class="status-a">A</span>
                             @elseif($dayData['status'] == 'L')
-                                <span class="status-l">L</span>
+                                <span class=" {{ $dayData['status_class'] == 'late' ? 'status-l' : 'status-lv' }}">L</span>
                             @elseif($dayData['status'] == 'H')
                                 <span class="status-h">H</span>
+                            @elseif($dayData['status'] == 'I')
+                                <span class="status-i">I</span>
                             @else
                                 <span class="status-dash">-</span>
                             @endif
@@ -211,8 +202,10 @@
                         @endforeach
                         <td class="text-center"><strong class="text-success">{{ $data['present_count'] }}</strong></td>
                         <td class="text-center"><strong class="text-danger">{{ $data['absent_count'] }}</strong></td>
-                        <td class="text-center"><strong class="text-warning">{{ $data['leave_count'] }}</strong></td>
+                        <td class="text-center"><strong class="text-warning">{{ $data['late_count'] }}</strong></td>
+                        <td class="text-center"><strong style="color: #6f42c1">{{ $data['leave_count'] }}</strong></td>
                         <td class="text-center"><strong class="text-info">{{ $data['holiday_count'] }}</strong></td>
+                        <td class="text-center"><strong class="text-dark">{{ $data['incomplete_count'] }}</strong></td>
                     </tr>
                     @empty
                     <tr>

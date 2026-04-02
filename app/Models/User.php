@@ -60,6 +60,7 @@ class User extends Authenticatable
         'driving_license',
         'etin',
         'distinguished_mark',
+        'distinguished_mark_bn',
         'height',
         'weight',
         'home_district',
@@ -75,8 +76,24 @@ class User extends Authenticatable
         'nominee_age',
         'present_address',
         'present_address_bn',
+        'present_village',
+        'present_village_bn',
+        'present_post_office',
+        'present_post_office_bn',
+        'present_upazila',
+        'present_upazila_bn',
+        'present_district',
+        'present_district_bn',
         'permanent_address',
         'permanent_address_bn',
+        'permanent_village',
+        'permanent_village_bn',
+        'permanent_post_office',
+        'permanent_post_office_bn',
+        'permanent_upazila',
+        'permanent_upazila_bn',
+        'permanent_district',
+        'permanent_district_bn',
         'salary_type',
         'employee_id',
         'employee_type',
@@ -519,6 +536,22 @@ class User extends Authenticatable
         // Child permission exists and is ON?
         return isset($permissions[$module][$action])
             && in_array($permissions[$module][$action], ['on', '1', 1, true], true);
+    }
+
+
+    public function getAvt($size = 40)
+    {
+        if ($this->image()) {
+            return '<img src="'.asset($this->image()).'"
+                    alt="'.$this->name.'"
+                    class="rounded-circleX"
+                    style="width: '.$size.'px; height: '.$size.'px; object-fit: cover; margin-right: 10px;">';
+        }
+
+        return '<div class="rounded-circleX d-flex align-items-center justify-content-center text-white font-weight-bold"
+                    style="width: '.$size.'px; height: '.$size.'px; background-color: '.random_color($this->id ?? 0).'; margin-right: 10px;">
+                    '.strtoupper(substr($this->name ?? 'U', 0, 1)).'
+                </div>';
     }
 
 

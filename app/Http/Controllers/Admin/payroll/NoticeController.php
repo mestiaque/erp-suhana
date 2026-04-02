@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Notice;
+use App\Models\payroll\Notice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

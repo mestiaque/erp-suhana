@@ -24,10 +24,10 @@ class TaxController extends Controller
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
-        
+
         $years = range(date('Y'), date('Y') - 5);
-        
-        return view('admin.tax.index', compact('taxes', 'years'));
+
+        return view('admin.payroll.tax.index', compact('taxes', 'years'));
     }
 
     /**
@@ -35,9 +35,9 @@ class TaxController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         $years = range(date('Y'), date('Y') - 5);
-        return view('admin.tax.create', compact('users', 'years'));
+        return view('admin.payroll.tax.create', compact('users', 'years'));
     }
 
     /**
@@ -53,7 +53,7 @@ class TaxController extends Controller
         ]);
 
         $taxableIncome = $request->gross_salary - ($request->rebate ?? 0);
-        
+
         // Simple tax calculation (can be customized based on tax rules)
         $taxAmount = 0;
         if ($taxableIncome > 0) {

@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="date" class="form-label">Date</label>
-                    <input type="date" name="date" id="date" class="form-control form-control-sm" value="{{ request('date') }}">
+                    <input type="date" name="date" id="date" class="form-control form-control-sm" value="{{ request('date') ?? $selectedDate }}">
                 </div>
                 <div class="col-md-3 align-self-end">
                     <button type="submit" class="btn btn-sm btn-primary w-50">Filter</button>
@@ -83,6 +83,38 @@
                 </table>
                 {{ $attendances->links('pagination') }}
             </div>
+
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Absent Employees ({{ $selectedDate }})</h6>
+                <small class="text-muted">These employees can be selected in Add Attendance modal.</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($absentEmployees as $absentEmployee)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $absentEmployee->employee_id ?? 'N/A' }}</td>
+                                <td>{{ $absentEmployee->name }}</td>
+                                <td>{{ $absentEmployee->department->name ?? 'N/A' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">No absent employee found for selected date.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -102,14 +134,14 @@
                         <label for="user_id_create" class="form-label">Employee</label>
                         <select name="user_id" id="user_id_create" class="form-control form-control-sm" required>
                             <option value="">Select Employee</option>
-                            @foreach($employees as $employee)
+                            @foreach($absentEmployees as $employee)
                                 <option value="{{ $employee->id }}">{{ $employee->employeeInfo->name ?? $employee->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="date_create" class="form-label">Date</label>
-                        <input type="date" name="date" id="date_create" class="form-control form-control-sm" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" name="date" id="date_create" class="form-control form-control-sm" value="{{ $selectedDate }}" required>
                     </div>
                     <div class="mb-3">
                         <label for="in_time_create" class="form-label">In Time</label>

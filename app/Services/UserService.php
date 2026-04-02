@@ -55,6 +55,8 @@ class UserService
             'passport_no' => 'nullable|max:20',
             'driving_license' => 'nullable|max:20',
             'etin' => 'nullable|max:20',
+            'distinguished_mark' => 'nullable|max:255',
+            'distinguished_mark_bn' => 'nullable|max:255',
             'height' => 'nullable|integer|min:30|max:300',
             'weight' => 'nullable|integer|min:10|max:500',
             'home_district' => 'nullable|max:100',
@@ -72,6 +74,22 @@ class UserService
             'provident_fund' => 'nullable|numeric|min:0',
             'emergency_mobile' => 'nullable|max:20',
             'emergency_relation' => 'nullable|max:50',
+            'present_village' => 'nullable|max:150',
+            'present_village_bn' => 'nullable|max:150',
+            'present_post_office' => 'nullable|max:150',
+            'present_post_office_bn' => 'nullable|max:150',
+            'present_upazila' => 'nullable|max:150',
+            'present_upazila_bn' => 'nullable|max:150',
+            'present_district' => 'nullable|max:150',
+            'present_district_bn' => 'nullable|max:150',
+            'permanent_village' => 'nullable|max:150',
+            'permanent_village_bn' => 'nullable|max:150',
+            'permanent_post_office' => 'nullable|max:150',
+            'permanent_post_office_bn' => 'nullable|max:150',
+            'permanent_upazila' => 'nullable|max:150',
+            'permanent_upazila_bn' => 'nullable|max:150',
+            'permanent_district' => 'nullable|max:150',
+            'permanent_district_bn' => 'nullable|max:150',
             'division_id' => 'nullable|integer',
             'department_id' => 'nullable|integer',
             'designation_id' => 'nullable|integer',
@@ -97,7 +115,7 @@ class UserService
     public function create(Request $request, string $type = 'customer'): User
     {
         $password = $request->password ?? Str::random(8);
-        
+
         $user = new User();
         $user->name = $request->name;
         $user->bn_name = $request->bn_name;
@@ -106,12 +124,12 @@ class UserService
         $user->employee_id = $request->employee_id;
         $user->password_show = $password;
         $user->password = Hash::make($password);
-        
+
         // Set user type
         $user->setTypes($type);
-        
+
         $user->save();
-        
+
         return $user;
     }
 
@@ -153,6 +171,7 @@ class UserService
         $user->driving_license = $request->driving_license;
         $user->etin = $request->etin;
         $user->distinguished_mark = $request->distinguished_mark;
+        $user->distinguished_mark_bn = $request->distinguished_mark_bn;
         $user->height = $request->height;
         $user->weight = $request->weight;
 
@@ -167,8 +186,24 @@ class UserService
         // Address
         $user->present_address = $request->present_address;
         $user->present_address_bn = $request->present_address_bn;
+        $user->present_village = $request->present_village;
+        $user->present_village_bn = $request->present_village_bn;
+        $user->present_post_office = $request->present_post_office;
+        $user->present_post_office_bn = $request->present_post_office_bn;
+        $user->present_upazila = $request->present_upazila;
+        $user->present_upazila_bn = $request->present_upazila_bn;
+        $user->present_district = $request->present_district;
+        $user->present_district_bn = $request->present_district_bn;
         $user->permanent_address = $request->permanent_address;
         $user->permanent_address_bn = $request->permanent_address_bn;
+        $user->permanent_village = $request->permanent_village;
+        $user->permanent_village_bn = $request->permanent_village_bn;
+        $user->permanent_post_office = $request->permanent_post_office;
+        $user->permanent_post_office_bn = $request->permanent_post_office_bn;
+        $user->permanent_upazila = $request->permanent_upazila;
+        $user->permanent_upazila_bn = $request->permanent_upazila_bn;
+        $user->permanent_district = $request->permanent_district;
+        $user->permanent_district_bn = $request->permanent_district_bn;
         $user->city = $request->city;
         $user->district = $request->district;
         $user->postal_code = $request->postal_code;

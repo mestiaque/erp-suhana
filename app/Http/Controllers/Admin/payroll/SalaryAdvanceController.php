@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\SalaryAdvance;
+use App\Models\payroll\SalaryAdvance;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class SalaryAdvanceController extends Controller
 {
@@ -21,8 +21,8 @@ class SalaryAdvanceController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        return view('admin.salary-advance.index', compact('advances'));
+
+        return view('admin.payroll.salary-advance.index', compact('advances'));
     }
 
     /**
@@ -30,8 +30,8 @@ class SalaryAdvanceController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.salary-advance.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.salary-advance.create', compact('users'));
     }
 
     /**
@@ -72,7 +72,7 @@ class SalaryAdvanceController extends Controller
         ]);
 
         $advance = SalaryAdvance::findOrFail($id);
-        
+
         $updateData = [
             'status' => $request->status,
             'admin_remark' => $request->admin_remark,

@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
-use App\Models\AttendanceMachineLog;
 use App\Models\Attribute;
-use App\Models\Holiday;
-use App\Models\Leave;
-use App\Models\Roaster;
-use App\Models\Shift;
+use App\Models\payroll\Attendance;
+use App\Models\payroll\AttendanceMachineLog;
+use App\Models\payroll\Holiday;
+use App\Models\payroll\Leave;
+use App\Models\payroll\Roaster;
+use App\Models\payroll\Salary;
+use App\Models\payroll\Shift;
+use App\Models\payroll\UserLocation;
+use App\Models\Post;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Faker\Provider\pt_PT\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AttendanceManagementController extends Controller
@@ -167,9 +173,9 @@ class AttendanceManagementController extends Controller
 
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
         $shifts = Shift::where('status', 'active')->get();
-        $employees = User::where('employee_status', 'active')->filterBy('employee')->get();
+        $employees = User::where('employee_status', 'active')->filterByType('employee')->get();
 
-        return view(adminTheme().'attendance.roaster_index', compact('roasters', 'departments', 'shifts', 'employees', 'date'));
+        return view(adminTheme().'payroll.attendance.roaster_index', compact('roasters', 'departments', 'shifts', 'employees', 'date'));
     }
 
     /**
@@ -179,12 +185,12 @@ class AttendanceManagementController extends Controller
     {
         $employees = User::where('employee_status', 'active')
             ->with(['department', 'designation'])
-            ->filterBy('employee')
+            ->filterByType('employee')
             ->get();
 
         $shifts = Shift::where('status', 'active')->get();
 
-        return view(adminTheme().'attendance.roaster_create', compact('employees', 'shifts'));
+        return view(adminTheme().'payroll.attendance.roaster_create', compact('employees', 'shifts'));
     }
 
     /**
@@ -388,39 +394,28 @@ class AttendanceManagementController extends Controller
                 $firstPunch = $logs->first();
                 $lastPunch = $logs->last();
 
-                $user = User::find($userId);
+                $user = User::with('shift')->find($userId);
                 if (!$user) continue;
-
-                // Get roaster for the day
-                $roaster = Roaster::where('user_id', $userId)
-                    ->where('roster_date', $date)
-                    ->first();
-
-                $shiftInTime = $roaster ? $roaster->in_time : '09:00:00';
-                $shiftOutTime = $roaster ? $roaster->out_time : '17:00:00';
 
                 $inTime = Carbon::parse($date . ' ' . $firstPunch->punch_time);
                 $outTime = $logs->count() > 1 ? Carbon::parse($date . ' ' . $lastPunch->punch_time) : null;
 
-                // Calculate late
-                $shiftStart = Carbon::parse($date . ' ' . $shiftInTime);
-                $lateMinutes = $inTime->greaterThan($shiftStart) ? $inTime->diffInMinutes($shiftStart) : 0;
+                // Use centralized shift computation to keep attendance metrics aligned.
+                $tempAtt           = new Attendance();
+                $tempAtt->in_time  = $inTime;
+                $tempAtt->out_time = $outTime;
 
-                // Calculate early out
-                $shiftEnd = Carbon::parse($date . ' ' . $shiftOutTime);
-                $earlyOutMinutes = $outTime && $outTime->lessThan($shiftEnd) ? $shiftEnd->diffInMinutes($outTime) : 0;
-
-                // Calculate work hours
-                $workHours = $outTime ? $inTime->diffInHours($outTime, true) : 0;
-
-                // Calculate overtime
-                $standardHours = 8;
-                $overtime = $workHours > $standardHours ? $workHours - $standardHours : 0;
-
-                // Determine status
-                $status = 'present';
-                if ($lateMinutes > 0) {
-                    $status = 'late';
+                if ($user->shift) {
+                    $tempAtt->computeFromShift($user->shift);
+                } else {
+                    $wm = $outTime ? (int) $inTime->diffInMinutes($outTime) : 0;
+                    $tempAtt->attributes['in_minutes']       = $wm;
+                    $tempAtt->attributes['work_hour']        = round($wm / 60, 2);
+                    $tempAtt->attributes['late_time']        = 0;
+                    $tempAtt->attributes['early_out']        = 0;
+                    $tempAtt->attributes['overtime_minutes'] = 0;
+                    $tempAtt->attributes['overtime']         = 0;
+                    $tempAtt->attributes['status']           = 'present';
                 }
 
                 // Create or update attendance
@@ -432,11 +427,13 @@ class AttendanceManagementController extends Controller
                     [
                         'in_time' => $inTime->format('H:i:s'),
                         'out_time' => $outTime ? $outTime->format('H:i:s') : null,
-                        'work_hour' => $workHours,
-                        'late_time' => $lateMinutes,
-                        'early_out' => $earlyOutMinutes,
-                        'overtime' => $overtime,
-                        'status' => $status,
+                        'in_minutes' => $tempAtt->attributes['in_minutes'],
+                        'work_hour' => $tempAtt->attributes['work_hour'],
+                        'late_time' => $tempAtt->attributes['late_time'],
+                        'early_out' => $tempAtt->attributes['early_out'],
+                        'overtime_minutes' => $tempAtt->attributes['overtime_minutes'],
+                        'overtime' => $tempAtt->attributes['overtime'],
+                        'status' => strtolower($tempAtt->attributes['status']),
                     ]
                 );
 
@@ -444,8 +441,8 @@ class AttendanceManagementController extends Controller
                     'user' => $user,
                     'in_time' => $inTime,
                     'out_time' => $outTime,
-                    'late_minutes' => $lateMinutes,
-                    'work_hours' => $workHours,
+                    'late_minutes' => $tempAtt->attributes['late_time'],
+                    'work_hours' => $tempAtt->attributes['work_hour'],
                 ];
             }
 
@@ -495,7 +492,7 @@ class AttendanceManagementController extends Controller
 
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
 
-        return view(adminTheme().'attendance.daily_report', compact('attendances', 'stats', 'date', 'departments'));
+        return view(adminTheme().'payroll.attendance.daily_report', compact('attendances', 'stats', 'date', 'departments'));
     }
 
     /**
@@ -545,10 +542,10 @@ class AttendanceManagementController extends Controller
         // Get employees for filter
         $employees = User::where('employee_status', 'active')
             ->with(['department', 'designation'])
-            ->filterBy('employee')
+            ->filterByType('employee')
             ->get();
 
-        return view(adminTheme().'attendance.machine_log_index', compact(
+        return view(adminTheme().'payroll.attendance.machine_log_index', compact(
             'logs', 'date', 'to_date', 'devices', 'employees', 'user_id', 'device_sn'
         ));
     }
@@ -585,10 +582,10 @@ class AttendanceManagementController extends Controller
                 'total_overtime' => $attendances->sum('overtime'),
             ];
 
-            return view(adminTheme().'attendance.individual_summary', compact('user', 'attendances', 'summary', 'month', 'year'));
+            return view(adminTheme().'payroll.attendance.individual_summary', compact('user', 'attendances', 'summary', 'month', 'year'));
         } else {
             // All employees summary
-            $employees = User::where('status', 'active')->filterBy('employee')->get();
+            $employees = User::where('status', 'active')->filterByType('employee')->get();
 
             $summaries = [];
             foreach ($employees as $employee) {
@@ -607,7 +604,7 @@ class AttendanceManagementController extends Controller
                 ];
             }
 
-            return view(adminTheme().'attendance.all_summary', compact('summaries', 'month', 'year'));
+            return view(adminTheme().'payroll.attendance.all_summary', compact('summaries', 'month', 'year'));
         }
     }
 
@@ -623,7 +620,7 @@ class AttendanceManagementController extends Controller
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
-        $query = User::where('status', 'active')->filterBy('employee');
+        $query = User::where('status', 'active')->filterByType('employee');
 
         if ($department_id) {
             $query->whereHas('department', function($q) use ($department_id) {
@@ -667,7 +664,7 @@ class AttendanceManagementController extends Controller
 
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
 
-        return view(adminTheme().'attendance.monthly_report', compact('reportData', 'month', 'year', 'departments'));
+        return view(adminTheme().'payroll.attendance.monthly_report', compact('reportData', 'month', 'year', 'departments'));
     }
 
     /**
@@ -682,7 +679,7 @@ class AttendanceManagementController extends Controller
         $department_id = $request->department_id;
 
         // Get employees - same as daily attendance
-        $query = User::filterBy('employee')->whereIn('status', [0, 1]);
+        $query = User::filterByType('employee')->whereIn('status', [0, 1]);
 
         if ($employee_id) {
             $query->where('id', $employee_id);
@@ -840,9 +837,9 @@ class AttendanceManagementController extends Controller
         }
 
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
-        $allEmployees = User::filterBy('employee')->whereIn('status', [0, 1])->orderBy('employee_id')->get();
+        $allEmployees = User::filterByType('employee')->whereIn('status', [0, 1])->orderBy('employee_id')->get();
 
-        return view(adminTheme().'attendance.monthly_summary', compact(
+        return view(adminTheme().'payroll.attendance.monthly_summary', compact(
             'reportData',
             'dateRange',
             'startDate',
@@ -862,7 +859,7 @@ class AttendanceManagementController extends Controller
         $employee_id = $request->employee_id;
 
         // Get employees
-        $employees = User::filterBy('employee')
+        $employees = User::filterByType('employee')
             ->whereIn('status', [0, 1])
             ->with(['designation', 'department']);
 
@@ -1058,7 +1055,7 @@ class AttendanceManagementController extends Controller
             ];
         }
 
-        return view(adminTheme().'attendance.individual_report', compact(
+        return view(adminTheme().'payroll.attendance.individual_report', compact(
             'employee',
             'employees',
             'employee_id',
@@ -1079,7 +1076,7 @@ class AttendanceManagementController extends Controller
         $endDate = Carbon::today();
         $startDate = Carbon::today()->subDays($days);
 
-        $employees = User::where('status', 'active')->filterBy('employee')->get();
+        $employees = User::where('status', 'active')->filterByType('employee')->get();
 
         $absentEmployees = [];
         foreach ($employees as $employee) {
@@ -1096,7 +1093,7 @@ class AttendanceManagementController extends Controller
             }
         }
 
-        return view(adminTheme().'attendance.absent_report', compact('absentEmployees', 'days', 'startDate', 'endDate'));
+        return view(adminTheme().'payroll.attendance.absent_report', compact('absentEmployees', 'days', 'startDate', 'endDate'));
     }
 
     /**
@@ -1119,7 +1116,7 @@ class AttendanceManagementController extends Controller
             ->where('late_time', '>', 120) // More than 2 hours late
             ->get();
 
-        return view(adminTheme().'attendance.invalid_report', compact('noOutTime', 'invalidInTime', 'date'));
+        return view(adminTheme().'payroll.attendance.invalid_report', compact('noOutTime', 'invalidInTime', 'date'));
     }
 
         /**
@@ -1140,9 +1137,9 @@ class AttendanceManagementController extends Controller
             $query->where('date', $request->date);
         }
         $attendances = $query->orderBy('date', 'desc')->paginate(2);
-        $employees = User::where('status', 1)->filterBy('employee')->get();
+        $employees = User::where('status', 1)->filterByType('employee')->get();
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
-        return view('admin.attendance.manual_index', compact('attendances', 'employees', 'departments'));
+        return view('admin.payroll.attendance.manual_index', compact('attendances', 'employees', 'departments'));
     }
 
     /**
@@ -1150,8 +1147,8 @@ class AttendanceManagementController extends Controller
      */
     public function manualCreate()
     {
-        $employees = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.attendance.manual_create', compact('employees'));
+        $employees = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.attendance.manual_create', compact('employees'));
     }
 
     /**
@@ -1205,8 +1202,8 @@ class AttendanceManagementController extends Controller
     public function manualEdit($id)
     {
         $attendance = \App\Models\Attendance::findOrFail($id);
-        $employees = \App\Models\User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.attendance.manual_edit', compact('attendance', 'employees'));
+        $employees = \App\Models\User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.attendance.manual_edit', compact('attendance', 'employees'));
     }
 
     /**
@@ -1250,4 +1247,1287 @@ class AttendanceManagementController extends Controller
         $attendance->delete();
         return redirect()->route('admin.attendance.manual.index')->with('success', 'Attendance deleted successfully.');
     }
+
+        public function dailyAttendance(Request $r)
+    {
+
+        // ===============================
+        // Date Range
+        // ===============================
+        $startDate = $r->startDate
+            ? Carbon::parse($r->startDate)->startOfDay()
+            : Carbon::today()->startOfDay();
+
+        $endDate = $r->endDate
+            ? Carbon::parse($r->endDate)->endOfDay()
+            : Carbon::today()->endOfDay();
+
+        // ===============================
+        // Users Query
+        // ===============================
+        $users = User::filterByType('employee')->latest()
+            ->whereIn('status', [0, 1])
+            ->when($r->search, fn($q) =>
+                $q->where('name', 'like', '%' . $r->search . '%')
+            )
+            ->when($r->employeeId, fn($q) =>
+                $q->where('employee_id', 'like', '%' . $r->employeeId . '%')
+            )
+            ->when($r->designation, fn($q) =>
+                $q->where('designation_id', $r->designation)
+            )
+            ->when($r->department, fn($q) =>
+                $q->where('department_id', $r->department)
+            )
+            ->when($r->employeeType, fn($q) =>
+                $q->where('employee_type', $r->employeeType)
+            )
+            ->paginate(25);
+
+
+        $userIds = $users->pluck('id');
+
+
+        // ===============================
+        // Fetch Leaves
+        // ===============================
+        $leaves = Leave::whereIn('user_id', $userIds)
+            ->where('status', 'approved')
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                ->orWhereBetween('end_date', [$startDate, $endDate])
+                ->orWhere(function($q) use ($startDate, $endDate) {
+                    $q->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $endDate);
+                });
+            })
+            ->with('leaveType')
+            ->get();
+
+
+        // ===============================
+        // Fetch Attendance (Bulk)
+        // ===============================
+        $attendancesRaw = Attendance::whereIn('user_id', $userIds)
+            ->whereDate('in_time', '>=', $startDate->toDateString())
+            ->whereDate('in_time', '<=', $endDate->toDateString())
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->user_id . '_' . Carbon::parse($item->in_time)->format('Y-m-d');
+            });
+
+
+        // ===============================
+        // Create Date Period
+        // ===============================
+        $period = CarbonPeriod::create(
+            $startDate->toDateString(),
+            $endDate->toDateString()
+        );
+
+
+        // ===============================
+        // Map Data
+        // ===============================
+        $finalData = collect();
+
+
+        foreach ($users as $user) {
+
+            foreach ($period as $date) {
+
+                $key = $user->id . '_' . $date->format('Y-m-d');
+
+                $att = $attendancesRaw->get($key)?->first();
+
+                // -----------------------
+                // Check Leave
+                // -----------------------
+                $leave = $leaves->where('user_id', $user->id)
+                    ->filter(function($l) use ($date) {
+                        return $date->between($l->start_date, $l->end_date);
+                    })->first();
+
+                if ($leave) {
+                    $finalData->push([
+                        'id'            => $user->id,
+                        'employee_id'   => $user->employee_id,
+                        'name'          => $user->name,
+                        'designation'   => $user->designation?->name ?? '--',
+                        'department'    => $user->department?->name ?? '--',
+                        'employee_type' => $user->employeeType?->name ?? '--',
+                        'in_time'       => '--',
+                        'out_time'      => '--',
+                        'work_hr'       => '--',
+                        'status'        => 'Leave (' . ($leave->leaveType->name ?? 'Leave') . ')',
+                        'date'          => $date->format('Y-m-d'),
+                        'map_url'       => null,
+                    ]);
+                    continue;
+                }
+
+                // -----------------------
+                // Holiday (Friday)
+                // -----------------------
+                if ($date->isFriday()) {
+
+                    $finalData->push([
+                        'id'            => $user->id,
+                        'employee_id'   => $user->employee_id,
+                        'name'          => $user->name,
+                        'designation'   => $user->designation?->name ?? '--',
+                        'department'    => $user->department?->name ?? '--',
+                        'employee_type' => $user->employeeType?->name ?? '--',
+                        'in_time'       => '--',
+                        'out_time'      => '--',
+                        'work_hr'       => '--',
+                        'status'        => 'Holiday',
+                        'date'          => $date->format('Y-m-d'),
+                        'map_url'       => null,
+                    ]);
+
+                    continue;
+                }
+
+
+                // -----------------------
+                // If Attendance Exists
+                // -----------------------
+                if ($att) {
+
+                    if ($att->in_time && $att->out_time) {
+
+                        $minutes = Carbon::parse($att->out_time)
+                            ->diffInMinutes(Carbon::parse($att->in_time));
+
+                        $workHr = sprintf(
+                            '%02d:%02d',
+                            floor($minutes / 60),
+                            $minutes % 60
+                        );
+
+                    } else {
+                        $workHr = '--';
+                    }
+
+
+                    $finalData->push([
+                        'id'            => $user->id,
+                        'employee_id'   => $user->employee_id,
+                        'name'          => $user->name,
+                        'designation'   => $user->designation?->name ?? '--',
+                        'department'    => $user->department?->name ?? '--',
+                        'employee_type' => $user->employeeType?->name ?? '--',
+                        'in_time'       => $att->in_time
+                                            ? Carbon::parse($att->in_time)->format('h:i A')
+                                            : '--',
+                        'out_time'      => $att->out_time
+                                            ? Carbon::parse($att->out_time)->format('h:i A')
+                                            : '--',
+                        'work_hr'       => $workHr,
+                        'status'        => $att->status ?? 'Present',
+                        'date'          => $date->format('Y-m-d'),
+                        'map_url'       => ($att->latitude && $att->longitude)
+                                            ? "https://www.google.com/maps?q={$att->latitude},{$att->longitude}"
+                                            : null,
+                    ]);
+
+                    continue;
+                }
+
+
+                // -----------------------
+                // Absent
+                // -----------------------
+                $finalData->push([
+                    'id'            => $user->id,
+                    'employee_id'   => $user->employee_id,
+                    'name'          => $user->name,
+                    'designation'   => $user->designation?->name ?? '--',
+                    'department'    => $user->department?->name ?? '--',
+                    'employee_type' => $user->employeeType?->name ?? '--',
+                    'in_time'       => '--',
+                    'out_time'      => '--',
+                    'work_hr'       => '--',
+                    'status'        => 'Absent',
+                    'date'          => $date->format('Y-m-d'),
+                    'map_url'       => null,
+                ]);
+
+            }
+
+        }
+
+
+        // ===============================
+        // Filter By Status
+        // ===============================
+        if ($r->status) {
+            $finalData = $finalData
+                ->where('status', $r->status)
+                ->values();
+        }
+
+
+        // ===============================
+        // Summary
+        // ===============================
+        $total   = $finalData->count();
+
+        $present = $finalData
+            ->whereIn('status', ['Present', 'Late'])
+            ->count();
+
+        $late = $finalData
+            ->where('status', 'Late')
+            ->count();
+
+        $absent = $finalData
+            ->where('status', 'Absent')
+            ->count();
+
+
+        // ===============================
+        // Dropdown Filters
+        // ===============================
+        $departments = Attribute::latest()
+            ->where('type', 3)
+            ->where('status', '<>', 'temp')
+            ->get();
+
+        $designations = Attribute::latest()
+            ->where('type', 2)
+            ->where('status', '<>', 'temp')
+            ->get();
+
+        $employeeTypes = Attribute::latest()
+            ->where('type', 16)
+            ->where('status', '<>', 'temp')
+            ->get();
+
+
+        // ===============================
+        // Return View
+        // ===============================
+        return view(
+            adminTheme() . 'payroll.attendance.dailyAttendance',
+            compact(
+                'users',
+                'finalData',
+                'present',
+                'late',
+                'absent',
+                'total',
+                'startDate',
+                'endDate',
+                'designations',
+                'departments',
+                'employeeTypes'
+            )
+        );
+    }
+
+    public function dailyAttendancePrint(Request $r)
+    {
+        // ===============================
+        // Date Range
+        // ===============================
+        $startDate = $r->startDate
+            ? Carbon::parse($r->startDate)->startOfDay()
+            : Carbon::today()->startOfDay();
+
+        $endDate = $r->endDate
+            ? Carbon::parse($r->endDate)->endOfDay()
+            : Carbon::today()->endOfDay();
+
+        // ===============================
+        // Users Query (No Pagination for Print)
+        // ===============================
+        $users = User::latest()
+            ->whereIn('status', [0, 1])
+            ->when($r->search, fn($q) =>
+                $q->where('name', 'like', '%' . $r->search . '%')
+            )
+            ->when($r->employeeId, fn($q) =>
+                $q->where('employee_id', 'like', '%' . $r->employeeId . '%')
+            )
+            ->when($r->designation, fn($q) =>
+                $q->where('designation_id', $r->designation)
+            )
+            ->when($r->department, fn($q) =>
+                $q->where('department_id', $r->department)
+            )
+            ->when($r->employeeType, fn($q) =>
+                $q->where('employee_type', $r->employeeType)
+            )
+            ->get();
+
+        $userIds = $users->pluck('id');
+
+        // ===============================
+        // Fetch Leaves
+        // ===============================
+        $leaves = Leave::whereIn('user_id', $userIds)
+            ->where('status', 'approved')
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                ->orWhereBetween('end_date', [$startDate, $endDate])
+                ->orWhere(function($q) use ($startDate, $endDate) {
+                    $q->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $endDate);
+                });
+            })
+            ->with('leaveType')
+            ->get();
+
+        // ===============================
+        // Fetch Attendance (Bulk)
+        // ===============================
+        $attendancesRaw = Attendance::whereIn('user_id', $userIds)
+            ->whereDate('in_time', '>=', $startDate->toDateString())
+            ->whereDate('in_time', '<=', $endDate->toDateString())
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->user_id . '_' . Carbon::parse($item->in_time)->format('Y-m-d');
+            });
+
+        // ===============================
+        // Create Date Period
+        // ===============================
+        $period = CarbonPeriod::create(
+            $startDate->toDateString(),
+            $endDate->toDateString()
+        );
+
+        // ===============================
+        // Map Data
+        // ===============================
+        $finalData = collect();
+
+        foreach ($users as $user) {
+
+            foreach ($period as $date) {
+
+                $key = $user->id . '_' . $date->format('Y-m-d');
+
+                $att = $attendancesRaw->get($key)?->first();
+
+                // -----------------------
+                // Check Leave
+                // -----------------------
+                $leave = $leaves->where('user_id', $user->id)
+                    ->filter(function($l) use ($date) {
+                        return $date->between($l->start_date, $l->end_date);
+                    })->first();
+
+                if ($leave) {
+                    $finalData->push([
+                        'id'            => $user->id,
+                        'employee_id'   => $user->employee_id,
+                        'name'          => $user->name,
+                        'designation'   => $user->designation?->name ?? '--',
+                        'department'    => $user->department?->name ?? '--',
+                        'employee_type' => $user->employeeType?->name ?? '--',
+                        'in_time'       => '--',
+                        'out_time'      => '--',
+                        'work_hr'       => '--',
+                        'status'        => 'Leave (' . ($leave->leaveType->name ?? 'Leave') . ')',
+                        'date'          => $date->format('Y-m-d'),
+                        'map_url'       => null,
+                    ]);
+                    continue;
+                }
+
+                // -----------------------
+                // Holiday (Friday)
+                // -----------------------
+                if ($date->isFriday()) {
+
+                    $finalData->push([
+                        'id'            => $user->id,
+                        'employee_id'   => $user->employee_id,
+                        'name'          => $user->name,
+                        'designation'   => $user->designation?->name ?? '--',
+                        'department'    => $user->department?->name ?? '--',
+                        'employee_type' => $user->employeeType?->name ?? '--',
+                        'in_time'       => '--',
+                        'out_time'      => '--',
+                        'work_hr'       => '--',
+                        'status'        => 'Holiday',
+                        'date'          => $date->format('Y-m-d'),
+                        'map_url'       => null,
+                    ]);
+
+                    continue;
+                }
+
+
+                // -----------------------
+                // If Attendance Exists
+                // -----------------------
+                if ($att) {
+
+                    if ($att->in_time && $att->out_time) {
+
+                        $minutes = Carbon::parse($att->out_time)
+                            ->diffInMinutes(Carbon::parse($att->in_time));
+
+                        $workHr = sprintf(
+                            '%02d:%02d',
+                            floor($minutes / 60),
+                            $minutes % 60
+                        );
+
+                    } else {
+                        $workHr = '--';
+                    }
+
+
+                    $finalData->push([
+                        'id'            => $user->id,
+                        'employee_id'   => $user->employee_id,
+                        'name'          => $user->name,
+                        'designation'   => $user->designation?->name ?? '--',
+                        'department'    => $user->department?->name ?? '--',
+                        'employee_type' => $user->employeeType?->name ?? '--',
+                        'in_time'       => $att->in_time
+                                            ? Carbon::parse($att->in_time)->format('h:i A')
+                                            : '--',
+                        'out_time'      => $att->out_time
+                                            ? Carbon::parse($att->out_time)->format('h:i A')
+                                            : '--',
+                        'work_hr'       => $workHr,
+                        'status'        => $att->status ?? 'Present',
+                        'date'          => $date->format('Y-m-d'),
+                        'map_url'       => ($att->latitude && $att->longitude)
+                                            ? "https://www.google.com/maps?q={$att->latitude},{$att->longitude}"
+                                            : null,
+                    ]);
+
+                    continue;
+                }
+
+
+                // -----------------------
+                // Absent
+                // -----------------------
+                $finalData->push([
+                    'id'            => $user->id,
+                    'employee_id'   => $user->employee_id,
+                    'name'          => $user->name,
+                    'designation'   => $user->designation?->name ?? '--',
+                    'department'    => $user->department?->name ?? '--',
+                    'employee_type' => $user->employeeType?->name ?? '--',
+                    'in_time'       => '--',
+                    'out_time'      => '--',
+                    'work_hr'       => '--',
+                    'status'        => 'Absent',
+                    'date'          => $date->format('Y-m-d'),
+                    'map_url'       => null,
+                ]);
+
+            }
+
+        }
+
+
+        // ===============================
+        // Filter By Status
+        // ===============================
+        if ($r->status) {
+            $finalData = $finalData
+                ->where('status', $r->status)
+                ->values();
+        }
+
+
+        // ===============================
+        // Summary
+        // ===============================
+        $total   = $finalData->count();
+
+        $present = $finalData
+            ->whereIn('status', ['Present', 'Late'])
+            ->count();
+
+        $late = $finalData
+            ->where('status', 'Late')
+            ->count();
+
+        $absent = $finalData
+            ->where('status', 'Absent')
+            ->count();
+
+        // ===============================
+        // General Settings (Company Info)
+        // ===============================
+        $general = general();
+
+        // ===============================
+        // Return Print View
+        // ===============================
+        return view(
+            'admin.attendance.dailyAttendancePrint',
+            compact(
+                'finalData',
+                'present',
+                'late',
+                'absent',
+                'total',
+                'startDate',
+                'endDate',
+                'general'
+            )
+        );
+    }
+
+    public function dailyAttendanceExport(Request $r)
+    {
+        $startDate = $r->startDate ?? date('Y-m-d');
+        $endDate = $r->endDate ?? date('Y-m-d');
+
+        // Get the same data as daily attendance
+        $finalData = [];
+
+        // Get employees
+        $employees = User::filterByType('employee')
+            ->whereIn('status', [0,1]);
+
+        if($r->employeeId){
+            $employees = $employees->where('employee_id', 'LIKE', '%'.$r->employeeId.'%');
+        }
+        if($r->search){
+            $employees = $employees->where('name', 'LIKE', '%'.$r->search.'%');
+        }
+        if($r->designation){
+            $employees = $employees->where('designation_id', $r->designation);
+        }
+        if($r->department){
+            $employees = $employees->where('department_id', $r->department);
+        }
+        if($r->employeeType){
+            $employees = $employees->where('employee_type_id', $r->employeeType);
+        }
+        $employees = $employees->get();
+
+        // Get attendance records
+        $dates = CarbonPeriod::create($startDate, $endDate);
+
+        $attendanceData = Attendance::whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        $sl = 1;
+        $data = [];
+
+        foreach($employees as $employee){
+            foreach($dates as $date){
+                $dateStr = $date->format('Y-m-d');
+                $day = $date->format('l');
+
+                $attedance = $attendanceData->where('user_id', $employee->id)
+                    ->where('date', $dateStr)
+                    ->first();
+
+                $status = 'Absent';
+                if($attedance){
+                    if($attedance->status == 'present') $status = 'Present';
+                    elseif($attedance->status == 'late') $status = 'Late';
+                    elseif($attedance->status == 'absent') $status = 'Absent';
+                }
+
+                if($r->status && $r->status != $status) continue;
+
+                $data[] = [
+                    'SL' => $sl++,
+                    'Employee ID' => $employee->employee_id ?? '',
+                    'Name' => $employee->name ?? '',
+                    'Designation' => $employee->designation->name ?? '',
+                    'Department' => $employee->department->name ?? '',
+                    'Employee Type' => $employee->employee_type ?? '',
+                    'In Time' => $attedance->in_time ?? '',
+                    'Out Time' => $attedance->out_time ?? '',
+                    'Work Hour' => $attedance->work_time ?? '',
+                    'Status' => $status,
+                    'Date' => $dateStr,
+                    'Day' => $day,
+                ];
+            }
+        }
+
+        // Create export
+        \Maatwebsite\Excel\Facades\Excel::store(new \App\Exports\DailyAttendanceExport($data), 'daily_attendance_'.$startDate.'_to_'.$endDate.'.xlsx');
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\DailyAttendanceExport($data), 'daily_attendance_'.$startDate.'_to_'.$endDate.'.xlsx');
+    }
+
+    public function dailyAttendanceDepartmentWise(Request $r)
+    {
+        // ----- Date Range -----
+        $startDate = $r->startDate
+            ? Carbon::parse($r->startDate)->startOfDay()
+            : Carbon::today()->startOfDay();
+
+        $endDate = $r->endDate
+            ? Carbon::parse($r->endDate)->endOfDay()
+            : Carbon::today()->endOfDay();
+
+        // ----- Users with Filters -----
+        $users = User::with(['designation', 'department', 'employeeType'])
+            ->whereIn('status', [0,1])
+            ->when($r->search, fn($q) =>
+                $q->where('name', 'like', '%' . $r->search . '%')
+            )
+            ->when($r->employeeId, fn($q) =>
+                $q->where('employee_id', 'like', '%' . $r->employeeId . '%')
+            )
+            ->when($r->designation, fn($q) =>
+                $q->where('designation_id', $r->designation)
+            )
+            ->when($r->department, fn($q) =>
+                $q->where('department_id', $r->department)
+            )
+            ->when($r->employeeType, fn($q) =>
+                $q->where('employee_type', $r->employeeType)
+            )
+            ->get(); // department-wise → pagination usually off
+
+        $userIds = $users->pluck('id');
+
+        // ----- Attendance Bulk Fetch -----
+        $attList = Attendance::whereIn('user_id', $userIds)
+            ->whereBetween('in_time', [$startDate, $endDate])
+            ->orderBy('in_time', 'asc')
+            ->get()
+            ->groupBy('user_id');
+
+        // ----- Map Users -----
+        $mapped = $users->map(function ($user) use ($attList) {
+
+            $att = $attList->get($user->id)?->first();
+
+            if ($att && $att->in_time && $att->out_time) {
+                $minutes = Carbon::parse($att->out_time)
+                    ->diffInMinutes(Carbon::parse($att->in_time));
+
+                $workHr = sprintf('%02d:%02d', floor($minutes / 60), $minutes % 60);
+            } else {
+                $workHr = '--';
+            }
+
+            return [
+                'user_id'        => $user->id,
+                'employee_id'    => $user->employee_id,
+                'name'           => $user->name,
+                'designation'    => $user->designation?->name ?? '--',
+                'department_id'  => $user->department_id,
+                'department'     => $user->department?->name ?? 'No Department',
+                'employee_type'  => $user->employeeType?->name ?? '--',
+                'in_time'        => $att?->in_time ? Carbon::parse($att->in_time)->format('h:i A') : '--',
+                'out_time'       => $att?->out_time ? Carbon::parse($att->out_time)->format('h:i A') : '--',
+                'work_hr'        => $workHr,
+                'status'         => $att->status ?? 'Absent',
+                'date'           => $att?->in_time ? Carbon::parse($att->in_time)->format('Y-m-d') : '--',
+                'map_url'        => ($att?->latitude && $att?->longitude)
+                    ? "https://www.google.com/maps?q={$att->latitude},{$att->longitude}"
+                    : null,
+            ];
+        });
+
+        // ----- Filter by Status -----
+        if ($r->status) {
+            $mapped = $mapped->filter(
+                fn($item) => $item['status'] === $r->status
+            );
+        }
+
+        // ----- Group By Department -----
+        $departmentWiseAttendances = $mapped
+            ->groupBy('department')
+            ->sortKeys();
+
+        // ----- Summary -----
+        $total   = $users->count();
+        $present = $mapped->where('status', '!=', 'Absent')->count();
+        $late    = $mapped->where('status', 'Late')->count();
+        $absent  = $total - $present;
+
+        // ----- Dropdown Filters -----
+        $departments   = Attribute::where('type', 3)->where('status', '<>', 'temp')->get();
+        $designations  = Attribute::where('type', 2)->where('status', '<>', 'temp')->get();
+        $employeeTypes = Attribute::where('type', 16)->where('status', '<>', 'temp')->get();
+
+        return view(
+            adminTheme().'attendance.dailyAttendanceDepartmentWise',
+            compact(
+                'departmentWiseAttendances',
+                'total',
+                'present',
+                'late',
+                'absent',
+                'startDate',
+                'endDate',
+                'departments',
+                'designations',
+                'employeeTypes'
+            )
+        );
+    }
+
+    public function dailyAttendanceDepartmentSummary(Request $r)
+    {
+        // =========================
+        // Date Range
+        // =========================
+        $startDate = $r->startDate
+            ? Carbon::parse($r->startDate)->startOfDay()
+            : Carbon::today()->startOfDay();
+
+        $endDate = $r->endDate
+            ? Carbon::parse($r->endDate)->endOfDay()
+            : Carbon::today()->endOfDay();
+
+
+        // =========================
+        // All Departments (Master)
+        // =========================
+        $departments = Attribute::where('type', 3)
+            ->where('status', '<>', 'temp')
+            ->when($r->department, function ($q) use ($r) {
+                $q->where('id', $r->department);
+            })
+            ->get();
+
+
+        // =========================
+        // Users
+        // =========================
+        $users = User::whereIn('status', [0, 1])
+            ->when($r->department, fn($q) =>
+                $q->where('department_id', $r->department)
+            )
+            ->get();
+
+
+        $userIds = $users->pluck('id');
+
+
+        // =========================
+        // Attendance (Bulk)
+        // =========================
+        $attendances = Attendance::whereIn('user_id', $userIds)
+            ->whereDate('in_time', '>=', $startDate->toDateString())
+            ->whereDate('in_time', '<=', $endDate->toDateString())
+            ->get()
+            ->groupBy(function ($item) {
+                return
+                    Carbon::parse($item->in_time)->format('Y-m-d')
+                    . '_'
+                    . $item->user_id;
+            });
+
+
+        // =========================
+        // Date Period
+        // =========================
+        $period = CarbonPeriod::create(
+            $startDate->toDateString(),
+            $endDate->toDateString()
+        );
+
+
+        // =========================
+        // Final Summary
+        // =========================
+        $dateWiseSummary = collect();
+
+
+        foreach ($period as $date) {
+
+            $dailyDepartments = collect();
+
+
+            foreach ($departments as $dept) {
+
+                // Users of this department
+                $deptUsers = $users
+                    ->where('department_id', $dept->id);
+
+                $total = $deptUsers->count();
+
+                $present = 0;
+                $late = 0;
+
+
+                foreach ($deptUsers as $user) {
+
+                    $key = $date->format('Y-m-d') . '_' . $user->id;
+
+                    $att = $attendances->get($key)?->first();
+
+                    if ($att) {
+                        $present++;
+
+                        if ($att->status === 'Late') {
+                            $late++;
+                        }
+                    }
+                }
+
+
+                $absent = $total - $present;
+
+
+                $dailyDepartments->push([
+                    'department_id'   => $dept->id,
+                    'department_name' => $dept->name,
+                    'total'           => $total,
+                    'present'         => $present,
+                    'late'            => $late,
+                    'absent'          => $absent,
+                ]);
+            }
+
+
+            $dateWiseSummary->push([
+                'date'        => $date->format('Y-m-d'),
+                'readable'    => $date->format('d M, Y'),
+                'departments' => $dailyDepartments
+            ]);
+        }
+
+
+        // =========================
+        // Return View
+        // =========================
+        return view(
+            adminTheme() . 'payroll.attendance.dailyAttendanceDepartmentSummary',
+            compact(
+                'dateWiseSummary',
+                'departments',
+                'startDate',
+                'endDate'
+            )
+        );
+    }
+
+    /**
+     * Live Location Tracking - Track employee locations in real-time
+     */
+    public function liveLocationTracking(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        $department_id = $request->department_id;
+
+        // Get employees with their last location
+        $query = User::where('status', 1)
+            ->where('customer', 1)
+            ->where('employee_status', 'active')
+            ->with(['department', 'lastLocation']);
+
+        if ($employee_id) {
+            $query->where('id', $employee_id);
+        }
+
+        if ($department_id) {
+            $query->where('department_id', $department_id);
+        }
+
+        $employees = $query->orderBy('name')->get();
+
+        // Get recent attendance with location for today
+        $today = Carbon::today()->format('Y-m-d');
+        $attendancesWithLocation = Attendance::where('date', $today)
+            ->whereNotNull('location_lat')
+            ->whereNotNull('location_long')
+            ->where('location_lat', '!=', '')
+            ->where('location_long', '!=', '')
+            ->get()
+            ->groupBy('user_id');
+
+        // Get all employees with location data
+        $employeesWithLocation = UserLocation::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', 0)
+            ->where('longitude', '!=', 0)
+            ->get()
+            ->groupBy('user_id');
+
+        // Build employee location data
+        $locationData = [];
+        foreach ($employees as $employee) {
+            $lastLocation = $employee->lastLocation;
+
+            // Try to get from today's attendance first
+            $todayAttendance = $attendancesWithLocation->get($employee->id)?->first();
+
+            // Then try from UserLocation
+            $userLocation = $employeesWithLocation->get($employee->id)?->first();
+
+            $location = null;
+            $locationTime = null;
+            $locationSource = null;
+
+            if ($todayAttendance && $todayAttendance->location_lat && $todayAttendance->location_long) {
+                $location = [
+                    'lat' => $todayAttendance->location_lat,
+                    'lng' => $todayAttendance->location_long,
+                ];
+                $locationTime = $todayAttendance->in_time;
+                $locationSource = 'Attendance';
+            } elseif ($userLocation && $userLocation->latitude && $userLocation->longitude) {
+                $location = [
+                    'lat' => $userLocation->latitude,
+                    'lng' => $userLocation->longitude,
+                ];
+                $locationTime = $userLocation->updated_at;
+                $locationSource = 'Mobile App';
+            }
+
+            $locationData[] = [
+                'employee' => $employee,
+                'location' => $location,
+                'location_time' => $locationTime,
+                'location_source' => $locationSource,
+                'has_location' => $location !== null,
+            ];
+        }
+
+        // Filter employees with location
+        $employeesWithLocationOnly = array_filter($locationData, function($item) {
+            return $item['has_location'];
+        });
+
+        $departments = Attribute::where('type', 3)->where('status', 'active')->get();
+        $allEmployees = User::where('status', 1)
+            ->where('customer', 1)
+            ->where('employee_status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        return view(adminTheme() . 'attendance.live_location_tracking', compact(
+            'locationData',
+            'employeesWithLocationOnly',
+            'departments',
+            'allEmployees',
+            'employee_id',
+            'department_id'
+        ));
+    }
+
+
+
+    public function dailyAttendanceAction(Request $r,$action,$id=null){
+
+        //Add Service  Start
+        if($action=='create'){
+
+          $invoice =Order::where('order_type','lc_invoices')->where('order_status','temp')->where('addedby_id',Auth::id())->first();
+          if(!$invoice){
+            $invoice =new Order();
+            $invoice->order_type ='lc_invoices';
+            $invoice->order_status ='temp';
+            $invoice->addedby_id =Auth::id();
+            $invoice->save();
+          }
+          $invoice->created_at =Carbon::now();
+          $invoice->save();
+
+          return redirect()->route('admin.dailyAttendanceAction',['edit',$invoice->id]);
+        }
+        //Add Service  End
+
+        $invoice =Order::where('order_type','lc_invoices')->find($id);
+        if(!$invoice){
+            Session()->flash('error','This LC Invoices Are Not Found');
+            return redirect()->route('admin.lcInvoices');
+        }
+
+        if($action=='view'){
+
+            return view(adminTheme().'lc-invoices.viewLcInvoice',compact('invoice'));
+        }
+
+        if($action=='search-goods'){
+
+            $services =Post::latest()->where('type',3)->where('status','active')->where(function($q)use($r){
+                if($r->search){
+                    $q->where('name','like','%'.$r->search.'%');
+                }
+            })->limit(10)->get();
+
+            $search =view(adminTheme().'lc-invoices.includes.searchGoods',compact('services','invoice'))->render();
+
+            return Response()->json([
+                'success' => true,
+                'view' => $search,
+            ]);
+        }
+
+        if($action=='search-company'){
+
+            $companies =Company::latest()->where('status','active')->where(function($q)use($r){
+                if($r->search){
+                    $q->where('factory_name','like','%'.$r->search.'%')->orWhere('owner_name','like','%'.$r->search.'%');
+                }
+            })->limit(10)->get();
+
+            $search =view(adminTheme().'lc-invoices.includes.searchCompany',compact('companies','invoice'))->render();
+
+            return Response()->json([
+                'success' => true,
+                'view' => $search,
+            ]);
+        }
+
+        if($action=='add-company'){
+
+            $data =Company::latest()->where('status','active')->find($r->company_id);
+            if($data){
+                $invoice->company_id=$data->id;
+                $invoice->save();
+            }
+
+            $view =view(adminTheme().'lc-invoices.includes.orderItems',compact('invoice'))->render();
+
+            return Response()->json([
+                'success' => true,
+                'view' => $view,
+            ]);
+        }
+
+
+        if($action=='add-item' || $action=='add-goods' || $action=='remove-item' || $action=='update-item'){
+
+            if($action=='add-item'){
+                $item =new OrderItem();
+                $item->order_id=$invoice->id;
+                $item->status=$invoice->status;
+                $item->addedby_id=Auth::id();
+                $item->save();
+            }
+
+            if($action=='add-goods'){
+                $service =Post::latest()->where('type',3)->where('status','active')->find($r->service_id);
+                if($service){
+                    $item =$invoice->items()->where('src_id',$service->id)->first();
+                    if(!$item){
+                        $item =new OrderItem();
+                        $item->order_id=$invoice->id;
+                        $item->src_id=$service->id;
+                        $item->quantity=1;
+                        $item->description=$service->name;
+                        $item->unit=$service->unit?$service->unit->name:null;
+                        $item->price=$service->item_price?:0;
+                        $item->final_price =$item->price*$item->quantity;
+                        $item->status=$invoice->status;
+                        $item->addedby_id=Auth::id();
+                        $item->save();
+                    }
+                }
+            }
+
+            if($action=='remove-item'){
+                $item =$invoice->items()->find($r->item_id);
+                if($item){
+                    $item->delete();
+                }
+            }
+
+            if($action=='update-item'){
+                $item =$invoice->items()->find($r->item_id);
+                if($item){
+                    if($r->name=='product_name' || $r->name=='description' || $r->name=='unit' || $r->name=='price' || $r->name=='quantity'){
+                      if($r->name=='price' || $r->name=='quantity'){
+                      $item[$r->name]=$r->data?:0;
+                      }else{
+                      $item[$r->name]=$r->data?:null;
+                      }
+
+                      if($r->name=='price' || $r->name=='quantity'){
+                        $item->final_price =$item->price*$item->quantity;
+                      }
+                      $item->save();
+                    }
+                }
+
+
+                $invoice->total_items=$invoice->items()->count();
+                $invoice->total_qty=$invoice->items()->sum('quantity');
+                $invoice->total_price=$invoice->items()->sum('final_price');
+                // $invoice->grand_total=$invoice->items()->sum('final_price');
+                $invoice->save();
+
+                return Response()->json([
+                'success' => true,
+                ]);
+            }
+
+            $invoice->total_items=$invoice->items()->count();
+            $invoice->total_qty=$invoice->items()->sum('quantity');
+            $invoice->total_price=$invoice->items()->sum('final_price');
+            // $invoice->grand_total=$invoice->items()->sum('final_price');
+            $invoice->save();
+
+            $view =view(adminTheme().'lc-invoices.includes.orderItems',compact('invoice'))->render();
+
+            return Response()->json([
+                'success' => true,
+                'view' => $view,
+            ]);
+
+        }
+
+        if($action=='update'){
+
+            $check = $r->validate([
+                'lc_open_bank' => 'nullable|max:100',
+                'total_amount' => 'nullable|numeric',
+                'lc_value_rate' => 'nullable|numeric',
+                'lc_total_value' => 'nullable|numeric',
+                'lc_no' => 'required|max:100',
+                'created_at' => 'required|date',
+                'submited_date' => 'nullable|date',
+                'estimated_date' => 'nullable|date',
+                'status' => 'nullable|max:20',
+                'note' => 'nullable|max:2000',
+            ]);
+
+            $invoice->invoice=$r->lc_no;
+            $invoice->lc_open_bank=$r->lc_open_bank;
+            $invoice->grand_total=$r->total_amount?:0;
+            $invoice->lc_value_rate=$r->lc_value_rate?:0;
+            $invoice->lc_total_value=$r->lc_total_value?:0;
+            $invoice->created_at=$r->created_at?:Carbon::now();
+            $invoice->pending_at=$r->submited_date;
+            $invoice->maturity_at=$r->estimated_date;
+            $invoice->note=$r->note;
+            $invoice->order_status=$r->status?:'confirmed';
+
+            $invoice->total_items=$invoice->items()->count();
+            $invoice->total_qty=$invoice->items()->sum('quantity');
+            $invoice->total_price=$invoice->items()->sum('final_price');
+            $invoice->save();
+
+            Session()->flash('success','Your Are Successfully Updated');
+            return redirect()->back();
+
+        }
+
+
+        if($action=='delete'){
+
+
+            if($invoice->order_status=='trash'){
+                $invoice->items()->delete();
+                $invoice->delete();
+            }else{
+                foreach($invoice->items()->whereHas('piOrder')->get() as $item){
+                    $data =$item->piOrder;
+                    $data->order_status='confirmed';
+                    $data->save();
+                }
+                $invoice->order_status='trash';
+                $invoice->save();
+            }
+
+            Session()->flash('success','Your Are Successfully Deleted');
+            return redirect()->back();
+        }
+
+        $pinumbers =Order::latest()->where('order_type','pi_invoices')->where('order_status','confirmed')->select(['id','invoice'])->limit(10)->get();
+        $banks =Attribute::latest()->where('type',9)->where('status','<>','temp')->where('fetured',true)->select(['id','name','description'])->get();
+        $companies =Company::latest()->where('status','active')->limit(10)->get();
+
+      return view(adminTheme().'lc-invoices.editLcInvoices',compact('invoice','pinumbers','companies'));
+    }
+
+    public function gradeWiseSalaryReport(Request $r)
+    {
+        // ----- Date Range -----
+        $startDate = $r->startDate
+            ? Carbon::parse($r->startDate)->startOfDay()
+            : Carbon::today()->startOfMonth();
+
+        $endDate = $r->endDate
+            ? Carbon::parse($r->endDate)->endOfDay()
+            : Carbon::today()->endOfDay();
+
+        // ----- Users Query with Filters -----
+        $users = User::latest()
+            ->when($r->search, fn($q) => $q->where('name','like','%'.$r->search.'%'))
+            ->when($r->grade, fn($q) => $q->where('grade_lavel', $r->grade))
+            ->when($r->designation, fn($q) => $q->where('designation_id', $r->designation))
+            ->when($r->department, fn($q) => $q->where('department_id', $r->department))
+            ->when($r->employeeType, fn($q) => $q->where('employee_type_id', $r->employeeType))
+            ->paginate(50);
+
+        $userIds = $users->pluck('id');
+
+        // ----- Fetch Salary Records -----
+        $salaryRecords = Salary::whereIn('user_id', $userIds)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
+        // ----- Map Users to Salary Data -----
+        $salaryData = $users->map(function($user) use ($salaryRecords) {
+
+            $grade = Attribute::where('type',12)->find($user->grade_lavel);
+            $gradeJson = $grade ? json_decode($grade->description, true) : [];
+
+            $salaryPaid = $salaryRecords->get($user->id);
+            $totalPaid = $salaryPaid ? $salaryPaid->sum('net_salary_amount') : 0;
+            $lastPaid = $salaryPaid ? $salaryPaid->first()?->created_at : null;
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'grade' => $grade?->name ?? '--',
+                'designation' => $user->designation?->name ?? '--',
+                'department' => $user->department?->name ?? '--',
+                'employee_type' => $user->employeeType?->name ?? '--',
+                'basic' => $gradeJson['basic_salary'] ?? 0,
+                'house_rent' => $gradeJson['house_rent'] ?? 0,
+                'medical' => $gradeJson['medical_allowance'] ?? 0,
+                'transport' => $gradeJson['transport_allowance'] ?? 0,
+                'food' => $gradeJson['food_allowance'] ?? 0,
+                'attendance_bonus' => $gradeJson['attendance_bonus'] ?? 0,
+                'other_allowance' => $gradeJson['other_allowance'] ?? 0,
+                'stamp_charge' => $gradeJson['stamp_charge'] ?? 0,
+                'computed_salary' => ($gradeJson['basic_salary'] ?? 0) + ($gradeJson['house_rent'] ?? 0) + ($gradeJson['medical_allowance'] ?? 0) + ($gradeJson['transport_allowance'] ?? 0) + ($gradeJson['food_allowance'] ?? 0) + ($gradeJson['attendance_bonus'] ?? 0) + ($gradeJson['other_allowance'] ?? 0) + ($gradeJson['stamp_charge'] ?? 0),
+                'total_paid' => $totalPaid,
+                'last_paid' => $lastPaid ? Carbon::parse($lastPaid)->format('Y-m-d') : '--',
+            ];
+        });
+
+        // ----- Summary -----
+        $totalEmployees = $users->total();
+        $totalSalary = $salaryData->sum('computed_salary');
+        $totalPaid = $salaryData->sum('total_paid');
+
+        // ----- Filters for dropdowns -----
+        $grades = Attribute::latest()->where('type',12)->where('status','<>','temp')->get();
+        $departments = Attribute::latest()->where('type',3)->where('status','<>','temp')->get();
+        $designations = Attribute::latest()->where('type',2)->where('status','<>','temp')->get();
+        $employeeTypes = Attribute::latest()->where('type',4)->where('status','active')->get();
+
+        return view(
+            adminTheme().'salary.gradeWiseSalaryReport',
+            compact(
+                'users',
+                'salaryData',
+                'totalEmployees',
+                'totalSalary',
+                'totalPaid',
+                'grades',
+                'departments',
+                'designations',
+                'employeeTypes',
+                'startDate',
+                'endDate'
+            )
+        );
+    }
+
 }

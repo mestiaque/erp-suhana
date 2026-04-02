@@ -128,12 +128,11 @@
                                 <ul>
                                     <li>Basic Salary: {{ $data['basic_salary'] ?? 0 }}%</li>
                                     <li>House Rent: {{ $data['house_rent'] ?? 0 }}%</li>
-                                    <li>Medical Allowance: {{ $data['medical_allowance'] ?? 0 }}TK</li>
-                                    <li>Transport Allowance: {{ $data['transport_allowance'] ?? 0 }}TK</li>
-                                    <li>Food Allowance: {{ $data['food_allowance'] ?? 0 }}TK</li>
-                                    <li>Attendance Bonus: {{ $data['attendance_bonus'] ?? 0 }}TK</li>
-                                    <li>Other Allowance: {{ $data['other_allowance'] ?? 0 }}TK</li>
-                                    <li>Stamp Charge: {{ $data['stamp_charge'] ?? 0 }}TK</li>
+                                    <li>Medical Allowance: {{ $data['medical_allowance'] ?? 0 }}%</li>
+                                    <li>Transport Allowance: {{ $data['transport_allowance'] ?? 0 }}%</li>
+                                    <li>Food Allowance: {{ $data['food_allowance'] ?? 0 }}%</li>
+                                    <li>Attendance Bonus: {{ $data['attendance_bonus'] ?? 0 }} TK</li>
+                                    <li>Other Allowance: {{ $data['other_allowance'] ?? 0 }}%</li>
                                 </ul>
                             </td>
                             <td>{{$grade->created_at->format('d-m-Y')}}</td>
@@ -189,34 +188,30 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Medical Allowance (TK)</label>
-                    <input type="text" class="form-control" name="json[medical_allowance]" placeholder="TK">
+                    <label>Medical Allowance (%)</label>
+                    <input type="text" class="form-control" name="json[medical_allowance]" placeholder="%">
                 </div>
 
                 <div class="form-group">
-                    <label>Transport Allowance (TK)</label>
-                    <input type="text" class="form-control" name="json[transport_allowance]" placeholder="TK">
+                    <label>Transport Allowance (%)</label>
+                    <input type="text" class="form-control" name="json[transport_allowance]" placeholder="%">
                 </div>
 
                 <div class="form-group">
-                    <label>Food Allowance (TK)</label>
-                    <input type="text" class="form-control" name="json[food_allowance]" placeholder="TK">
+                    <label>Food Allowance (%)</label>
+                    <input type="text" class="form-control" name="json[food_allowance]" placeholder="%">
                 </div>
 
                 <div class="form-group">
                     <label>Attendance Bonus (TK)</label>
-                    <input type="text" class="form-control" name="json[attendance_bonus]" placeholder="TK">
+                    <input type="text" class="form-control" name="json[attendance_bonus]" placeholder="Amount in TK">
                 </div>
 
                 <div class="form-group">
-                    <label>Other Allowance (TK)</label>
-                    <input type="text" class="form-control" name="json[other_allowance]" placeholder="TK">
+                    <label>Other Allowance (%)</label>
+                    <input type="text" class="form-control" name="json[other_allowance]" placeholder="%">
                 </div>
 
-                <div class="form-group">
-                    <label>Stamp Charge (TK)</label>
-                    <input type="text" class="form-control" name="json[stamp_charge]" placeholder="TK">
-                </div>
                 <!-- END JSON INPUTS -->
 
     	   </div>
@@ -266,17 +261,17 @@ $json = json_decode($dpm->description, true);
                 </div>
 
                 <div class="form-group">
-                    <label>Medical Allowance (TK)</label>
+                    <label>Medical Allowance (%)</label>
                     <input type="text" class="form-control" name="json[medical_allowance]" value="{{$json['medical_allowance'] ?? ''}}">
                 </div>
 
                 <div class="form-group">
-                    <label>Transport Allowance (TK)</label>
+                    <label>Transport Allowance (%)</label>
                     <input type="text" class="form-control" name="json[transport_allowance]" value="{{$json['transport_allowance'] ?? ''}}">
                 </div>
 
                 <div class="form-group">
-                    <label>Food Allowance (TK)</label>
+                    <label>Food Allowance (%)</label>
                     <input type="text" class="form-control" name="json[food_allowance]" value="{{$json['food_allowance'] ?? ''}}">
                 </div>
 
@@ -286,14 +281,10 @@ $json = json_decode($dpm->description, true);
                 </div>
 
                 <div class="form-group">
-                    <label>Other Allowance (TK)</label>
+                    <label>Other Allowance (%)</label>
                     <input type="text" class="form-control" name="json[other_allowance]" value="{{$json['other_allowance'] ?? ''}}">
                 </div>
 
-                <div class="form-group">
-                    <label>Stamp Charge (TK)</label>
-                    <input type="text" class="form-control" name="json[stamp_charge]" value="{{$json['stamp_charge'] ?? ''}}">
-                </div>
                 <!-- END JSON INPUTS -->
 
              	<div class="row">

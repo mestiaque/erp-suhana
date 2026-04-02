@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Deduction;
+use App\Models\payroll\Deduction;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -24,7 +24,7 @@ class DeductionController extends Controller
             ->orderBy('month', 'desc')
             ->get();
 
-        return view('admin.deduction.index', compact('deductions'));
+        return view('admin.payroll.deduction.index', compact('deductions'));
     }
 
     /**
@@ -32,8 +32,8 @@ class DeductionController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.deduction.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.deduction.create', compact('users'));
     }
 
     /**

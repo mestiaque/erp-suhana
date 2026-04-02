@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\AttendanceApproval;
+use App\Models\payroll\Attendance;
+use App\Models\payroll\AttendanceApproval;
 use App\Models\User;
-use App\Models\Attendance;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceApprovalController extends Controller
 {
@@ -28,8 +29,8 @@ class AttendanceApprovalController extends Controller
             })
             ->orderBy('attendance_date', 'desc')
             ->get();
-        
-        return view('admin.attendance-approval.index', compact('approvals'));
+
+        return view('admin.payroll.attendance-approval.index', compact('approvals'));
     }
 
     /**
@@ -37,8 +38,8 @@ class AttendanceApprovalController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.attendance-approval.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.attendance-approval.create', compact('users'));
     }
 
     /**
@@ -83,26 +84,26 @@ class AttendanceApprovalController extends Controller
         ]);
 
         $approval = AttendanceApproval::findOrFail($id);
-        
+
         // Update the attendance record if approved
         if ($request->status === 'approved') {
-            $attendance = Attendance::where('user_id', $approval->user_id)
-                ->whereDate('date', $approval->attendance_date)
-                ->first();
-            
-            if ($attendance) {
-                $attendance->update([
+            Attendance::updateOrCreate(
+                [
+                    'user_id' => $approval->user_id,
+                    'date' => $approval->attendance_date,
+                ],
+                [
                     'status' => $approval->requested_status,
                     'in_time' => $approval->in_time,
                     'out_time' => $approval->out_time,
-                ]);
-            }
+                ]
+            );
         }
 
         $approval->update([
             'status' => $request->status,
             'admin_remark' => $request->admin_remark,
-            'approved_by' => auth()->id(),
+            'approved_by' => Auth::id(),
             'approved_at' => Carbon::now(),
         ]);
 

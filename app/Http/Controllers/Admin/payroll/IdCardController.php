@@ -13,7 +13,7 @@ class IdCardController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
 
         $selectedUsers = [];
         if ($request->user_ids) {
@@ -22,7 +22,7 @@ class IdCardController extends Controller
                 ->get();
         }
 
-        return view('admin.idcard.index', compact('users', 'selectedUsers'));
+        return view('admin.payroll.idcard.index', compact('users', 'selectedUsers'));
     }
 
     /**
@@ -30,7 +30,7 @@ class IdCardController extends Controller
      */
     public function print(Request $request)
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
 
         $selectedUsers = [];
         if ($request->user_ids) {
@@ -39,6 +39,6 @@ class IdCardController extends Controller
                 ->get();
         }
 
-        return view('admin.idcard.print', compact('users', 'selectedUsers'));
+        return view('admin.payroll.idcard.print', compact('users', 'selectedUsers'));
     }
 }

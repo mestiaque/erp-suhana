@@ -46,6 +46,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Image;
 use Pdf;
 use Redirect,Response;
@@ -4496,7 +4497,7 @@ class AdminController extends Controller
                 Session()->flash('success', 'User restored successfully!');
                 return redirect()->back();
             }
-    
+
             // FORCE DELETE USER
             if ($action == 'force-delete') {
                 if ($id == $authId) {
@@ -4517,10 +4518,10 @@ class AdminController extends Controller
                 Session()->flash('success', 'User permanently deleted!');
                 return redirect()->back();
             }
-    
+
             // CREATE USER
             if ($action == 'create' && $r->isMethod('post')) {
-    
+
                 $r->validate([
                     'name'         => 'required|max:100',
                     'company_name' => 'nullable|max:100',
@@ -4531,14 +4532,14 @@ class AdminController extends Controller
                 ]);
                 // Check for existing user by mobile
                 $existingUser = User::where('mobile', $r->mobile)->first();
-    
+
                 // Check for soft-deleted user with same mobile
                 $trashedUser = User::withTrashed()->where('mobile', $r->mobile)->first();
                 if ($trashedUser && !$existingUser) {
                     Session()->flash('info', 'This mobile number is associated with a soft-deleted account.');
                     return redirect()->back();
                 }
-    
+
                 // Check for existing user by email only if email provided
                 if (!empty($r->email)) {
                     $existingUserByEmail = User::where('email', $r->email)->first();
@@ -4547,13 +4548,13 @@ class AdminController extends Controller
                         return redirect()->back();
                     }
                 }
-    
+
                 // If mobile/email already exist, do not forcefully change roles
                 if ($existingUser) {
                     Session()->flash('info', 'Mobile already in use.');
                     return redirect()->back();
                 }
-    
+
                 $password = Str::random(8);
                 $user = new User();
                 $user->name          = $r->name;
@@ -4564,21 +4565,48 @@ class AdminController extends Controller
                 $user->address_line1 = $r->address;
                 $user->password_show = $password;
                 $user->password      = Hash::make($password);
-    
+
                 $user->setTypes('customer'); // if you already have setTypes method
                 $user->save();
-    
+
                 Session()->flash('success', 'Employee registered successfully!');
                 return redirect()->route('admin.usersCustomerAction', ['view', $user->id]);
             }
-    
-    
-            $user = User::whereIn('status', [0,1])->find($id);
-            if (!$user) {
+
+
+            $user = $action === 'employee-create'
+                ? new User()
+                : User::whereIn('status', [0,1])->find($id);
+
+            if (!$user && !in_array($action, ['employee-create'])) {
                 Session()->flash('error', 'User not found.');
                 return redirect()->route('admin.usersCustomer');
             }
-    
+
+            if ($action == 'employee-create' && $r->isMethod('post')) {
+                try {
+                    $userService = app(UserService::class);
+                    $rules = $userService->getUpdateValidationRules();
+                    $rules['name'] = 'required|max:100';
+                    $rules['employee_id'] = 'required|max:50|unique:users,employee_id';
+                    $rules['mobile'] = 'nullable|max:20|unique:users,mobile';
+                    $rules['password'] = 'required|min:6|max:100';
+
+                    $r->validate($rules);
+
+                    $userService->update($r, $user);
+                    $user->setTypes('customer');
+                    $user->save();
+
+                    Session()->flash('success', 'Employee created successfully!');
+                    return redirect()->route('admin.usersCustomerAction', ['view', $user->id]);
+                } catch (ValidationException $e) {
+                    throw $e;
+                } catch (\Exception $e) {
+                    return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+                }
+            }
+
             // UPDATE USER PROFILE
             if ($action == 'update' && $r->isMethod('post')) {
                 try {
@@ -4591,12 +4619,14 @@ class AdminController extends Controller
                     Session()->flash('success', 'Update Successful!');
                     return redirect()->back();
 
+                } catch (ValidationException $e) {
+                    throw $e;
                 } catch (\Exception $e) {
 
-                    return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+                    return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
                 }
             }
-    
+
             // PASSWORD CHANGE
             if ($action == 'change-password' && $r->isMethod('post')) {
                 $validator = Validator::make($r->all(), [
@@ -4616,10 +4646,10 @@ class AdminController extends Controller
                 }
                 return redirect()->back();
             }
-    
+
             // SOFT DELETE
             if ($action == 'delete') {
-    
+
                 if ($user->id == $authId) {
                     Session()->flash('error', 'You cannot delete your own account!');
                     return redirect()->back();
@@ -4630,8 +4660,8 @@ class AdminController extends Controller
                 Session()->flash('success', 'User soft deleted successfully!');
                 return redirect()->back();
             }
-    
-            if($action=='edit'){
+
+            if($action=='edit' || $action == 'employee-create'){
                 $departments   = Attribute::latest()->filterBy('department')->where('status','<>','temp')->get();
                 $designations  = Attribute::latest()->filterBy('designation')->where('status','<>','temp')->get();
                 $divisions     = Attribute::latest()->filterBy('divisions')->where('status', '<>', 'temp')->get();
@@ -4640,17 +4670,21 @@ class AdminController extends Controller
                 $sections      = Attribute::latest()->filterBy('sections')->where('status', '<>', 'temp')->get();
                 $emp_types     = Attribute::latest()->where('type', 16)->where('status', '<>', 'temp')->get();
                 $shifts        = Shift::latest()->get();
-    
+
                 $roles =Permission::latest()->where('status','active')->get();
-    
+
                 return view(adminTheme().'users.customers.editUser', compact('user','departments','designations','divisions','grades','lines','sections','shifts','roles', 'emp_types'));
-    
+
             }
-    
+
+            if ($action == 'print') {
+                return view(adminTheme().'users.customers.printUser', compact('user'));
+            }
+
             if ($action == 'user-document') {
                 $fileAction = $r->file_action;
                 $fileId = $r->file_id ?? null;
-    
+
                 if ($fileAction == 'addfile') {
                     Media::create([
                         'src_id' => $user->id,
@@ -4659,11 +4693,11 @@ class AdminController extends Controller
                         'addedby_id' => Auth::id(),
                     ]);
                 }
-    
+
                 if (in_array($fileAction, ['removeData', 'removeFile']) && $fileId) {
                     $file = $user->galleryFiles()->find($fileId);
                     if($file && File::exists($file->file_url)) File::delete($file->file_url);
-    
+
                     if ($fileAction == 'removeData') $file?->delete();
                     if ($fileAction == 'removeFile') {
                         $file?->update([
@@ -4671,17 +4705,17 @@ class AdminController extends Controller
                         ]);
                     }
                 }
-    
+
                 if ($fileAction == 'updateTitle' && $fileId) {
                     $file = $user->galleryFiles()->find($fileId);
                     if($file) $file->update(['file_name'=>$r->title]);
                 }
-    
+
                 if ($fileAction == 'updateFile' && $fileId && $r->hasFile('file')) {
                     $fileData = $user->galleryFiles()->find($fileId);
                     if ($fileData) {
                         if(File::exists($fileData->file_url)) File::delete($fileData->file_url);
-    
+
                         $file = $r->file;
                         $ext = $file->getClientOriginalExtension();
                         $size = $file->getSize();
@@ -4690,7 +4724,7 @@ class AdminController extends Controller
                         $imgName = time().'.'.uniqid().'.'.$ext;
                         $path = "medies/".$folder;
                         $fullPath = "".$path.'/'.$imgName;
-    
+
                         $fileData->update([
                             'alt_text' => Str::limit($name,250),
                             'file_rename' => $imgName,
@@ -4707,21 +4741,29 @@ class AdminController extends Controller
                             'file_url' => $fullPath,
                             'file_path' => $path
                         ]);
-    
+
                         $file->move(public_path($path), $imgName);
                     }
                 }
                 $view = view(adminTheme().'users.customers.includes.userFiles', compact('user'))->render();
                 return response()->json(['success'=>true, 'view'=>$view]);
             }
-    
+
             // Return view
             $startDate = $r->startDate ? Carbon::parse($r->startDate) : Carbon::now()->startOfMonth();
             $endDate = $r->endDate ? Carbon::parse($r->endDate) : Carbon::now();
-    
-            return view(adminTheme().'users.customers.viewUser',compact('user','action','startDate','endDate'));
+
+            $selectedGrade = null;
+            if (!empty($user->grade_lavel)) {
+                $selectedGrade = Attribute::find($user->grade_lavel);
+            }
+
+            return view(adminTheme().'users.customers.viewUser',compact('user','action','startDate','endDate', 'selectedGrade'));
+        }catch(ValidationException $e){
+            throw $e;
         }catch(\Exception $e){
-            return redirect()->back()->withErrors($e->getMessage())->withInput();
+
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
 
@@ -5323,14 +5365,14 @@ class AdminController extends Controller
       $employeeType =Attribute::where('type',16)->find($id);
       if(!$employeeType){
         Session()->flash('error','This Employee Type Are Not Found');
-        return redirect()->route('admin.employeeTypes');
+        return redirect()->route('admin.employeeType');
       }
 
       //Check Authorized User
       $allPer = empty(json_decode(Auth::user()->permission->permission, true)['clients']['all']);
       if($allPer && $employeeType->addedby_id!=Auth::id()){
         Session()->flash('error','You are unauthorized Try!!');
-        return redirect()->route('admin.employeeTypes');
+        return redirect()->route('admin.employeeType');
       }
 
       // Update EmployeeType Action Start
@@ -5416,7 +5458,7 @@ class AdminController extends Controller
         $employeeType->delete();
 
         Session()->flash('success','Your Are Successfully Deleted');
-        return redirect()->route('admin.employeeTypes');
+        return redirect()->route('admin.employeeType');
 
       }
       // Delete EmployeeType Action End
@@ -5536,13 +5578,13 @@ class AdminController extends Controller
         $division =Attribute::where('type',27)->find($id);
         if(!$division){
             Session()->flash('error','This Division Are Not Found');
-            return redirect()->route('admin.admin.divisions');
+            return redirect()->route('admin.divisions');
         }
 
         $allPer = empty(json_decode(Auth::user()->permission->permission, true)['brands']['all']);
         if($allPer && $division->addedby_id!=Auth::id()){
             Session()->flash('error','You are unauthorized Try!!');
-            return redirect()->route('admin.admin.divisions');
+            return redirect()->route('admin.divisions');
         }
 
 
@@ -5617,7 +5659,7 @@ class AdminController extends Controller
                 $division->delete();
 
                 Session()->flash('success','Your Are Successfully Done');
-                return redirect()->route('admin.admin.divisions');
+                return redirect()->route('admin.divisions');
         }
 
         return redirect()->back();
@@ -5627,11 +5669,10 @@ class AdminController extends Controller
 
     // grades
     public function grades(Request $r){
-
         if($r->action){
             if($r->checkid){
 
-            $datas=Attribute::latest()->where('type',28)->whereIn('id',$r->checkid)->get();
+            $datas=Attribute::latest()->filterBy('grades')->whereIn('id',$r->checkid)->get();
 
             foreach($datas as $data){
 
@@ -5666,7 +5707,7 @@ class AdminController extends Controller
         }
 
 
-        $grades=Attribute::latest()->where('type',28)->where('status','<>','temp')
+        $grades=Attribute::latest()->filterBy('grades')->where('status','<>','temp')
             ->where(function($q) use ($r) {
 
             if($r->search){
@@ -5737,13 +5778,13 @@ class AdminController extends Controller
         $grade =Attribute::where('type',28)->find($id);
         if(!$grade){
             Session()->flash('error','This Grade Are Not Found');
-            return redirect()->route('admin.admin.grades');
+            return redirect()->route('admin.grades');
         }
 
         $allPer = empty(json_decode(Auth::user()->permission->permission, true)['brands']['all']);
         if($allPer && $grade->addedby_id!=Auth::id()){
             Session()->flash('error','You are unauthorized Try!!');
-            return redirect()->route('admin.admin.grades');
+            return redirect()->route('admin.grades');
         }
 
 
@@ -6057,34 +6098,36 @@ class AdminController extends Controller
             }
 
             // Validation
-            $validatedData = $r->validate([
-                'name_of_shift' => 'required|string|max:100',
-                'name_of_shift_bn' => 'nullable|string|max:100',
-                'shift_starting_time' => 'required',
-                'red_marking_on' => 'required',
-                'shift_closing_time' => 'required',
-                'shift_closing_time_next_day' => 'nullable|boolean',
-                'over_time_allowed_up_to' => 'required',
-                'over_time_allowed_up_to_next_day' => 'nullable|boolean',
-                'over_time_1_allowed_up_to' => 'required',
-                'over_time_1_allowed_up_to_next_day' => 'nullable|boolean',
-                'card_accept_from' => 'required',
-                'card_accept_to' => 'required',
-                'card_accept_to_next_day' => 'nullable|boolean',
-                'meal_option' => 'nullable|string',
-                'tiffin_allowance' => 'nullable|numeric',
-                'no_lunch_hour_holiday' => 'nullable|boolean',
-                'dinner_allowance' => 'nullable|boolean',
-                'dinner_count_option' => 'nullable|string',
-                'double_shift' => 'nullable|boolean',
-                'weekly_overtime_allowed' => 'nullable',
-                'weekly_ot_sat' => 'nullable',
-                'weekly_ot_sun' => 'nullable',
-                'weekly_ot_mon' => 'nullable',
-                'weekly_ot_tue' => 'nullable',
-                'weekly_ot_wed' => 'nullable',
-                'weekly_ot_thu' => 'nullable',
-            ]);
+            if (in_array($action, ['store', 'update'])) {
+                $validatedData = $r->validate([
+                    'name_of_shift' => 'required|string|max:100',
+                    'name_of_shift_bn' => 'nullable|string|max:100',
+                    'shift_starting_time' => 'required',
+                    'red_marking_on' => 'required',
+                    'shift_closing_time' => 'required',
+                    'shift_closing_time_next_day' => 'nullable|boolean',
+                    'over_time_allowed_up_to' => 'required',
+                    'over_time_allowed_up_to_next_day' => 'nullable|boolean',
+                    'over_time_1_allowed_up_to' => 'required',
+                    'over_time_1_allowed_up_to_next_day' => 'nullable|boolean',
+                    'card_accept_from' => 'required',
+                    'card_accept_to' => 'required',
+                    'card_accept_to_next_day' => 'nullable|boolean',
+                    'meal_option' => 'nullable|string',
+                    'tiffin_allowance' => 'nullable|numeric',
+                    'no_lunch_hour_holiday' => 'nullable|boolean',
+                    'dinner_allowance' => 'nullable|boolean',
+                    'dinner_count_option' => 'nullable|string',
+                    'double_shift' => 'nullable|boolean',
+                    'weekly_overtime_allowed' => 'nullable',
+                    'weekly_ot_sat' => 'nullable',
+                    'weekly_ot_sun' => 'nullable',
+                    'weekly_ot_mon' => 'nullable',
+                    'weekly_ot_tue' => 'nullable',
+                    'weekly_ot_wed' => 'nullable',
+                    'weekly_ot_thu' => 'nullable',
+                ]);
+            }
 
             // Fix boolean fields properly
             $booleanFields = [

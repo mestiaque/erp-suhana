@@ -3,25 +3,23 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\SalarySheet;
-use App\Models\Attendance;
-use App\Models\Leave;
-use App\Models\Roaster;
-use App\Models\Shift;
 use App\Models\Attribute;
-use App\Models\Overtime;
-use App\Models\Bonus;
-use App\Models\Deduction;
-use App\Models\Tax;
-use App\Models\Loan;
-use App\Models\SalaryAdvance;
-use App\Models\ProvidentFund;
-use App\Models\WorkingHour;
-use App\Models\Policy;
-use App\Models\Holiday;
-use Illuminate\Http\Request;
+use App\Models\payroll\Attendance;
+use App\Models\payroll\Bonus;
+use App\Models\payroll\Deduction;
+use App\Models\payroll\Leave;
+use App\Models\payroll\Loan;
+use App\Models\payroll\Overtime;
+use App\Models\payroll\ProvidentFund;
+use App\Models\payroll\Roaster;
+use App\Models\payroll\SalaryAdvance;
+use App\Models\payroll\SalarySheet;
+use App\Models\payroll\Shift;
+use App\Models\payroll\Tax;
+use App\Models\payroll\WorkingHour;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PayrollManagementController extends Controller
@@ -56,7 +54,7 @@ class PayrollManagementController extends Controller
                 // Ignore
             }
 
-            return view(adminTheme().'payroll.index', compact('salaries', 'summary', 'month', 'year', 'departments'));
+            return view(adminTheme().'payroll.payroll.index', compact('salaries', 'summary', 'month', 'year', 'departments'));
         } catch (\Exception $e) {
             return back()->with('error', 'Error loading payroll: ' . $e->getMessage());
         }
@@ -71,6 +69,8 @@ class PayrollManagementController extends Controller
         $request->validate([
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer|min:2020',
+            'attendance_start_date' => 'nullable|date',
+            'attendance_end_date' => 'nullable|date|after_or_equal:attendance_start_date',
         ]);
 
         $month = $request->month;
@@ -94,13 +94,23 @@ class PayrollManagementController extends Controller
             return back()->with('error', 'Salary for this month already processed. Enable reprocess to update.');
         }
 
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+        $defaultStartDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $defaultEndDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
-        // For current month, only count up to today
-        $actualEndDate = $endDate;
-        if ($isCurrentMonth) {
-            $actualEndDate = $today;
+        // For current month, default range ends at today.
+        $defaultActualEndDate = $isCurrentMonth ? $today->copy() : $defaultEndDate->copy();
+
+        // Allow custom attendance range from salary sheet page.
+        $startDate = $request->attendance_start_date
+            ? Carbon::parse($request->attendance_start_date)->startOfDay()
+            : $defaultStartDate->copy();
+
+        $actualEndDate = $request->attendance_end_date
+            ? Carbon::parse($request->attendance_end_date)->endOfDay()
+            : $defaultActualEndDate->copy();
+
+        if ($startDate->gt($actualEndDate)) {
+            return back()->with('error', 'Attendance start date must be before or equal to end date.');
         }
 
         // Calculate working days (up to actual end date)
@@ -109,7 +119,7 @@ class PayrollManagementController extends Controller
         // Get all active employees - using User table directly since salary info is there
         $employees = User::where('employee_status', 'active')
             ->where('status', 1)
-            ->filterBy('employee')
+            ->filterByType('employee')
             ->get();
 
         if ($employees->isEmpty()) {
@@ -168,16 +178,41 @@ class PayrollManagementController extends Controller
                     $hoursPerDay = $this->calculateShiftHours($employeeShift);
                 }
 
-                // Get attendance for the month
-                // Use centralized function for accurate attendance calculation
-                $attendanceSummary = getMonthlyAttendanceSummary($employee->id, $year, $month);
+                // Get attendance for the month.
+                // For custom ranges, calculate directly from attendance table.
+                if ($request->attendance_start_date || $request->attendance_end_date) {
+                    $attendances = Attendance::where('user_id', $employee->id)
+                        ->whereBetween('date', [$startDate->format('Y-m-d'), $actualEndDate->format('Y-m-d')])
+                        ->get();
 
-                $presentDays = $attendanceSummary['present'];
-                $lateDays = $attendanceSummary['late'];
-                $leaveDays = $attendanceSummary['leave'];
-                $holidayDays = $attendanceSummary['holiday'];
-                $weeklyOffDays = $attendanceSummary['weekly_off'];
-                $absentDays = $attendanceSummary['absent'];
+                    $presentDays = $attendances->filter(function ($a) {
+                        return strtolower((string) $a->status) === 'present';
+                    })->count();
+                    $lateDays = $attendances->filter(function ($a) {
+                        return strtolower((string) $a->status) === 'late';
+                    })->count();
+                    $leaveDays = $attendances->filter(function ($a) {
+                        return strtolower((string) $a->status) === 'leave';
+                    })->count();
+                    $holidayDays = $attendances->filter(function ($a) {
+                        return strtolower((string) $a->status) === 'holiday';
+                    })->count();
+                    $weeklyOffDays = $attendances->filter(function ($a) {
+                        return strtolower((string) $a->status) === 'weekly_off';
+                    })->count();
+                    $attendanceSummary = [
+                        'days_counted' => $startDate->copy()->startOfDay()->diffInDays($actualEndDate->copy()->startOfDay()) + 1,
+                    ];
+                } else {
+                    $attendanceSummary = \getMonthlyAttendanceSummary($employee->id, $year, $month);
+                    $presentDays = $attendanceSummary['present'];
+                    $lateDays = $attendanceSummary['late'];
+                    $leaveDays = $attendanceSummary['leave'];
+                    $holidayDays = $attendanceSummary['holiday'];
+                    $weeklyOffDays = $attendanceSummary['weekly_off'];
+                }
+
+                $absentDays = $attendanceSummary['absent'] ?? 0;
 
                 // ============ NEW LOGIC ============
                 // Holiday + Weekend = treated as paid days (like present)
@@ -610,9 +645,9 @@ class PayrollManagementController extends Controller
 
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
         $designations = Attribute::where('type', 4)->where('status', 'active')->get();
-        $employees = User::where('status', 1)->filterBy('employee')->get();
+        $employees = User::where('status', 1)->filterByType('employee')->get();
 
-        return view(adminTheme().'payroll.salary_sheet', compact('salaries', 'summary', 'month', 'year', 'departments', 'designations', 'employees'));
+        return view(adminTheme().'payroll.payroll.salary_sheet', compact('salaries', 'summary', 'month', 'year', 'departments', 'designations', 'employees'));
     }
 
     /**
@@ -664,7 +699,7 @@ class PayrollManagementController extends Controller
             ->groupBy('payment_method')
             ->get();
 
-        return view(adminTheme().'payroll.salary_summary', compact('departmentSummary', 'departments', 'paymentMethodSummary', 'month', 'year'));
+        return view(adminTheme().'payroll.payroll.salary_summary', compact('departmentSummary', 'departments', 'paymentMethodSummary', 'month', 'year'));
     }
 
     /**
@@ -701,7 +736,7 @@ class PayrollManagementController extends Controller
             ];
         }
 
-        return view(adminTheme().'payroll.daily_salary_sheet', compact('dailySalaries', 'date'));
+        return view(adminTheme().'payroll.payroll.daily_salary_sheet', compact('dailySalaries', 'date'));
     }
 
     /**
@@ -716,7 +751,7 @@ class PayrollManagementController extends Controller
                 $q->where('is_primary', 'yes');
             }
         ])->findOrFail($salarySheetId);
-        return view(adminTheme().'payroll.pay_slip', compact('salarySheet'));
+        return view(adminTheme().'payroll.payroll.pay_slip', compact('salarySheet'));
     }
 
     /**
@@ -740,7 +775,7 @@ class PayrollManagementController extends Controller
 
         $salaries = $query->get();
 
-        return view(adminTheme().'payroll.bulk_pay_slip', compact('salaries', 'month', 'year'));
+        return view(adminTheme().'payroll.payroll.bulk_pay_slip', compact('salaries', 'month', 'year'));
     }
 
     /**
@@ -757,7 +792,7 @@ class PayrollManagementController extends Controller
             ->get();
 
         // Return as download or view for printing
-        return view(adminTheme().'payroll.salary_sheet_export', compact('salaries', 'month', 'year'));
+        return view(adminTheme().'payroll.payroll.salary_sheet_export', compact('salaries', 'month', 'year'));
     }
 
     /**
@@ -774,7 +809,7 @@ class PayrollManagementController extends Controller
             ->get();
 
         // Return view for printing
-        return view(adminTheme().'payroll.salary_sheet_export', compact('salaries', 'month', 'year'));
+        return view(adminTheme().'payroll.payroll.salary_sheet_export', compact('salaries', 'month', 'year'));
     }
 
     /**
@@ -823,7 +858,7 @@ class PayrollManagementController extends Controller
             ->where('payment_status', 'held')
             ->get();
 
-        return view(adminTheme().'payroll.held_salary', compact('heldSalaries', 'month', 'year'));
+        return view(adminTheme().'payroll.payroll.held_salary', compact('heldSalaries', 'month', 'year'));
     }
 
     /**
@@ -908,6 +943,6 @@ class PayrollManagementController extends Controller
         // Get departments for filter
         $departments = Attribute::where('type', 3)->where('status', 1)->get();
 
-        return view(adminTheme().'payroll.payroll_report', compact('salaries', 'summary', 'month', 'year', 'departments', 'monthParam'));
+        return view(adminTheme().'payroll.payroll.payroll_report', compact('salaries', 'summary', 'month', 'year', 'departments', 'monthParam'));
     }
 }

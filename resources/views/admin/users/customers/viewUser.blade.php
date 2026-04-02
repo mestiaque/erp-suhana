@@ -149,6 +149,10 @@
                         </div>
                     </div>
                     <div class="col-md-3 text-right">
+                        <a href="{{route('admin.usersCustomerAction',['print',$user->id])}}" target="_blank" class="btn btn-light btn-md mb-2">
+                            <i class="bx bx-printer"></i> Print
+                        </a>
+                        <br>
                         <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn btn-light btn-md">
                             <i class="bx bx-edit"></i> Edit Profile
                         </a>
@@ -292,6 +296,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -333,6 +338,81 @@
                                     <div class="col-md-4 mb-3">
                                         <div class="info-label">No of Girls</div>
                                         <div class="info-value">{{$user->girls ?? '0'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                                                        <div class="info-card">
+                                <h5 class="section-title">Present Address Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Village Name</div>
+                                        <div class="info-value">{{$user->present_village ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Village Name (Bangla)</div>
+                                        <div class="info-value">{{$user->present_village_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Post Office</div>
+                                        <div class="info-value">{{$user->present_post_office ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Post Office (Bangla)</div>
+                                        <div class="info-value">{{$user->present_post_office_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Upazila/Police Station</div>
+                                        <div class="info-value">{{$user->present_upazila ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Upazila/Police Station (Bangla)</div>
+                                        <div class="info-value">{{$user->present_upazila_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">District</div>
+                                        <div class="info-value">{{$user->present_district ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">District (Bangla)</div>
+                                        <div class="info-value">{{$user->present_district_bn ?? 'N/A'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-card">
+                                <h5 class="section-title">Permanent Address Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Village Name</div>
+                                        <div class="info-value">{{$user->permanent_village ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Village Name (Bangla)</div>
+                                        <div class="info-value">{{$user->permanent_village_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Post Office</div>
+                                        <div class="info-value">{{$user->permanent_post_office ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Post Office (Bangla)</div>
+                                        <div class="info-value">{{$user->permanent_post_office_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Upazila/Police Station</div>
+                                        <div class="info-value">{{$user->permanent_upazila ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Upazila/Police Station (Bangla)</div>
+                                        <div class="info-value">{{$user->permanent_upazila_bn ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">District</div>
+                                        <div class="info-value">{{$user->permanent_district ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">District (Bangla)</div>
+                                        <div class="info-value">{{$user->permanent_district_bn ?? 'N/A'}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -579,6 +659,50 @@
                                 @else
                                 <p class="text-muted">No salary history available</p>
                                 @endif --}}
+                            </div>
+
+                            @php
+                                $gradeSetup = [];
+                                if (!empty($selectedGrade?->description)) {
+                                    $gradeSetup = json_decode($selectedGrade->description, true) ?: [];
+                                }
+                            @endphp
+                            <div class="info-card">
+                                <h5 class="section-title">Grade Percentage Setup</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="info-label">Grade Name</div>
+                                        <div class="info-value">{{$selectedGrade->name ?? 'N/A'}}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Basic Salary</div>
+                                        <div class="info-value">{{ $gradeSetup['basic_salary'] ?? 0 }}%</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">House Rent</div>
+                                        <div class="info-value">{{ $gradeSetup['house_rent'] ?? 0 }}%</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Medical Allowance</div>
+                                        <div class="info-value">{{ $gradeSetup['medical_allowance'] ?? 0 }}%</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Transport Allowance</div>
+                                        <div class="info-value">{{ $gradeSetup['transport_allowance'] ?? 0 }}%</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Food Allowance</div>
+                                        <div class="info-value">{{ $gradeSetup['food_allowance'] ?? 0 }}%</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Attendance Bonus</div>
+                                        <div class="info-value">{{ $gradeSetup['attendance_bonus'] ?? 0 }} TK</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-label">Other Allowance</div>
+                                        <div class="info-value">{{ $gradeSetup['other_allowance'] ?? 0 }}%</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

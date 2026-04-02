@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use App\Models\Attribute;
-use App\Models\Leave;
+use App\Models\payroll\Attendance;
+use App\Models\payroll\Leave;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -53,7 +53,7 @@ class LeaveController extends Controller
 
         // For modal forms and filters
         $leaveTypes = Attribute::where('type', 20)->where('status', 'active')->get();
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
 
         // Get leave balance for each user (approved leaves only)
@@ -72,14 +72,14 @@ class LeaveController extends Controller
             }
         }
 
-        return view(adminTheme().'leaves.index', compact('leaves', 'leaveTypes', 'users', 'departments', 'leaveBalances'));
+        return view(adminTheme().'payroll.leaves.index', compact('leaves', 'leaveTypes', 'users', 'departments', 'leaveBalances'));
     }
 
     public function create()
     {
         $leaveTypes = Attribute::where('type', 20)->where('status', 'active')->get();
-        $users = User::where('status', 1)->filterBy('employee')->get(); // For admin to apply on behalf of user
-        return view(adminTheme().'leaves.create', compact('leaveTypes', 'users'));
+        $users = User::where('status', 1)->filterByType('employee')->get(); // For admin to apply on behalf of user
+        return view(adminTheme().'payroll.leaves.create', compact('leaveTypes', 'users'));
     }
 
     public function store(Request $request)
@@ -113,7 +113,7 @@ class LeaveController extends Controller
     {
         $leave = Leave::findOrFail($id);
         $leaveTypes = Attribute::where('type', 20)->where('status', 'active')->get();
-        return view(adminTheme().'leaves.edit', compact('leave', 'leaveTypes'));
+        return view(adminTheme().'payroll.leaves.edit', compact('leave', 'leaveTypes'));
     }
 
     public function update(Request $request, $id)
@@ -182,6 +182,9 @@ class LeaveController extends Controller
     public function destroy($id)
     {
         $leave = Leave::findOrFail($id);
+        if ($leave->status == 'approved') {
+            return redirect()->route('admin.leaves.index')->with('error', 'Approved leave cannot be deleted. Please contact HR for further assistance.');
+        }
         $leave->delete();
         return redirect()->route('admin.leaves.index')->with('success', 'Leave deleted successfully.');
     }
@@ -190,7 +193,7 @@ class LeaveController extends Controller
     public function types()
     {
         $types = Attribute::where('type', 20)->latest()->paginate(20);
-        return view(adminTheme().'leaves.types.index', compact('types'));
+        return view(adminTheme().'payroll.leaves.types.index', compact('types'));
     }
 
     public function typesStore(Request $request)
@@ -241,8 +244,8 @@ class LeaveController extends Controller
      */
     public function manualCreate()
     {
-        $employees = \App\Models\User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.leaves.manual_create', compact('employees'));
+        $employees = \App\Models\User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.leaves.manual_create', compact('employees'));
     }
 
     /**
@@ -257,16 +260,16 @@ class LeaveController extends Controller
             'reason' => 'required|string',
         ]);
 
-        $leave = new \App\Models\Leave();
+        $leave = new Leave();
         $leave->user_id = $request->user_id;
         $leave->start_date = $request->start_date;
         $leave->end_date = $request->end_date;
         $leave->reason = $request->reason;
         $leave->status = 'approved';
-        $leave->created_by = auth()->id();
+        $leave->created_by = Auth::id();
         $leave->save();
 
-        return redirect()->route('leaves.index')->with('success', 'Leave created successfully.');
+        return redirect()->route('admin.leaves.index')->with('success', 'Leave created successfully.');
     }
 
     /**
@@ -276,7 +279,7 @@ class LeaveController extends Controller
     {
         $year = $request->year ?? Carbon::now()->year;
 
-        $users = User::where('status', 1)->filterBy('employee')
+        $users = User::where('status', 1)->filterByType('employee')
             ->with(['department', 'designation'])
             ->get();
 
@@ -325,6 +328,6 @@ class LeaveController extends Controller
             $summaryData[] = $userData;
         }
 
-        return view(adminTheme().'leaves.summary', compact('summaryData', 'leaveTypes', 'year'));
+        return view(adminTheme().'payroll.leaves.summary', compact('summaryData', 'leaveTypes', 'year'));
     }
 }

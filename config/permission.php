@@ -616,5 +616,13 @@ return [
                 ],
             ],
         ],
+        'HR' =>[
+            'hr' => [
+                'label'       => 'HR',
+                'permissions' => [
+                    'all'    => 'All',
+                ],
+            ],
+        ],
     ],
 ];

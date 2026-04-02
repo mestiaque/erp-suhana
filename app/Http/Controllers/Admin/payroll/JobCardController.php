@@ -3,13 +3,9 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
+use App\Models\payroll\EmployeeIncrement;
+use App\Models\payroll\Roaster;
 use App\Models\User;
-use App\Models\Attendance;
-use App\Models\Leave;
-use App\Models\Holiday;
-use App\Models\Attribute;
-use App\Models\Roaster;
-use App\Models\EmployeeIncrement;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -21,7 +17,7 @@ class JobCardController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
 
         $selectedUser = null;
         $month = $request->month ?? Carbon::now()->format('Y-m');
@@ -114,7 +110,7 @@ class JobCardController extends Controller
             ];
         }
 
-        return view('admin.jobcard.index', compact('users', 'selectedUser', 'month', 'summary', 'dailyData', 'increments'));
+        return view('admin..payroll.jobcard.index', compact('users', 'selectedUser', 'month', 'summary', 'dailyData', 'increments'));
     }
 
     /**
@@ -127,9 +123,9 @@ class JobCardController extends Controller
         ]);
 
         $month = $request->month ?? Carbon::now()->format('Y-m');
-        
+
         $selectedUser = User::with(['department', 'designation', 'divisionData', 'section', 'shift', 'line', 'grade', 'increments'])->findOrFail($request->user_id);
-        
+
         // Get employee increments
         $increments = EmployeeIncrement::where('user_id', $request->user_id)->orderBy('increment_date', 'desc')->get();
 
@@ -210,6 +206,6 @@ class JobCardController extends Controller
             'total_work_hours' => $totalWorkHours,
         ];
 
-        return view('admin.jobcard.print', compact('selectedUser', 'month', 'summary', 'dailyData', 'increments'));
+        return view('admin.payroll.payroll.payroll.payroll.payroll.payroll.payroll.payroll.jobcard.print', compact('selectedUser', 'month', 'summary', 'dailyData', 'increments'));
     }
 }

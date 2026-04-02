@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\payroll;
 
 use Illuminate\Database\Eloquent\Model;
 
 class UserLocation extends Model
 {
-    
+
     //Models Information Data
     /********
-     * 
+     *
      * type ==0 : Page
-     * 
+     *
      * ------------------------
      *  Status==
      * ------------------------
-     * 
+     *
      * Column:
-     * 
+     *
      * id            =bigint(20):None,
      * user_id       =bigint(20):null,
      * latitude      =bigint(20):null,
@@ -25,17 +25,17 @@ class UserLocation extends Model
      * visit_url     =bigint(20):null,
      * created_at    =timestamp:null
      * updated_at    =timestamp:null
-     * 
-     * 
-     * 
+     *
+     *
+     *
      ****/
-    
+
 
     public function user(){
         return $this->belongsTo(User::class,'user_id');
     }
-     
-     
-     
+
+
+
 
 }

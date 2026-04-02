@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\EmployeeRetirement;
+use App\Models\payroll\EmployeeRetirement;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class RetirementController extends Controller
 {
@@ -21,8 +21,8 @@ class RetirementController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        return view('admin.retirement.index', compact('retirements'));
+
+        return view('admin.payroll.retirement.index', compact('retirements'));
     }
 
     /**
@@ -30,8 +30,8 @@ class RetirementController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.retirement.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.retirement.create', compact('users'));
     }
 
     /**

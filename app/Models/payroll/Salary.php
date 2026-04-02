@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\payroll;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -37,7 +37,7 @@ class Salary extends Model
     {
         static::addGlobalScope('hideUser7', function (Builder $builder) {
             // $builder->where('user_id', '!=', 7);
-            $builder->filterBy('employee');
+            $builder->filterByType('employee');
         });
     }
 

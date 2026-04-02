@@ -20,23 +20,19 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    
-      
-    public function __construct(){
+  protected $device = '';
 
-        function isMobileDevice() {
-          return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo 
-        |fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i" 
-        , $_SERVER["HTTP_USER_AGENT"]); 
-        }
+
+    public function __construct(){
+        $theme = optional(general())->theme ?? 'welcome';
 
         if(isMobileDevice())
         {
-          $this->device =general()->theme.'.customer.';
+          $this->device =$theme.'.customer.';
         }
         else
         {
-          $this->device =general()->theme.'.customer.';
+          $this->device =$theme.'.customer.';
         }
 
     }
@@ -53,7 +49,7 @@ class CustomerController extends Controller
 
 
     public function profileUpdate(Request $r){
-      
+
         $myprofile =Auth::user();
         $check = $r->validate([
             'name' => 'required|max:50',
@@ -75,37 +71,37 @@ class CustomerController extends Controller
         $myprofile->district =$r->district;
         $myprofile->city =$r->city;
         $myprofile->address_line1 =$r->address;
-        
+
         $addr =$myprofile->address_line1;
         $city =Country::find($myprofile->city);
         if($city){
          $addr .=', '.$city->name;
         }
-        
+
         $dis =Country::find($myprofile->district);
         if($dis){
          $addr .=', '.$dis->name;
         }
-        
+
         $div =Country::find($myprofile->division);
         if($div){
          $addr .=', '.$div->name;
         }
-        
+
        $myprofile->full_address=$addr;
-        
+
         ///////Image Uploard Start////////////
       if($r->hasFile('image')){
             $file =$r->image;
             $src  =$myprofile->id;
             $srcType  =6;
             $fileUse  =1;
-          
+
             uploadFile($file,$src,$srcType,$fileUse);
       }
-      
+
       ///////Image Uploard End////////////
-        
+
       $myprofile->save();
 
 
@@ -113,8 +109,8 @@ class CustomerController extends Controller
       return redirect()->back();
 
     }
-    
-    
+
+
 
     public function changePassword(){
       return view($this->device.'changePassword');
@@ -132,7 +128,7 @@ class CustomerController extends Controller
             Session::flash('error','Need To validatation');
             return redirect()->back();
         }
-        
+
         if(Hash::check($r->current_password, $user->password)){
           $user->password_show=$r->password;
           $user->password=Hash::make($r->password);
@@ -147,7 +143,7 @@ class CustomerController extends Controller
     }
 
 
-    
+
 
 
 }

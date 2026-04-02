@@ -17,8 +17,11 @@
          <div class="dropdown">
 
             @can('employee.add')
-             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
+             <a href="{{route('admin.usersCustomerAction',['employee-create'])}}" class="btn-custom primary" >
                  <i class="bx bx-plus"></i> Employee
+             </a>
+             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
+                 <i class="bx bx-plus"></i> User
              </a>
              @endcan
              <a href="{{route('admin.usersCustomer')}}" class="btn-custom yellow">
