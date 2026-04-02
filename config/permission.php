@@ -495,6 +495,7 @@ return [
                     'edit'   => 'Edit',
                     'view'   => 'View',
                     'delete' => 'Delete',
+                    'role'   => 'Role',
                     'all'    => 'All',
                 ],
             ],

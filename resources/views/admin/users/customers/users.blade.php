@@ -238,7 +238,7 @@
                                     <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
                                 </span>
                             </td>
-                            <td><a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
+                            <td><a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="invoice-action-view mr-1">{{$user->name}}</a>
                                 @if($user->permission)
                                 <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
                                 @endif
@@ -303,20 +303,35 @@
                                 @endif
                             </td>
                             <td style="padding: 8px 5px; text-align: center;">
-                                @if(can('employee.edit')  || can('employee.delete'))
-                                    @can('employee.edit')
-                                        <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success">
-                                            <i class="bx bx-edit"></i>
-                                        </a>
-                                    @endcan
-                                    @if($user->id==Auth::id()) @else
-                                        @can('employee.delete')
-                                            <a href="{{route('admin.usersCustomerAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                                <i class="bx bx-trash"></i>
+                                <div class="btn-group">
+                                    <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="btn-custom yellow mr-1"><i class="bx bx-show"></i> </a>
+                                    @if(can('employee.edit')  || can('employee.delete'))
+                                        @can('employee.edit')
+                                            <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success mr-1">
+                                                <i class="bx bx-edit"></i>
                                             </a>
                                         @endcan
-                                    @endif
-                                @else -- @endif
+                                        @if($user->id==Auth::id()) @else
+                                            @can('employee.delete')
+                                                <a href="{{route('admin.usersCustomerAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
+                                                    <i class="bx bx-trash"></i>
+                                                </a>
+                                            @endcan
+                                        @endif
+                                    @else  @endif
+                                    @can('employee.role')
+                                    <a href="javascript:void(0)"
+                                       class="btn-custom info ml-1 open-role-modal"
+                                       data-toggle="modal"
+                                       data-target="#AssignRoleModal"
+                                       data-user-id="{{$user->id}}"
+                                       data-user-name="{{$user->name}}"
+                                       data-role-id="{{$user->permission_id}}"
+                                       title="Assign Role">
+                                        <i class="bx bx-shield-quarter"></i>
+                                    </a>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -383,9 +398,57 @@
    </div>
  </div>
 
+ @can('employee.role')
+ <div class="modal fade text-left" id="AssignRoleModal" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+     <div class="modal-content">
+        <form method="post" id="assignRoleForm" action="">
+            @csrf
+            <div class="modal-header">
+                <h4 class="modal-title">Assign Employee Role</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Employee: <strong id="assignRoleUserName">-</strong></p>
+                <div class="form-group mb-0">
+                    <label for="assignRoleSelect">Role</label>
+                    <select name="role" id="assignRoleSelect" class="form-control">
+                        <option value="" class="text-danger">No Role</option>
+                        @foreach($roles as $role)
+                        <option value="{{$role->id}}">{{$role->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save Role</button>
+            </div>
+        </form>
+     </div>
+   </div>
+ </div>
+ @endcan
+
 
 
 
 @endsection
 @push('js')
+@can('employee.role')
+<script>
+$(document).on('click', '.open-role-modal', function () {
+    const userId = $(this).data('user-id');
+    const userName = $(this).data('user-name') || '-';
+    const roleId = $(this).data('role-id');
+    const actionTemplate = "{{ route('admin.usersCustomerAction', ['role', '__ID__']) }}";
+
+    $('#assignRoleUserName').text(userName);
+    $('#assignRoleSelect').val(roleId || '');
+    $('#assignRoleForm').attr('action', actionTemplate.replace('__ID__', userId));
+});
+</script>
+@endcan
 @endpush

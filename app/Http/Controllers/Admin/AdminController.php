@@ -4661,6 +4661,24 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
+            // ROLE ASSIGN
+            if ($action == 'role' && $r->isMethod('post')) {
+                if (!$user) {
+                    Session()->flash('error', 'User not found.');
+                    return redirect()->back();
+                }
+
+                $r->validate([
+                    'role' => 'nullable|exists:permissions,id',
+                ]);
+
+                $user->permission_id = $r->role ?: null;
+                $user->save();
+
+                Session()->flash('success', 'Role updated successfully!');
+                return redirect()->back();
+            }
+
             if($action=='edit' || $action == 'employee-create'){
                 $departments   = Attribute::latest()->filterBy('department')->where('status','<>','temp')->get();
                 $designations  = Attribute::latest()->filterBy('designation')->where('status','<>','temp')->get();
