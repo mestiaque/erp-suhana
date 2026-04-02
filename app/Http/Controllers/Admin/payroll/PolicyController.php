@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Policy;
+use App\Models\payroll\Policy;
 use Illuminate\Http\Request;
 
 class PolicyController extends Controller
@@ -14,7 +14,7 @@ class PolicyController extends Controller
     public function index()
     {
         $policies = Policy::orderBy('type')->get();
-        return view('admin.policy.index', compact('policies'));
+        return view('admin.payroll.policy.index', compact('policies'));
     }
 
     /**
@@ -22,7 +22,7 @@ class PolicyController extends Controller
      */
     public function create()
     {
-        return view('admin.policy.create');
+        return view('admin.payroll.policy.create');
     }
 
     /**

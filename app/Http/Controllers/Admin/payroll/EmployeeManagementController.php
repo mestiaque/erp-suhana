@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\EmployeeEducation;
-use App\Models\EmployeeTraining;
-use App\Models\EmployeeExperience;
-use App\Models\EmployeeBank;
-use App\Models\EmployeeIncrement;
 use App\Models\Attribute;
-use App\Models\Shift;
-use App\Models\Media;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
+use App\Models\payroll\EmployeeBank;
+use App\Models\payroll\EmployeeEducation;
+use App\Models\payroll\EmployeeExperience;
+use App\Models\payroll\EmployeeIncrement;
+use App\Models\payroll\EmployeeTraining;
+use App\Models\payroll\Shift;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class EmployeeManagementController extends Controller
@@ -26,7 +25,7 @@ class EmployeeManagementController extends Controller
     public function index(Request $request)
     {
         // Query employees directly from users table
-        $query = User::query()->filterBy('employee');
+        $query = User::query()->filterByType('employee');
 
         // Filter by employee status
         if ($request->employee_status) {
@@ -61,8 +60,8 @@ class EmployeeManagementController extends Controller
         $employees = $query->paginate(25);
 
         // Get filter data
-        $departments = Attribute::where('type', 3)->where('status', 'active')->get();
-        $designations = Attribute::where('type', 2)->where('status', 'active')->get();
+        $departments = Attribute::filterBy('department')->where('status', 'active')->get();
+        $designations = Attribute::filterBy('designation')->where('status', 'active')->get();
 
         return view(adminTheme().'employees.index', compact('employees', 'departments', 'designations'));
     }

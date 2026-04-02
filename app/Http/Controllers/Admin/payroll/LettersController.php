@@ -19,13 +19,13 @@ class LettersController extends Controller
     public function appointmentIndex()
     {
         $letters = AppointmentLetter::with(['user', 'creator'])->latest()->paginate(20);
-        return view('admin.letters.appointment.index', compact('letters'));
+        return view('admin.payroll.letters.appointment.index', compact('letters'));
     }
 
     public function appointmentCreate()
     {
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.appointment.create', compact('employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.appointment.create', compact('employees'));
     }
 
     public function appointmentStore(Request $request)
@@ -55,8 +55,8 @@ class LettersController extends Controller
     public function appointmentEdit($id)
     {
         $letter = AppointmentLetter::findOrFail($id);
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.appointment.edit', compact('letter', 'employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.appointment.edit', compact('letter', 'employees'));
     }
 
     public function appointmentUpdate(Request $request, $id)
@@ -87,7 +87,7 @@ class LettersController extends Controller
     public function appointmentShow($id)
     {
         $letter = AppointmentLetter::with('user')->findOrFail($id);
-        return view('admin.letters.appointment.show', compact('letter'));
+        return view('admin.payroll.letters.appointment.show', compact('letter'));
     }
 
     public function appointmentDestroy($id)
@@ -100,13 +100,13 @@ class LettersController extends Controller
     public function joiningIndex()
     {
         $letters = JoiningLetter::with(['user', 'creator'])->latest()->paginate(20);
-        return view('admin.letters.joining.index', compact('letters'));
+        return view('admin.payroll.letters.joining.index', compact('letters'));
     }
 
     public function joiningCreate()
     {
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.joining.create', compact('employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.joining.create', compact('employees'));
     }
 
     public function joiningStore(Request $request)
@@ -133,8 +133,8 @@ class LettersController extends Controller
     public function joiningEdit($id)
     {
         $letter = JoiningLetter::findOrFail($id);
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.joining.edit', compact('letter', 'employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.joining.edit', compact('letter', 'employees'));
     }
 
     public function joiningUpdate(Request $request, $id)
@@ -162,7 +162,7 @@ class LettersController extends Controller
     public function joiningShow($id)
     {
         $letter = JoiningLetter::with('user')->findOrFail($id);
-        return view('admin.letters.joining.show', compact('letter'));
+        return view('admin.payroll.letters.joining.show', compact('letter'));
     }
 
     public function joiningDestroy($id)
@@ -175,13 +175,13 @@ class LettersController extends Controller
     public function confirmationIndex()
     {
         $letters = ConfirmationLetter::with(['user', 'creator'])->latest()->paginate(20);
-        return view('admin.letters.confirmation.index', compact('letters'));
+        return view('admin.payroll.letters.confirmation.index', compact('letters'));
     }
 
     public function confirmationCreate()
     {
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.confirmation.create', compact('employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.confirmation.create', compact('employees'));
     }
 
     public function confirmationStore(Request $request)
@@ -208,8 +208,8 @@ class LettersController extends Controller
     public function confirmationEdit($id)
     {
         $letter = ConfirmationLetter::findOrFail($id);
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.confirmation.edit', compact('letter', 'employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.confirmation.edit', compact('letter', 'employees'));
     }
 
     public function confirmationUpdate(Request $request, $id)
@@ -237,7 +237,7 @@ class LettersController extends Controller
     public function confirmationShow($id)
     {
         $letter = ConfirmationLetter::with('user')->findOrFail($id);
-        return view('admin.letters.confirmation.show', compact('letter'));
+        return view('admin.payroll.letters.confirmation.show', compact('letter'));
     }
 
     public function confirmationDestroy($id)
@@ -250,38 +250,38 @@ class LettersController extends Controller
     public function appointmentPrint($id)
     {
         $letter = AppointmentLetter::with('user')->findOrFail($id);
-        return view('admin.letters.appointment.print', compact('letter'));
+        return view('admin.payroll.letters.appointment.print', compact('letter'));
     }
 
     public function joiningPrint($id)
     {
         $letter = JoiningLetter::with('user')->findOrFail($id);
-        return view('admin.letters.joining.print', compact('letter'));
+        return view('admin.payroll.letters.joining.print', compact('letter'));
     }
 
     public function confirmationPrint($id)
     {
         $letter = ConfirmationLetter::with('user')->findOrFail($id);
-        return view('admin.letters.confirmation.print', compact('letter'));
+        return view('admin.payroll.letters.confirmation.print', compact('letter'));
     }
 
     public function incrementPrint($id)
     {
         $increment = EmployeeIncrement::with('user')->findOrFail($id);
-        return view('admin.letters.increment.print', compact('increment'));
+        return view('admin.payroll.letters.increment.print', compact('increment'));
     }
 
     // ============ Increment ============
     public function incrementIndex()
     {
         $increments = EmployeeIncrement::with(['user', 'approver'])->latest()->paginate(20);
-        return view('admin.letters.increment.index', compact('increments'));
+        return view('admin.payroll.letters.increment.index', compact('increments'));
     }
 
     public function incrementCreate()
     {
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.increment.create', compact('employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.increment.create', compact('employees'));
     }
 
     public function incrementStore(Request $request)
@@ -313,8 +313,8 @@ class LettersController extends Controller
     public function incrementEdit($id)
     {
         $increment = EmployeeIncrement::findOrFail($id);
-        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterBy('employee')->get();
-        return view('admin.letters.increment.edit', compact('increment', 'employees'));
+        $employees = User::where('customer', 1)->where('employee_status', 'active')->filterByType('employee')->get();
+        return view('admin.payroll.letters.increment.edit', compact('increment', 'employees'));
     }
 
     public function incrementUpdate(Request $request, $id)
@@ -347,7 +347,7 @@ class LettersController extends Controller
     public function incrementShow($id)
     {
         $increment = EmployeeIncrement::with('user')->findOrFail($id);
-        return view('admin.letters.increment.show', compact('increment'));
+        return view('admin.payroll.letters.increment.show', compact('increment'));
     }
 
     public function incrementDestroy($id)

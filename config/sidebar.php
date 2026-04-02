@@ -495,7 +495,7 @@ return [
                     'title' => 'Employees',
                     'icon' => 'fa fa-user-circle',
                     'route' => 'admin/users/employee',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Employee Report',
@@ -503,36 +503,36 @@ return [
                     'route' => 'admin/reports/employees',
                     'permission' => 'dev',
                 ],
-                [
-                    'title' => 'Employee Performance',
-                    'icon' => 'fa fa-chart-line',
-                    'route' => 'admin/performance',
-                    'permission' => 'dev',
-                ],
-                [
-                    'title' => 'Probation',
-                    'icon' => 'fa fa-user-clock',
-                    'route' => 'admin/probations',
-                    'permission' => 'dev',
-                ],
+                // [
+                //     'title' => 'Employee Performance',
+                //     'icon' => 'fa fa-chart-line',
+                //     'route' => 'admin/performance',
+                //     'permission' => 'dev',
+                // ],
+                // [
+                //     'title' => 'Probation',
+                //     'icon' => 'fa fa-user-clock',
+                //     'route' => 'admin/probations',
+                //     'permission' => 'dev',
+                // ],
                 [
                     'title' => 'Termination',
                     'icon' => 'fa fa-user-times',
                     'route' => 'admin/terminations',
                     'permission' => 'dev',
                 ],
-                [
-                    'title' => 'Retirement',
-                    'icon' => 'fa fa-user-clock',
-                    'route' => 'admin/retirement',
-                    'permission' => 'dev',
-                ],
-                [
-                    'title' => 'Interviews',
-                    'icon' => 'fa fa-user-tie',
-                    'route' => 'admin/interviews',
-                    'permission' => 'dev',
-                ],
+                // [
+                //     'title' => 'Retirement',
+                //     'icon' => 'fa fa-user-clock',
+                //     'route' => 'admin/retirement',
+                //     'permission' => 'dev',
+                // ],
+                // [
+                //     'title' => 'Interviews',
+                //     'icon' => 'fa fa-user-tie',
+                //     'route' => 'admin/interviews',
+                //     'permission' => 'dev',
+                // ],
             ]
         ],
 
@@ -540,49 +540,55 @@ return [
         [
             'title' => 'Employee Structure',
             'icon' => 'fa fa-sitemap',
-            'permission' => 'dev',
+            'permission' => 'hr',
             'children' => [
                 [
                     'title' => 'Employee Type',
                     'icon' => 'fa fa-id-badge',
                     'route' => 'admin/hr/employee-types',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Department',
                     'icon' => 'fa fa-building',
                     'route' => 'admin/hr/departments',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Designation',
                     'icon' => 'fa fa-briefcase',
                     'route' => 'admin/hr/designations',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Division',
                     'icon' => 'fa fa-sitemap',
                     'route' => 'admin/hr/divisions',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Grade',
                     'icon' => 'fa fa-graduation-cap',
                     'route' => 'admin/hr/grades',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Line Number',
                     'icon' => 'fa fa-list-ol',
-                    'route' => 'admin/hr/line-numbers',
-                    'permission' => 'dev',
+                    'route' => 'admin/hr/floor-lines',
+                    'permission' => 'hr',
                 ],
                 [
                     'title' => 'Section',
                     'icon' => 'fa fa-th-large',
                     'route' => 'admin/hr/sections',
-                    'permission' => 'dev',
+                    'permission' => 'hr',
+                ],
+                [
+                    'title' => 'Shift',
+                    'icon' => 'fa fa-th-large',
+                    'route' => 'admin/hr/shifts',
+                    'permission' => 'hr',
                 ],
             ]
         ],
@@ -629,24 +635,24 @@ return [
                     'route' => 'admin/bonus',
                     'permission' => 'dev',
                 ],
-                [
-                    'title' => 'Tax',
-                    'icon' => 'fa fa-percentage',
-                    'route' => 'admin/tax',
-                    'permission' => 'dev',
-                ],
-                [
-                    'title' => 'Loan',
-                    'icon' => 'fa fa-hand-holding-usd',
-                    'route' => 'admin/loan',
-                    'permission' => 'dev',
-                ],
-                [
-                    'title' => 'Provident Fund',
-                    'icon' => 'fa fa-piggy-bank',
-                    'route' => 'admin/provident-fund',
-                    'permission' => 'dev',
-                ],
+                // [
+                //     'title' => 'Tax',
+                //     'icon' => 'fa fa-percentage',
+                //     'route' => 'admin/tax',
+                //     'permission' => 'dev',
+                // ],
+                // [
+                //     'title' => 'Loan',
+                //     'icon' => 'fa fa-hand-holding-usd',
+                //     'route' => 'admin/loan',
+                //     'permission' => 'dev',
+                // ],
+                // [
+                //     'title' => 'Provident Fund',
+                //     'icon' => 'fa fa-piggy-bank',
+                //     'route' => 'admin/provident-fund',
+                //     'permission' => 'dev',
+                // ],
             ]
         ],
 
@@ -692,24 +698,24 @@ return [
                     'route' => 'admin/attendance/roaster',
                     'permission' => 'dev',
                 ],
-                [
-                    'title' => 'Working Hours',
-                    'icon' => 'fa fa-hourglass-half',
-                    'route' => 'admin/working-hours',
-                    'permission' => 'dev',
-                ],
+                // [
+                //     'title' => 'Working Hours',
+                //     'icon' => 'fa fa-hourglass-half',
+                //     'route' => 'admin/working-hours',
+                //     'permission' => 'dev',
+                // ],
                 [
                     'title' => 'Attendance Approval',
                     'icon' => 'fa fa-check-circle',
                     'route' => 'admin/attendance-approval',
                     'permission' => 'dev',
                 ],
-                [
-                    'title' => 'Live Location',
-                    'icon' => 'fa fa-map-marker',
-                    'route' => 'admin/live-location-tracking',
-                    'permission' => 'dev',
-                ],
+                // [
+                //     'title' => 'Live Location',
+                //     'icon' => 'fa fa-map-marker',
+                //     'route' => 'admin/live-location-tracking',
+                //     'permission' => 'dev',
+                // ],
                 [
                     'title' => 'Overtime',
                     'icon' => 'fa fa-business-time',
@@ -803,12 +809,12 @@ return [
                     'route' => 'admin/documents/pay-slip',
                     'permission' => 'pay_slip',
                 ],
-                [
-                    'title' => 'Personal Info',
-                    'icon' => 'fa fa-user',
-                    'route' => 'admin/documents/personal-info',
-                    'permission' => 'personal_info',
-                ],
+                // [
+                //     'title' => 'Personal Info',
+                //     'icon' => 'fa fa-user',
+                //     'route' => 'admin/documents/personal-info',
+                //     'permission' => 'personal_info',
+                // ],
                 [
                     'title' => 'Job Card',
                     'icon' => 'fa fa-id-card',
@@ -852,46 +858,46 @@ return [
         ],
 
         // Assets
-        [
-            'title' => 'Assets',
-            'icon' => 'fa fa-laptop',
-            'permission' => 'dev',
-            'children' => [
-                [
-                    'title' => 'Asset List',
-                    'icon' => 'fa fa-list',
-                    'route' => 'admin/assetss',
-                    'permission' => 'dev',
-                ],
-                [
-                    'title' => 'Distribution',
-                    'icon' => 'fa fa-share-alt',
-                    'route' => 'admin/assets/distribution',
-                    'permission' => 'dev',
-                ],
-            ]
-        ],
+        // [
+        //     'title' => 'Assets',
+        //     'icon' => 'fa fa-laptop',
+        //     'permission' => 'dev',
+        //     'children' => [
+        //         [
+        //             'title' => 'Asset List',
+        //             'icon' => 'fa fa-list',
+        //             'route' => 'admin/assetss',
+        //             'permission' => 'dev',
+        //         ],
+        //         [
+        //             'title' => 'Distribution',
+        //             'icon' => 'fa fa-share-alt',
+        //             'route' => 'admin/assets/distribution',
+        //             'permission' => 'dev',
+        //         ],
+        //     ]
+        // ],
 
         // Policies & Requests
-        [
-            'title' => 'Policies & Requests',
-            'icon' => 'fa fa-folder-open',
-            'permission' => 'dev',
-            'children' => [
-                [
-                    'title' => 'Policy',
-                    'icon' => 'fa fa-balance-scale',
-                    'route' => 'admin/policy',
-                    'permission' => 'dev',
-                ],
-                [
-                    'title' => 'Convenience Request',
-                    'icon' => 'fa fa-file-signature',
-                    'route' => 'admin/convenience',
-                    'permission' => 'dev',
-                ]
-            ]
-        ],
+        // [
+        //     'title' => 'Policies & Requests',
+        //     'icon' => 'fa fa-folder-open',
+        //     'permission' => 'dev',
+        //     'children' => [
+        //         [
+        //             'title' => 'Policy',
+        //             'icon' => 'fa fa-balance-scale',
+        //             'route' => 'admin/policy',
+        //             'permission' => 'dev',
+        //         ],
+        //         [
+        //             'title' => 'Convenience Request',
+        //             'icon' => 'fa fa-file-signature',
+        //             'route' => 'admin/convenience',
+        //             'permission' => 'dev',
+        //         ]
+        //     ]
+        // ],
 
         // Notice
         [
@@ -934,7 +940,7 @@ return [
     [
         'group_title' => '',
         [
-            'title'      => 'HR / User Management',
+            'title'      => 'User Management',
             'icon'       => 'fa-solid fa-users',
             'icon_color' => 'text-success',
             'permission' => '',
@@ -981,57 +987,57 @@ return [
                     'icon_color'  => 'text-info',
                     'permission'  => 'branchs'
                 ],
-                [
-                    'title' => 'Employee Type',
-                    'icon' => 'fa fa-id-badge',
-                    'route' => 'admin/hr/employee-types',
-                    'permission' => 'departments',
-                ],
-                [
-                    'title'       => 'Departments',
-                    'icon'        => 'fa-solid fa-sitemap',
-                    'route'       => '/admin/hr/departments',
-                    'permission'  => 'departments'
-                ],
-                [
-                    'title' => 'Division',
-                    'icon' => 'fa fa-sitemap',
-                    'route' => 'admin/hr/divisions',
-                    'permission' => 'departments',
-                ],
-                [
-                    'title' => 'Grade',
-                    'icon' => 'fa fa-graduation-cap',
-                    'route' => 'admin/hr/grades',
-                    'permission' => 'departments',
-                ],
-                [
-                    'title' => 'Section',
-                    'icon' => 'fa fa-th-large',
-                    'route' => 'admin/hr/sections',
-                    'permission' => 'departments',
-                ],
-                [
-                    'title'       => 'Designation',
-                    'icon'        => 'fa-solid fa-id-card-clip',
-                    'route'       => '/admin/hr/designations',
-                    'icon_color'  => 'text-info',
-                    'permission'  => 'designations'
-                ],
-                [
-                    'title'       => 'Floor/Lines',
-                    'icon'        => 'fa-solid fa-building',
-                    'route'       => '/admin/hr/floor-lines',
-                    'icon_color'  => 'text-info',
-                    'permission'  => 'designations'
-                ],
-                [
-                    'title'       => 'Shift',
-                    'icon'        => 'fa-solid fa-clock',
-                    'route'       => '/admin/hr/shifts',
-                    'icon_color'  => 'text-info',
-                    'permission'  => 'designations'
-                ]
+                // [
+                //     'title' => 'Employee Type',
+                //     'icon' => 'fa fa-id-badge',
+                //     'route' => 'admin/hr/employee-types',
+                //     'permission' => 'departments',
+                // ],
+                // [
+                //     'title'       => 'Departments',
+                //     'icon'        => 'fa-solid fa-sitemap',
+                //     'route'       => '/admin/hr/departments',
+                //     'permission'  => 'departments'
+                // ],
+                // [
+                //     'title' => 'Division',
+                //     'icon' => 'fa fa-sitemap',
+                //     'route' => 'admin/hr/divisions',
+                //     'permission' => 'departments',
+                // ],
+                // [
+                //     'title' => 'Grade',
+                //     'icon' => 'fa fa-graduation-cap',
+                //     'route' => 'admin/hr/grades',
+                //     'permission' => 'departments',
+                // ],
+                // [
+                //     'title' => 'Section',
+                //     'icon' => 'fa fa-th-large',
+                //     'route' => 'admin/hr/sections',
+                //     'permission' => 'departments',
+                // ],
+                // [
+                //     'title'       => 'Designation',
+                //     'icon'        => 'fa-solid fa-id-card-clip',
+                //     'route'       => '/admin/hr/designations',
+                //     'icon_color'  => 'text-info',
+                //     'permission'  => 'designations'
+                // ],
+                // [
+                //     'title'       => 'Floor/Lines',
+                //     'icon'        => 'fa-solid fa-building',
+                //     'route'       => '/admin/hr/floor-lines',
+                //     'icon_color'  => 'text-info',
+                //     'permission'  => 'designations'
+                // ],
+                // [
+                //     'title'       => 'Shift',
+                //     'icon'        => 'fa-solid fa-clock',
+                //     'route'       => '/admin/hr/shifts',
+                //     'icon_color'  => 'text-info',
+                //     'permission'  => 'designations'
+                // ]
             ]
         ],
     ],

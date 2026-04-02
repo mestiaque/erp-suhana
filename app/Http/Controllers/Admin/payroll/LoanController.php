@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Loan;
+use App\Models\payroll\Loan;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
@@ -24,8 +24,8 @@ class LoanController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        return view('admin.loan.index', compact('loans'));
+
+        return view('admin.payroll.loan.index', compact('loans'));
     }
 
     /**
@@ -33,8 +33,8 @@ class LoanController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.loan.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.loan.create', compact('users'));
     }
 
     /**
@@ -84,7 +84,7 @@ class LoanController extends Controller
         ]);
 
         $loan = Loan::findOrFail($id);
-        
+
         $updateData = [
             'status' => $request->status,
             'admin_remark' => $request->admin_remark,

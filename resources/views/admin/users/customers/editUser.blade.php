@@ -1,8 +1,7 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('User Profile')}}</title>
+<title>{{websiteTitle('User Profile Edit')}}</title>
 @endsection
-
 @push('css')
 <style>
     .fileLoader {
@@ -56,30 +55,44 @@
 
 @include(adminTheme().'alerts')
 <div class="flex-grow-1">
+    @php
+        $user = $user ?? new \App\Models\User();
+        $isCreateMode = !$user || !$user->exists;
+        $profileImageClass = 'image_' . ($user->id ?? 'new');
+    @endphp
     <div class="row">
         <div class="col-md-12">
 
             <!-- Start -->
             <div class="card mb-30">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                     <h3>Profile Edit <button class="btn btn-sm btn-light copyBtn ms-2 d-none" id="copyBtn">Copy Login</button></h3>
+                     <h3>{{ $isCreateMode ? 'Create Employee' : 'Profile Edit' }} <button class="btn btn-sm btn-light copyBtn ms-2 d-none" id="copyBtn">Copy Login</button></h3>
                      <div class="d-none">
                         <p>email: <span id="email">{{ $user?->email }}</span></p>
                         <p>password: <span id="password">{{ $user?->password_show }}</span></p>
                     </div>
-                     <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" target="_blank" class="btn-custom yellow"><i class="bx bx-show"></i> View</a>
+                    @if(!$isCreateMode)
+                        <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="btn-custom yellow"><i class="bx bx-show"></i> View</a>
+                    @endif
                 </div>
                 <div class="card-body">
-                    <form action="{{route('admin.usersCustomerAction',['update',$user->id])}}" method="post" enctype="multipart/form-data">
+                    @php
+                        if(!$isCreateMode) {
+                            $action = route('admin.usersCustomerAction',['update',$user->id]);
+                        }else{
+                            $action = route('admin.usersCustomerAction',['employee-create']);
+                        }
+                    @endphp
+                    <form action="{{$action}}" method="post" enctype="multipart/form-data">
                         @csrf
                         <div class="media">
                             <a href="javascript: void(0);">
-                                <img src="{{asset($user->image())}}"  class="ProfileImage image_{{$user->id}} rounded mr-75" style="max-height: 100px;" alt="profile image" />
+                                <img src="{{ asset($user->image()) }}"  class="ProfileImage {{ $profileImageClass }} rounded mr-75" style="max-height: 100px;" alt="profile image" />
                             </a>
                             <div class="media-body" style="padding: 0 10px;">
                                 <div style="display:flex;">
                                     <label class="btn btn-sm btn-primary cursor-pointer" for="account-upload" >Upload photo </label>
-                                    <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
+                                    <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="{{ $profileImageClass }}" hidden="" />
                                     @if($user->imageFile)
                                     <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete btn btn-sm btn-secondary" style="margin: 0 10px;height:31px;">Reset </a>
                                     @endif
@@ -100,7 +113,7 @@
                                         <tr>
                                             <th>Employee ID*</th>
                                             <td style="padding:2px;">
-                                                <input type="text" name="employee_id" class="form-control form-control-sm  {{$errors->has('employee_id')?'error':''}}" value="{{$user->employee_id?:old('employee_id')}}" placeholder="Employee ID" required="required" minlength="3" maxlength="50" >
+                                                <input type="text" name="employee_id" class="form-control form-control-sm  {{$errors->has('employee_id')?'error':''}}" value="{{ old('employee_id', $user->employee_id) }}" placeholder="Employee ID" required="required" minlength="3" maxlength="50" >
                                                 @if ($errors->has('employee_id'))
                                                 <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('employee_id') }}</p>
                                                 @endif
@@ -109,7 +122,7 @@
                                         <tr>
                                             <th>Employee Name*</th>
                                             <td style="padding:2px;">
-                                                <input type="text" class="form-control form-control-sm " placeholder="Enter name" value="{{$user->name?:old('name')}}" name="name" required="required" minlength="2" maxlength="255">
+                                                <input type="text" class="form-control form-control-sm " placeholder="Enter name" value="{{ old('name', $user->name) }}" name="name" required="required" minlength="2" maxlength="255">
                                                 @if ($errors->has('name'))
                                                 <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
                                                 @endif
@@ -257,8 +270,8 @@
                                             <td style="padding:2px;">
                                                 <select class="form-control form-control-sm {{$errors->has('gender')?'error':''}}" name="gender">
                                                     <option value="">Select Gender</option>
-                                                    <option value="Male" {{$user->gender=='Male'?'selected':''}}>Male</option>
-                                                    <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female</option>
+                                                    <option value="Male" {{$user->gender=='Male'?'selected':''}}>Male (পুরুষ)</option>
+                                                    <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female (মহিলা)</option>
                                                 </select>
                                                 @if ($errors->has('gender'))
                                                 <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gender') }}</p>
@@ -354,27 +367,7 @@
                                                 @endif
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <th>Conveyance Allowance</th>
-                                            <td style="padding:2px;">
-                                                <input type="number" data-key="conveyance_allowance" step="0.01" name="conveyance_allowance" class="form-control form-control-sm " placeholder="Enter Conveyance Allowance" value="{{$user->conveyance_allowance?:old('conveyance_allowance')}}" />
-                                                @if ($errors->has('conveyance_allowance'))
-                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('conveyance_allowance') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="2" style="text-align:center;background: #f7f7f7;">Deductions</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Provident Fund</th>
-                                            <td style="padding:2px;">
-                                                <input type="number" data-key="provident_fund" step="0.01" name="provident_fund" class="form-control form-control-sm " placeholder="Enter Provident Fund" value="{{$user->provident_fund?:old('provident_fund')}}" />
-                                                @if ($errors->has('provident_fund'))
-                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('provident_fund') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
+
                                         <tr>
                                             <th colspan="2" style="text-align:center;background: #f7f7f7;">Other Benefits</th>
                                         </tr>
@@ -396,18 +389,6 @@
                                                 @endif
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <th colspan="2" style="text-align:center;background: #f7f7f7;">Deductions</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Stamp Charge</th>
-                                            <td style="padding:2px;">
-                                                <input type="number" data-key="stamp_charge" class="form-control form-control-sm  {{$errors->has('gross_salary')?'error':''}}" placeholder="Enter Salary" readonly="" value="{{ $user->stamp_charge ?? 0 }}"  />
-                                                @if ($errors->has('gross_salary'))
-                                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gross_salary') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
                                     </table>
                                 </div>
                             </div>
@@ -420,7 +401,7 @@
                                     </div>
                                     <table class="table">
                                         <tr>
-                                            <th>Father Name*</th>
+                                            <th>Father Name</th>
                                             <td style="padding:2px;">
                                                 <input type="text" class="form-control form-control-sm "
                                                        placeholder="Enter father name"
@@ -559,11 +540,11 @@
                                         </tr>
 
                                         <tr>
-                                            <th>Mobile Number*</th>
+                                            <th>Mobile Number</th>
                                             <td style="padding:2px;">
                                                 <input type="text" class="form-control form-control-sm "
-                                                       value="{{ $user->mobile ?? old('mobile') }}"
-                                                       name="mobile" required="required" pattern="[0-9+\-\s()]{10,20}" minlength="10" maxlength="20">
+                                                       value="{{ old('mobile', $user->mobile) }}"
+                                                       name="mobile" pattern="[0-9+\-\s()]{10,20}" minlength="10" maxlength="20">
                                                 @if ($errors->has('mobile'))
                                                     <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('mobile') }}</p>
                                                 @endif
@@ -668,13 +649,25 @@
                                         </tr>
 
                                         <tr>
-                                            <th>Distinguished Mark</th>
+                                            <th>Identification Mark</th>
                                             <td style="padding:2px;">
                                                 <input type="text" class="form-control form-control-sm "
                                                        value="{{ $user->distinguished_mark ?? old('distinguished_mark') }}"
                                                        name="distinguished_mark">
                                                 @if ($errors->has('distinguished_mark'))
                                                     <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('distinguished_mark') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Identification Mark (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->distinguished_mark_bn ?? old('distinguished_mark_bn') }}"
+                                                       name="distinguished_mark_bn">
+                                                @if ($errors->has('distinguished_mark_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('distinguished_mark_bn') }}</p>
                                                 @endif
                                             </td>
                                         </tr>
@@ -749,13 +742,213 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th>Emergency Mobile</th>
+                                            <th>Emergency Contact Number</th>
                                             <td style="padding:2px;">
                                                 <input type="text" class="form-control form-control-sm "
                                                        value="{{ $user->emergency_mobile ?? old('emergency_mobile') }}"
                                                        name="emergency_mobile">
                                                 @if ($errors->has('emergency_mobile'))
                                                     <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('emergency_mobile') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th colspan="2" style="text-align:left;background: #f7f7f7;">Permanent Address :</th>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Village Name</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_village ?? old('permanent_village') }}"
+                                                       name="permanent_village">
+                                                @if ($errors->has('permanent_village'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_village') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Village Name (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_village_bn ?? old('permanent_village_bn') }}"
+                                                       name="permanent_village_bn">
+                                                @if ($errors->has('permanent_village_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_village_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Post Office</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_post_office ?? old('permanent_post_office') }}"
+                                                       name="permanent_post_office">
+                                                @if ($errors->has('permanent_post_office'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_post_office') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Post Office (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_post_office_bn ?? old('permanent_post_office_bn') }}"
+                                                       name="permanent_post_office_bn">
+                                                @if ($errors->has('permanent_post_office_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_post_office_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Upazila/Police Station</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_upazila ?? old('permanent_upazila') }}"
+                                                       name="permanent_upazila">
+                                                @if ($errors->has('permanent_upazila'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_upazila') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Upazila/Police Station (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_upazila_bn ?? old('permanent_upazila_bn') }}"
+                                                       name="permanent_upazila_bn">
+                                                @if ($errors->has('permanent_upazila_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_upazila_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>District</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_district ?? old('permanent_district') }}"
+                                                       name="permanent_district">
+                                                @if ($errors->has('permanent_district'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_district') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>District (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->permanent_district_bn ?? old('permanent_district_bn') }}"
+                                                       name="permanent_district_bn">
+                                                @if ($errors->has('permanent_district_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_district_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th colspan="2" style="text-align:left;background: #f7f7f7;">Present Address :</th>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Village Name</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_village ?? old('present_village') }}"
+                                                       name="present_village">
+                                                @if ($errors->has('present_village'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_village') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Village Name (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_village_bn ?? old('present_village_bn') }}"
+                                                       name="present_village_bn">
+                                                @if ($errors->has('present_village_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_village_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Post Office</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_post_office ?? old('present_post_office') }}"
+                                                       name="present_post_office">
+                                                @if ($errors->has('present_post_office'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_post_office') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Post Office (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_post_office_bn ?? old('present_post_office_bn') }}"
+                                                       name="present_post_office_bn">
+                                                @if ($errors->has('present_post_office_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_post_office_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Upazila/Police Station</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_upazila ?? old('present_upazila') }}"
+                                                       name="present_upazila">
+                                                @if ($errors->has('present_upazila'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_upazila') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Upazila/Police Station (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_upazila_bn ?? old('present_upazila_bn') }}"
+                                                       name="present_upazila_bn">
+                                                @if ($errors->has('present_upazila_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_upazila_bn') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>District</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_district ?? old('present_district') }}"
+                                                       name="present_district">
+                                                @if ($errors->has('present_district'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_district') }}</p>
+                                                @endif
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>District (Bangla)</th>
+                                            <td style="padding:2px;">
+                                                <input type="text" class="form-control form-control-sm "
+                                                       value="{{ $user->present_district_bn ?? old('present_district_bn') }}"
+                                                       name="present_district_bn">
+                                                @if ($errors->has('present_district_bn'))
+                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_district_bn') }}</p>
                                                 @endif
                                             </td>
                                         </tr>
@@ -856,50 +1049,12 @@
                                             </td>
                                         </tr>
 
-                                        <tr>
-                                            <th>Present Address</th>
-                                            <td style="padding:2px;">
-                                                <textarea class="form-control form-control-sm " name="present_address">{{ $user->present_address ?? old('present_address') }}</textarea>
-                                                @if ($errors->has('present_address'))
-                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_address') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>Present Address (Bangla)</th>
-                                            <td style="padding:2px;">
-                                                <textarea class="form-control form-control-sm " name="present_address_bn">{{ $user->present_address_bn ?? old('present_address_bn') }}</textarea>
-                                                @if ($errors->has('present_address_bn'))
-                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('present_address_bn') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>Permanent Address</th>
-                                            <td style="padding:2px;">
-                                                <textarea class="form-control form-control-sm " name="permanent_address">{{ $user->permanent_address ?? old('permanent_address') }}</textarea>
-                                                @if ($errors->has('permanent_address'))
-                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_address') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>Permanent Address (Bangla)</th>
-                                            <td style="padding:2px;">
-                                                <textarea class="form-control form-control-sm " name="permanent_address_bn">{{ $user->permanent_address_bn ?? old('permanent_address_bn') }}</textarea>
-                                                @if ($errors->has('permanent_address_bn'))
-                                                    <p style="color:red;margin:0;font-size:10px;">{{ $errors->first('permanent_address_bn') }}</p>
-                                                @endif
-                                            </td>
-                                        </tr>
                                     </table>
                                 </div>
                             </div>
                         </div>
 
+                        @if(!$isCreateMode)
                         <h5 style="color:#e91e63">Attach Document</h5>
                         <hr>
                         <div class="table-responsive fileLoader">
@@ -921,7 +1076,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-md rounded-0">Save changes</button>
+                        @endif
+                        <button type="submit" class="btn btn-primary btn-md rounded-0">{{ $isCreateMode ? 'Create Employee' : 'Save changes' }}</button>
                     </form>
                 </div>
             </div>
@@ -1075,44 +1231,20 @@ $(document).ready(function() {
 
 function updateSalaries() {
     let gross = parseFloat($('input[name="gross_salary"]').val());
-    if (isNaN(gross) || !gradeData.basic_salary) return;
+    if (isNaN(gross) || gross <= 0) return;
 
-    // ১. ফিক্সড ভ্যালুগুলো আগে বের করে নিচ্ছি (MTF + ATS)
-    let medical = parseFloat(gradeData.medical_allowance || 0);
-    let transport = parseFloat(gradeData.transport_allowance || 0);
-    let food = parseFloat(gradeData.food_allowance || 0);
+    const percentAmount = (key) => {
+        const percent = parseFloat(gradeData[key] || 0);
+        return ((gross * percent) / 100).toFixed(2);
+    };
 
-    let attendance = parseFloat(gradeData.attendance_bonus || 0);
-    let other = parseFloat(gradeData.other_allowance || 0);
-    let stamp = parseFloat(gradeData.stamp_charge || 0);
-    let providentFund = parseFloat(gradeData.provident_fund || 0);
-    let conveyance = parseFloat(gradeData.conveyance_allowance || 0);
-
-    let MTF = medical + transport + food; // ২টো যোগফল
-    let ATS = attendance + other + stamp;
-
-    // ২. অবশিষ্ট টাকা বের করা (Gross - (MTF + ATS))
-    let remainder = gross - (MTF + ATS);
-
-    // ৩. পার্সেন্টেজ অনুযায়ী Basic এবং House Rent ক্যালকুলেশন
-
-    let basicSalary = (remainder * parseFloat(gradeData.basic_salary) / 100);
-    let houseRent = (remainder * parseFloat(gradeData.house_rent) / 100);
-    console.log(houseRent);
-
-    // ৪. ফিল্ডগুলোতে ভ্যালু বসানো
-    $('input[data-key="basic_salary"]').val(basicSalary.toFixed(2));
-    $('input[data-key="house_rent"]').val(houseRent.toFixed(2));
-
-    // ফিক্সড অ্যামাউন্টগুলো সরাসরি বসবে
-    $('input[data-key="medical_allowance"]').val(medical.toFixed(2));
-    $('input[data-key="transport_allowance"]').val(transport.toFixed(2));
-    $('input[data-key="food_allowance"]').val(food.toFixed(2));
-    $('input[data-key="attendance_bonus"]').val(attendance.toFixed(2));
-    $('input[data-key="other_allowance"]').val(other.toFixed(2));
-    $('input[data-key="stamp_charge"]').val(stamp.toFixed(2));
-    $('input[data-key="provident_fund"]').val(providentFund.toFixed(2));
-    $('input[data-key="conveyance_allowance"]').val(conveyance.toFixed(2));
+    $('input[data-key="basic_salary"]').val(percentAmount('basic_salary'));
+    $('input[data-key="house_rent"]').val(percentAmount('house_rent'));
+    $('input[data-key="medical_allowance"]').val(percentAmount('medical_allowance'));
+    $('input[data-key="transport_allowance"]').val(percentAmount('transport_allowance'));
+    $('input[data-key="food_allowance"]').val(percentAmount('food_allowance'));
+    $('input[data-key="attendance_bonus"]').val(parseFloat(gradeData['attendance_bonus'] || 0).toFixed(2));
+    $('input[data-key="other_allowance"]').val(percentAmount('other_allowance'));
 }
 
     // Grade change
@@ -1180,3 +1312,7 @@ $(document).ready(function() {
 </script>
 
 @endpush
+
+
+
+

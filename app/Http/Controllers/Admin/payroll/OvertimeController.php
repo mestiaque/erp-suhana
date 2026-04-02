@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
-use App\Models\Overtime;
+use App\Models\payroll\Overtime;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class OvertimeController extends Controller
         }
 
         $overtimes = $query->paginate(20);
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
 
         return view(adminTheme().'overtimes.index', compact('overtimes', 'users', 'departments'));
@@ -45,7 +45,7 @@ class OvertimeController extends Controller
 
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         return view(adminTheme().'overtimes.create', compact('users'));
     }
 
@@ -88,7 +88,7 @@ class OvertimeController extends Controller
     public function edit($id)
     {
         $overtime = Overtime::findOrFail($id);
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         return view(adminTheme().'overtimes.edit', compact('overtime', 'users'));
     }
 

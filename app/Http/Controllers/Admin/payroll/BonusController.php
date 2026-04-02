@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Bonus;
+use App\Models\payroll\Bonus;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class BonusController extends Controller
 {
@@ -28,7 +28,7 @@ class BonusController extends Controller
             ->orderBy('month', 'desc')
             ->get();
 
-        return view('admin.bonus.index', compact('bonuses'));
+        return view('admin.payroll.bonus.index', compact('bonuses'));
     }
 
     /**
@@ -36,8 +36,8 @@ class BonusController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.bonus.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.bonus.create', compact('users'));
     }
 
     /**

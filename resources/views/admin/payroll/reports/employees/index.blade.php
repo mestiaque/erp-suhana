@@ -190,13 +190,7 @@
                         <td>{{ $employee->employee_id ?? 'N/A' }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                @if($employee->photo)
-                                    <img src="{{ asset('uploads/user_photo/' . $employee->photo) }}" alt="{{ $employee->name }}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; margin-right: 10px;">
-                                @else
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 35px; height: 35px; background-color: {{ random_color($employee->id ?? 0) }}; margin-right: 10px;">
-                                        {{ strtoupper(substr($employee->name ?? 'U', 0, 1)) }}
-                                    </div>
-                                @endif
+                                {!! $employee->getAvt() !!}
                                 <span>{{ $employee->name }}</span>
                             </div>
                         </td>

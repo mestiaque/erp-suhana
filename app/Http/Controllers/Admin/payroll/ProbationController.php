@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Probation;
+use App\Models\payroll\Probation;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -36,15 +36,15 @@ class ProbationController extends Controller
         }
 
         $probations = $query->paginate(20);
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
 
-        return view(adminTheme().'probations.index', compact('probations', 'users'));
+        return view(adminTheme().'payroll.probations.index', compact('probations', 'users'));
     }
 
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view(adminTheme().'probations.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view(adminTheme().'payroll.probations.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -75,8 +75,8 @@ class ProbationController extends Controller
     public function edit($id)
     {
         $probation = Probation::findOrFail($id);
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view(adminTheme().'probations.edit', compact('probation', 'users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view(adminTheme().'payroll.probations.edit', compact('probation', 'users'));
     }
 
     public function update(Request $request, $id)

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Holiday;
-use Illuminate\Http\Request;
+use App\Models\payroll\Holiday;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class HolidayController extends Controller
 {
@@ -15,7 +15,7 @@ class HolidayController extends Controller
     public function index()
     {
         $holidays = Holiday::orderBy('from_date', 'desc')->get();
-        return view('admin.holiday.index', compact('holidays'));
+        return view('admin.payroll.holiday.index', compact('holidays'));
     }
 
     /**
@@ -23,7 +23,7 @@ class HolidayController extends Controller
      */
     public function create()
     {
-        return view('admin.holiday.create');
+        return view('admin.payroll.holiday.create');
     }
 
     /**
@@ -62,7 +62,7 @@ class HolidayController extends Controller
     public function edit($id)
     {
         $holiday = Holiday::findOrFail($id);
-        return view('admin.holiday.edit', compact('holiday'));
+        return view('admin.payroll.holiday.edit', compact('holiday'));
     }
 
     /**

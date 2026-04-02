@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Asset;
-use App\Models\AssetDistribution;
+use App\Models\payroll\Asset;
+use App\Models\payroll\AssetDistribution;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class AssetController extends Controller
 {
@@ -24,8 +24,8 @@ class AssetController extends Controller
             })
             ->orderBy('name')
             ->get();
-        
-        return view('admin.asset.index', compact('assets'));
+
+        return view('admin.payroll.asset.index', compact('assets'));
     }
 
     /**
@@ -33,7 +33,7 @@ class AssetController extends Controller
      */
     public function create()
     {
-        return view('admin.asset.create');
+        return view('admin.payroll.asset.create');
     }
 
     /**
@@ -81,8 +81,8 @@ class AssetController extends Controller
             })
             ->orderBy('assignment_date', 'desc')
             ->get();
-        
-        return view('admin.asset.distribution', compact('distributions'));
+
+        return view('admin.payroll.asset.distribution', compact('distributions'));
     }
 
     /**
@@ -90,9 +90,9 @@ class AssetController extends Controller
      */
     public function distributionCreate()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         $assets = Asset::where('status', 'available')->get();
-        return view('admin.asset.distribution-create', compact('users', 'assets'));
+        return view('admin.payroll.asset.distribution-create', compact('users', 'assets'));
     }
 
     /**

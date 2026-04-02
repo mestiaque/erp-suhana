@@ -14,7 +14,7 @@ class OffdayController extends Controller
     public function index()
     {
         $offday = Attribute::where('type', 21)->first();
-        return view('admin.offday.index', compact('offday'));
+        return view('admin.payroll.offday.index', compact('offday'));
     }
 
     /**
@@ -27,7 +27,7 @@ class OffdayController extends Controller
         ]);
 
         $offday = Attribute::where('type', 21)->first();
-        
+
         if (!$offday) {
             $offday = new Attribute();
             $offday->type = 21;

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProvidentFund;
+use App\Models\payroll\ProvidentFund;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ProvidentFundController extends Controller
 {
@@ -25,10 +25,10 @@ class ProvidentFundController extends Controller
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
-        
+
         $years = range(date('Y'), date('Y') - 5);
-        
-        return view('admin.provident-fund.index', compact('providentFunds', 'years'));
+
+        return view('admin.payroll.provident-fund.index', compact('providentFunds', 'years'));
     }
 
     /**
@@ -36,9 +36,9 @@ class ProvidentFundController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         $years = range(date('Y'), date('Y') - 5);
-        return view('admin.provident-fund.create', compact('users', 'years'));
+        return view('admin.payroll.provident-fund.create', compact('users', 'years'));
     }
 
     /**

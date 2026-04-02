@@ -6,9 +6,23 @@ use App\Models\Media;
 use App\Models\Country;
 use App\Models\General;
 use App\Models\Attribute;
-use App\Models\PostExtra;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+
+
+function random_color($seed = 0) {
+    $colors = [
+        '#3498db', '#e74c3c', '#9b59b6', '#f1c40f',
+        '#1abc9c', '#e67e22', '#34495e', '#16a085',
+        '#c0392b', '#8e44ad', '#27ae60', '#d35400',
+        '#2980b9', '#2c3e50', '#f39c12', '#00b894'
+    ];
+    return $colors[$seed % count($colors)];
+}
 
     function general() {
         // Skip DB query if running in console (artisan commands)
@@ -29,9 +43,10 @@ function websiteTitle($title=null){
 }
 
 function isMobileDevice() {
+  $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
   return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo
 |fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i"
-, $_SERVER["HTTP_USER_AGENT"]);
+, $userAgent) === 1;
 }
 
 // function adminTheme(){
@@ -354,8 +369,150 @@ if (!function_exists('hasChildPermission')) {
 
 if (! function_exists('can')) {
     function can($ability, $arguments = []) {
-        return auth()->check() && Gate::allows($ability, $arguments);
+    return Auth::check() && Gate::allows($ability, $arguments);
     }
+}
+
+/**
+ * Get attendance status for a user on a specific date.
+ */
+if (!function_exists('getAttendanceStatus')) {
+  function getAttendanceStatus($userId, $date) {
+    $date = Carbon::parse($date)->format('Y-m-d');
+    $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+
+    $result = [
+      'status' => 'A',
+      'status_text' => 'Absent',
+      'is_holiday' => false,
+      'is_weekly_off' => false,
+      'is_leave' => false,
+      'is_present' => false,
+      'in_time' => null,
+      'out_time' => null,
+      'work_hours' => 0,
+      'holiday_info' => null,
+      'leave_info' => null,
+    ];
+
+    $offdaySetting = Attribute::where('type', 21)->where('status', 'active')->first();
+    $offdayNumber = $offdaySetting
+      ? array_search($offdaySetting->name, ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])
+      : 5;
+
+    $holiday = \App\Models\payroll\Holiday::where('status', 'active')
+      ->whereDate('from_date', '<=', $date)
+      ->whereDate('to_date', '>=', $date)
+      ->first();
+
+    if ($holiday) {
+      $result['status'] = 'H';
+      $result['status_text'] = 'Holiday';
+      $result['is_holiday'] = true;
+      $result['holiday_info'] = $holiday;
+      return $result;
+    }
+
+    if ($dayOfWeek == $offdayNumber) {
+      $result['status'] = 'WO';
+      $result['status_text'] = 'Weekly Off';
+      $result['is_weekly_off'] = true;
+      return $result;
+    }
+
+    $leave = \App\Models\payroll\Leave::where('user_id', $userId)
+      ->where('status', 'approved')
+      ->whereDate('start_date', '<=', $date)
+      ->whereDate('end_date', '>=', $date)
+      ->first();
+
+    $attendance = \App\Models\payroll\Attendance::where('user_id', $userId)
+      ->whereDate('date', $date)
+      ->first();
+
+    if ($leave) {
+      $result['status'] = 'L';
+      $result['status_text'] = 'Leave';
+      $result['is_leave'] = true;
+      $result['leave_info'] = $leave;
+      return $result;
+    }
+
+    if ($attendance) {
+      $result['status'] = ($attendance->status === 'late') ? 'LT' : 'P';
+      $result['status_text'] = ($attendance->status === 'late') ? 'Late' : 'Present';
+      $result['is_present'] = true;
+      $result['in_time'] = $attendance->in_time;
+      $result['out_time'] = $attendance->out_time;
+      $result['work_hours'] = isset($attendance->in_minutes)
+        ? round(((float) $attendance->in_minutes) / 60, 2)
+        : ($attendance->work_hour ?? 0);
+    }
+
+    return $result;
+  }
+}
+
+/**
+ * Get monthly attendance summary for a user.
+ */
+if (!function_exists('getMonthlyAttendanceSummary')) {
+  function getMonthlyAttendanceSummary($userId, $year, $month, $upToToday = true) {
+    $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+    $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+    $today = Carbon::today();
+    if ($upToToday && $endDate->gt($today)) {
+      $endDate = $today;
+    }
+
+    $summary = [
+      'present' => 0,
+      'late' => 0,
+      'absent' => 0,
+      'leave' => 0,
+      'holiday' => 0,
+      'weekly_off' => 0,
+      'total_work_hours' => 0,
+      'days_counted' => 0,
+    ];
+
+    if ($startDate->gt($today)) {
+      return $summary;
+    }
+
+    $period = CarbonPeriod::create($startDate, $endDate);
+
+    foreach ($period as $date) {
+      $summary['days_counted']++;
+      $status = getAttendanceStatus($userId, $date);
+
+      switch ($status['status']) {
+        case 'P':
+          $summary['present']++;
+          $summary['total_work_hours'] += $status['work_hours'];
+          break;
+        case 'LT':
+          $summary['late']++;
+          $summary['total_work_hours'] += $status['work_hours'];
+          break;
+        case 'L':
+          $summary['leave']++;
+          break;
+        case 'H':
+          $summary['holiday']++;
+          break;
+        case 'WO':
+          $summary['weekly_off']++;
+          break;
+        case 'A':
+          $summary['absent']++;
+          break;
+      }
+    }
+
+    return $summary;
+  }
 }
 
 

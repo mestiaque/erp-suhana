@@ -145,7 +145,15 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-2">
+                <label>Attendance From</label>
+                <input type="date" name="attendance_start_date" class="form-control form-control-sm" value="{{ request('attendance_start_date') }}">
+            </div>
+            <div class="col-md-2">
+                <label>Attendance To</label>
+                <input type="date" name="attendance_end_date" class="form-control form-control-sm" value="{{ request('attendance_end_date') }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
                 <label>&nbsp;</label>
                 <button type="submit" class="btn btn-sm btn-primary w-50 mr-1"><i class="bx bx-search"></i> Filter</button>
                  <a href="{{ route('admin.payroll.salarySheet') }}" class="btn btn-sm btn-secondary"><i class="bx bx-reset"></i> Reset</a>
@@ -195,6 +203,27 @@
                                     @endfor
                                 </select>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Attendance From Date (Optional)</label>
+                                    <input
+                                        type="date"
+                                        name="attendance_start_date"
+                                        class="form-control"
+                                        value="{{ request('attendance_start_date', \Carbon\Carbon::createFromDate($year, $month, 1)->format('Y-m-d')) }}"
+                                    >
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Attendance To Date (Optional)</label>
+                                    <input
+                                        type="date"
+                                        name="attendance_end_date"
+                                        class="form-control"
+                                        value="{{ request('attendance_end_date', \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d')) }}"
+                                    >
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mb-2">If provided, salary attendance will be calculated using this custom date range.</small>
                             <div class="mb-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="reprocess" id="reprocess" value="1">
@@ -224,7 +253,7 @@
                         <th colspan="6" class="text-center bg-success text-white">Salary Components</th>
                         <th colspan="5" class="text-center bg-primary text-white">Extra Earnings</th>
                         <th colspan="7" class="text-center bg-danger text-white">Deductions</th>
-                        <th colspan="4" class="text-center bg-info text-white">Attendance</th>
+                        <th colspan="5" class="text-center bg-info text-white">Attendance</th>
                         <th rowspan="2" class="align-middle text-center bg-warning" style="min-width: 80px;">Net Salary</th>
                         <th rowspan="2" class="align-middle text-center" style="min-width: 60px;">Status</th>
                         <th rowspan="2" class="align-middle text-center" style="min-width: 50px;">Action</th>
@@ -376,7 +405,7 @@
                         <th class="text-end text-danger">৳{{ number_format($totals['advance'], 0) }}</th>
                         <th class="text-end text-danger">৳{{ number_format($totals['total_deduction'], 0) }}</th>
                         <!-- Attendance -->
-                        <th colspan="4"></th>
+                        <th colspan="5"></th>
                         <!-- Net -->
                         <th class="text-end bg-warning">৳{{ number_format($totals['net'], 0) }}</th>
                         <th colspan="2"></th>

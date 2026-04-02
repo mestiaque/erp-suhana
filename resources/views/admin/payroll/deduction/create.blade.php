@@ -4,8 +4,17 @@
 @endsection
 
 @section('contents')
-<div class="card">
-    <div class="card-header"><h5 class="mb-0">Add Deduction</h5></div>
+<div class="flex-grow-1">
+    <div class="breadcrumb-area">
+        <h1>Add Deduction</h1>
+        <ol class="breadcrumb">
+            <li class="item"><a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a></li>
+            <li class="item">Payroll</li>
+            <li class="item">Deductions</li>
+        </ol>
+    </div>
+    @include(adminTheme().'alerts')
+    <div class="card">
     <div class="card-body">
         <form action="{{ route('admin.deductions.store') }}" method="POST">
             @csrf
@@ -38,8 +47,10 @@
                     <input type="month" name="month" class="form-control" required>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <a href="{{ route('admin.deductions.index') }}" class="btn btn-secondary">Back</a>
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="{{ route('admin.deductions.index') }}" class="btn btn-secondary">Back</a>
+            </div>
         </form>
     </div>
 </div>

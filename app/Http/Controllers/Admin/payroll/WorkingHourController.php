@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\WorkingHour;
+use App\Models\payroll\WorkingHour;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class WorkingHourController extends Controller
 {
@@ -27,10 +27,10 @@ class WorkingHourController extends Controller
             })
             ->orderBy('date', 'desc')
             ->get();
-        
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        
-        return view('admin.working-hour.index', compact('hours', 'users'));
+
+        $users = User::where('status', 1)->filterByType('employee')->get();
+
+        return view('admin.payroll.working-hour.index', compact('hours', 'users'));
     }
 
     /**
@@ -38,8 +38,8 @@ class WorkingHourController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.working-hour.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.working-hour.create', compact('users'));
     }
 
     /**

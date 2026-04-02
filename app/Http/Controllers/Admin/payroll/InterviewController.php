@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
-use App\Models\Interview;
+use App\Models\payroll\Interview;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,7 +41,7 @@ class InterviewController extends Controller
 
         $interviews = $query->paginate(20);
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
-        $interviewers = User::where('status', 1)->filterBy('employee')->get();
+        $interviewers = User::where('status', 1)->filterByType('employee')->get();
 
         return view(adminTheme().'interviews.index', compact('interviews', 'departments', 'interviewers'));
     }
@@ -49,7 +49,7 @@ class InterviewController extends Controller
     public function create()
     {
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
-        $interviewers = User::where('status', 1)->filterBy('employee')->get();
+        $interviewers = User::where('status', 1)->filterByType('employee')->get();
         return view(adminTheme().'interviews.create', compact('departments', 'interviewers'));
     }
 
@@ -90,7 +90,7 @@ class InterviewController extends Controller
     {
         $interview = Interview::findOrFail($id);
         $departments = Attribute::where('type', 3)->where('status', 'active')->get();
-        $interviewers = User::where('status', 1)->filterBy('employee')->get();
+        $interviewers = User::where('status', 1)->filterByType('employee')->get();
         return view(adminTheme().'interviews.edit', compact('interview', 'departments', 'interviewers'));
     }
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\ConvenienceRequest;
+use App\Models\payroll\ConvenienceRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -21,8 +21,8 @@ class ConvenienceController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        return view('admin.convenience.index', compact('requests'));
+
+        return view('admin.payroll.convenience.index', compact('requests'));
     }
 
     /**
@@ -30,8 +30,8 @@ class ConvenienceController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
-        return view('admin.convenience.create', compact('users'));
+        $users = User::where('status', 1)->filterByType('employee')->get();
+        return view('admin.payroll.convenience.create', compact('users'));
     }
 
     /**

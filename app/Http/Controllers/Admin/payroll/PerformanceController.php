@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\payroll;
 
 use App\Http\Controllers\Controller;
-use App\Models\Performance;
+use App\Models\payroll\Performance;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -24,10 +24,10 @@ class PerformanceController extends Controller
             ->orderBy('year', 'desc')
             ->orderBy('quarter', 'desc')
             ->get();
-        
+
         $years = range(date('Y'), date('Y') - 5);
-        
-        return view('admin.performance.index', compact('performances', 'years'));
+
+        return view('admin.payroll.performance.index', compact('performances', 'years'));
     }
 
     /**
@@ -35,9 +35,9 @@ class PerformanceController extends Controller
      */
     public function create()
     {
-        $users = User::where('status', 1)->filterBy('employee')->get();
+        $users = User::where('status', 1)->filterByType('employee')->get();
         $years = range(date('Y'), date('Y') - 5);
-        return view('admin.performance.create', compact('users', 'years'));
+        return view('admin.payroll.performance.create', compact('users', 'years'));
     }
 
     /**
@@ -79,7 +79,7 @@ class PerformanceController extends Controller
     public function update(Request $request, $id)
     {
         $performance = Performance::findOrFail($id);
-        
+
         $performance->update([
             'rating' => $request->rating,
             'attendance_score' => $request->attendance_score ?? 0,
