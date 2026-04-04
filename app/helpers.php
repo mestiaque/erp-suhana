@@ -325,6 +325,38 @@ function uploadFile($file,$src,$srcType,$fileUse,$author=null,$fileStatus=true){
 
 }
 
+if (!function_exists('deleteUserFiles')) {
+  function deleteUserFiles($userId)
+  {
+    $medias = Media::where('src_type', 6)->where('src_id', $userId)->get();
+
+    foreach ($medias as $media) {
+      $paths = [
+        $media->file_url,
+        $media->file_url_sm,
+        $media->file_url_md,
+        $media->file_url_lg,
+      ];
+
+      foreach ($paths as $path) {
+        if (!$path) {
+          continue;
+        }
+
+        $normalizedPath = str_starts_with($path, 'public/') ? substr($path, 7) : $path;
+
+        if (File::exists($normalizedPath)) {
+          File::delete($normalizedPath);
+        }
+      }
+
+      $media->delete();
+    }
+
+    return true;
+  }
+}
+
 
 
 if (!function_exists('hasParentPermission')) {

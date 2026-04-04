@@ -3,7 +3,6 @@
 @section('title')
 <title>{{ websiteTitle('Floor Planning - Create') }}</title>
 @endsection
-
 @section('contents')
 <div class="flex-grow-1">
     <div class="breadcrumb-area">
@@ -30,7 +29,7 @@
                             <option value="">-- Select Master Plan --</option>
                             @foreach($masterPlans as $mp)
                                 <option value="{{ $mp->id }}">
-                                    {{ $mp->planning_no }} | 
+                                    {{ $mp->planning_no }} |
                                     @php $pis = $mp->productions->pluck('pi_no')->unique()->filter()->implode(', ') @endphp
                                     ({{ $mp->productions->pluck('pi_no')->unique()->count() }} PI) |
                                     {{ $mp->productions->count() }} Styles |
@@ -159,7 +158,7 @@ $(document).ready(function(){
         if(selectedLines > 0){
             let baseQty = Math.floor(qty / selectedLines);
             let remainder = qty % selectedLines;
-            
+
             row.find('td').each(function(){
                 let td = $(this);
                 let checkbox = td.find('.lineCheckbox');

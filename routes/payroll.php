@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\payroll\AssetController;
 use App\Http\Controllers\Admin\payroll\AttendanceApprovalController;
 use App\Http\Controllers\Admin\payroll\AttendanceManagementController;
@@ -369,8 +370,6 @@ Route::post('/iclock/cdata', [ZKTecoPushController::class, 'receiveData']);
     // ===========================================
 
     // Apps Setting
-    Route::get('/setting/{type}',[AdminController::class,'setting'])->name('setting');
-    Route::post('/setting/{type}/update',[AdminController::class,'settingUpdate'])->name('settingUpdate');
 
     Route::get('download/zk-installer', function () { $path = resource_path('apps/ZKTimeSyncInstaller.exe'); return response()->download($path); });
     Route::get('download/zk-installer-v2', function () { $path = resource_path('apps/ZKTimeAdmsInstaller.exe'); return response()->download($path); });
