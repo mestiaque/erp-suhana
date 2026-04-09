@@ -4722,6 +4722,7 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
+            
             // ROLE ASSIGN
             if ($action == 'role' && $r->isMethod('post')) {
                 if (!$user) {
