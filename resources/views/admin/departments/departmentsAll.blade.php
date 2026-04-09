@@ -83,6 +83,7 @@
                                 @else All @endif
                             </th>
                             <th style="min-width: 200px;">Name</th>
+                            <th style="min-width: 200px;">Bangla Name</th>
                             <th style="min-width: 300px;">Description</th>
                             <th style="min-width: 120px;">Date</th>
                             <th style="min-width: 100px;width:100px;">Action</th>
@@ -117,6 +118,9 @@
                             </td>
                             <td>
                                 <span>{{$department->name}}</span>
+                            </td>
+                            <td>
+                                <span>{{$department->bn_name ?: '--'}}</span>
                             </td>
                             <td>
                                 <span>{!!$department->description ?? '--' !!}</span>
@@ -167,6 +171,13 @@
     				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
     				@endif
              	</div>
+                 <div class="form-group">
+                    <label for="bn_name">Bangla Name</label>
+                    <input type="text" class="form-control {{$errors->has('bn_name')?'error':''}}" name="bn_name" value="{{old('bn_name')}}" placeholder="বাংলা নাম লিখুন">
+                    @if ($errors->has('bn_name'))
+                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bn_name') }}</p>
+                    @endif
+                	</div>
     			 <div class="form-group">
     				<label for="name">Description</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description"></textarea>
@@ -205,6 +216,13 @@
     				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
     				@endif
              	</div>
+                 <div class="form-group">
+                    <label for="bn_name">Bangla Name</label>
+                    <input type="text" class="form-control {{$errors->has('bn_name')?'error':''}}" value="{{$dpm->bn_name?:old('bn_name')}}" name="bn_name" placeholder="বাংলা নাম লিখুন">
+                    @if ($errors->has('bn_name'))
+                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bn_name') }}</p>
+                    @endif
+                	</div>
     			 <div class="form-group">
     				<label for="name">Description</label>
 					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>

@@ -10,12 +10,14 @@ return [
             'icon'       => 'fa-solid fa-gauge-high',
             'route'      => '/admin/dashboard',
             'permission' => '',
+            'order'      => 1,
         ],
         [
             'title'      => 'My Profile',
             'icon'       => 'fa-solid fa-user',
             'route'      => '/admin/my-profile',
             'permission' => '',
+            'order'      => 2,
         ],
     ],
 
@@ -26,6 +28,7 @@ return [
             'title'      => 'Purchases Management',
             'icon'       => 'fa-solid fa-store',
             'icon_color' => 'text-primary',
+            'order'      => 3,
             'permission' => '',
             'children'   => [
                 [
@@ -97,6 +100,7 @@ return [
             'title'      => 'Merchandising',
             'icon'       => 'fa-solid fa-cart-shopping',
             'icon_color' => 'text-primary',
+            'order'      => 4,
             'permission' => '',
             'children'   => [
                 [
@@ -166,6 +170,7 @@ return [
             'title'      => 'Procurement',
             'icon'       => 'fa-solid fa-layer-group',
             'icon_color' => 'text-primary',
+            'order'      => 5,
             'permission' => '',
             'children'   => [
                 [
@@ -245,6 +250,7 @@ return [
             'title'      => 'Production',
             'icon'       => 'fa-solid fa-layer-group',
             'icon_color' => 'text-primary',
+            'order'      => 6,
             'permission' => '',
             'children'   => [
                 [
@@ -309,6 +315,7 @@ return [
             'title'      => 'Commercial',
             'icon'       => 'fa-solid fa-file-invoice-dollar',
             'icon_color' => 'text-primary',
+            'order'      => 7,
             'permission' => '',
             'children'   => [
                 [
@@ -393,6 +400,7 @@ return [
             'icon'       => 'fa-solid fa-cogs',
             'icon_color' => 'text-primary',
             'permission' => '',
+            'order'      => 8,
             'children'   => [
                 [
                     'title'       => 'Expenses List',
@@ -490,6 +498,7 @@ return [
             'icon'       => 'fa-solid fa-users',
             'icon_color' => 'text-success',
             'permission' => '',
+            'order'      => 9,
             'children'   => [
                 [
                     'title'       => 'Employee List',
@@ -545,6 +554,7 @@ return [
             'icon'       => 'fa-solid fa-sliders-h',
             'icon_color' => 'text-secondary',
             'permission' => '',
+            'order'      => 999,
             'children'   => [
                 [
                     'title'       => 'General Setting',

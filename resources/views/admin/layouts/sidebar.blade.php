@@ -89,35 +89,25 @@
 
                     if ($permission !== '') {
 
-                        // If permission IS defined → MUST CHECK PERMISSION
-                        $show = hasChildPermission($permission);
+                        // If permission is module.key format, run strict child check.
+                        if (str_contains($permission, '.')) {
+                            [$moduleName, $permissionKey] = array_pad(explode('.', $permission, 2), 2, null);
+                            $show = !empty($moduleName) && !empty($permissionKey)
+                                ? hasChildPermission($moduleName, $permissionKey)
+                                : false;
+                        } else {
+                            // Backward-compatible module-level check.
+                            $show = hasChildPermission($permission);
+                        }
 
                     } else {
 
-                        // NO PERMISSION SET
-                        if ($level == 0) {
-
-                            // PARENT LEVEL
-
-                            if (isset($menu['children'])) {
-                                // Parent WITH children → show only if any child is visible
-                                $show = $hasVisibleChild;
-                            } else {
-                                // Single parent menu → always show
-                                $show = true;
-                            }
-
-                        } elseif ($level == 1) {
-                            // CHILD LEVEL: leaf nodes without permission should still be visible.
-                            if (isset($menu['children'])) {
-                                $show = $hasVisibleChild;
-                            } else {
-                                $show = true;
-                            }
-
+                        // Unified rule for all levels when permission key is empty:
+                        // - with children: show only if any child is visible
+                        // - without children: show
+                        if (isset($menu['children'])) {
+                            $show = $hasVisibleChild;
                         } else {
-
-                            // GRANDCHILD (level >= 2) always show if no permission
                             $show = true;
                         }
                     }
@@ -191,7 +181,26 @@
 
 
             {{-- গ্রুপ অনুযায়ী মেনু রেন্ডার --}}
-            @foreach(config('sidebar') as $group)
+            {{-- Sort groups by the minimum 'order' value among their menu items --}}
+            @php
+                $sidebarGroups = config('sidebar', []);
+                usort($sidebarGroups, function ($a, $b) {
+                    $minA = PHP_INT_MAX;
+                    $minB = PHP_INT_MAX;
+                    foreach ($a as $k => $item) {
+                        if ($k !== 'group_title' && is_array($item)) {
+                            $minA = min($minA, $item['order'] ?? PHP_INT_MAX);
+                        }
+                    }
+                    foreach ($b as $k => $item) {
+                        if ($k !== 'group_title' && is_array($item)) {
+                            $minB = min($minB, $item['order'] ?? PHP_INT_MAX);
+                        }
+                    }
+                    return $minA <=> $minB;
+                });
+            @endphp
+            @foreach($sidebarGroups as $group)
 
                 @php
                     // check if any parent in this group will be visible

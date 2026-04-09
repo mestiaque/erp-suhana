@@ -3023,7 +3023,10 @@ class AdminController extends Controller
         ->where(function($q) use ($r) {
 
           if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
+                            $q->where(function($searchQuery) use ($r) {
+                                $searchQuery->where('name','LIKE','%'.$r->search.'%')
+                                    ->orWhere('bn_name','LIKE','%'.$r->search.'%');
+                            });
           }
 
           if($r->status){
@@ -3031,7 +3034,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','name','slug','type','description','created_at','addedby_id','status'])
+    ->select(['id','name','bn_name','slug','type','description','created_at','addedby_id','status'])
       ->paginate(25)->appends([
         'search'=>$r->search,
         'status'=>$r->status,
@@ -3055,6 +3058,7 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'name' => 'required|max:100',
+                        'bn_name' => 'nullable|max:191',
             'description' => 'nullable|max:1000',
         ]);
 
@@ -3063,6 +3067,7 @@ class AdminController extends Controller
           $department =new Attribute();
         }
         $department->name=$r->name;
+        $department->bn_name=$r->bn_name;
         $department->description=$r->description;
         $department->type =3;
         $department->status ='active';
@@ -3107,6 +3112,7 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'name' => 'required|max:191',
+                        'bn_name' => 'nullable|max:191',
             'seo_title' => 'nullable|max:200',
             'seo_desc' => 'nullable|max:250',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -3114,6 +3120,7 @@ class AdminController extends Controller
         ]);
 
         $department->name=$r->name;
+                $department->bn_name=$r->bn_name;
         $department->short_description=$r->short_description;
         $department->description=$r->description;
         $department->seo_title=$r->seo_title;
@@ -3445,7 +3452,10 @@ class AdminController extends Controller
         ->where(function($q) use ($r) {
 
           if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
+                            $q->where('name','LIKE','%'.$r->search.'%')
+                                ->orWhere('slug','LIKE','%'.$r->search.'%')
+                                ->orWhere('bn_name','LIKE','%'.$r->search.'%')
+                                ->orWhere('description','LIKE','%'.$r->search.'%');
           }
 
           if($r->status){
@@ -3454,7 +3464,7 @@ class AdminController extends Controller
 
       })
       ->orderBy('slug')
-      ->select(['id','name','slug','type','description','capacity','created_at','addedby_id','status'])
+            ->select(['id','name','bn_name','slug','type','description','capacity','created_at','addedby_id','status'])
       ->paginate(25)->appends([
         'search'=>$r->search,
         'status'=>$r->status,
@@ -3478,7 +3488,9 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'floor' => 'required|max:100',
+            'floor_bn' => 'nullable|max:100',
             'line' => 'required|max:100',
+            'bn_name' => 'nullable|max:100',
             'capacity' => 'nullable|numeric',
         ]);
 
@@ -3489,7 +3501,9 @@ class AdminController extends Controller
         }
         $line =new Attribute();
         $line->name=$r->floor;
+        $line->description=$r->floor_bn;
         $line->slug=$r->line;
+        $line->bn_name=$r->bn_name;
         $line->capacity=$r->capacity?:0;
         $line->type =4;
         $line->status ='active';
@@ -3515,7 +3529,9 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'floor' => 'required|max:100',
+            'floor_bn' => 'nullable|max:100',
             'line' => 'required|max:100',
+            'bn_name' => 'nullable|max:100',
             'created_at' => 'required|date',
             'capacity' => 'nullable|numeric',
         ]);
@@ -3525,7 +3541,9 @@ class AdminController extends Controller
             return redirect()->back();
         }
         $line->name=$r->floor;
+        $line->description=$r->floor_bn;
         $line->slug=$r->line;
+        $line->bn_name=$r->bn_name;
         $line->capacity=$r->capacity?:0;
 
         $createDate =$r->created_at?Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')):Carbon::now();
@@ -4747,7 +4765,7 @@ class AdminController extends Controller
                 return redirect()->back();
             }
 
-            
+
             // ROLE ASSIGN
             if ($action == 'role' && $r->isMethod('post')) {
                 if (!$user) {
@@ -5946,7 +5964,8 @@ class AdminController extends Controller
         ->where(function($q) use ($r) {
 
           if($r->search){
-              $q->where('name','LIKE','%'.$r->search.'%');
+                            $q->where('name','LIKE','%'.$r->search.'%')
+                                ->orWhere('bn_name','LIKE','%'.$r->search.'%');
           }
 
           if($r->status){
@@ -5954,7 +5973,7 @@ class AdminController extends Controller
           }
 
       })
-      ->select(['id','name','slug','type','description','created_at','addedby_id','status'])
+            ->select(['id','name','bn_name','slug','type','description','created_at','addedby_id','status'])
       ->paginate(25)->appends([
         'search'=>$r->search,
         'status'=>$r->status,
@@ -5978,6 +5997,7 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'name' => 'required|max:100',
+            'bn_name' => 'nullable|max:100',
             'description' => 'nullable|max:1000',
         ]);
 
@@ -5986,6 +6006,7 @@ class AdminController extends Controller
           $employeeType =new Attribute();
         }
         $employeeType->name=$r->name;
+        $employeeType->bn_name=$r->bn_name;
         $employeeType->description=$r->description;
         $employeeType->type =16;
         $employeeType->status ='active';
@@ -6030,6 +6051,7 @@ class AdminController extends Controller
 
         $check = $r->validate([
             'name' => 'required|max:191',
+            'bn_name' => 'nullable|max:191',
             'seo_title' => 'nullable|max:200',
             'seo_desc' => 'nullable|max:250',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -6037,6 +6059,7 @@ class AdminController extends Controller
         ]);
 
         $employeeType->name=$r->name;
+        $employeeType->bn_name=$r->bn_name;
         $employeeType->short_description=$r->short_description;
         $employeeType->description=$r->description;
         $employeeType->seo_title=$r->seo_title;

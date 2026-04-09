@@ -79,12 +79,30 @@ function adminTheme() {
 
 
 function welcomeTheme(){
-  $theme=general()->theme.'.';
-  if(isMobileDevice()){
-    $theme=general()->theme.'.';
-  }
-  return $theme;
+    $theme = general()->adminTheme;
+
+    // Mobile device হলে আলাদা theme ব্যবহার করতে চাইলে uncomment করতে পারো
+    // if (isMobileDevice()) {
+    //     $theme = general()->mobileTheme ?? $theme;
+    // }
+
+    $viewPath = resource_path('views/' . $theme);
+
+    // Linux case-sensitive: যদি folder না থাকে, strtolower try করি
+    if (!file_exists($viewPath) && file_exists(resource_path('views/' . strtolower($theme)))) {
+        $theme = strtolower($theme);
+    }
+
+    // শেষে dot দিয়ে return (Laravel view path convention)
+    return $theme . '.';
 }
+// function welcomeTheme(){
+//   $theme=general()->theme.'.';
+//   if(isMobileDevice()){
+//     $theme=general()->theme.'.';
+//   }
+//   return $theme;
+// }
 
 function serial($serial){
     $data =$serial.'th';
@@ -383,19 +401,63 @@ if (!function_exists('hasChildPermission')) {
         if (!$roles) return false;
 
         $permissions = json_decode($roles->permission, true);
+        if (!is_array($permissions)) return false;
 
-        // If $permissionKey is null, check if module exists with any 'on' permission
-        if ($permissionKey === null) {
-            if (!isset($permissions[$module])) return false;
-
-            foreach ($permissions[$module] as $value) {
-                if (in_array($value, ['on', '1', true])) return true;
-            }
-            return false;
+        // Support dot notation directly: hasChildPermission('dev.all')
+        $module = trim($module);
+        if ($permissionKey !== null) {
+          $permissionKey = trim($permissionKey);
         }
 
-        // Check specific child permission
-        return isset($permissions[$module][$permissionKey]) && in_array($permissions[$module][$permissionKey], ['on', '1', true]);
+        if ($permissionKey === null && str_contains($module, '.')) {
+          [$module, $permissionKey] = array_pad(explode('.', $module, 2), 2, null);
+          $module = trim((string) $module);
+          $permissionKey = $permissionKey !== null ? trim((string) $permissionKey) : null;
+        }
+
+        $isAllowedValue = static function ($value): bool {
+          return in_array($value, ['on', '1', 1, true, 'true'], true);
+        };
+
+        if (!array_key_exists($module, $permissions)) return false;
+
+        $modulePermission = $permissions[$module];
+
+        // Scalar permission style: {"dev":"on"}
+        if (!is_array($modulePermission)) {
+          return $permissionKey === null ? $isAllowedValue($modulePermission) : false;
+        }
+
+        // Specific key check: hasChildPermission('dev', 'all') or hasChildPermission('dev.all')
+        if ($permissionKey !== null) {
+          if (array_key_exists($permissionKey, $modulePermission)) {
+            return $isAllowedValue($modulePermission[$permissionKey]);
+          }
+
+          // Fallback: if specific key missing but module-level all is granted.
+          if (array_key_exists('all', $modulePermission) && $isAllowedValue($modulePermission['all'])) {
+            return true;
+          }
+
+          return false;
+        }
+
+        // Module-level check: when 'all' exists, use it as authoritative module permission.
+        if (array_key_exists('all', $modulePermission)) {
+          return $isAllowedValue($modulePermission['all']);
+        }
+
+        // Legacy shape support: {'dev': {'dev': 'on'}}
+        if (array_key_exists($module, $modulePermission)) {
+          return $isAllowedValue($modulePermission[$module]);
+        }
+
+        // Fallback for modules without 'all': allow if any child permission is granted.
+        foreach ($modulePermission as $value) {
+          if ($isAllowedValue($value)) return true;
+        }
+
+        return false;
     }
 }
 

@@ -4,6 +4,13 @@
 <style type="text/css"></style>
 @endpush @section('contents')
 
+@php
+    $floorOptions = [
+        'Floor 1' => ['label' => 'Floor 1 / ফ্লোর ১', 'bn' => 'ফ্লোর ১'],
+        'Floor 2' => ['label' => 'Floor 2 / ফ্লোর ২', 'bn' => 'ফ্লোর ২'],
+    ];
+@endphp
+
 <div class="flex-grow-1">
     <!-- Start -->
     <div class="card mb-30">
@@ -26,7 +33,7 @@
                 <div class="row">
                     <div class="col-md-12 mb-0">
                         <div class="input-group">
-                            <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Floor/Lines Name" class="form-control {{$errors->has('search')?'error':''}}" />
+                            <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Floor/Line Name (English/Bangla)" class="form-control {{$errors->has('search')?'error':''}}" />
                             <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>
                     </div>
@@ -80,8 +87,10 @@
                                         </div>
                                     @else All @endif
                                 </th>
-                                <th style="min-width: 200px;">Floor</th>
-                                <th style="min-width: 200px;">Line</th>
+                                <th style="min-width: 200px;">Floor (English)</th>
+                                <th style="min-width: 200px;">Floor (Bangla)</th>
+                                <th style="min-width: 200px;">Line (English)</th>
+                                <th style="min-width: 200px;">Line (Bangla)</th>
                                 <th style="min-width: 200px;width:200px;">Capacity P/H</th>
                                 <th style="min-width: 100px;width:100px;">Date</th>
                                 <th style="min-width: 100px;width:100px;">Action</th>
@@ -117,7 +126,9 @@
                                 <td>
                                     <span>{{$line->name}}</span>
                                 </td>
+                                <td>{{ $line->description ?: 'N/A' }}</td>
                                 <td>{{$line->slug}}</td>
+                                <td>{{ $line->bn_name ?: 'N/A' }}</td>
                                 <td>{{$line->capacity}}</td>
                                 <td>{{$line->created_at->format('d.m.Y')}}</td>
                                 <td class="text-center">
@@ -164,9 +175,11 @@
                         <label for="name">Floor* </label>
                         <select class="form-control" name="floor">
                             <option value="">Select Floor</option>
-                            <option value="Floor 1">Floor 1</option>
-                            <option value="Floor 2">Floor 2</option>
+                            @foreach($floorOptions as $value => $option)
+                                <option value="{{ $value }}" data-bn="{{ $option['bn'] }}" @selected(old('floor') === $value)>{{ $option['label'] }}</option>
+                            @endforeach
                         </select>
+                        <input type="hidden" name="floor_bn" value="{{ old('floor_bn') }}">
                         @if ($errors->has('floor'))
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('floor') }}</p>
                         @endif
@@ -176,6 +189,13 @@
                         <input type="text" class="form-control {{$errors->has('line')?'error':''}}" value="{{old('line')}}" name="line" placeholder="Enter line" required="">
                         @if ($errors->has('floor'))
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('floor') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label for="bn_name">Block/Line Name (Bangla)</label>
+                        <input type="text" class="form-control {{$errors->has('bn_name')?'error':''}}" value="{{old('bn_name')}}" name="bn_name" placeholder="বাংলা নাম লিখুন">
+                        @if ($errors->has('bn_name'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bn_name') }}</p>
                         @endif
                     </div>
                 </div>
@@ -216,9 +236,17 @@
                         <label for="name">Floor* </label>
                         <select class="form-control" name="floor">
                             <option value="">Select Floor</option>
-                            <option value="Floor 1" {{$dpm->name=='Floor 1'?'selected':''}}>Floor 1</option>
-                            <option value="Floor 2" {{$dpm->name=='Floor 2'?'selected':''}}>Floor 2</option>
+                            @foreach($floorOptions as $value => $option)
+                                <option
+                                    value="{{ $value }}"
+                                    data-bn="{{ $option['bn'] }}"
+                                    @selected(
+                                        old('floor', $dpm->name) === $value
+                                    )
+                                >{{ $option['label'] }}</option>
+                            @endforeach
                         </select>
+                        <input type="hidden" name="floor_bn" value="{{ old('floor_bn', $dpm->description) }}">
                         @if ($errors->has('floor'))
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('floor') }}</p>
                         @endif
@@ -228,6 +256,13 @@
                         <input type="text" class="form-control {{$errors->has('line')?'error':''}}" value="{{$dpm->slug?:old('line')}}" name="line" placeholder="Enter line" required="">
                         @if ($errors->has('floor'))
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('floor') }}</p>
+                        @endif
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label for="bn_name">Block/Line Name (Bangla)</label>
+                        <input type="text" class="form-control {{$errors->has('bn_name')?'error':''}}" value="{{$dpm->bn_name?:old('bn_name')}}" name="bn_name" placeholder="বাংলা নাম লিখুন">
+                        @if ($errors->has('bn_name'))
+                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('bn_name') }}</p>
                         @endif
                     </div>
                 </div>
@@ -275,5 +310,40 @@
 
 
 
-@endsection @push('js') @endpush
+@endsection
+
+@push('js')
+<script>
+    (function () {
+        function syncFloorBangla(selectElement) {
+            if (!selectElement) {
+                return;
+            }
+
+            var form = selectElement.closest('form');
+            if (!form) {
+                return;
+            }
+
+            var hiddenInput = form.querySelector('input[name="floor_bn"]');
+            if (!hiddenInput) {
+                return;
+            }
+
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            hiddenInput.value = selectedOption ? (selectedOption.getAttribute('data-bn') || '') : '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var floorSelects = document.querySelectorAll('select[name="floor"]');
+            floorSelects.forEach(function (selectElement) {
+                syncFloorBangla(selectElement);
+                selectElement.addEventListener('change', function () {
+                    syncFloorBangla(selectElement);
+                });
+            });
+        });
+    })();
+</script>
+@endpush
 

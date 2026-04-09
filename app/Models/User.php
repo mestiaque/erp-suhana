@@ -488,6 +488,15 @@ class User extends Authenticatable
                 'merchandiser' => false,
             ]),
 
+            'employee' => $query->where([
+                'supplier'     => false,
+                'buyer'        => false,
+                'staff'        => false,
+                'admin'        => false,
+                'customer'     => true,
+                'merchandiser' => false,
+            ]),
+
             'merchandiser' => $query->where([
                 'supplier'     => false,
                 'buyer'        => false,
@@ -518,6 +527,7 @@ class User extends Authenticatable
             'buyer'    => $this->buyer = true,
             'staff'    => $this->staff = true,
             'admin'    => $this->admin = true,
+            'employee' => $this->customer = true,
 
             'customer' => [
                 $this->customer = true,
