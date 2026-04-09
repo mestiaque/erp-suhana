@@ -2561,6 +2561,50 @@
             "install-path": "../league/uri-interfaces"
         },
         {
+            "name": "mestiaque/hr",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/estiaque/Desktop/NIT/hr",
+                "reference": "4ffd2210c7792646aba24f467ded87c308791d96"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ME\\Hr\\HrServiceProvider"
+                    ]
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "ME\\Hr\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "M. Estiaque Ahmed Khan",
+                    "email": "info@mestiaque.com",
+                    "homepage": "https://mestiaque.com"
+                }
+            ],
+            "description": "Hr module for Laravel (by M. Estiaque Ahmed Khan)",
+            "keywords": [
+                "Estiaque",
+                "Hr",
+                "Laravel"
+            ],
+            "transport-options": {
+                "relative": false
+            },
+            "install-path": "../mestiaque/hr"
+        },
+        {
             "name": "mockery/mockery",
             "version": "1.6.12",
             "version_normalized": "1.6.12.0",

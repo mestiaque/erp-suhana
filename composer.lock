@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d1ff60997688f596b55552170a39aa79",
+    "content-hash": "06e391c14c4ee189c133ae6fed003f74",
     "packages": [
         {
             "name": "brick/math",
@@ -2079,6 +2079,47 @@
                 }
             ],
             "time": "2025-11-18T12:17:23+00:00"
+        },
+        {
+            "name": "mestiaque/hr",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/estiaque/Desktop/NIT/hr",
+                "reference": "4ffd2210c7792646aba24f467ded87c308791d96"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ME\\Hr\\HrServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ME\\Hr\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "M. Estiaque Ahmed Khan",
+                    "email": "info@mestiaque.com",
+                    "homepage": "https://mestiaque.com"
+                }
+            ],
+            "description": "Hr module for Laravel (by M. Estiaque Ahmed Khan)",
+            "keywords": [
+                "Estiaque",
+                "Hr",
+                "Laravel"
+            ],
+            "transport-options": {
+                "relative": false
+            }
         },
         {
             "name": "monolog/monolog",
@@ -8478,6 +8519,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "mestiaque/hr": 20,
         "mshadydev/zkteco-php": 20
     },
     "prefer-stable": true,

@@ -1,245 +1,154 @@
-@extends(adminTheme().'layouts.app') @section('title')
-<title>{{websiteTitle('Employee Type List')}}</title>
-@endsection @push('css')
-<style type="text/css"></style>
-@endpush @section('contents')
+@extends(adminTheme().'layouts.app')
 
+@section('title')
+<title>{{ websiteTitle('Classification List') }}</title>
+@endsection
+
+@section('contents')
 <div class="flex-grow-1">
+    @include(adminTheme().'alerts')
 
-
-<!-- Start -->
-<div class="card mb-30">
-    <div class="card-header d-flex justify-content-between align-items-center">
-         <h3>Employee Type List</h3>
-         <div class="dropdown">
-             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddDepartment" style="padding:5px 15px;">
-                 <i class="bx bx-plus"></i> Empoyee Type
-             </a>
-             <a href="{{route('admin.employeeType')}}" class="btn-custom yellow">
-                 <i class="bx bx-rotate-left"></i>
-             </a>
-         </div>
-    </div>
-    <div class="card-body">
-        @include(adminTheme().'alerts')
-        <div class="accordion-box">
-            <div class="accordion">
-                <div class="accordion-item">
-                 <a class="accordion-title" href="javascript:void(0)">
-                     <i class="bx bx-filter-alt"></i>
-                    Search click Here..
-                 </a>
-                 <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                    <form action="{{route('admin.employeeType')}}">
-                        <div class="row">
-                            <div class="col-md-12 mb-0">
-                                <div class="input-group">
-                                    <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Empoyee Type Name" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                </div>
+    <div class="card mb-30">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>Classification List</h3>
+            <div class="d-flex align-items-center">
+                <a href="javascript:void(0)" class="btn-custom primary mr-2" data-toggle="modal" data-target="#AddClassificationModal">
+                    <i class="bx bx-plus"></i> Classification
+                </a>
+                <a href="{{ route('admin.employeeType') }}" class="btn-custom yellow">
+                    <i class="bx bx-rotate-left"></i>
+                </a>
             </div>
         </div>
-        <br>
-        <form action="{{route('admin.employeeType')}}">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="input-group mb-1">
-                        <select class="form-control form-control-sm rounded-0" name="action" required="">
-                            <option value="">Select Action</option>
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            <option value="5">Delete</option>
-                        </select>
-                        <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
-                    </div>
-                </div>
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    <ul class="statuslist mb-0">
-                        <li><a href="{{route('admin.employeeType')}}">All ({{$totals->total}})</a></li>
-                        <li><a href="{{route('admin.employeeType',['status'=>'active'])}}">Active ({{$totals->active}})</a></li>
-                        <li><a href="{{route('admin.employeeType',['status'=>'inactive'])}}">Inactive ({{$totals->inactive}})</a></li>
-                    </ul>
-                </div>
-            </div>
+
+        <div class="card-body">
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="min-width: 100px;width: 100px;padding-right:0;">
-                                <div class="checkbox mr-3">
-                                 <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
-                                 <label class="cbx" for="checkall">
-                                     <span>
-                                         <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                             <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                         </svg>
-                                     </span>
-                                     All <span class="checkCounter"></span>
-                                 </label>
-                                </div>
-                            </th>
-                            <th style="min-width: 200px;">Name</th>
-                            <th style="min-width: 300px;">Description</th>
-                            <th style="min-width: 120px;">Date</th>
-                            <th style="min-width: 100px;width:100px;">Action</th>
+                            <th style="min-width: 80px;">#</th>
+                            <th style="min-width: 220px;">Name</th>
+                            <th style="min-width: 260px;">Description</th>
+                            <th style="min-width: 120px;">Status</th>
+                            <th style="min-width: 140px;">Date</th>
+                            <th style="min-width: 120px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($employeeTypes as $i=>$et)
-                        <tr>
-                            <td>
-                                <div class="checkbox">
-                                     <input class="inp-cbx" id="cbx_{{$et->id}}" type="checkbox" name="checkid[]" value="{{$et->id}}" style="display: none;" />
-                                     <label class="cbx" for="cbx_{{$et->id}}">
-                                         <span>
-                                             <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                                 <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                             </svg>
-                                         </span>
-                                     </label>
-                                 </div>
-                                <span style="margin:0 5px;">{{$employeeTypes->currentpage()==1?$i+1:$i+($employeeType->perpage()*($employeeType->currentpage() - 1))+1}}</span>
-                                @if($et->status=='active')
-                                <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
-                                    <i class="bx bx-check-circle"></i>
-                                </span>
-                                @else
-                                <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
-                                    <i class="bx bx-analyse"></i>
-                                </span>
-                                @endif
-                            </td>
-                            <td>
-                                <span>{{$et->name}}</span>
-                            </td>
-                            <td>
-                                <span>{!!$et->description!!}</span>
-                            </td>
-                            <td>{{$et->created_at->format('d-m-Y')}}</td>
-                            <td class="center">
-                                <a href="javascript:void(0)" data-toggle="modal" data-target="#EditDepartment_{{$et->id}}" class="btn-custom success">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                <a href="{{route('admin.employeeTypeAction',['delete',$et->id])}}" class="btn-custom danger" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
-                            </td>
-                        </tr>
-                        @endforeach
+                        @forelse($employeeTypes as $i => $type)
+                            <tr>
+                                <td>
+                                    {{ $employeeTypes->currentPage() == 1 ? $i + 1 : $i + ($employeeTypes->perPage() * ($employeeTypes->currentPage() - 1)) + 1 }}
+                                </td>
+                                <td>{{ $type->name }}</td>
+                                <td>{!! $type->description !!}</td>
+                                <td>
+                                    @if($type->status === 'active')
+                                        <span class="badge badge-success">Active</span>
+                                    @else
+                                        <span class="badge badge-warning">Inactive</span>
+                                    @endif
+                                </td>
+                                <td>{{ $type->created_at?->format('d-m-Y') }}</td>
+                                <td>
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#EditClassificationModal_{{ $type->id }}" class="btn-custom success">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center">No classification found</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
-                {{$employeeTypes->links('pagination')}}
+
+                {{ $employeeTypes->links('pagination') }}
             </div>
-        </form>
-
-
+        </div>
     </div>
 </div>
+
+<div class="modal fade text-left" id="AddClassificationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('admin.employeeTypeAction', 'create') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Classification</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name*</label>
+                        <input type="text" name="name" class="form-control {{ $errors->has('name') ? 'error' : '' }}" placeholder="Enter classification name" required>
+                        @if ($errors->has('name'))
+                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                        @endif
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" class="form-control {{ $errors->has('description') ? 'error' : '' }}" placeholder="Enter description"></textarea>
+                        @if ($errors->has('description'))
+                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
+                        @endif
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
-<!-- Add Modal -->
- <div class="modal fade text-left" id="AddDepartment" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document">
-	 <div class="modal-content">
-	 <form action="{{route('admin.employeeTypeAction','create')}}" method="post">
-	   	  @csrf
-    	   <div class="modal-header">
-    		 <h4 class="modal-title">Add Employee Type</h4>
-    		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-    		   <span aria-hidden="true">&times; </span>
-    		 </button>
-    	   </div>
-    	   <div class="modal-body">
-    	   		<div class="form-group">
-    			    <label for="name">Name* </label>
-                    <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
-    				@if ($errors->has('name'))
-    				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-    				@endif
-             	</div>
-    			 <div class="form-group">
-    				<label for="name">Description</label>
-					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description"></textarea>
-					@if ($errors->has('description'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
-					@endif
-             	</div>
-    	   </div>
-    	   <div class="modal-footer">
-    		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add Empoyee Type</button>
-    	   </div>
-	   </form>
-	 </div>
-   </div>
- </div>
-
-<!--Edit Modal -->
-@foreach($employeeTypes as $i=>$dpm)
- <div class="modal fade text-left" id="EditDepartment_{{$dpm->id}}" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document">
-	 <div class="modal-content">
-	 <form action="{{route('admin.employeeTypeAction',['update',$dpm->id])}}" method="post">
-	   	  @csrf
-    	   <div class="modal-header">
-    		 <h4 class="modal-title">Edit Empoyee Type</h4>
-    		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-    		   <span aria-hidden="true">&times; </span>
-    		 </button>
-    	   </div>
-    	   <div class="modal-body">
-    	   		<div class="form-group">
-    			    <label for="name">Name* </label>
-                    <input type="text" class="form-control {{$errors->has('name')?'error':''}}" value="{{$dpm->name?:old('name')}}" name="name" placeholder="Enter Name" required="">
-    				@if ($errors->has('name'))
-    				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-    				@endif
-             	</div>
-    			 <div class="form-group">
-    				<label for="name">Description</label>
-					<textarea name="description" class="form-control {{$errors->has('description')?'error':''}}" placeholder="Enter Description">{!!$dpm->description!!}</textarea>
-					@if ($errors->has('description'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('description') }}</p>
-					@endif
-             	</div>
-             	<div class="row">
-                 	<div class="col-md-6 form-group">
-                 	    <label for="name">Status</label><br>
-                 	    <div class="checkbox">
-                             <input class="inp-cbx" id="status_{{$dpm->id}}" type="checkbox" name="status" style="display: none;" {{$dpm->status=='active'?'checked':''}} />
-                             <label class="cbx" for="status_{{$dpm->id}}">
-                                 <span>
-                                     <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                         <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                     </svg>
-                                 </span>
-                                 Active
-                             </label>
-                         </div>
-                 	</div>
-                    <div class="col-md-6 form-group">
-                        <label for="name">Publish Date*</label>
-                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" value="{{$dpm->created_at->format('Y-m-d')}}" name="created_at" required="">
-                        @if ($errors->has('created_at'))
-    					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
-    					@endif
+@foreach($employeeTypes as $type)
+<div class="modal fade text-left" id="EditClassificationModal_{{ $type->id }}" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('admin.employeeTypeAction', ['update', $type->id]) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Classification</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name*</label>
+                        <input type="text" name="name" value="{{ $type->name }}" class="form-control" placeholder="Enter classification name" required>
                     </div>
-             	</div>
-    	   </div>
-    	   <div class="modal-footer">
-    		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-    		 <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Update Empoyee Type</button>
-    	   </div>
-	   </form>
-	 </div>
-   </div>
- </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" class="form-control" placeholder="Enter description">{{ $type->description }}</textarea>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Status</label>
+                        <div class="checkbox">
+                            <input class="inp-cbx" id="status_{{ $type->id }}" type="checkbox" name="status" style="display: none;" {{ $type->status == 'active' ? 'checked' : '' }} />
+                            <label class="cbx" for="status_{{ $type->id }}">
+                                <span>
+                                    <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                    </svg>
+                                </span>
+                                Active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endforeach
-
-
-
-@endsection @push('js') @endpush
+@endsection

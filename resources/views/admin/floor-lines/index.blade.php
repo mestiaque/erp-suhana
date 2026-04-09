@@ -22,31 +22,19 @@
         </div>
         <div class="card-body">
             @include(adminTheme().'alerts')
-            <div class="accordion-box">
-                <div class="accordion">
-                    <div class="accordion-item">
-                    <a class="accordion-title" href="javascript:void(0)">
-                        <i class="bx bx-filter-alt"></i>
-                        Search click Here..
-                    </a>
-                    <div class="accordion-content" style="border:1px solid #e1000a;border-top:0;">
-                        <form action="{{route('admin.floorLines')}}">
-                            <div class="row">
-                                <div class="col-md-12 mb-0">
-                                    <div class="input-group">
-                                        <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Floor/Lines Name" class="form-control {{$errors->has('search')?'error':''}}" />
-                                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    </div>
-                </div>
-            </div>
-            <br>
             <form action="{{route('admin.floorLines')}}">
                 <div class="row">
+                    <div class="col-md-12 mb-0">
+                        <div class="input-group">
+                            <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="Floor/Lines Name" class="form-control {{$errors->has('search')?'error':''}}" />
+                            <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <form action="{{route('admin.floorLines')}}">
+                <div class="row d-none">
                     <div class="col-md-4">
                         @if(auth()->user()->hasPermission('designations.edit')  || auth()->user()->hasPermission('designations.delete'))
                         <div class="input-group mb-1">
@@ -191,7 +179,7 @@
                         @endif
                     </div>
                 </div>
-    	   		
+
     	   		<div class="form-group">
     			    <label for="name">Line Capacity Per/Hour* </label>
                     <input type="number" class="form-control {{$errors->has('capacity')?'error':''}}" value="{{old('capacity')}}" name="capacity" placeholder="Enter capacity" required="">
@@ -243,7 +231,7 @@
                         @endif
                     </div>
                 </div>
-    	   		
+
     	   		<div class="form-group">
     			    <label for="name">Line Capacity Per/Hour* </label>
                     <input type="number" class="form-control {{$errors->has('capacity')?'error':''}}" value="{{$dpm->capacity?:old('capacity')}}" name="capacity" placeholder="Enter capacity" required="">

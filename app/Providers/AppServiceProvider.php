@@ -38,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->mergePackageSidebar();
+
         $general = general(); // helper function
 
         if ($general) { // Only proceed if general() returns a valid object
@@ -62,6 +64,32 @@ class AppServiceProvider extends ServiceProvider
             // observers
             \App\Models\OrderDetail::observe(\App\Observers\OrderDetailObserver::class);
         }
+    }
+
+    /**
+     * Merge HR package sidebar config into main sidebar config.
+     */
+    private function mergePackageSidebar(): void
+    {
+        $mainSidebar = config('sidebar', []);
+        $hrSidebar = config('hr-sidebar', []);
+
+        if (!is_array($mainSidebar)) {
+            return;
+        }
+
+        $merged = $mainSidebar;
+
+        if (is_array($hrSidebar) && !empty($hrSidebar)) {
+            foreach ($hrSidebar as $hrGroup) {
+                // Prevent exact duplicate groups when both configs already contain the same section.
+                if (!in_array($hrGroup, $merged, true)) {
+                    $merged[] = $hrGroup;
+                }
+            }
+        }
+
+        config(['sidebar' => $merged]);
     }
 
 }

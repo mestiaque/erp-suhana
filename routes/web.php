@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PostsController;
 use App\Http\Controllers\Staff\StaffController;
-use App\Http\Controllers\Admin\PayrollController;
 use App\Http\Controllers\Api\ZKTecoPushController;
 
 // ----------------------
@@ -282,45 +281,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
         Route::get('/reports', [CommercialController::class, 'reports'])->name('reports');
     });
 
-    // --- Payroll Management Routes ---
-    Route::group(['prefix' => 'payroll', 'as' => 'payroll.'], function () {
-        // 1. Salary Setup
-        Route::get('/salary-setup', [PayrollController::class, 'salarySetup'])->name('salarySetup');
-        Route::any('/salary-setup/{action}/{id?}', [PayrollController::class, 'salarySetupAction'])->name('salarySetupAction');
-
-        // 2. Attendance Summary
-        Route::get('/attendance', [PayrollController::class, 'attendance'])->name('attendance');
-        Route::any('/attendance/{action}/{id?}', [PayrollController::class, 'attendanceAction'])->name('attendanceAction');
-
-        // 3. Generate Payslip
-        Route::get('/generate-payslip', [PayrollController::class, 'payslip'])->name('payslip');
-        Route::any('/generate-payslip/{action}/{id?}', [PayrollController::class, 'payslipAction'])->name('payslipAction');
-
-        // 4. Bonus & Allowance
-        Route::get('/bonus-allowance', [PayrollController::class, 'bonus'])->name('bonus');
-        Route::any('/bonus-allowance/{action}/{id?}', [PayrollController::class, 'bonusAction'])->name('bonusAction');
-
-        // 5. Deductions & Loan
-        Route::get('/deductions', [PayrollController::class, 'deductions'])->name('deductions');
-        Route::any('/deductions/{action}/{id?}', [PayrollController::class, 'deductionsAction'])->name('deductionsAction');
-
-        // 6. Overtime (OT) Entry
-        Route::get('/overtime', [PayrollController::class, 'overtime'])->name('overtime');
-        Route::any('/overtime/{action}/{id?}', [PayrollController::class, 'overtimeAction'])->name('overtimeAction');
-
-        // 7. Salary Disbursement
-        Route::get('/disbursement', [PayrollController::class, 'disbursement'])->name('disbursement');
-        Route::any('/disbursement/{action}/{id?}', [PayrollController::class, 'disbursementAction'])->name('disbursementAction');
-
-        // 8. Payroll Reports
-        Route::get('/payroll-reports', [PayrollController::class, 'reports'])->name('reports');
-    });
-
-
     Route::get('/roadmap', [PostsController::class, 'roadmap']);
-
-
-    include(__DIR__ . '/payroll.php');
 
 
 });

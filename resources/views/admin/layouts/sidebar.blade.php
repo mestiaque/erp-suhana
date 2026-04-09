@@ -108,8 +108,12 @@
                             }
 
                         } elseif ($level == 1) {
-                            // CHILD LEVEL (must have children to show)
-                            $show = $hasVisibleChild;
+                            // CHILD LEVEL: leaf nodes without permission should still be visible.
+                            if (isset($menu['children'])) {
+                                $show = $hasVisibleChild;
+                            } else {
+                                $show = true;
+                            }
 
                         } else {
 
@@ -250,3 +254,46 @@
 }
 
 </style>
+
+<script>
+    (function () {
+        function scrollActiveSidebarItemIntoView() {
+            var sidebarNav = document.getElementById('sidemenu-nav');
+            if (!sidebarNav) {
+                return;
+            }
+
+            var activeCandidates = sidebarNav.querySelectorAll('.nav-item.mm-active > .nav-link, .nav-item.mm-active');
+            if (!activeCandidates.length) {
+                return;
+            }
+
+            // Use the deepest active item so nested menu focus stays accurate.
+            var activeElement = activeCandidates[activeCandidates.length - 1];
+            var simplebarScroller = sidebarNav.querySelector('.simplebar-content-wrapper');
+            var fallbackScroller = sidebarNav.closest('.sidemenu-body');
+            var scroller = simplebarScroller || fallbackScroller;
+
+            if (!scroller) {
+                return;
+            }
+
+            var targetRect = activeElement.getBoundingClientRect();
+            var scrollerRect = scroller.getBoundingClientRect();
+            var isOutOfView = targetRect.top < scrollerRect.top || targetRect.bottom > scrollerRect.bottom;
+
+            if (!isOutOfView) {
+                return;
+            }
+
+            var targetTop = targetRect.top - scrollerRect.top + scroller.scrollTop;
+            var centeredScrollTop = targetTop - (scroller.clientHeight / 2) + (activeElement.offsetHeight / 2);
+            scroller.scrollTop = Math.max(0, centeredScrollTop);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(scrollActiveSidebarItemIntoView, 200);
+            setTimeout(scrollActiveSidebarItemIntoView, 600);
+        });
+    })();
+</script>

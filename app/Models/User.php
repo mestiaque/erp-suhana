@@ -3,11 +3,28 @@
 namespace App\Models;
 
 use App\Models\Attribute;
+use ME\Hr\Models\Attendance;
+use ME\Hr\Models\EmployeeBank;
+use ME\Hr\Models\EmployeeEducation;
+use ME\Hr\Models\EmployeeExperience;
+use ME\Hr\Models\EmployeeIncrement;
+use ME\Hr\Models\EmployeeRetirement;
+use ME\Hr\Models\EmployeeTraining;
+use ME\Hr\Models\Leave;
+use ME\Hr\Models\LeaveBalance;
+use ME\Hr\Models\Probation;
+use ME\Hr\Models\ProductReview;
+use ME\Hr\Models\Review;
+use ME\Hr\Models\Roaster;
+use ME\Hr\Models\Salary;
+use ME\Hr\Models\SalarySheet;
+use ME\Hr\Models\SocialIdentity;
+use ME\Hr\Models\Termination;
+use ME\Hr\Models\UserLocation;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 

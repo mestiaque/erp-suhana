@@ -27,6 +27,13 @@
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
     ),
   ),
+  'mestiaque/hr' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'ME\\Hr\\HrServiceProvider',
+    ),
+  ),
   'nesbot/carbon' => 
   array (
     'providers' => 

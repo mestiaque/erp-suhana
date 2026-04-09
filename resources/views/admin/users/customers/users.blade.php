@@ -17,9 +17,9 @@
          <div class="dropdown">
 
             @can('employee.add')
-             <a href="{{route('admin.usersCustomerAction',['employee-create'])}}" class="btn-custom primary" >
+             {{-- <a href="{{route('admin.usersCustomerAction',['employee-create'])}}" class="btn-custom primary" >
                  <i class="bx bx-plus"></i> Employee
-             </a>
+             </a> --}}
              <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
                  <i class="bx bx-plus"></i> User
              </a>
@@ -37,7 +37,7 @@
                  <div class="accordionx-content">
                      <form action="{{route('admin.usersCustomer')}}">
                         <div class="row">
-                            <div class="col-md-2 mb-1">
+                            {{-- <div class="col-md-2 mb-1">
                                 <div class="input-group">
                                     <label for="" class="mb-0">Joining Date</label>
                                     <div class="d-flex">
@@ -45,7 +45,7 @@
                                         <input type="date" name="joining_end" value="{{request()->joining_end?:''}}" class="form-control form-control-sm" title="Joining Date To" />
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-md-2 mb-1">
                                 <label for="" class="mb-0">Role</label>
                                 <select class="form-control form-control-sm" name="role_id">
@@ -55,7 +55,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2 mb-1">
+                            {{-- <div class="col-md-2 mb-1">
                                 <label for="" class="mb-0">Division</label>
                                 <select class="form-control form-control-sm" name="division_id">
                                     <option value="">Select Division</option>
@@ -65,8 +65,8 @@
                                     @endforeach
                                     @endif
                                 </select>
-                            </div>
-                            <div class="col-md-2 mb-1">
+                            </div> --}}
+                            {{-- <div class="col-md-2 mb-1">
                                 <label for="" class="mb-0">Designation</label>
                                 <select class="form-control form-control-sm" name="designation_id">
                                     <option value="">Select Designation</option>
@@ -76,8 +76,8 @@
                                     @endforeach
                                     @endif
                                 </select>
-                            </div>
-                            <div class="col-md-2 mb-1">
+                            </div> --}}
+                            {{-- <div class="col-md-2 mb-1">
                                 <label for="" class="mb-0">Department</label>
                                 <select class="form-control form-control-sm" name="department_id">
                                     <option value="">Select Department</option>
@@ -98,8 +98,8 @@
                                     @endforeach
                                     @endif
                                 </select>
-                            </div>
-                            <div class="col-md-2 mb-1">
+                            </div> --}}
+                            {{-- <div class="col-md-2 mb-1">
                                 <label for="" class="mb-0">Shift</label>
                                 <select class="form-control form-control-sm" name="shift_id">
                                     <option value="">Select Shift</option>
@@ -120,7 +120,7 @@
                                     @endforeach
                                     @endif
                                 </select>
-                            </div>
+                            </div> --}}
                             <div class="col-md-4 mb-1">
                                 <label for="" class="mb-0">Search</label>
                                 <div class="input-group">
@@ -304,7 +304,7 @@
                             </td>
                             <td style="padding: 8px 5px; text-align: center;">
                                 <div class="btn-group">
-                                    <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="btn-custom yellow mr-1"><i class="bx bx-show"></i> </a>
+                                    {{-- <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="btn-custom yellow mr-1"><i class="bx bx-show"></i> </a> --}}
                                     @if(can('employee.edit')  || can('employee.delete'))
                                         @can('employee.edit')
                                             <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success mr-1">
@@ -340,7 +340,7 @@
             </div>
         </form>
         {{-- {{$users->links('pagination')}} --}}
-        {{ $users->links('pagination::bootstrap-4') }}
+        {{ $users->links('pagination::bootstrap-5') }}
     </div>
 </div>
 </div>
@@ -350,7 +350,7 @@
  <div class="modal fade text-left" id="AddUser" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document">
 	 <div class="modal-content">
-	 	<form action="{{route('admin.usersCustomerAction','create')}}" method="post">
+     	<form action="{{route('admin.usersCustomerAction','create')}}" method="post" id="AddUserForm">
 	   		@csrf
 	   <div class="modal-header">
 		 <h4 class="modal-title">Add Employee</h4>
@@ -368,11 +368,11 @@
 				@endif
 				</div>
          	</div>
-			 <div class="form-group">
-				<label for="name">Mobile* </label>
+             <div class="form-group">
+                <label for="name">Mobile </label>
 				<div class="controls">
 					{{-- <input type="mobile" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required> --}}
-                    <input type="tel" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" required>
+                    <input type="tel" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" id="addUserMobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0">
 
 					@if ($errors->has('mobile'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
@@ -380,13 +380,14 @@
 				</div>
          	</div>
 			 <div class="form-group">
-				<label for="name">Email </label>
+                <label for="name">Email </label>
 				<div class="controls">
-					<input type="email" class="form-control form-control-sm {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
+                    <input type="email" class="form-control form-control-sm {{$errors->has('email')?'error':''}}" name="email" id="addUserEmail" placeholder="Enter Email">
 					@if ($errors->has('email'))
 					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
 					@endif
 				</div>
+                <small class="text-muted">Phone or Email যেকোনো একটা দিলেই হবে।</small>
          	</div>
 	   </div>
 	   <div class="modal-footer">
@@ -451,4 +452,29 @@ $(document).on('click', '.open-role-modal', function () {
 });
 </script>
 @endcan
+
+<script>
+$(document).on('submit', '#AddUserForm', function (e) {
+    const $form = $(this);
+    // Allow normal loader behavior for valid submissions by default.
+    $form.removeClass('no-loader');
+
+    const mobile = ($('#addUserMobile').val() || '').trim();
+    const email = ($('#addUserEmail').val() || '').trim();
+
+    if (!mobile && !email) {
+        e.preventDefault();
+        // Tell global submit-listener to skip loader for this blocked submit.
+        $form.addClass('no-loader');
+        if (typeof XLoader !== 'undefined' && XLoader && typeof XLoader.hide === 'function') {
+            XLoader.hide();
+        }
+        alert('Phone or Email যেকোনো একটি দিতে হবে।');
+        // Re-enable loader for future valid submits.
+        setTimeout(function () {
+            $form.removeClass('no-loader');
+        }, 0);
+    }
+});
+</script>
 @endpush

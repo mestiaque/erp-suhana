@@ -432,7 +432,7 @@ if (!function_exists('getAttendanceStatus')) {
       ? array_search($offdaySetting->name, ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])
       : 5;
 
-    $holiday = \App\Models\payroll\Holiday::where('status', 'active')
+    $holiday = \ME\Hr\Models\Holiday::where('status', 'active')
       ->whereDate('from_date', '<=', $date)
       ->whereDate('to_date', '>=', $date)
       ->first();
@@ -452,13 +452,13 @@ if (!function_exists('getAttendanceStatus')) {
       return $result;
     }
 
-    $leave = \App\Models\payroll\Leave::where('user_id', $userId)
+    $leave = \ME\Hr\Models\Leave::where('user_id', $userId)
       ->where('status', 'approved')
       ->whereDate('start_date', '<=', $date)
       ->whereDate('end_date', '>=', $date)
       ->first();
 
-    $attendance = \App\Models\payroll\Attendance::where('user_id', $userId)
+    $attendance = \ME\Hr\Models\Attendance::where('user_id', $userId)
       ->whereDate('date', $date)
       ->first();
 
