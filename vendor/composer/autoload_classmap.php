@@ -3076,6 +3076,7 @@ return array(
     'ME\\Hr\\HrServiceProvider' => $vendorDir . '/mestiaque/hr/src/HrServiceProvider.php',
     'ME\\Hr\\Http\\Controllers\\HrController' => $vendorDir . '/mestiaque/hr/src/Http/Controllers/HrController.php',
     'ME\\Hr\\Http\\Controllers\\HrDashboardController' => $vendorDir . '/mestiaque/hr/src/Http/Controllers/HrDashboardController.php',
+    'ME\\Hr\\Http\\Controllers\\HrEmployeeController' => $vendorDir . '/mestiaque/hr/src/Http/Controllers/HrEmployeeController.php',
     'ME\\Hr\\Http\\Controllers\\HrMasterController' => $vendorDir . '/mestiaque/hr/src/Http/Controllers/HrMasterController.php',
     'ME\\Hr\\Http\\Controllers\\HrReportController' => $vendorDir . '/mestiaque/hr/src/Http/Controllers/HrReportController.php',
     'ME\\Hr\\Models\\Attendance' => $vendorDir . '/mestiaque/hr/src/Models/Attendance.php',

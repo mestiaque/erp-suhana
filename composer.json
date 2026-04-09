@@ -11,7 +11,7 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1",
-        "mestiaque/hr": "dev-main",
+        "mestiaque/hr": "dev-master",
         "mshadydev/zkteco-php": "dev-master"
     },
     "require-dev": {
@@ -92,8 +92,8 @@
     "prefer-stable": true,
     "repositories"     : {
         "hr": {
-            "type": "path",
-            "url": "/home/estiaque/Desktop/NIT/hr"
+            "type": "vcs",
+            "url": "https://github.com/mestiaque/nit-erp-hr.git"
         }
     }
 }

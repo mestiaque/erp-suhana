@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '92578d4c6f22c6d9200d89c20377b7fe5ca00b15',
+        'reference' => 'f3ff038b3a64f784b659e3ef65791d23954c90a6',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -394,7 +394,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '92578d4c6f22c6d9200d89c20377b7fe5ca00b15',
+            'reference' => 'f3ff038b3a64f784b659e3ef65791d23954c90a6',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -527,12 +527,14 @@
             'dev_requirement' => false,
         ),
         'mestiaque/hr' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => '4ffd2210c7792646aba24f467ded87c308791d96',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'bf3459ec9117f9f6eac45f672312d6582673e5e9',
             'type' => 'library',
             'install_path' => __DIR__ . '/../mestiaque/hr',
-            'aliases' => array(),
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
             'dev_requirement' => false,
         ),
         'mockery/mockery' => array(

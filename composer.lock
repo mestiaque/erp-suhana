@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "06e391c14c4ee189c133ae6fed003f74",
+    "content-hash": "398e9473f315147ed2bb3681abcf714b",
     "packages": [
         {
             "name": "brick/math",
@@ -2082,12 +2082,19 @@
         },
         {
             "name": "mestiaque/hr",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "/home/estiaque/Desktop/NIT/hr",
-                "reference": "4ffd2210c7792646aba24f467ded87c308791d96"
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mestiaque/nit-erp-hr.git",
+                "reference": "bf3459ec9117f9f6eac45f672312d6582673e5e9"
             },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mestiaque/nit-erp-hr/zipball/bf3459ec9117f9f6eac45f672312d6582673e5e9",
+                "reference": "bf3459ec9117f9f6eac45f672312d6582673e5e9",
+                "shasum": ""
+            },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -2117,9 +2124,11 @@
                 "Hr",
                 "Laravel"
             ],
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "source": "https://github.com/mestiaque/nit-erp-hr/tree/master",
+                "issues": "https://github.com/mestiaque/nit-erp-hr/issues"
+            },
+            "time": "2026-04-09T13:41:56+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -8527,6 +8536,6 @@
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }
