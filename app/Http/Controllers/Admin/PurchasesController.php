@@ -800,7 +800,7 @@ class PurchasesController extends Controller
         /* ================= FIND SUPPLIER ================= */
         // Skip user lookup for actions that work with bill/payment IDs, not user IDs
         $skipUserLookup = ['bill-entry-edit', 'bill-entry-update', 'bill-entry-delete', 'bill-payment-edit', 'bill-payment-update', 'bill-payment-delete'];
-        
+
         if (!in_array($action, $skipUserLookup)) {
             $user = User::filterByType('supplier')->whereIn('status', [0,1])->find($id);
             if (!$user && $action != 'create') {
@@ -2035,6 +2035,11 @@ class PurchasesController extends Controller
             $paymentsQuery->where('transection_id', 'LIKE', "%{$r->title}%");
         }
 
+        // account filter for payments
+        if ($r->account_id) {
+            $paymentsQuery->where('account_id', $r->account_id);
+        }
+
         // date range filter
         if ($r->startDate || $r->endDate) {
             $from = $r->startDate
@@ -2085,9 +2090,11 @@ class PurchasesController extends Controller
         $totalBills = $bills->sum('credit');
         $totalPayments = $payments->sum('debit');
 
+        $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+
         return view(
             adminTheme().'suppliers.bill-payments',
-            compact('ledgerEntries', 'totalBills', 'totalPayments')
+            compact('ledgerEntries', 'totalBills', 'totalPayments', 'filterAccounts')
         );
     }
 

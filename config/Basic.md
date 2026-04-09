@@ -10,7 +10,11 @@ Basic
     -Bonus title
 	-country
 	-district
+<<<<<<< HEAD
     -Police station
+=======
+    -PO station
+>>>>>>> 4d91f5c081201c8a366741fa1eca79fd40321246
 	-employee type(classification) 
 	-Designation
         -Name
@@ -100,7 +104,11 @@ Basic
     -Monthly
     -Machine Id
     -Job Card
+<<<<<<< HEAD
     -Personal File (print page of employee info, nomini, age verivy, etc)
+=======
+    -Personal File (Employee Info)
+>>>>>>> 4d91f5c081201c8a366741fa1eca79fd40321246
     -Attendance
     -Tifin/Night/Diner
     -Pro. Job Card
@@ -111,6 +119,7 @@ Basic
         -Fixed
         -Production
         -Wages And Salary Sumary
+<<<<<<< HEAD
     
 -employee (create btn) 
     -edit (btn-in row)
@@ -223,3 +232,6 @@ Basic
 1245 x 2
 688 x 3
 172 x 3
+=======
+    
+>>>>>>> 4d91f5c081201c8a366741fa1eca79fd40321246

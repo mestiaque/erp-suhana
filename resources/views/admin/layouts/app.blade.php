@@ -382,37 +382,34 @@
         document.addEventListener('focus', function(e) {
             const target = e.target;
 
-            // Only act on number inputs that are not disabled or readonly
             if (
                 target.tagName === 'INPUT' &&
                 target.type === 'number' &&
                 !target.disabled &&
                 !target.readOnly
             ) {
-                // Clear if the current value is exactly 0
-                if (target.value === '0' || target.value === 0) {
+                // Convert to number and check if it's 0
+                if (parseFloat(target.value) === 0) {
                     target.value = '';
                 }
             }
-        }, true); // capture phase so it works on dynamically added inputs
+        }, true);
 
 
         document.addEventListener('blur', function(e) {
             const target = e.target;
 
-            // Only act on number inputs that are not disabled or readonly
             if (
                 target.tagName === 'INPUT' &&
                 target.type === 'number' &&
                 !target.disabled &&
                 !target.readOnly
             ) {
-                // Restore 0 if the input is empty
                 if (target.value === '') {
                     target.value = 0;
                 }
             }
-        }, true); // use capture so it works on dynamically added inputs
+        }, true);
       </script>
 
       @stack('js')

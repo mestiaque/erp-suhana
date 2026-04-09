@@ -96,7 +96,7 @@
                         <input type="date" value="{{$to->format('Y-m-d')}}" name="endDate" class="form-control {{$errors->has('endDate')?'error':''}}" />
                     </div>
                 </div>
-                <div class="col-md-3 mb-1">
+                <div class="col-md-2 mb-1">
                     <div class="form-group">
                         <label>Expense Type</label>
                         <select class="select2" name="expense_type" data-placeholder="Select Expense Type">
@@ -107,13 +107,24 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-3 mb-1">
+                <div class="col-md-2 mb-1">
                     <div class="form-group">
                         <label>Branch</label>
                         <select class="form-control" name="branch_id" >
                             <option value="">Select Branch</option>
                             @foreach($branches as $branch)
                             <option value="{{$branch->id}}" {{request()->branch_id==$branch->id?'selected':''}}>{{$branch->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-1">
+                    <div class="form-group">
+                        <label>Account</label>
+                        <select class="form-control" name="account_id" >
+                            <option value="">All Accounts</option>
+                            @foreach($filterAccounts as $account)
+                            <option value="{{$account->id}}" {{request()->account_id==$account->id?'selected':''}}>{{$account->name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -139,6 +150,7 @@
                     <input type="hidden" name="endDate" value="{{ request()->endDate }}">
                     <input type="hidden" name="expense_type" value="{{ request()->expense_type }}">
                     <input type="hidden" name="branch_id" value="{{ request()->branch_id }}">
+                    <input type="hidden" name="account_id" value="{{ request()->account_id }}">
                     <button type="submit" class="btn-custom primary" style="padding:5px 15px;">
                         <i class="fa fa-print"></i> Print
                     </button>

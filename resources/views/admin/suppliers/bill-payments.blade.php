@@ -47,7 +47,16 @@
                             placeholder="Creditor Code">
                     </div>
 
-                    <div class="col-md-3 mb-1">
+                    <div class="col-md-2 mb-1">
+                        <select name="account_id" class="form-control form-control-sm">
+                            <option value="">All Accounts</option>
+                            @foreach($filterAccounts as $account)
+                            <option value="{{$account->id}}" {{request('account_id') == $account->id ? 'selected' : ''}}>{{$account->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-1">
                         <div class="input-group">
                             <input type="date" name="startDate"
                                 value="{{ request('startDate') }}"
@@ -58,7 +67,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-2 mb-1 d-flex gap-2">
+                    <div class="col-md-1 mb-1 d-flex gap-2">
                         <button type="submit" class="btn btn-sm btn-success w-100 mr-2">
                             Search
                         </button>

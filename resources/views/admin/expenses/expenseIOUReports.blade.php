@@ -101,19 +101,30 @@
                         </select>
                     </div>
                 </div> --}}
-                <div class="col-md-3 mb-1">
+                <div class="col-md-2 mb-1">
                     <div class="form-group">
                         <label>Employee</label>
                         <input type="text" name="employee" id="" checked class="form-control" value="{{request()->employee}}" placeholder="Employee">
                     </div>
                 </div>
-                <div class="col-md-3 mb-1">
+                <div class="col-md-2 mb-1">
                     <div class="form-group">
                         <label>Branch</label>
                         <select class="form-control" name="branch_id" >
                             <option value="">Select Branch</option>
                             @foreach($branches as $branch)
                             <option value="{{$branch->id}}" {{request()->branch_id==$branch->id?'selected':''}}>{{$branch->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-1">
+                    <div class="form-group">
+                        <label>Account</label>
+                        <select class="form-control" name="account_id" >
+                            <option value="">All Accounts</option>
+                            @foreach($filterAccounts as $account)
+                            <option value="{{$account->id}}" {{request()->account_id==$account->id?'selected':''}}>{{$account->name}}</option>
                             @endforeach
                         </select>
                     </div>

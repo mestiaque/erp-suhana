@@ -74,9 +74,15 @@
             <div class="col-md-8">
                 <form action="{{route('admin.completedIou')}}" method="GET">
                     <div class="col-md-12 d-flex">
-                        <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control mr-1" style="width: 30%">
-                        <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control mr-2" style="width: 30%">
-                        <div class="input-group shadow-sm" style="width: 40%">
+                        <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control mr-1" style="width: 22%">
+                        <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control mr-1" style="width: 22%">
+                        <select name="account_id" class="form-control mr-2" style="width: 24%">
+                            <option value="">All Accounts</option>
+                            @foreach($filterAccounts as $account)
+                                <option value="{{$account->id}}" {{request()->account_id == $account->id ? 'selected' : ''}}>{{$account->name}}</option>
+                            @endforeach
+                        </select>
+                        <div class="input-group shadow-sm" style="width: 32%">
                             <input type="text"
                                 name="search"
                                 value="{{request()->search}}"
@@ -88,7 +94,7 @@
                                     <i class="fa fa-search mr-1"></i> Search
                                 </button>
                             </div>
-                            @if(request()->search)
+                            @if(request()->anyFilled(['search', 'account_id', 'startDate', 'endDate']))
                                 <a href="{{route('admin.completedIou')}}" class="btn btn-outline-danger ml-2 rounded">Clear</a>
                             @endif
                         </div>

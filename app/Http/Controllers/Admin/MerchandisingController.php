@@ -694,7 +694,7 @@ class MerchandisingController extends Controller
         } else {
             $query->where(function ($q) use ($shipmentYears, $shipmentMonths, $shipmentDates) {
                 $dateConditions = [];
-                
+
                 // Handle year filters
                 if (!empty($shipmentYears)) {
                     $years = is_array($shipmentYears) ? $shipmentYears : [$shipmentYears];
@@ -702,7 +702,7 @@ class MerchandisingController extends Controller
                         $dateConditions[] = "YEAR(shipment_date) = " . intval($year);
                     }
                 }
-                
+
                 // Handle month filters
                 if (!empty($shipmentMonths)) {
                     $months = is_array($shipmentMonths) ? $shipmentMonths : [$shipmentMonths];
@@ -713,7 +713,7 @@ class MerchandisingController extends Controller
                         }
                     }
                 }
-                
+
                 // Handle date filters
                 if (!empty($shipmentDates)) {
                     $dates = is_array($shipmentDates) ? $shipmentDates : [$shipmentDates];
@@ -721,7 +721,7 @@ class MerchandisingController extends Controller
                         $dateConditions[] = "DATE(shipment_date) = '" . $date . "'";
                     }
                 }
-                
+
                 if (!empty($dateConditions)) {
                     $q->whereRaw('(' . implode(' OR ', $dateConditions) . ')');
                 }
@@ -1928,7 +1928,7 @@ class MerchandisingController extends Controller
 
                 DB::commit();
 
-                return redirect()->route('admin.budgetAction', ['view', $budget->id])
+                return redirect()->route('admin.budget')
                                 ->with('success', 'Budget saved successfully!');
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -1969,7 +1969,7 @@ class MerchandisingController extends Controller
 
                 DB::commit();
 
-                return redirect()->route('admin.budgetAction', ['view', $budget->id])->with('success', 'Budget updated successfully!');
+                return redirect()->route('admin.budget')->with('success', 'Budget updated successfully!');
             } catch (\Exception $e) {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'Failed to update budget: ' . $e->getMessage())->withInput();

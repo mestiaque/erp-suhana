@@ -165,7 +165,7 @@
                                         <th>Login Password</th>
                                             <td style="padding:2px;">
                                                 <div class="input-group">
-                                                    <input type="password" class="form-control form-control-sm  password" placeholder="Enter Password" name="password" value="{{$user->password_show?:old('password')}}" required="required" minlength="6" style="border: 1px solid #e1000a;" />
+                                                    <input type="password" class="form-control form-control-sm  password" placeholder="Enter Password" name="password" value="{{$user->password_show?:old('password')}}" minlength="6" style="border: 1px solid #e1000a;" />
                                                     <div class="input-group-append">
                                                         <span class="input-group-text showPassword" style="background: #e1000a;border-color: #e1000a;color: white;"><i class="bx bx-hide"></i></span>
                                                     </div>

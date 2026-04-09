@@ -83,7 +83,7 @@
                     <div class="card-body p-0">
                         <form action="{{ route('admin.expenses') }}" method="GET" class="row g-2 align-items-center">
                             <!-- Search by Serial -->
-                            <div class="col-lg-3 col-md-6">
+                            <div class="col-lg-2 col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-text bg-white"><i class="fa fa-hashtag text-muted"></i></span>
                                     <input type="text" class="form-control" name="search" value="{{request()->search}}" placeholder="Serial No">
@@ -91,7 +91,7 @@
                             </div>
 
                             <!-- Date Range -->
-                            <div class="col-lg-4 col-md-6">
+                            <div class="col-lg-3 col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-text bg-white"><i class="fa fa-calendar-alt text-muted"></i></span>
                                     <input type="date" name="startDate" value="{{request()->startDate ?? $from}}" class="form-control">
@@ -100,7 +100,7 @@
                             </div>
 
                             <!-- Expense Type -->
-                            <div class="col-lg-3 col-md-6">
+                            <div class="col-lg-2 col-md-6">
                                 <select class="form-control select2" name="expense_type">
                                     <option value="">All Expense Types</option>
                                     @foreach($expenseTypes as $type)
@@ -109,13 +109,23 @@
                                 </select>
                             </div>
 
-                            <!-- Submit Button -->
+                            <!-- Account -->
                             <div class="col-lg-2 col-md-6">
+                                <select class="form-control select2" name="account_id">
+                                    <option value="">All Accounts</option>
+                                    @foreach($filterAccounts as $account)
+                                        <option value="{{$account->id}}" {{request()->account_id == $account->id ? 'selected' : ''}}>{{$account->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="col-lg-3 col-md-6">
                                 <div class="d-flex gap-1">
                                     <button type="submit" class="btn btn-primary w-100">
                                         <i class="fa fa-search me-1"></i> Search
                                     </button>
-                                    @if(request()->anyFilled(['search', 'startDate', 'endDate', 'expense_type']))
+                                    @if(request()->anyFilled(['search', 'startDate', 'endDate', 'expense_type', 'account_id']))
                                         <a href="{{ route('admin.expenses') }}" class="btn btn-light border">Reset</a>
                                     @endif
                                 </div>

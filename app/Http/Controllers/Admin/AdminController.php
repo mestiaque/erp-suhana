@@ -377,6 +377,9 @@ class AdminController extends Controller
                             if($r->expense_type){
                                 $q->where('category_id', $r->expense_type);
                             }
+                            if($r->account_id){
+                                $q->where('account_id', $r->account_id);
+                            }
                             $q->whereDate('created_at', '>=', $this->from)
                             ->whereDate('created_at', '<=', $this->to);
                         });
@@ -393,6 +396,7 @@ class AdminController extends Controller
                                 'startDate' => $r->startDate,
                                 'endDate' => $r->endDate,
                                 'expense_type' => $r->expense_type,
+                                'account_id' => $r->account_id,
                             ]);
 
         $report = [
@@ -426,11 +430,11 @@ class AdminController extends Controller
                                     ->where('addedby_id',Auth::id())->orderBy('name')
                                     ->select(['id','name','amount'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
-
+        $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
         $lastAudit = Expense::whereNotNull('audit_at')->latest()->first();
 
-        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches', 'to', 'from', 'lastAudit'));
+        return view(adminTheme().'expenses.expensesAll',compact('expenses','report','expenseTypes','paymentMethods','accountMethods','branches', 'to', 'from', 'lastAudit', 'filterAccounts'));
     }
 
 
@@ -909,6 +913,10 @@ class AdminController extends Controller
                                  $q->where('status',$r->status);
                               }
 
+                                        if($r->account_id){
+                                            $q->where('account_id',$r->account_id);
+                              }
+
                             if ($r->quick_filter) {
 
                                 // All → no filtering
@@ -966,6 +974,7 @@ class AdminController extends Controller
         $accountMethods =Attribute::where('type',10)->where('status','active')->where('addedby_id',Auth::id())->orderBy('name')->select(['id','name','amount'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $users =User::where('status',1)->orderBy('name')->select(['id','name'])->get();
+        $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $report=[
             'today_expenses'=>numberFormat(
                     ExpenseIou::where('status', '<>', 'temp')
@@ -982,7 +991,7 @@ class AdminController extends Controller
                 )
         ];
 
-        return view(adminTheme().'expenses.expensesIOU',compact('expenseIou','branches','users','accountMethods','paymentMethods','report'));
+        return view(adminTheme().'expenses.expensesIOU',compact('expenseIou','branches','users','accountMethods','paymentMethods','report','filterAccounts'));
     }
 
     public function expensesIOUAction(Request $r,$action,$id=null){
@@ -1217,6 +1226,10 @@ class AdminController extends Controller
                                 $q->where('status',$r->status);
                             }
 
+                            if($r->account_id){
+                                $q->where('account_id',$r->account_id);
+                            }
+
                             if($r->startDate || $r->endDate) {
                                 $from = $r->startDate ? Carbon::parse($r->startDate)->startOfDay() : Carbon::minValue();
                                 $to   = $r->endDate ? Carbon::parse($r->endDate)->endOfDay() : Carbon::now()->endOfDay();
@@ -1228,7 +1241,9 @@ class AdminController extends Controller
                         ->orderBy('updated_at','desc')
                         ->paginate(50);
 
-        return view(adminTheme().'expenses.completedIOU', compact('completedIou'));
+        $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+
+        return view(adminTheme().'expenses.completedIOU', compact('completedIou', 'filterAccounts'));
     }
 
 
@@ -1268,15 +1283,20 @@ class AdminController extends Controller
                             });
                     });
                 }
+
+                if ($r->account_id) {
+                    $q->where('account_id', $r->account_id);
+                }
             })
             ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
             ->get();
 
 
         $users =User::where('status',1)->orderBy('name')->select(['id','name'])->get();
+        $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
-        return view(adminTheme().'expenses.expenseIOUReports',compact('expenses','users','from','to','branches'));
+        return view(adminTheme().'expenses.expenseIOUReports',compact('expenses','users','from','to','branches','filterAccounts'));
     }
 
     public function expenseReports(Request $r){
@@ -1312,21 +1332,26 @@ class AdminController extends Controller
                 if($r->method){
                     $q->where('method_id',$r->method);
                 }
+
+                if($r->account_id){
+                    $q->where('account_id',$r->account_id);
+                }
             })
             ->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)
             ->get();
 
 
         $expenseTypes =Attribute::where('type',5)->where('status','active')->orderBy('name')->select(['id','name'])->get();
+        $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $branches =Attribute::where('type',0)->where('status','active')->orderBy('name')->select(['id','name'])->get();
         $supplierBill = Transaction::where('type', 3)->whereDate('created_at','>=',$from)->whereDate('created_at','<=',$to)->sum('amount');
 
         if($r->summery){
 
-            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill'));
+            return view(adminTheme().'expenses.expenseSummeryReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill', 'filterAccounts'));
         }
 
-        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill'));
+        return view(adminTheme().'expenses.expenseReports',compact('expenses','expenseTypes','from','to','branches', 'supplierBill', 'filterAccounts'));
     }
 
     // Services Management Function
@@ -1984,7 +2009,7 @@ class AdminController extends Controller
             return $account;
         });
 
-        $adminUsers = User::where('admin',true)->select(['id','name','mobile'])->get();
+        $adminUsers = User::where('admin',true)->orWhere('status',1)->orderBy('name')->select(['id','name','mobile'])->get();
 
         return view(adminTheme().'accounts.accountsMethods',compact('accounts','adminUsers'));
     }
@@ -2274,20 +2299,20 @@ class AdminController extends Controller
                 ")->value('balance') ?? 0;
 
             // (A) Normal transactions (created_at)
-            $normalTrans = Transaction::where('account_id', $method->id)
+            $normalTransQuery = Transaction::where('account_id', $method->id)
                 ->where('status', 'success')
                 ->whereDate('created_at', '>=', $from)
                 ->whereDate('created_at', '<=', $to)
-                ->whereIn('type', [0,1,3,4,5,6,7])
-                ->get();
+                ->whereIn('type', [0,1,3,4,5,6,7]);
+            $normalTrans = $normalTransQuery->get();
 
             // (B) IOU refund transactions (updated_at)
-            $refundTrans = Transaction::where('account_id', $method->id)
+            $refundTransQuery = Transaction::where('account_id', $method->id)
                 ->where('type', 7)
                 ->where('status', 'refund')
                 ->whereDate('updated_at', '>=', $from)
-                ->whereDate('updated_at', '<=', $to)
-                ->get();
+                ->whereDate('updated_at', '<=', $to);
+            $refundTrans = $refundTransQuery->get();
 
             // Merge & unique
             $transactions = $normalTrans->merge($refundTrans)->unique('id');
@@ -5094,7 +5119,7 @@ class AdminController extends Controller
                     $rules['name'] = 'required|max:100';
                     $rules['employee_id'] = 'required|max:50|unique:users,employee_id';
                     $rules['mobile'] = 'nullable|max:20|unique:users,mobile';
-                    $rules['password'] = 'required|min:6|max:100';
+                    $rules['password'] = 'nullable|min:6|max:100';
 
                     $r->validate($rules);
 

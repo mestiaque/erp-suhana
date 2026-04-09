@@ -8,7 +8,7 @@
 <div class="flex-grow-1">
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3>Order Details List</h3>
+            <h3>Budget List</h3>
             <div class="d-flex gap-1">
                 @can('budget.add')
                     <a href="{{ route('admin.budgetAction','create') }}" class="btn btn-primary btn-sm mr-1">

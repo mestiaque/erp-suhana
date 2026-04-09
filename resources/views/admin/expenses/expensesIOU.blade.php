@@ -76,29 +76,38 @@
 
 <div class="row align-items-center mb-4">
     <!-- Search Section -->
-    <div class="col-md-7">
+    <div class="col-md-8">
         <form action="{{route('admin.expensesIOU')}}" method="GET">
-            <div class="input-group shadow-sm">
-                <input type="text"
-                       name="search"
-                       value="{{request()->search}}"
-                       class="form-control border-secondary"
-                       placeholder="Search by name..."
-                       style="border-radius: 5px 0 0 5px;">
-                <div class="input-group-append">
-                    <button type="submit" class="btn btn-success px-4" style="border-radius: 0 5px 5px 0;">
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input type="text"
+                           name="search"
+                           value="{{request()->search}}"
+                           class="form-control border-secondary"
+                           placeholder="Search by name...">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-control" name="account_id">
+                        <option value="">All Accounts</option>
+                        @foreach($filterAccounts as $account)
+                            <option value="{{$account->id}}" {{request()->account_id == $account->id ? 'selected' : ''}}>{{$account->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <button type="submit" class="btn btn-success px-4 w-100 mr-2">
                         <i class="fa fa-search mr-1"></i> Search
                     </button>
+                    @if(request()->anyFilled(['search', 'account_id']))
+                        <a href="{{route('admin.expensesIOU')}}" class="btn btn-outline-danger rounded">Clear</a>
+                    @endif
                 </div>
-                @if(request()->search)
-                    <a href="{{route('admin.expensesIOU')}}" class="btn btn-outline-danger ml-2 rounded">Clear</a>
-                @endif
             </div>
         </form>
     </div>
 
     <!-- Stats Card Section -->
-    <div class="col-md-3 offset-2" >
+    <div class="col-md-4" >
         <div class="card border-0 shadow-sm bg-light p-0">
             <div class="card-body p-3 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">

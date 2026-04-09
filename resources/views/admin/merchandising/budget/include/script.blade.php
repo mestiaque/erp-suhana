@@ -217,7 +217,7 @@ $(document).ready(function(){
     }
 
     // Trigger calculation on input
-    $(document).on('keyup input change paste cut drop blur', '#pi-value, #pi_id, input.calc, .btb_percent_input, .cash_percent_input', function(){
+    $(document).on('keyup input change paste cut drop blur', '#pi-value, #pi_id, input.calc, #testTable input[name*="_qty]"], #testTable input[name*="_unit_price]"], .btb_percent_input, .cash_percent_input', function(){
         calculateAllTables();
         calculateTestTable();
     });
