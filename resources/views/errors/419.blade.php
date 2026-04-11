@@ -1,4 +1,4 @@
-@extends(welcomeTheme().'layouts.app')
+@extends('app')
 @section('title')
 <title>{{websiteTitle('PAGE EXPIRED')}}</title>
 @endsection

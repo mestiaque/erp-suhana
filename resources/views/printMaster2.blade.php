@@ -122,6 +122,10 @@
             .container { padding: 0; margin-top: 0rem; width: 100%; }
             .company-name { font-size: 28px !important; }
         }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .grandtotal-row { background: #d1d1d1 !important; font-weight: bold; }
+        .subtotal-row { background: #e7e7e7 !important; font-weight: bold; }
     </style>
     @stack('css')
 </head>
