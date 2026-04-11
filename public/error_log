@@ -271,3 +271,10 @@ Stack trace:
 #2 /home/erpanrf/public_html/public/index.php(14): require('/home/erpanrf/p...')
 #3 {main}
   thrown in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
+[11-Apr-2026 04:57:58 UTC] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.4.0". You are running 8.2.29. in /home/erpanrf/public_html/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /home/erpanrf/public_html/vendor/composer/autoload_real.php(25): require()
+#1 /home/erpanrf/public_html/vendor/autoload.php(22): ComposerAutoloaderInit8f387a0734f3bf879214e4aa2fca6e2f::getLoader()
+#2 /home/erpanrf/public_html/public/index.php(14): require('/home/erpanrf/p...')
+#3 {main}
+  thrown in /home/erpanrf/public_html/vendor/composer/platform_check.php on line 22
