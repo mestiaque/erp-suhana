@@ -33,6 +33,60 @@ function random_color($seed = 0) {
         return General::first();
     }
 
+  if (!function_exists('hr_factory')) {
+    function hr_factory($field = null, $fallback = null, bool $fresh = false)
+    {
+      static $factory = null;
+
+      // Backward compatibility: hr_factory(true) works as refresh flag.
+      if (is_bool($field) && $fallback === null) {
+        $fresh = $field;
+        $field = null;
+      }
+
+      if ($fresh) {
+        $factory = null;
+      }
+
+      if ($factory === null) {
+        if (app()->runningInConsole() || !class_exists(\ME\Hr\Models\Factory::class)) {
+          return $field !== null ? $fallback : null;
+        }
+
+        try {
+          $factory = \ME\Hr\Models\Factory::query()
+            ->where('status', 'active')
+            ->latest('id')
+            ->first();
+
+          if (!$factory) {
+            $factory = \ME\Hr\Models\Factory::query()->latest('id')->first();
+          }
+        } catch (\Throwable $e) {
+          $factory = null;
+        }
+      }
+
+      if ($field === null) {
+        return $factory;
+      }
+
+      $field = trim((string) $field);
+      if ($field === 'banga_name') {
+        $field = 'bn_name';
+      }
+
+      return data_get($factory, $field, $fallback);
+    }
+  }
+
+  if (!function_exists('hr_factory_name')) {
+    function hr_factory_name(?string $fallback = null): string
+    {
+      return (string) hr_factory('name', $fallback ?? '');
+    }
+  }
+
 function websiteTitle($title=null){
 
   $hasTitle =$title?' - ':'';
