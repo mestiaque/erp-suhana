@@ -581,6 +581,16 @@ class User extends Authenticatable
                 </div>';
     }
 
+    public function otherInfo()
+    {
+        $current = $this->other_information;
+        if (is_array($current)) {
+            return $current;
+        }
+
+        $decoded = json_decode((string) $current, true);
+        return is_array($decoded) ? $decoded : [];
+    }
 
 
 

@@ -87,6 +87,85 @@ function random_color($seed = 0) {
     }
   }
 
+  /**
+   * Resolve effective salary breakdown for an employee based on the factory compliance tier.
+   *
+   * Factory No = 0 (default) → Actual gross  (users.gross_salary)                   — deduct FROM gross
+   * Factory No = 1           → Comp-1 gross  (salary_info.gross_salary_comp_1)       — deduct FROM basic
+   * Factory No = 2           → Comp-2 gross  (salary_info.gross_salary_comp_2)       — deduct FROM basic
+   *
+   * Breakdown formula:  mtf = medical + transport + food
+   *                     basic = (gross - mtf) / 1.5
+   *                     house = basic / 2
+   */
+  if (!function_exists('hr_employee_salary')) {
+    function hr_employee_salary($employee, $factory = null, $salaryKey = null): array
+    {
+      // Factory
+      if ($factory === null) {
+        $factory = hr_factory();
+      }
+      $factoryNo = (int) ($factory->factory_no ?? 0);
+
+      // Salary Key (fixed MTF allowances)
+      if ($salaryKey === null) {
+        try {
+          $salaryKey = \ME\Hr\Models\SalaryKey::where('status', 'active')->latest('id')->first();
+        } catch (\Throwable $e) {
+          $salaryKey = null;
+        }
+      }
+      $medical   = (float) ($salaryKey->medical   ?? 0);
+      $transport = (float) ($salaryKey->transport ?? 0);
+      $food      = (float) ($salaryKey->lunch     ?? 0);
+      $mtf       = $medical + $transport + $food;
+
+      // Effective gross by factory_no
+      $salaryInfo = json_decode($employee->other_information ?? '{}', true);
+      $salaryInfo = data_get($salaryInfo, 'salary_info', []);
+
+      if ($factoryNo === 1) {
+        $gross      = (float) ($salaryInfo['gross_salary_comp_1'] ?? $employee->gross_salary ?? 0);
+        $deductFrom = 'basic';
+      } elseif ($factoryNo === 2) {
+        $gross      = (float) ($salaryInfo['gross_salary_comp_2'] ?? $employee->gross_salary ?? 0);
+        $deductFrom = 'basic';
+      } else {
+        $gross      = (float) ($employee->gross_salary ?? 0);
+        $deductFrom = 'gross';
+      }
+
+      // Fallback: sum individual allowance columns
+      if ($gross <= 0) {
+        $gross = (float) (
+          ($employee->basic_salary        ?? 0)
+          + ($employee->house_rent          ?? 0)
+          + ($employee->medical_allowance   ?? 0)
+          + ($employee->transport_allowance ?? 0)
+          + ($employee->food_allowance      ?? 0)
+        );
+      }
+
+      // Breakdown
+      $basic  = ($gross > 0 && $mtf > 0) ? ($gross - $mtf) / 1.5 : ((float) ($employee->basic_salary ?? 0) ?: null);
+      $house  = $basic ? $basic / 2 : null;
+      $otRate = (float) ($factory->ot_rate ?? $employee->ot_rate ?? 0);
+
+      return [
+        'factory_no'  => $factoryNo,
+        'gross'       => $gross,
+        'basic'       => $basic,
+        'house'       => $house,
+        'medical'     => $medical,
+        'transport'   => $transport,
+        'food'        => $food,
+        'mtf'         => $mtf,
+        'ot_rate'     => $otRate,
+        'deduct_from' => $deductFrom,
+      ];
+    }
+  }
+
 function websiteTitle($title=null){
 
   $hasTitle =$title?' - ':'';
