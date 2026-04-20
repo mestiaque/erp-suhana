@@ -95,7 +95,7 @@
                 <!--<div class="bar-inner">-->
                 <!--    <div class="bar progress-line" data-width="56.9"></div>-->
                 <!--</div>-->
-                <p>Total Sales <a href="#">View</a> </p>
+                <p>Total Sales <a href="#" class="btn btn-primary btn-sm">View</a> </p>
             </div>
         </div>
     </div>
@@ -114,7 +114,7 @@
                 <!--    <div class="bar progress-line" data-width="82"></div>-->
                 <!--</div>-->
 
-                <p>Total Buy <a href="">View</a> </p>
+                <p>Total Buy <a href="" class="btn btn-primary btn-sm">View</a> </p>
             </div>
         </div>
     </div>
@@ -133,7 +133,7 @@
                 <!--    <div class="bar progress-line" data-width="80"></div>-->
                 <!--</div>-->
 
-                <p>Total Customers <a href="#">View</a> </p>
+                <p>Total Customers <a href="#" class="btn btn-primary btn-sm">View</a> </p>
             </div>
         </div>
     </div>
@@ -148,7 +148,7 @@
                 <br><span class="badge"><i class="bx bx-up-arrow-alt"></i> Total</span>
             </h3>
             <div class="progress-list">
-                <p>Total  <a href="#">View</a> </p>
+                <p>Total  <a href="#" class="btn btn-primary btn-sm">View</a> </p>
             </div>
         </div>
     </div>

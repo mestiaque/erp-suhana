@@ -124,6 +124,7 @@
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-end { text-align: right; }
         .grandtotal-row { background: #d1d1d1 !important; font-weight: bold; }
         .subtotal-row { background: #e7e7e7 !important; font-weight: bold; }
     </style>
