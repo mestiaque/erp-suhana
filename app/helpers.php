@@ -149,7 +149,7 @@ function random_color($seed = 0) {
       // Breakdown
       $basic  = ($gross > 0 && $mtf > 0) ? ($gross - $mtf) / 1.5 : ((float) ($employee->basic_salary ?? 0) ?: null);
       $house  = $basic ? $basic / 2 : null;
-      $otRate = (float) ($factory->ot_rate ?? $employee->ot_rate ?? 0);
+      $otRate = $basic > 0 ? round(($basic / 208) * 2, 2) : 0;
 
       return [
         'factory_no'  => $factoryNo,
@@ -743,3 +743,37 @@ if (!function_exists('getMonthlyAttendanceSummary')) {
 }
 
 
+if (!function_exists('bn_date')) {
+    function bn_date($date, $format = 'd/m/Y')
+    {
+        if (!$date) return null;
+
+        // English → Bangla digits
+        $en = ['0','1','2','3','4','5','6','7','8','9'];
+        $bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+
+        // Full + Short month map
+        $months = [
+            'January' => 'জানুয়ারি', 'Jan' => 'জানু',
+            'February' => 'ফেব্রুয়ারি', 'Feb' => 'ফেব্রু',
+            'March' => 'মার্চ', 'Mar' => 'মার্চ',
+            'April' => 'এপ্রিল', 'Apr' => 'এপ্রিল',
+            'May' => 'মে',
+            'June' => 'জুন', 'Jun' => 'জুন',
+            'July' => 'জুলাই', 'Jul' => 'জুলাই',
+            'August' => 'আগস্ট', 'Aug' => 'আগস্ট',
+            'September' => 'সেপ্টেম্বর', 'Sep' => 'সেপ্টেম্বর',
+            'October' => 'অক্টোবর', 'Oct' => 'অক্টোবর',
+            'November' => 'নভেম্বর', 'Nov' => 'নভেম্বর',
+            'December' => 'ডিসেম্বর', 'Dec' => 'ডিসেম্বর',
+        ];
+
+        $formatted = \Carbon\Carbon::parse($date)->format($format);
+
+        // Month replace (if format contains month text)
+        $formatted = str_replace(array_keys($months), array_values($months), $formatted);
+
+        // Digit replace
+        return str_replace($en, $bn, $formatted);
+    }
+}

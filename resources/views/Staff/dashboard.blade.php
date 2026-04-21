@@ -17,7 +17,7 @@
       max-width: 600px;
       width: 100%;
     }
-    
+
     #eventModal .body{
         background: white;
         padding: 10px;
@@ -64,7 +64,7 @@
 @section('contents')
 
 <div class="flex-grow-1">
-    
+
 
 
 <!-- Breadcrumb Area -->
@@ -176,7 +176,7 @@
                             </tr>
                         </thead>
                         <tbody class="table__body">
-                           
+
                         </tbody>
                     </table>
                 </div>
@@ -199,7 +199,7 @@
                             </tr>
                         </thead>
                         <tbody class="table__body">
-                           
+
                         </tbody>
                     </table>
                 </div>
