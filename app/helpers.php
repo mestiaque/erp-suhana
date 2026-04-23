@@ -647,8 +647,7 @@ if (!function_exists('getAttendanceStatus')) {
       return $result;
     }
 
-    $leave = \ME\Hr\Models\Leave::where('user_id', $userId)
-      ->where('status', 'approved')
+    $leave = \ME\Hr\Models\Leave::where('employee_id', $userId)
       ->whereDate('start_date', '<=', $date)
       ->whereDate('end_date', '>=', $date)
       ->first();
@@ -775,5 +774,35 @@ if (!function_exists('bn_date')) {
 
         // Digit replace
         return str_replace($en, $bn, $formatted);
+    }
+}
+
+if (!function_exists('bn_time')) {
+    function bn_time($time, $short = true, $withSeconds = false)
+    {
+        if (!$time) return null;
+
+        try {
+            $dt = \Carbon\Carbon::parse($time);
+        } catch (\Exception $e) {
+            return $time;
+        }
+
+        // Format
+        $format = $withSeconds ? 'h:i:s' : 'h:i';
+        $formattedTime = $dt->format($format);
+
+        // Convert to Bangla digits
+        $bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+        $formattedTime = str_replace(range(0, 9), $bnDigits, $formattedTime);
+
+        // AM / PM in Bangla
+        if ($short) {
+            $period = $dt->format('A') === 'AM' ? 'পূঃ' : 'অঃ';
+        } else {
+            $period = $dt->format('A') === 'AM' ? 'পূর্বাহ্ণ' : 'অপরাহ্ণ';
+        }
+
+        return "{$formattedTime} {$period}";
     }
 }

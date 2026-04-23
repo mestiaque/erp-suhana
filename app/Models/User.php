@@ -155,6 +155,7 @@ class User extends Authenticatable
         'confirmation_date',
         'retirement_date',
         'updated_at',
+        'other_information',
     ];
 
     protected $hidden = [
@@ -173,6 +174,8 @@ class User extends Authenticatable
         'addedby_at' => 'datetime',
         'deleted_at' => 'datetime',
         'joining_date' => 'datetime',
+        'other_information' => 'array',
+
     ];
 
     public function identities() {
