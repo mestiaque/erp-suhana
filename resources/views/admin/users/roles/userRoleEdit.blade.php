@@ -53,7 +53,7 @@
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
                     @endif
                 </div>
-                <button type="submit" class="btn btn-primary btn-md rounded-0">Save changes</button>
+                <button type="submit" class="btn btn-primary btn-md rounded-0" style="position: fixed; z-index: 1; right: 1rem; bottom: 1rem;">Save changes</button>
             </div>
         </div>
 
