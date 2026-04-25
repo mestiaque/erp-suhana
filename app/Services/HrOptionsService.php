@@ -228,7 +228,7 @@ class HrOptionsService
             $presentAddress = $presentAddress ?: data_get($employee, 'present_address', data_get($employee, 'address', $na));
 
             // --- Salary/Earnings/Deductions/Leaves/Increments Logic ---
-            $other = json_decode($employee->other_information ?? '{}', true);
+            $other = is_array($employee->other_information) ? $employee->other_information : json_decode($employee->other_information ?? '{}', true);
             $earningsDeductions = data_get($other, 'earnings_deductions', []);
             $increments = data_get($other, 'increments', []);
             $leaves = data_get($other, 'leaves', []);
