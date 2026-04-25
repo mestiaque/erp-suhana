@@ -121,7 +121,7 @@ function random_color($seed = 0) {
       $mtf       = $medical + $transport + $food;
 
       // Effective gross by factory_no
-      $salaryInfo = json_decode($employee->other_information ?? '{}', true);
+      $salaryInfo = is_array($employee->salary_info) ? $employee->salary_info : json_decode($employee->salary_info, true);
       $salaryInfo = data_get($salaryInfo, 'salary_info', []);
 
       if ($factoryNo === 1) {
