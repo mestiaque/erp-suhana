@@ -135,7 +135,7 @@ function random_color($seed = 0) {
         $deductFrom = 'gross';
       }
 
-      // Fallback: sum individual allowance columns
+      // Fallback: sum individual allowance columnss
       if ($gross <= 0) {
         $gross = (float) (
           ($employee->basic_salary        ?? 0)
