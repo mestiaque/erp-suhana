@@ -95,8 +95,8 @@
     "prefer-stable": true,
     "repositories"     : {
         "hr": {
-            "type": "vcs",
-            "url": "https://github.com/mestiaque/nit-erp-hr.git"
+            "type": "path",
+            "url": "/home/estiaque/Desktop/NIT/hr"
         }
     }
 }

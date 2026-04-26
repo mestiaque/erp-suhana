@@ -125,10 +125,10 @@ function random_color($seed = 0) {
       $salaryInfo = data_get($salaryInfo, 'salary_info', []);
 
       if ($factoryNo === 1) {
-        $gross      = (float) ($salaryInfo['gross_salary_comp_1'] ?? $employee->gross_salary ?? 0);
+        $gross      = (float) ($employee->otherInfo()['salary_info']['gross_salary_comp_1'] ?? $employee->gross_salary ?? 0);
         $deductFrom = 'basic';
       } elseif ($factoryNo === 2) {
-        $gross      = (float) ($salaryInfo['gross_salary_comp_2'] ?? $employee->gross_salary ?? 0);
+        $gross      = (float) ($employee->otherInfo()['salary_info']['gross_salary_comp_2'] ?? $employee->gross_salary ?? 0);
         $deductFrom = 'basic';
       } else {
         $gross      = (float) ($employee->gross_salary ?? 0);
@@ -145,7 +145,7 @@ function random_color($seed = 0) {
           + ($employee->food_allowance      ?? 0)
         );
       }
-
+    // dd($gross);
       // Breakdown
       $basic  = ($gross > 0 && $mtf > 0) ? ($gross - $mtf) / 1.5 : ((float) ($employee->basic_salary ?? 0) ?: null);
       $house  = $basic ? $basic / 2 : null;
