@@ -202,11 +202,15 @@
                             <form action="{{ route('admin.suppliersAction', ['action' => 'bill-entry-post', 'id' => $user->id]) }}" method="POST" class="p-3 border rounded">
                                 @csrf
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Created Date</label>
+                                        <input type="date" name="created_at" value="{{Carbon\Carbon::now()->format('Y-m-d')}}" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label fw-bold">Bill Title/Invoice No</label>
                                         <input type="text" name="title" class="form-control" placeholder="Enter title" required>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label fw-bold">Amount</label>
                                         <input type="number" step="any" name="amount" class="form-control" placeholder="0.00" required>
                                     </div>
@@ -226,11 +230,16 @@
                                 @csrf
                                 <input type="hidden" value="{{ $user->id }}" name="user_id" hidden readonly>
                                 <div class="row">
-                                    <div class="mb-2 col-md-6">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Created Date</label>
+                                        <input type="date" name="created_at" value="{{Carbon\Carbon::now()->format('Y-m-d')}}" class="form-control" required>
+                                    </div>
+                                    
+                                    <div class="mb-2 col-md-4">
                                         <label>Pay Amount</label>
                                         <input type="number" placeholder="0.00" name="pay_amount" step="any" max="" class="form-control" required>
                                     </div>
-                                    <div class="mb-2 col-md-6">
+                                    <div class="mb-2 col-md-4">
                                         <label>Select Account</label>
                                         <select name="account_id" class="form-control" required>
                                             <option value="">Select Account</option>

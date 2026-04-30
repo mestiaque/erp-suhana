@@ -1208,7 +1208,7 @@ class AdminController extends Controller
 
     public function completedIou(Request $r)
     {
-        $completedIou =ExpenseIou::where('status', 'completed')
+        $query =ExpenseIou::where('status', 'completed')
                     ->where(function($q) use ($r) {
                               if($r->search){
 
@@ -1237,13 +1237,18 @@ class AdminController extends Controller
                                 $q->whereBetween('updated_at', [$from, $to]);
                             }
 
-                        })
+                        });
+                        
+        $totalAmount = (clone $query)->sum('amount');
+        
+        
+        $completedIou = (clone $query)
                         ->orderBy('updated_at','desc')
                         ->paginate(50);
 
         $filterAccounts = Attribute::where('type',10)->where('status','active')->orderBy('name')->select(['id','name'])->get();
 
-        return view(adminTheme().'expenses.completedIOU', compact('completedIou', 'filterAccounts'));
+        return view(adminTheme().'expenses.completedIOU', compact('completedIou','totalAmount','filterAccounts'));
     }
 
 

@@ -32,11 +32,15 @@
             <form action="{{ route('admin.suppliersAction', ['action' => 'bill-payment-update', 'id' => $transaction->id]) }}" method="POST" enctype="multipart/form-data" class="p-3 border rounded">
                 @csrf
                 <div class="row">
-                    <div class="mb-2 col-md-6">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Created Date</label>
+                        <input type="date" name="created_at" class="form-control" value="{{ old('title', $transaction->created_at->format('Y-m-d')) }}" required>
+                    </div>
+                    <div class="mb-2 col-md-4">
                         <label>Pay Amount</label>
                         <input type="number" placeholder="0.00" name="pay_amount" step="any" value="{{ old('pay_amount', $transaction->amount) }}" class="form-control" required>
                     </div>
-                    <div class="mb-2 col-md-6">
+                    <div class="mb-2 col-md-4">
                         <label>Select Account</label>
                         <select name="account_id" class="form-control" required>
                             <option value="">Select Account</option>

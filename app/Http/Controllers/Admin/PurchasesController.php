@@ -1041,11 +1041,14 @@ class PurchasesController extends Controller
 
             // Validate the request (optional but recommended)
             $r->validate([
+                'created_at' => 'required|date',
                 'title' => 'required|string|max:255',
                 'amount' => 'required|numeric|min:0',
                 'description' => 'nullable|string|max:1000',
             ]);
-
+            
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
+            
             // Create the transaction
             $bill = CreditorBill::create([
                 'title'        => $r->title,
@@ -1053,6 +1056,7 @@ class PurchasesController extends Controller
                 'amount'       => $r->amount,
                 'description'  => $r->description,
                 'created_by'   => auth()->id(),
+                'created_at'   => $createDate,
             ]);
 
             // Increment user's balance
@@ -1072,6 +1076,7 @@ class PurchasesController extends Controller
         /* ================= BILL ENTRY UPDATE ================= */
         if ($action == 'bill-entry-update' && $r->isMethod('post')) {
             $r->validate([
+                'created_at' => 'required|date',
                 'title' => 'required|string|max:255',
                 'amount' => 'required|numeric|min:0',
                 'description' => 'nullable|string|max:1000',
@@ -1079,12 +1084,23 @@ class PurchasesController extends Controller
 
             $bill = CreditorBill::findOrFail($id);
             $oldAmount = $bill->amount;
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
+            
+            
+            if (!$createDate->isSameDay($bill->created_at)) {
+                $date =$createDate;
+            }else{
+                $date =$bill->created_at;
+            }
+            
+            
 
             $bill->update([
                 'title'       => $r->title,
                 'amount'      => $r->amount,
                 'description' => $r->description,
                 'created_by'  => auth()->id(),
+                'created_at'  => $date,
             ]);
 
             // Adjust user balance
@@ -1126,6 +1142,7 @@ class PurchasesController extends Controller
         if ($action == 'bill-payment-store' && $r->isMethod('post')) {
 
             $r->validate([
+                'created_at' => 'required|date',
                 'pay_amount' => 'required|numeric|min:0.01',
                 'account_id' => 'required',
                 'payment_method_id' => 'required',
@@ -1138,14 +1155,30 @@ class PurchasesController extends Controller
 
             $account = Attribute::findOrFail($r->account_id);
             $paymentMethod = Attribute::findOrFail($r->payment_method_id);
-
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
             if($pay_amount > $account->amount){
                 return redirect()->back()->with('error','Insufficient account balance!');
             }
+            
+            $expense = Expense::create([
+                "category_id"     => 0,
+                "method_id"       => $paymentMethod->id,
+                "account_id"      => $account->id,
+                "branch_id"       => 542,
+                "title"           => "Supplier Bill Payment",
+                "amount"          => $pay_amount,
+                "description"     => $r->note,
+                "company_name"    => $user->name,
+                "receiver_name"   => $user->name,
+                "receiver_mobile" => $user->mobile,
+                "status"          => "active",
+                "addedby_id"      => Auth::id(),
+                "created_at"      => $createDate,
+            ]);
 
             // Create transaction
             $transactionData = [
-                "src_id"            => $user->id,
+                "src_id"            => $expense->id,
                 "user_id"           => $user->id,
                 "billing_name"      => $user?->name ?? null,
                 "billing_mobile"    => $user?->mobile ?? null,
@@ -1162,6 +1195,7 @@ class PurchasesController extends Controller
                 "currency"          => "BDT",
                 "status"            => "success",
                 "addedby_id"        => Auth::user()->id,
+                "created_at"        => $createDate,
             ];
             $transaction = Transaction::create($transactionData);
 
@@ -1174,21 +1208,7 @@ class PurchasesController extends Controller
             $user->save();
             // dd(Attribute::where('type', 0)->first()->id);
 
-            $expense = Expense::create([
-                "category_id"     => 0,
-                "method_id"       => $paymentMethod->id,
-                "account_id"      => $account->id,
-                "branch_id"       => 542,
-                "title"           => "Supplier Bill Payment",
-                "amount"          => $pay_amount,
-                "description"     => $r->note,
-                "company_name"    => $user->name,
-                "receiver_name"   => $user->name,
-                "receiver_mobile" => $user->mobile,
-                "status"          => "active",
-                "addedby_id"      => Auth::id(),
-                "created_at"      => now(),
-            ]);
+            
 
             // Upload attachment if exists
             if($r->hasFile('attachment')){
@@ -1212,7 +1232,9 @@ class PurchasesController extends Controller
 
         /* ================= BILL PAYMENT UPDATE ================= */
         if ($action == 'bill-payment-update' && $r->isMethod('post')) {
+      
             $r->validate([
+                'created_at' => 'required|date',
                 'pay_amount' => 'required|numeric|min:0.01',
                 'account_id' => 'required',
                 'payment_method_id' => 'required',
@@ -1225,6 +1247,7 @@ class PurchasesController extends Controller
 
             $old_amount = floatval($transaction->amount);
             $new_amount = floatval($r->pay_amount);
+            $createDate = $r->created_at ? Carbon::parse($r->created_at . ' ' . Carbon::now()->format('H:i:s')) : Carbon::now();
 
             // Adjust user balance
             $user->balance = ($user->balance + $old_amount) - $new_amount;
@@ -1247,14 +1270,25 @@ class PurchasesController extends Controller
 
             if ($oldAccountId) {
                 $oldAccount = Attribute::find($oldAccountId);
-                if ($oldAccount) {
+                if ($oldAccount){
                     $oldAccount->amount += $old_amount;
                     $oldAccount->save();
                 }
             }
-
-            $account->amount -= $new_amount;
+            
+            $diff = $new_amount - $old_amount;
+            if ($diff > 0) {
+                $account->amount -= $diff;
+            } else {
+                $account->amount += abs($diff);
+            }
             $account->save();
+            
+            if (!$createDate->isSameDay($transaction->created_at)) {
+                $date =$createDate;
+            }else{
+                $date =$transaction->created_at;
+            }
 
             $transaction->update([
                 "amount"            => $new_amount,
@@ -1262,11 +1296,20 @@ class PurchasesController extends Controller
                 "payment_method"    => $paymentMethod->name,
                 "payment_method_id" => $paymentMethod->id,
                 "billing_note"      => $r->note,
+                "created_at"      => $date,
             ]);
-
+   
             if($r->hasFile('attachment')){
                 uploadFile($r->attachment, $transaction->id, 9, 1);
             }
+            
+            $expense =$transaction->expense;
+            if($expense){
+                $expense->amount =$new_amount;
+                $expense->created_at =$date;
+                $expense->save();
+            }
+
 
             return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id])
                             ->with('success','Payment updated successfully!');
@@ -1292,6 +1335,11 @@ class PurchasesController extends Controller
             }
 
             $transaction->delete();
+            
+            $expense =$transaction->expense;
+            if($expense){
+                $expense->delete();
+            }
 
             return redirect()->route('admin.suppliersAction', ['bill-entry', $user->id])
                             ->with('success','Payment deleted successfully!');

@@ -113,7 +113,7 @@
                             <div>
                                 <p class="text-muted mb-0 small font-weight-bold">TOTAL AMOUNT</p>
                                 <h4 class="mb-0 font-weight-bold text-dark">
-                                    {{ number_format($completedIou->sum('amount'), 2) }}
+                                    {{ number_format($totalAmount, 2) }}
                                 </h4>
                             </div>
                         </div>
