@@ -19,6 +19,7 @@ class CreditorBill extends Model
         'amount',
         'description',
         'created_by',  // user id who created the bill
+        'created_at',  // user id who created the bill
     ];
 
     // Optional: cast amount as float
