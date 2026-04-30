@@ -806,3 +806,26 @@ if (!function_exists('bn_time')) {
         return "{$formattedTime} {$period}";
     }
 }
+
+
+if(!function_exists('att_status')) {
+    function att_status($status, $lang = 'en')
+    {
+        $map = [
+            'absent' => ['en' => 'A', 'bn' => 'অনুপস্থিত'],
+            'leave' => ['en' => 'L', 'bn' => 'ছুটি'],
+            'weekend' => ['en' => 'W', 'bn' => 'সাপ্তাহিক ছুটি'],
+            'holiday' => ['en' => 'H', 'bn' => 'সরকারি ছুটি'],
+            'late and early exit' => ['en' => 'LEO', 'bn' => 'বিলম্ব ও আগে বের'],
+            'punch missing' => ['en' => 'PM', 'bn' => 'পাঞ্চ মিসিং'],
+            'early exit' => ['en' => 'EO', 'bn' => 'আগে বের'],
+            'late and punch missing' => ['en' => 'LPM', 'bn' => 'বিলম্ব ও পাঞ্চ মিসিং'],
+            'late' => ['en' => 'LATE', 'bn' => 'বিলম্ব'],
+            'present' => ['en' => 'P', 'bn' => 'উপস্থিত'],
+        ];
+
+        $key = strtolower(trim($status));
+
+        return $map[$key][$lang] ?? $status;
+    }
+}

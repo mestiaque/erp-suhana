@@ -293,4 +293,3 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 Route::group(['prefix' => 'staff', 'as' => 'staff.', 'middleware' => ['auth','redirectUser']], function () {
     Route::get('/dashboard', [StaffController::class, 'dashboard'])->name('dashboard');
 });
-

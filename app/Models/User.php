@@ -286,6 +286,11 @@ class User extends Authenticatable
         return $this->hasMany(Probation::class);
     }
 
+    public function section()
+    {
+        return $this->belongsTo(Attribute::class,'section_id');
+    }
+
 
 
     // public function sales(){

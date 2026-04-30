@@ -180,7 +180,7 @@
                                         <i class="bx bx-edit"></i>
                                     </a>
                                     @endcan
-                                    @can('creditor.edit')
+                                    @can('creditor.payment')
                                         <a href="{{route('admin.suppliersAction',['bill-entry',$user->id])}}" class="btn-custom yellow">
                                             <i class="bx bx-credit-card"></i>
                                         </a>

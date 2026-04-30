@@ -36,7 +36,7 @@ class HrOptionsService
             $language = data_get($request ?? null, 'language', 'bn');
             $isBangla = $language === 'bn';
             $t = fn (string $bn, string $en) => $isBangla ? $bn : $en;
-            $na = $t('প্রযোজ্য নয়', 'N/A');
+            $na = $t('--', '--');
 
             $companyName = $isBangla
                 ? (hr_factory('bn_name') ?? hr_factory('name') ?? general()->name ?? $na)
@@ -52,7 +52,7 @@ class HrOptionsService
             $motherName = $isBangla ? data_get($employee, 'mother_name_bn', $na) : data_get($employee, 'mother_name', $na);
             $spouseName = $isBangla ? data_get($employee, 'spouse_name_bn', $na) : data_get($employee, 'spouse_name', $na);
             $joiningDate = blank($employee->joining_date) ? $na : bn_date($employee->joining_date, 'd/m/Y');
-            $gender = $isBangla ? \ME\Hr\Models\Location::where('type', 'sex')->where('name', $employee->gender)->first()->bn_name : $employee->gender ?? $na;
+            $gender = $isBangla ? \ME\Hr\Models\Location::where('type', 'sex')->where('name', $employee->gender)->first()?->bn_name : $employee->gender ?? $na;
             $designationModel = optional($employee->designation);
             $designationAttr = optional(\ME\Hr\Models\Designation::find($employee->designation_id));
             $grade = $designationAttr->grade_id ?? $designationModel->grade_id ?? data_get($employee, 'designation_grade') ?? $na;
@@ -87,6 +87,24 @@ class HrOptionsService
                 ? optional($masterData['classifications']->where('id', $employee->employee_type)->first())->bn_name
                 : optional($masterData['classifications']->where('id', $employee->employee_type)->first())->name;
             $employeeId = data_get($employee, 'employee_id', $na);
+            $education = $isBangla
+                ? $employeeOthers['profile']['education_bn'] ?? $na
+                : $employee->education ?? $na;
+
+            $religion = $isBangla
+                ? \ME\Hr\Models\Location::where('type', 'religion')->where('name', $employee->religion)->first()?->bn_name ?? $employee->religion ?? $na
+                : $employee->religion ?? $na;
+            $nid = data_get($employee, 'nid_number', 0);
+            $girls = $employee->girls ?? 0;
+            $boys = $employee->boys ?? 0;
+            $maritalStatus = $isBangla
+                ? \ME\Hr\Models\Location::where('type', 'marital_status')->where('name', $employee->marital_status)->first()?->bn_name ?? $employee->marital_status ?? $na
+                : $employee->marital_status ?? $na;
+
+            $bloodGroup = $employee->blood_group ?? $na;
+            $mobileNumber = $employee->mobile ?? $na;
+            $emergencyMobile = $employee->emergency_mobile ?? $na;
+            // dd($employee);
 
             $presentAddress = collect([
                 data_get($employee, 'present_address'),
@@ -155,6 +173,7 @@ class HrOptionsService
                 ->implode(', ');
 
 
+
             // Permanent Address (BN)
             $permanentAddressBnFull = collect([
                     'ঠিকানা' => data_get($employee, 'permanent_address_bn'),
@@ -180,14 +199,9 @@ class HrOptionsService
 
             $qualification = data_get($employee, 'qualification', data_get($profile, 'qualification', $na));
             $birthDate = data_get($employee, 'date_of_birth', data_get($employee, 'dob'));
-            $employeeAge = '';
-            if (filled($birthDate)) {
-                try {
-                    $employeeAge = \Illuminate\Support\Carbon::parse($birthDate)->age;
-                } catch (\Throwable $e) {
-                    $employeeAge = '';
-                }
-            }
+            $employeeAge = isset($employeeOthers['age_verification']['verified_age'])
+                ? $employeeOthers['age_verification']['verified_age']
+                : \Illuminate\Support\Carbon::parse($birthDate)->age;
             $employeePhoto = method_exists($employee, 'image') ? $employee->image() : null;
 
             $shifts = \ME\Hr\Models\Shift::orderBy('name_of_shift')->get();
@@ -310,6 +324,7 @@ class HrOptionsService
                 'father_name'               => $fatherName,
                 'mother_name'               => $motherName,
                 'spouse_name'               => $spouseName,
+                'education'                 => $education,
                 'joining_date'              => $joiningDate,
                 'designation'               => $designation,
                 'designation_full'          => $designationAttr,
@@ -368,6 +383,14 @@ class HrOptionsService
                 'getLeaves'                    => $getLeaves,
                 'getSalaryReport'              => $getSalaryReport,
                 'gender'                       => $gender,
+                'religion'                     => $religion,
+                'nid'                          => $nid,
+                'girls'                         => $girls,
+                'boys'                          => $boys,
+                'marital_status'               => $maritalStatus,
+                'blood_group'                 => $bloodGroup,
+                'mobile_number'               => $mobileNumber,
+                'emergency_mobile'            => $emergencyMobile,
                   // Optionally add more fields as needed
             ];
         };
