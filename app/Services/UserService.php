@@ -259,6 +259,8 @@ class UserService
             $user->created_at = Carbon::parse($request->created_at . ' ' . now()->format('H:i:s'));
         }
 
+        $this->syncDesignationSalaryDefaults($user, (int) ($request->designation_id ?? 0));
+
         $user->exited_at = $request->exited_at;
 
         // Permission (only for admin editing others)
@@ -296,6 +298,62 @@ class UserService
         }
 
         return $user;
+    }
+
+    private function syncDesignationSalaryDefaults(User $user, int $designationId): void
+    {
+        if ($designationId <= 0 || !class_exists(\ME\Hr\Models\Designation::class)) {
+            return;
+        }
+
+        $designation = \ME\Hr\Models\Designation::query()->find($designationId);
+        if (!$designation) {
+            return;
+        }
+
+        if (empty($user->gross_salary) || (float) $user->gross_salary <= 0) {
+            $user->gross_salary = data_get($designation, 'gross_salary', $user->gross_salary);
+        }
+
+        $other = is_array($user->other_information)
+            ? $user->other_information
+            : json_decode($user->other_information ?? '{}', true);
+        if (!is_array($other)) {
+            $other = [];
+        }
+
+        $salaryInfo = data_get($other, 'salary_info', []);
+        if (!is_array($salaryInfo)) {
+            $salaryInfo = [];
+        }
+
+        $defaults = [
+            'gross_salary_comp_1' => data_get($designation, 'gross_salary'),
+            'gross_salary_comp_2' => data_get($designation, 'gross_salary'),
+            'car_fuel' => data_get($designation, 'car_fuel'),
+            'phone_internet' => data_get($designation, 'phone_internet'),
+            'extra_facility' => data_get($designation, 'extra_facility'),
+            'attendance_bonus' => data_get($designation, 'attendance_bonus'),
+            'attendance_bonus_com' => data_get($designation, 'attendance_bonus_com'),
+            'holiday_allowance' => data_get($designation, 'holiday_allowance'),
+            'weekend_allowance_count' => data_get($designation, 'weekend_allowance_count'),
+            'tiffin_allowance' => data_get($designation, 'tiffin_allowance'),
+            'night_allowance' => data_get($designation, 'night_allowance'),
+            'dinner_allowance' => data_get($designation, 'dinner_allowance'),
+            'minimum_tiffin_hour' => data_get($designation, 'minimum_tiffin_hour'),
+            'minimum_night_hour' => data_get($designation, 'minimum_night_hour'),
+            'minimum_dinner_hour' => data_get($designation, 'minimum_dinner_hour'),
+            'meal_payment_way' => data_get($designation, 'meal_payment_way'),
+        ];
+
+        foreach ($defaults as $key => $value) {
+            if (!array_key_exists($key, $salaryInfo) || $salaryInfo[$key] === null || $salaryInfo[$key] === '' || (is_numeric($salaryInfo[$key]) && (float) $salaryInfo[$key] <= 0)) {
+                $salaryInfo[$key] = $value;
+            }
+        }
+
+        $other['salary_info'] = $salaryInfo;
+        $user->other_information = json_encode($other);
     }
 
     /**

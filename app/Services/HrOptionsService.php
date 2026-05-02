@@ -288,6 +288,20 @@ class HrOptionsService
                 return $leaves;
             };
 
+            $getWeekendToRegularSummary = function($from = null, $to = null) use ($employee) {
+                if (!$from || !$to) {
+                    return [];
+                }
+
+                $attendancePack = \App\Services\EmployeeAttendanceService::getEmployeeAttendanceByDate(
+                    $employee->id,
+                    $from,
+                    $to
+                );
+
+                return $attendancePack['weekend_to_regular'] ?? [];
+            };
+
             // Salary report logic (aggregate salary, earnings, deductions, etc.)
             $getSalaryReport = function($from = null, $to = null) use ($employee, $getEarningsDeductionsSummary) {
                 $sal = function_exists('hr_employee_salary') ? hr_employee_salary($employee) : [];
@@ -328,6 +342,8 @@ class HrOptionsService
                 'joining_date'              => $joiningDate,
                 'designation'               => $designation,
                 'designation_full'          => $designationAttr,
+                'designation_weekend_allowance_count' => data_get($designationAttr, 'weekend_allowance_count'),
+                'designation_holiday_allowance' => data_get($designationAttr, 'holiday_allowance'),
                 'department'                => $department,
                 'grade'                     => $grade,
                 'section'                   => $section,
@@ -381,6 +397,7 @@ class HrOptionsService
                 'getEarningsDeductionsSummary' => $getEarningsDeductionsSummary,
                 'getIncrements'                => $getIncrements,
                 'getLeaves'                    => $getLeaves,
+                'getWeekendToRegularSummary'   => $getWeekendToRegularSummary,
                 'getSalaryReport'              => $getSalaryReport,
                 'gender'                       => $gender,
                 'religion'                     => $religion,

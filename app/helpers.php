@@ -124,6 +124,15 @@ function random_color($seed = 0) {
       $salaryInfo = is_array($employee->salary_info) ? $employee->salary_info : json_decode($employee->salary_info, true);
       $salaryInfo = data_get($salaryInfo, 'salary_info', []);
 
+      $designation = null;
+      if (!empty($employee->designation_id) && class_exists(\ME\Hr\Models\Designation::class)) {
+        try {
+          $designation = \ME\Hr\Models\Designation::query()->find($employee->designation_id);
+        } catch (\Throwable $e) {
+          $designation = null;
+        }
+      }
+
       if ($factoryNo === 1) {
         $gross      = (float) ($employee->otherInfo()['salary_info']['gross_salary_comp_1'] ?? $employee->gross_salary ?? 0);
         $deductFrom = 'basic';
@@ -150,6 +159,37 @@ function random_color($seed = 0) {
       $basic  = ($gross > 0 && $mtf > 0) ? ($gross - $mtf) / 1.5 : ((float) ($employee->basic_salary ?? 0) ?: null);
       $house  = $basic ? $basic / 2 : null;
       $otRate = $basic > 0 ? round(($basic / 208) * 2, 2) : 0;
+      $fromEmployeeOrDesignation = static function ($employeeValue, $designationValue): float {
+        if (is_numeric($employeeValue) && (float) $employeeValue > 0) {
+          return (float) $employeeValue;
+        }
+        if (is_numeric($designationValue) && (float) $designationValue > 0) {
+          return (float) $designationValue;
+        }
+
+        return (float) ($employeeValue ?? $designationValue ?? 0);
+      };
+
+      $attendanceBonus = $fromEmployeeOrDesignation(
+        data_get($salaryInfo, 'attendance_bonus'),
+        data_get($designation, 'attendance_bonus', 0)
+      );
+      $attendanceBonusCom = $fromEmployeeOrDesignation(
+        data_get($salaryInfo, 'attendance_bonus_com'),
+        data_get($designation, 'attendance_bonus_com', 0)
+      );
+      $carFuel = $fromEmployeeOrDesignation(
+        data_get($salaryInfo, 'car_fuel'),
+        data_get($designation, 'car_fuel', 0)
+      );
+      $phoneInternet = $fromEmployeeOrDesignation(
+        data_get($salaryInfo, 'phone_internet'),
+        data_get($designation, 'phone_internet', 0)
+      );
+      $extraFacility = $fromEmployeeOrDesignation(
+        data_get($salaryInfo, 'extra_facility'),
+        data_get($designation, 'extra_facility', 0)
+      );
 
       return [
         'factory_no'  => $factoryNo,
@@ -159,6 +199,11 @@ function random_color($seed = 0) {
         'medical'     => $medical,
         'transport'   => $transport,
         'food'        => $food,
+        'attendance_bonus' => $attendanceBonus,
+        'attendance_bonus_com' => $attendanceBonusCom,
+        'car_fuel' => $carFuel,
+        'phone_internet' => $phoneInternet,
+        'extra_facility' => $extraFacility,
         'mtf'         => $mtf,
         'ot_rate'     => $otRate,
         'deduct_from' => $deductFrom,

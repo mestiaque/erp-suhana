@@ -9,6 +9,94 @@ use ME\Hr\Models\RegularToWeekend;
 
 class EmployeeAttendanceService
 {
+    private static function normalizeLeaveType($leave): string
+    {
+        $code = strtolower((string) data_get($leave, 'leaveType.code', ''));
+        $name = strtolower((string) data_get($leave, 'leaveType.name', ''));
+        $type = trim($code . ' ' . $name);
+
+        if (str_contains($type, 'casual') || preg_match('/\bcl\b/', $type)) {
+            return 'casual';
+        }
+        if (str_contains($type, 'sick') || preg_match('/\bsl\b/', $type)) {
+            return 'sick';
+        }
+        if (str_contains($type, 'earned') || preg_match('/\bel\b/', $type)) {
+            return 'earned';
+        }
+        if (str_contains($type, 'weekly') || str_contains($type, 'weekend') || preg_match('/\bwo\b/', $type)) {
+            return 'weekly';
+        }
+        if (str_contains($type, 'festival') || str_contains($type, 'fest')) {
+            return 'festival';
+        }
+        if (str_contains($type, 'maternity') || preg_match('/\bml\b/', $type)) {
+            return 'maternity';
+        }
+
+        return 'general';
+    }
+
+    public static function calculateWeekendToRegularAllowance(User $employee, array $context = []): array
+    {
+        $designation = $employee->designation;
+        if (!$designation && $employee->designation_id) {
+            $designation = \ME\Hr\Models\Designation::find($employee->designation_id);
+        }
+
+        $policy = (string) data_get($designation, 'weekend_allowance_count', 'ot_by_worked_hour');
+        $policy = $policy !== '' ? $policy : 'ot_by_worked_hour';
+
+        $salary = function_exists('hr_employee_salary') ? hr_employee_salary($employee) : [];
+        $gross = (float) ($salary['gross'] ?? data_get($employee, 'gross_salary', 0));
+        $basic = (float) ($salary['basic'] ?? data_get($employee, 'basic_salary', 0));
+        $otRate = (float) ($salary['ot_rate'] ?? (($basic > 0) ? round(($basic / 208) * 2, 2) : 0));
+        $fixedPerDay = (float) data_get($designation, 'holiday_allowance', 0);
+
+        $workedDays = (float) ($context['weekend_to_regular_days'] ?? 0);
+        $otMinutes = (float) ($context['weekend_to_regular_ot_minutes'] ?? 0);
+        $otHours = round($otMinutes / 60, 2);
+        $workingDays = max((int) ($context['working_days'] ?? 26), 1);
+
+        $calculationType = 'ot_by_worked_hour';
+        $amount = 0.0;
+
+        switch ($policy) {
+            case 'fixed_amount':
+                $calculationType = 'fixed_amount';
+                $amount = $fixedPerDay * $workedDays;
+                break;
+            case 'gross_month_day':
+                $calculationType = 'fixed_formula';
+                $amount = ($gross > 0 ? ($gross / 30) : 0) * $workedDays;
+                break;
+            case 'basic_working_day':
+                $calculationType = 'fixed_formula';
+                $amount = ($basic > 0 ? ($basic / $workingDays) : 0) * $workedDays;
+                break;
+            case 'basic_104_2_5':
+                $calculationType = 'fixed_formula';
+                $amount = ($basic > 0 ? (($basic / 104) * 2.5) : 0) * $workedDays;
+                break;
+            case 'ot_by_worked_hour':
+            default:
+                $calculationType = 'ot_by_worked_hour';
+                $amount = $otHours * $otRate;
+                break;
+        }
+
+        return [
+            'policy' => $policy,
+            'calculation_type' => $calculationType,
+            'worked_days' => $workedDays,
+            'ot_minutes' => (int) round($otMinutes),
+            'ot_hours' => $otHours,
+            'ot_rate' => $otRate,
+            'fixed_per_day' => $fixedPerDay,
+            'amount' => round($amount, 2),
+        ];
+    }
+
     public static function getEmployeeAttendanceByDate($employeeId, $fromDate, $toDate)
     {
         $employee = User::findOrFail($employeeId);
@@ -30,6 +118,35 @@ class EmployeeAttendanceService
             $dates[] = $date->copy();
         }
 
+        $leaveSummary = [
+            'casual' => 0,
+            'sick' => 0,
+            'earned' => 0,
+            'weekly' => 0,
+            'festival' => 0,
+            'general' => 0,
+            'maternity' => 0,
+        ];
+
+        $leaves = Leave::with('leaveType')
+            ->where('employee_id', $employee->id)
+            ->whereDate('start_date', '<=', $toDate)
+            ->whereDate('end_date', '>=', $fromDate)
+            ->get();
+
+        $leaveByDate = [];
+        foreach ($leaves as $leave) {
+            $leaveFrom = Carbon::parse($leave->start_date)->max($from)->startOfDay();
+            $leaveTo = Carbon::parse($leave->end_date)->min($to)->startOfDay();
+
+            for ($leaveDate = $leaveFrom->copy(); $leaveDate->lte($leaveTo); $leaveDate->addDay()) {
+                $leaveByDate[$leaveDate->format('Y-m-d')] = $leave;
+            }
+        }
+
+        $weekendToRegularDays = 0;
+        $weekendToRegularOtMinutes = 0;
+
         if (!$attendanceMap) $attendanceMap = collect();
         if (!$holidays) $holidays = collect();
 
@@ -46,10 +163,11 @@ class EmployeeAttendanceService
             $att = $attendanceMap[$employee->id . '_' . $dateStr] ?? null;
 
             // Leave
-            $leave = Leave::where('employee_id', $employee->id)
-                ->whereDate('start_date', '<=', $dateStr)
-                ->whereDate('end_date', '>=', $dateStr)
-                ->first();
+            $leave = $leaveByDate[$dateStr] ?? null;
+            if ($leave) {
+                $leaveBucket = self::normalizeLeaveType($leave);
+                $leaveSummary[$leaveBucket] = ($leaveSummary[$leaveBucket] ?? 0) + 1;
+            }
 
             // Holiday
             $isHoliday = $holidays->contains(function ($h) use ($dateStr) {
@@ -135,6 +253,11 @@ class EmployeeAttendanceService
                 $extraOt = null;
             }
 
+            if ($isWeekendToRegular && $att && ($att->in_time || $att->out_time || $otMinRaw > 0)) {
+                $weekendToRegularDays++;
+                $weekendToRegularOtMinutes += max($otMinRaw, 0);
+            }
+
             $result[] = [
                 'date' => $d->format('d-m-Y'),
                 'day' => $d->format('l'),
@@ -175,9 +298,8 @@ class EmployeeAttendanceService
         foreach ($dates as $idx => $d) {
             $row = $result[$idx]; // assuming you fill $result[] as above
 
-
             $dateStr = $d->format('Y-m-d');
-            $att = ($attendanceMap->get($employee->id . '_' . $dateStr) ?? collect())->first();
+            $att = $attendanceMap->get($employee->id . '_' . $dateStr);
 
             $totals['totalOt'] += $att ? round(($att->overtime_minutes ?? 0) / 60, 2) : 0;
             $totals['totalComplianceOt'] += $row['compliance_ot'] ?? 0;
@@ -218,9 +340,27 @@ class EmployeeAttendanceService
                 if ($st === 'LPM' || $st == 'LATE AND PUNCH MISSING') $totals['totalLPM']++;
             }
         }
+
+        // Payslip requirement: weekly leave should reflect monthly weekends,
+        // and festival leave should reflect factory holidays in the range.
+        $leaveSummary['weekly'] = (int) ($totals['totalWeekendDays'] ?? 0);
+        $leaveSummary['festival'] = (int) ($totals['totalGovHolidays'] ?? 0);
+
+        $weekendToRegular = self::calculateWeekendToRegularAllowance($employee, [
+            'weekend_to_regular_days' => $weekendToRegularDays,
+            'weekend_to_regular_ot_minutes' => $weekendToRegularOtMinutes,
+            'working_days' => $totals['totalWorkingDays'] ?? 0,
+        ]);
+
+        $totals['totalWeekendToRegularDays'] = $weekendToRegularDays;
+        $totals['totalWeekendToRegularOtHours'] = round($weekendToRegularOtMinutes / 60, 2);
+        $totals['totalWeekendToRegularAmount'] = $weekendToRegular['amount'] ?? 0;
+
         return [
             'attendance' => $result,
-            'summary' => $totals
+            'summary' => $totals,
+            'leave' => $leaveSummary,
+            'weekend_to_regular' => $weekendToRegular,
         ];
 
         // return $result;
