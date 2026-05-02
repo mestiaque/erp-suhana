@@ -494,9 +494,10 @@
     	       <div class="row">
     	           <div class="col-md-6 form-group">
         			    <label for="name">Date* </label>
-                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{$dpm->created_at->format('Y-m-d')}}" min="{{ $lastAudit && $lastAudit->audit_at
+                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" name="created_at" value="{{$dpm->created_at->format('Y-m-d')}}" 
+                        min="{{ $lastAudit && $lastAudit->audit_at
     ? \Carbon\Carbon::parse($lastAudit->audit_at)->addDay()->format('Y-m-d')
-    : now()->format('Y-m-d') }}"  required="">
+    : '' }}"  required="">
         				@if ($errors->has('created_at'))
         				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
         				@endif
@@ -608,13 +609,6 @@
                              </label>
                          </div>
                  	</div>
-                    <div class="col-md-6 form-group">
-                        <label for="name">Publish Date*</label>
-                        <input type="date" class="form-control {{$errors->has('created_at')?'error':''}}" value="{{$dpm->created_at->format('Y-m-d')}}" name="created_at" required="">
-                        @if ($errors->has('created_at'))
-    					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('created_at') }}</p>
-    					@endif
-                    </div>
              	</div>
     	   </div>
     	   <div class="modal-footer">
