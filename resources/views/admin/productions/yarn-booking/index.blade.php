@@ -36,16 +36,28 @@
                 <div class="row mb-3">
 
                     {{-- Date Range --}}
-                    <div class="col-md-6 mb-1">
+                    <div class="col-md-4 mb-1">
                         <div class="input-group">
                             <input type="date" name="startDate"
                                    value="{{ request()->startDate ?? '' }}"
-                                   class="form-control">
+                                   class="form-control form-control-sm">
 
                             <input type="date" name="endDate"
                                    value="{{ request()->endDate ?? '' }}"
-                                   class="form-control">
+                                   class="form-control form-control-sm">
                         </div>
+                    </div>
+
+                    {{-- Created By --}}
+                    <div class="col-md-2 mb-1">
+                        <select name="created_by" class="form-control form-control-sm">
+                            <option value="">All Created By</option>
+                            @foreach($createdByUsers as $creator)
+                                <option value="{{ $creator->id }}" {{ (string)request('created_by') === (string)$creator->id ? 'selected' : '' }}>
+                                    {{ $creator->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
                     {{-- Search Text --}}
@@ -54,7 +66,7 @@
                             <input type="text" name="search"
                                    value="{{ request()->search ?? '' }}"
                                    placeholder="Search Buyer, Pi No, Booking No, Creditor"
-                                   class="form-control">
+                                   class="form-control form-control-sm">
 
                             <button class="btn btn-success btn-sm rounded-0">Search</button>
                         </div>

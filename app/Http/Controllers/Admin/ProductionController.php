@@ -2,31 +2,32 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\Cutting;
-use App\Models\Finishing;
-use App\Models\Iron;
-use App\Models\Poly;
+use App\Http\Controllers\Controller;
 use App\Models\Attribute;
-use App\Models\OrderDetail;
-use App\Models\YarnBooking;
-use App\Models\YarnReceive;
-use App\Models\SewingOutput;
-use Illuminate\Http\Request;
+use App\Models\Cutting;
 use App\Models\DyeingBooking;
 use App\Models\DyeingReceive;
-use App\Models\MasterPlanning;
+use App\Models\Finishing;
+use App\Models\Iron;
 use App\Models\KnittingBooking;
 use App\Models\KnittingReceive;
-use App\Models\ProformaInvoice;
-use App\Models\ProductionSewing;
-use App\Models\ProductionPlanning;
-use Illuminate\Support\Facades\DB;
-use App\Models\ProformaInvoiceItem;
-use App\Http\Controllers\Controller;
+use App\Models\MasterPlanning;
+use App\Models\OrderDetail;
 use App\Models\OrderDetailItem;
+use App\Models\Poly;
+use App\Models\ProductionPlanning;
+use App\Models\ProductionSewing;
+use App\Models\ProformaInvoice;
+use App\Models\ProformaInvoiceItem;
+use App\Models\SewingOutput;
+use App\Models\User;
+use App\Models\YarnBooking;
+use App\Models\YarnReceive;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductionController extends Controller
 {
@@ -1503,6 +1504,13 @@ class ProductionController extends Controller
         }
 
         // ----------------------------
+        // CREATED BY FILTER
+        // ----------------------------
+        if ($r->filled('created_by')) {
+            $query->where('created_by', $r->created_by);
+        }
+
+        // ----------------------------
         // GROUP BY booking_no / pi_id with required columns
         // ----------------------------
         $bookings = $query->select(
@@ -1522,7 +1530,17 @@ class ProductionController extends Controller
                         ->orderBy('booking_no', 'DESC')
                         ->paginate(10); // pagination
 
-        return view(adminTheme() . 'productions.yarn-booking.index', compact('bookings'));
+        $createdByUsers = User::whereIn(
+                'id',
+                YarnBooking::whereNotNull('created_by')
+                    ->distinct()
+                    ->pluck('created_by')
+            )
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return view(adminTheme() . 'productions.yarn-booking.index', compact('bookings', 'createdByUsers'));
     }
 
     public function yarnBookingAction(Request $r, $action, $id = null)
