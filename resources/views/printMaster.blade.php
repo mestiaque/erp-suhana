@@ -78,8 +78,8 @@
         .report-title span {
             display: inline-block;
             padding: 5px 15px;
-            background: #333333b5;
-            color: #fff;
+            background: #33333318;
+            color: #000000;
             border-radius: 4px;
         }
 

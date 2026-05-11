@@ -100,6 +100,9 @@
                                 <a href="javascript:void(0)" class="btn-custom yellow mr-1" data-toggle="modal" data-target="#viewModal_{{ $row->booking_no }}">
                                     <i class="fa fa-eye"></i>
                                 </a>
+                                <a href="{{ route('admin.yarnBookingAction',['print',$row->booking_no]) }}" class="btn-custom primary mr-1" target="_blank" title="Print">
+                                    <i class="fa fa-print"></i>
+                                </a>
                                 <a href="{{ route('admin.yarnBookingAction',['edit',$row->booking_no]) }}" class="btn-custom success mr-1">
                                     <i class="bx bx-edit"></i>
                                 </a>

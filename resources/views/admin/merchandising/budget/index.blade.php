@@ -33,7 +33,7 @@
                         <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control form-control-sm me-1">
                         <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control form-control-sm">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <select name="created_by" class="form-control form-control-sm">
                             <option value="">All Created By</option>
                             @foreach($createdByUsers as $creator)
