@@ -231,6 +231,18 @@
                     </div>
 
                     <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
+                        <label class="form-label mb-0">Created By</label>
+                        <select name="created_by" class="form-control form-control-sm">
+                            <option value="">All</option>
+                            @foreach($createdByUsers as $creator)
+                                <option value="{{ $creator->id }}" {{ (string)request('created_by') === (string)$creator->id ? 'selected' : '' }}>
+                                    {{ $creator->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-1 pr-0 pl-0" style="margin-left:5px">
                         <label class="form-label mb-0">Keyword</label>
                         <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control form-control-sm"
                                placeholder="Search Order, Buyer, Style, Merchant, Invoice, Order, Composition, Fabrication, PI No">
@@ -238,7 +250,7 @@
 
 
                     {{-- Button --}}
-                    <div class="col-md-2 pl-0" style="margin-left:5px">
+                    <div class="col-md-1 pl-0" style="margin-left:5px">
                         <label class="form-label mb-0">&nbsp;</label>
                         <button type="submit" class="btn btn-success btn-sm w-10">
                             <i class="fa fa-search"></i> Search

@@ -29,15 +29,26 @@
             <!-- Search & Date Filter -->
             <form action="{{ route('admin.budget') }}" class="mb-3">
                 <div class="row g-2">
-                    <div class="col-md-6 d-flex">
-                        <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control me-1">
-                        <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control">
+                    <div class="col-md-4 d-flex">
+                        <input type="date" name="startDate" value="{{ request()->startDate }}" class="form-control form-control-sm me-1">
+                        <input type="date" name="endDate" value="{{ request()->endDate }}" class="form-control form-control-sm">
                     </div>
-                    <div class="col-md-6 d-flex">
-                        <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control me-1"
+                    <div class="col-md-4">
+                        <select name="created_by" class="form-control form-control-sm">
+                            <option value="">All Created By</option>
+                            @foreach($createdByUsers as $creator)
+                                <option value="{{ $creator->id }}" {{ (string)request('created_by') === (string)$creator->id ? 'selected' : '' }}>
+                                    {{ $creator->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex">
+                        <input type="text" name="search" value="{{ request()->search ?? '' }}" class="form-control form-control-sm me-1"
                                placeholder="Search by PI No, Buyer...">
                         <button type="submit" class="btn btn-success btn-sm">Search</button>
                     </div>
+
                 </div>
             </form>
 

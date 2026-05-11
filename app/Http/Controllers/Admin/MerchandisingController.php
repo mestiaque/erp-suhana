@@ -669,6 +669,14 @@ class MerchandisingController extends Controller
 
 
         // ================================
+        // Created By
+        // ================================
+        if ($r->filled('created_by')) {
+            $query->where('created_by', $r->created_by);
+        }
+
+
+        // ================================
         // Created Date Range
         // ================================
         if ($r->startDate || $r->endDate) {
@@ -858,6 +866,17 @@ class MerchandisingController extends Controller
             ->orderBy('pi_no')
             ->pluck('pi_no');
 
+        $createdByUsers = User::whereIn(
+                'id',
+                OrderDetail::whereNotIn('status', ['trash', 'temp'])
+                    ->whereNotNull('created_by')
+                    ->distinct()
+                    ->pluck('created_by')
+            )
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         // Build hierarchical shipment dates (year → month → dates)
         $shipmentDatesRaw = OrderDetail::whereNotIn('status',['trash','temp'])
             ->whereNotNull('shipment_date')
@@ -916,6 +935,7 @@ class MerchandisingController extends Controller
             'styles',
             'orderNos',
             'piNumbers',
+            'createdByUsers',
             'shipmentDatesHierarchy'
         );
 
@@ -1212,6 +1232,7 @@ class MerchandisingController extends Controller
                     $r->endDate   ?: now()->format('Y-m-d')
                 ]);
             })
+            ->when($r->filled('created_by'), fn($q) => $q->where('created_by', $r->created_by))
             ->when($r->status, fn($q)=>$q->where('status',$r->status))
             ->paginate(25)
             ->appends($r->all());
@@ -1224,7 +1245,18 @@ class MerchandisingController extends Controller
             ->selectRaw("SUM(status='cancelled') cancelled")
             ->first();
 
-        return view(adminTheme().'merchandising.pi.index', compact('pis','totals'));
+        $createdByUsers = User::whereIn(
+                'id',
+                ProformaInvoice::where('status', '<>', 'temp')
+                    ->whereNotNull('created_by')
+                    ->distinct()
+                    ->pluck('created_by')
+            )
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return view(adminTheme().'merchandising.pi.index', compact('pis','totals','createdByUsers'));
     }
 
     public function proformaInvoiceAction(Request $r, $action, $id = null)
@@ -1820,10 +1852,21 @@ class MerchandisingController extends Controller
                 $to   = $r->endDate   ?: now()->format('Y-m-d');
                 $q->whereBetween('created_at', [$from,$to]);
             })
+            ->when($r->filled('created_by'), fn($q) => $q->where('created_by', $r->created_by))
             ->paginate(25)
             ->appends($r->all());
 
-        return view(adminTheme().'merchandising.budget.index', compact('budgets'));
+        $createdByUsers = User::whereIn(
+                'id',
+                Budget::whereNotNull('created_by')
+                    ->distinct()
+                    ->pluck('created_by')
+            )
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return view(adminTheme().'merchandising.budget.index', compact('budgets', 'createdByUsers'));
     }
 
     public function budgetAction(Request $r, $action, $id = null)
