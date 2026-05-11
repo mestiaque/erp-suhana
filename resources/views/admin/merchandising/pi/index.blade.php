@@ -29,13 +29,24 @@
             ====================== --}}
             <form action="{{ route('admin.proformaInvoice') }}">
                 <div class="row mb-2">
-                    <div class="col-md-6 mb-1">
+                    <div class="col-md-4 mb-1">
                         <div class="input-group">
                             <input type="date" name="startDate" value="{{ request()->startDate ? Carbon\Carbon::parse(request()->startDate)->format('Y-m-d') : '' }}" class="form-control form-control-sm" />
                             <input type="date" name="endDate" value="{{ request()->endDate ? Carbon\Carbon::parse(request()->endDate)->format('Y-m-d') : '' }}" class="form-control form-control-sm" />
                         </div>
                     </div>
-                    <div class="col-md-6 mb-1">
+
+                    <div class="col-md-3 mb-1">
+                        <select name="created_by" class="form-control form-control-sm">
+                            <option value="">All Created By</option>
+                            @foreach($createdByUsers as $creator)
+                                <option value="{{ $creator->id }}" {{ (string)request('created_by') === (string)$creator->id ? 'selected' : '' }}>
+                                    {{ $creator->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-5 mb-1">
                         <div class="input-group">
                             <input type="text" name="search" value="{{ request()->search ?? '' }}" placeholder="Search " class="form-control form-control-sm" />
                             <button type="submit" class="btn btn-sm btn-success btn-sm rounded-0">Search</button>

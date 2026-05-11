@@ -1625,6 +1625,23 @@ class ProductionController extends Controller
         }
 
         // -------------------------------
+        // PRINT
+        // -------------------------------
+        if ($action == 'print') {
+            $items = YarnBooking::where('booking_no', $id)->with('pi')->get();
+            if ($items->isEmpty()) {
+                session()->flash('error', 'Booking not found');
+                return redirect()->route('admin.yarnBooking');
+            }
+            $booking = $items->first();
+            $general = general();
+            $createdByUser = \App\Models\User::find($booking->created_by);
+            return view(adminTheme().'productions.yarn-booking.print',
+                compact('items', 'booking', 'general', 'createdByUser')
+            );
+        }
+
+        // -------------------------------
         // AJAX: PI SELECT
         // -------------------------------
         if ($action == 'pi-select') {
