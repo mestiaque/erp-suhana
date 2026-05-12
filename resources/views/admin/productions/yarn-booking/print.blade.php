@@ -119,12 +119,28 @@
         if (empty($yarnCounts)) {
             $yarnCounts = [['count' => '--', 'qty' => floatval($item->required_qty)]];
         }
+
+        $composition = '--';
+        $orderItem = $item->getOrderItem();
+        if ($orderItem && $orderItem->orderDetail) {
+            $composition = $orderItem->orderDetail->items
+                ->pluck('composition')
+                ->filter()
+                ->unique()
+                ->implode(', ');
+
+            if ($composition === '') {
+                $composition = '--';
+            }
+        }
+
         foreach ($yarnCounts as $yarn) {
             $printRows[] = [
                 'buyer'      => $item->buyer_name ?? $buyerName,
                 'po_no'      => $item->order_no ?? '--',
                 'style'      => $item->style ?? '--',
                 'fabric'     => $item->fabric_type ?? '--',
+                'composition' => $composition,
                 'yarn_count' => $yarn['count'] ?? '--',
                 'qty'        => floatval($yarn['qty'] ?? 0),
                 'remarks'    => $item->remarks ?? '',
@@ -194,6 +210,7 @@
             <th style="width:130px">PO NUMBER</th>
             <th style="width:130px">Style</th>
             <th>Fabrics composition</th>
+            <th style="width:130px">Composition</th>
             <th style="width:80px">Yarn count</th>
             <th style="width:105px">Quantity (Kgs)</th>
             <th style="width:80px">REMARKS</th>
@@ -216,6 +233,7 @@
             @if($fbSpan[$idx] > 0)
                 <td class="left-text" rowspan="{{ $fbSpan[$idx] }}">{{ $row['fabric'] }}</td>
             @endif
+            <td>{{ $row['composition'] }}</td>
             <td>{{ $row['yarn_count'] }}</td>
             <td>{{ number_format($row['qty'], 2) }} Kgs</td>
             <td class="left-text">{{ $row['remarks'] }}</td>
@@ -224,7 +242,7 @@
     </tbody>
     <tfoot>
         <tr>
-            <td colspan="6" style="text-align:center; font-weight:bold;">TOTAL</td>
+            <td colspan="7" style="text-align:center; font-weight:bold;">TOTAL</td>
             <td style="text-align:center; font-weight:bold;">{{ number_format($grandTotal, 2) }} KGS</td>
             <td></td>
         </tr>

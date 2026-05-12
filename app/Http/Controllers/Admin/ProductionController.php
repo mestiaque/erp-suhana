@@ -1667,7 +1667,7 @@ class ProductionController extends Controller
             if (!$pi || $pi->items->count() < 1) {
                 return response()->json([
                     'success' => false,
-                    'html'    => '<tr><td colspan="5" class="text-center">No items found</td></tr>'
+                    'html'    => '<tr><td colspan="6" class="text-center">No items found</td></tr>'
                 ]);
             }
             $html = view(adminTheme().'productions.yarn-booking.includes.items', [

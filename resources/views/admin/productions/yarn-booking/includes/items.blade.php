@@ -1,9 +1,19 @@
 @php
     $yarnOptions = [];
     for($x = 16; $x <= 40; $x += 2){
-        $yarnOptions[] = $x.'/2';
+        $yarnOptions[] = $x.'/1';
     }
 @endphp
+{{-- @php
+    $yarnOptions = [];
+
+    for ($x = 16; $x <= 40; $x += 2) {
+        for ($y = 1; $y <= 2; $y++) {
+            $yarnOptions[] = $x . '/' . $y;
+        }
+    }
+@endphp --}}
+
 
 <div class="table-responsive">
     <table class="table table-bordered table-sm m-0">
@@ -12,8 +22,9 @@
                 <th width="5%">SL</th>
                 <th width="10%">Style</th>
                 <th width="25%">Fabrication</th>
-                <th width="45%">Yarn Count Wise Qnty</th>
-                <th width="15%">Total Req Qnty</th>
+                <th width="20%">Composition</th>
+                <th width="30%">Yarn Count Wise Qnty</th>
+                <th width="10%">Total Req Qnty</th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +36,19 @@
                     $yarns = [];
                     if (!empty($item->yarn_count)) {
                         $yarns = json_decode($item->yarn_count, true) ?? [];
+                    }
+
+                    $composition = '--';
+                    if ($item->order) {
+                        $composition = $item->order->items
+                            ->pluck('composition')
+                            ->filter()
+                            ->unique()
+                            ->implode(', ');
+
+                        if ($composition === '') {
+                            $composition = '--';
+                        }
                     }
                 @endphp
                 <tr>
@@ -48,6 +72,13 @@
                                value="{{ $item->fabric_type ?? $item->fabrication }}"
                                readonly>
                         <input type="hidden" name="items[{{ $i }}][fabrication]" value="{{ $item->fabric_type ?? $item->fabrication }}">
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               value="{{ $composition }}"
+                               readonly>
                     </td>
 
                     {{-- Yarn Count + Qnty --}}
@@ -127,7 +158,7 @@
             @endforeach
         @else
             <tr>
-                <td colspan="5" class="text-center text-muted">No Yarn Items Found</td>
+                <td colspan="6" class="text-center text-muted">No Yarn Items Found</td>
             </tr>
         @endif
 

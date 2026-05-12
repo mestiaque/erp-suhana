@@ -44,7 +44,8 @@
                                 <th width="5%" class="text-center">SL</th>
                                 <th width="15%">Style</th>
                                 <th width="25%">Fabrication</th>
-                                <th width="40%">Yarn Count & Target Qty</th>
+                                <th width="20%">Composition</th>
+                                <th width="25%">Yarn Count & Target Qty</th>
                                 <th width="15%" class="text-right">Total Req. Qnty</th>
                             </tr>
                         </thead>
@@ -55,11 +56,28 @@
                                 $grandTotal = 0;
                             @endphp
                             @forelse($booking_items as $i => $item)
-                                @php $grandTotal += $item->required_qty; @endphp
+                                @php
+                                    $grandTotal += $item->required_qty;
+
+                                    $composition = '--';
+                                    $orderItem = $item->getOrderItem();
+                                    if ($orderItem && $orderItem->orderDetail) {
+                                        $composition = $orderItem->orderDetail->items
+                                            ->pluck('composition')
+                                            ->filter()
+                                            ->unique()
+                                            ->implode(', ');
+
+                                        if ($composition === '') {
+                                            $composition = '--';
+                                        }
+                                    }
+                                @endphp
                                 <tr>
                                     <td class="text-center">{{ $i + 1 }}</td>
                                     <td>{{ $item->style ?? '--' }}</td>
                                     <td>{{ $item->fabric_type ?? '--' }}</td>
+                                    <td>{{ $composition }}</td>
                                     <td class="p-0">
                                         {{-- ইয়ার্ন কাউন্ট ও Qty কে সাব-টেবিল হিসেবে দেখানো --}}
                                         <table class="table table-sm table-borderless mb-0">
@@ -83,13 +101,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">No Items Found</td>
+                                    <td colspan="6" class="text-center text-muted">No Items Found</td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot class="bg-light font-weight-bold">
                             <tr>
-                                <td colspan="4" class="text-right">Grand Total:</td>
+                                <td colspan="5" class="text-right">Grand Total:</td>
                                 <td class="text-right text-primary">{{ number_format($grandTotal, 2) }} KG</td>
                             </tr>
                         </tfoot>

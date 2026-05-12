@@ -213,21 +213,21 @@ return [
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/yarn-receive',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'yarn_booking'
+                            'permission'  => 'yarn_receive'
                         ],
                         [
                             'title'       => 'knitting',
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/knitting-receive',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'knitting_booking'
+                            'permission'  => 'knitting_receive'
                         ],
                         [
                             'title'       => 'Dyeing',
                             'icon'        => 'fa-solid fa-arrow-right',
                             'route'       => '/admin/procurement/dyeing-receive',
                             'icon_color'  => 'text-warning',
-                            'permission'  => 'dyeing_booking'
+                            'permission'  => 'dyeing_receive'
                         ],
                     ]
                 ],
