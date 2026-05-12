@@ -1623,6 +1623,7 @@ class ProductionController extends Controller
                         'required_qty'  => $item['requisition_qty'],
                         'status'        => $r->status,
                         'supplier'      => $r->supplier,
+                        'attn'          => $r->attn ?? null,
                         'created_by'    => auth()->id(),
                     ]
                 );

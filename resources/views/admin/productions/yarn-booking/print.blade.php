@@ -81,7 +81,7 @@
     $piNo        = $pi?->pi_no ?? '--';
     $buyerName   = $booking->pi?->buyer_name ?? '--';
     $supplier    = $booking->supplier ?? '--';
-    $attnName    = $createdByUser?->name ?? '--';
+    $attnName    = $booking->attn ?? $createdByUser?->name ?? '--';
     $bookingDate = \Carbon\Carbon::parse($booking->created_at)->format('d-M-y');
     $signatures  = ['Knitting & Deying', 'Merchendiser', 'Director', 'Managing Director'];
 @endphp
@@ -250,3 +250,5 @@
 </table>
 
 @endsection
+
+

@@ -38,7 +38,12 @@
 
                     <div class="col-md-3 mb-3">
                         <label>Creditor</label>
-                        <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required>
+                        <input type="text" name="supplier" class="form-control" value="{{ $booking->supplier ?? '' }}" required placeholder="Supplier Name">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Attn. Name</label>
+                        <input type="text" name="attn" class="form-control" value="{{ $booking->attn ?? '' }}" placeholder="Attention Name">
                     </div>
 
                     <div class="col-md-3 mb-3 d-none">

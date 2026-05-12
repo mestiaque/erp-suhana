@@ -21,6 +21,7 @@ class YarnBooking extends Model
         'yarn_type',
         'required_qty',
         'supplier',
+        'attn',
         'expected_delivery',
         'remarks',
         'created_by',
