@@ -89,7 +89,7 @@
                             @if(count($yarns) > 0)
                                 @foreach($yarns as $y)
                                     <tr class="yarn-row">
-                                        <td width="45%">
+                                        <td width="35%">
                                             <select name="items[{{ $i }}][yarn_count][]"
                                                     class="form-control form-control-sm yarn-count-select"
                                                     required>
@@ -102,14 +102,21 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td width="35%">
+                                        <td width="25%">
+                                            <input type="text"
+                                                   name="items[{{ $i }}][yarn_type][]"
+                                                   class="form-control form-control-sm yarn-type"
+                                                   value="{{ $y['type'] ?? '' }}"
+                                                   placeholder="Type (e.g. Cotton)">
+                                        </td>
+                                        <td width="25%">
                                             <input type="number" step="0.1"
                                                    name="items[{{ $i }}][yarn_qty][]"
                                                    class="form-control form-control-sm yarn-qty"
                                                    value="{{ $y['qty'] }}"
                                                    min="">
                                         </td>
-                                        <td width="20%" class="text-center">
+                                        <td width="15%" class="text-center">
                                             <button type="button" class="btn btn-success btn-sm addRow">+</button>
                                             <button type="button" class="btn btn-danger btn-sm removeRow">-</button>
                                         </td>
@@ -117,7 +124,7 @@
                                 @endforeach
                             @else
                                 <tr class="yarn-row">
-                                    <td>
+                                    <td width="35%">
                                         <select name="items[{{ $i }}][yarn_count][]"
                                                 class="form-control form-control-sm yarn-count-select"
                                                 required>
@@ -127,14 +134,21 @@
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td>
+                                    <td width="25%">
+                                        <input type="text"
+                                               name="items[{{ $i }}][yarn_type][]"
+                                               class="form-control form-control-sm yarn-type"
+                                               value=""
+                                               placeholder="Type (e.g. Cotton)">
+                                    </td>
+                                    <td width="25%">
                                         <input type="number" step="0.1"
                                                name="items[{{ $i }}][yarn_qty][]"
                                                class="form-control form-control-sm yarn-qty"
                                                value="0"
                                                min="0">
                                     </td>
-                                    <td class="text-center">
+                                    <td width="15%" class="text-center">
                                         <button type="button" class="btn btn-success btn-sm addRow">+</button>
                                         <button type="button" class="btn btn-danger btn-sm removeRow">-</button>
                                     </td>

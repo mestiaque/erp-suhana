@@ -135,13 +135,21 @@
         }
 
         foreach ($yarnCounts as $yarn) {
+            $yarnCount = trim($yarn['count'] ?? '--');
+            $yarnType = trim($yarn['type'] ?? '');
+            $yarnLabel = $yarnCount;
+
+            if ($yarnType !== '') {
+                $yarnLabel .= ' ' . $yarnType;
+            }
+
             $printRows[] = [
                 'buyer'      => $item->buyer_name ?? $buyerName,
                 'po_no'      => $item->order_no ?? '--',
                 'style'      => $item->style ?? '--',
                 'fabric'     => $item->fabric_type ?? '--',
                 'composition' => $composition,
-                'yarn_count' => $yarn['count'] ?? '--',
+                'yarn_count' => $yarnLabel,
                 'qty'        => floatval($yarn['qty'] ?? 0),
                 'remarks'    => $item->remarks ?? '',
             ];
@@ -152,11 +160,13 @@
     $bpKey = fn($r) => $r['buyer'] . '||' . $r['po_no'];
     $stKey = fn($r) => $r['buyer'] . '||' . $r['po_no'] . '||' . $r['style'];
     $fbKey = fn($r) => $r['buyer'] . '||' . $r['po_no'] . '||' . $r['style'] . '||' . $r['fabric'];
+    $cpKey = fn($r) => $r['buyer'] . '||' . $r['po_no'] . '||' . $r['style'] . '||' . $r['composition'];
 
     $n       = count($printRows);
     $bpSpan  = array_fill(0, $n, 0);
     $stSpan  = array_fill(0, $n, 0);
     $fbSpan  = array_fill(0, $n, 0);
+    $cpSpan  = array_fill(0, $n, 0);
 
     // buyer+po spans
     $i = 0;
@@ -199,6 +209,22 @@
         $i = $stEnd;
     }
 
+    // composition spans (within each style group)
+    $i = 0;
+    while ($i < $n) {
+        $stEnd = $i;
+        while ($stEnd < $n && $stKey($printRows[$stEnd]) === $stKey($printRows[$i])) { $stEnd++; }
+
+        $k = $i;
+        while ($k < $stEnd) {
+            $m = $k;
+            while ($m < $stEnd && $cpKey($printRows[$m]) === $cpKey($printRows[$k])) { $m++; }
+            $cpSpan[$k] = $m - $k;
+            $k = $m;
+        }
+        $i = $stEnd;
+    }
+
     $grandTotal = array_sum(array_column($printRows, 'qty'));
 @endphp
 
@@ -233,7 +259,10 @@
             @if($fbSpan[$idx] > 0)
                 <td class="left-text" rowspan="{{ $fbSpan[$idx] }}">{{ $row['fabric'] }}</td>
             @endif
-            <td>{{ $row['composition'] }}</td>
+
+            @if($cpSpan[$idx] > 0)
+                <td class="left-text" rowspan="{{ $cpSpan[$idx] }}">{{ $row['composition'] }}</td>
+            @endif
             <td>{{ $row['yarn_count'] }}</td>
             <td>{{ number_format($row['qty'], 2) }} Kgs</td>
             <td class="left-text">{{ $row['remarks'] }}</td>

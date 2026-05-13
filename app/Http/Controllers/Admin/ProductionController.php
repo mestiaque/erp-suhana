@@ -1576,6 +1576,7 @@ class ProductionController extends Controller
                 'items.*.fabrication' => 'required|string',
                 'items.*.style_no' => 'required|string',
                 'items.*.yarn_count' => 'required|array',
+                'items.*.yarn_type' => 'nullable|array',
                 'items.*.yarn_qty' => 'required|array',
                 'items.*.requisition_qty' => 'required|numeric|min:0',
                 'status' => 'required|string'
@@ -1598,9 +1599,11 @@ class ProductionController extends Controller
                 if (isset($item['yarn_count'], $item['yarn_qty'])) {
                     foreach ($item['yarn_count'] as $index => $count) {
                         $qty = $item['yarn_qty'][$index] ?? 0;
+                        $type = trim($item['yarn_type'][$index] ?? '');
                         if ($count) {
                             $yarnData[] = [
                                 'count' => $count,
+                                'type'  => $type,
                                 'qty'   => floatval($qty)
                             ];
                         }

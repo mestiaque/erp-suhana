@@ -124,6 +124,7 @@ $(document).ready(function() {
 
         // reset values
         $clone.find('select').prop('selectedIndex', 0);
+        $clone.find('.yarn-type').val('');
         $clone.find('.yarn-qty').val(0);
 
         $row.closest('.yarnBody').append($clone);
