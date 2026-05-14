@@ -21,7 +21,6 @@
                         <i class="bx bx-plus"></i> Add Yarn Booking
                     </a>
                 {{-- @endcan --}}
-
                     <a href="{{ route('admin.yarnBooking') }}" class="btn-custom yellow">
                         <i class="bx bx-rotate-left"></i>
                     </a>
