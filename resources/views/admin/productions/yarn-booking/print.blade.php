@@ -157,16 +157,27 @@
     }
 
     /* ── Compute rowspans ── */
+    $buyerKey = fn($r) => $r['buyer'];
     $bpKey = fn($r) => $r['buyer'] . '||' . $r['po_no'];
     $stKey = fn($r) => $r['buyer'] . '||' . $r['po_no'] . '||' . $r['style'];
     $fbKey = fn($r) => $r['buyer'] . '||' . $r['po_no'] . '||' . $r['style'] . '||' . $r['fabric'];
     $cpKey = fn($r) => $r['buyer'] . '||' . $r['po_no'] . '||' . $r['style'] . '||' . $r['composition'];
 
     $n       = count($printRows);
+    $buyerSpan = array_fill(0, $n, 0);
     $bpSpan  = array_fill(0, $n, 0);
     $stSpan  = array_fill(0, $n, 0);
     $fbSpan  = array_fill(0, $n, 0);
     $cpSpan  = array_fill(0, $n, 0);
+
+    // buyer spans (across all po numbers)
+    $i = 0;
+    while ($i < $n) {
+        $j = $i;
+        while ($j < $n && $buyerKey($printRows[$j]) === $buyerKey($printRows[$i])) { $j++; }
+        $buyerSpan[$i] = $j - $i;
+        $i = $j;
+    }
 
     // buyer+po spans
     $i = 0;

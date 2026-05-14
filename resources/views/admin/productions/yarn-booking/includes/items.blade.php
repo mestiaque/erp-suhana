@@ -170,6 +170,10 @@
                 </tr>
 
             @endforeach
+            <tr>
+                <td colspan="5" class="text-right font-weight-bold">Grand Total (Kgs):</td>
+                <td><input type="number" step="0.1" id="grand_total" class="form-control form-control-sm" value="0" readonly></td>
+            </tr>
         @else
             <tr>
                 <td colspan="6" class="text-center text-muted">No Yarn Items Found</td>

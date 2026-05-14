@@ -24,12 +24,18 @@
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label>PI Number</label>
-                        <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.yarnBookingAction', ['pi-select', $booking->id ?? 0]) }}" required>
+                        {{-- @dd($booking?->pi_id) --}}
+                        @if($booking?->pi_id)
+                        <input type="text" readonly class="form-control" value="{{ $booking->pi->pi_no ?? '' }}">
+                        <input type="hidden" name="pi_id" value="{{ $booking->pi_id }}">
+                        @else
+                        <select class="form-control" name="pi_id" id="pi_select" data-url="{{ route('admin.yarnBookingAction', ['pi-select', $booking->id ?? 0]) }}" required >
                             <option value="">-- Select PI Number --</option>
                             @foreach($pis as $pi)
                                 <option value="{{ $pi->id }}" {{ ($booking?->pi_id ?? '') == $pi->id ? 'selected' : '' }}>{{ $pi->pi_no }}</option>
                             @endforeach
                         </select>
+                        @endif
                     </div>
                     <div class="col-md-3 mb-3">
                         <label>Buyer Name</label>
@@ -89,6 +95,15 @@ $(document).ready(function() {
             if(res.success){
                 $('.buyer_name').val(res.order.buyer_name);
                 $('.cardItems').html(res.html);
+
+                // Recalculate totals after new items are loaded
+                $('.cardItems tr').each(function() {
+                    let $itemRow = $(this);
+                    if ($itemRow.find('.total-qty').length) {
+                        calculateItemTotal($itemRow);
+                    }
+                });
+                calculateGrandTotal();
             } else {
                 alert('PI not found');
                 $('.cardItems').html('<tr><td colspan="7" class="text-center">No items found</td></tr>');
@@ -113,7 +128,19 @@ $(document).ready(function() {
     $(document).on('input', '.yarn-qty', function() {
         let $yarnRow = $(this).closest('.yarnBody').closest('tr'); // outer item row
         calculateItemTotal($yarnRow);
+        calculateGrandTotal();
     });
+
+    // ----------------------------
+    // Calculate grand total for all items
+    // ----------------------------
+    function calculateGrandTotal() {
+        let grandTotal = 0;
+        $('.total-qty').each(function() {
+            grandTotal += parseFloat($(this).val()) || 0;
+        });
+        $('#grand_total').val(grandTotal.toFixed(2));
+    }
 
     // ----------------------------
     // Add new yarn row
@@ -128,6 +155,7 @@ $(document).ready(function() {
         $clone.find('.yarn-qty').val(0);
 
         $row.closest('.yarnBody').append($clone);
+        calculateGrandTotal();
     });
 
     // ----------------------------
@@ -141,6 +169,7 @@ $(document).ready(function() {
             // recalc total for the remaining rows
             let $itemRow = $tbody.closest('tr');
             calculateItemTotal($itemRow);
+            calculateGrandTotal();
         }
     });
 
@@ -153,6 +182,9 @@ $(document).ready(function() {
             calculateItemTotal($itemRow);
         }
     });
+
+    // Calculate grand total on page load
+    calculateGrandTotal();
 
 });
 
