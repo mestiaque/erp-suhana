@@ -32,8 +32,10 @@ class HrOptionsService
     public static function getOptionsForEmployee(): callable
     {
         $options = self::getOptions();
+
         return function ($employee, $request = null, $factory = null, $salaryKey = null, $profile = null, $nominee = null) use ($options) {
-            $language = data_get($request ?? null, 'language', 'bn');
+            $language = data_get($request ?? null, 'language', 'en');
+
             $isBangla = $language === 'bn';
             $t = fn (string $bn, string $en) => $isBangla ? $bn : $en;
             $na = $t('--', '--');

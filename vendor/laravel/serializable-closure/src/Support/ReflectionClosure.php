@@ -120,9 +120,6 @@ class ReflectionClosure extends ReflectionFunction
         $isUsingScope = false;
         $isUsingThisObject = false;
 
-        $closureArgsInnerFuncCount = 0;
-        $closureArgsBraceDepth = 0;
-
         $candidates = [];
 
         for ($i = 0, $l = count($tokens); $i < $l; $i++) {
@@ -188,41 +185,7 @@ class ReflectionClosure extends ReflectionFunction
                     }
                     break;
                 case 'closure_args':
-                    $insideClosureArgsInner = $closureArgsBraceDepth > 0 || $closureArgsInnerFuncCount > 0;
-
-                    if ($insideClosureArgsInner) {
-                        switch ($token[0]) {
-                            case T_FUNCTION:
-                                $closureArgsInnerFuncCount++;
-                                $code .= $token[1];
-                                break;
-                            case T_CURLY_OPEN:
-                            case T_DOLLAR_OPEN_CURLY_BRACES:
-                                $closureArgsBraceDepth++;
-                                $code .= $token[1];
-                                break;
-                            case '{':
-                                if ($closureArgsInnerFuncCount > 0) {
-                                    $closureArgsInnerFuncCount--;
-                                }
-                                $closureArgsBraceDepth++;
-                                $code .= '{';
-                                break;
-                            case '}':
-                                $closureArgsBraceDepth--;
-                                $code .= '}';
-                                break;
-                            default:
-                                $code .= is_array($token) ? $token[1] : $token;
-                        }
-                        break;
-                    }
-
                     switch ($token[0]) {
-                        case T_FUNCTION:
-                            $closureArgsInnerFuncCount++;
-                            $code .= $token[1];
-                            break;
                         case T_NAME_QUALIFIED:
                             [$id_start, $id_start_ci, $id_name] = $this->parseNameQualified($token[1]);
                             $context = 'args';
@@ -338,8 +301,6 @@ class ReflectionClosure extends ReflectionFunction
                                 $isShortClosure = $reset['isShortClosure'];
                                 $isUsingThisObject = $reset['isUsingThisObject'];
                                 $isUsingScope = $reset['isUsingScope'];
-                                $closureArgsInnerFuncCount = $reset['closureArgsInnerFuncCount'];
-                                $closureArgsBraceDepth = $reset['closureArgsBraceDepth'];
                             } elseif ($inside_structure) {
                                 $inside_structure = ! ($open === $inside_structure_mark);
                             }
@@ -363,8 +324,6 @@ class ReflectionClosure extends ReflectionFunction
                                     $isShortClosure = $reset['isShortClosure'];
                                     $isUsingThisObject = $reset['isUsingThisObject'];
                                     $isUsingScope = $reset['isUsingScope'];
-                                    $closureArgsInnerFuncCount = $reset['closureArgsInnerFuncCount'];
-                                    $closureArgsBraceDepth = $reset['closureArgsBraceDepth'];
                                     continue 3;
                                 }
                                 $open--;
@@ -382,8 +341,6 @@ class ReflectionClosure extends ReflectionFunction
                                 $isShortClosure = $reset['isShortClosure'];
                                 $isUsingThisObject = $reset['isUsingThisObject'];
                                 $isUsingScope = $reset['isUsingScope'];
-                                $closureArgsInnerFuncCount = $reset['closureArgsInnerFuncCount'];
-                                $closureArgsBraceDepth = $reset['closureArgsBraceDepth'];
                                 continue 3;
                             }
                             $code .= $token[0];
@@ -1395,8 +1352,6 @@ class ReflectionClosure extends ReflectionFunction
             'isShortClosure' => false,
             'isUsingThisObject' => false,
             'isUsingScope' => false,
-            'closureArgsInnerFuncCount' => 0,
-            'closureArgsBraceDepth' => 0,
         ];
     }
 
