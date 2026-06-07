@@ -19,33 +19,33 @@
     }
 
 
-        .stats-card-box{
-            background-color: #fafafa;
-            border: 1px solid #e0e0e0;
-            padding: 10px 15px 10px 80px;
-            margin-bottom: 0
-        }
-        .stats-card-box .icon-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
-        }
+    .stats-card-box{
+        background-color: #fafafa;
+        border: 1px solid #e0e0e0;
+        padding: 10px 15px 10px 80px;
+        margin-bottom: 0
+    }
+    .stats-card-box .icon-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
 
-        .stats-card-box .sub-title {
-            color: #000;
-        }
+    .stats-card-box .sub-title {
+        color: #000;
+    }
+    .stats-card-box h3 {
+        font-size: 20px;
+    }
+
+    @media (max-width: 1400px) {
         .stats-card-box h3 {
-            font-size: 20px;
+            font-size: 14px;
         }
-
-        @media (max-width: 1400px) {
-            .stats-card-box h3 {
-                font-size: 14px;
-            }
-        }
+    }
 
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
