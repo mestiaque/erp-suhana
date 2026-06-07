@@ -5588,3 +5588,21 @@ Stack trace:
 #17 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->Illuminate\Foundation\Bootstrap\{closure}(Object(Illuminate\Contracts\Container\BindingResolutionException))
 #18 {main}
   thrown in /home/erpanrf/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 1124
+[19-May-2026 13:52:02 UTC] PHP Warning:  require(/home/erpanrf/public_html/vendor/symfony/polyfill-intl-normalizer/bootstrap.php): Failed to open stream: No such file or directory in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
+[19-May-2026 13:52:02 UTC] PHP Warning:  require(/home/erpanrf/public_html/vendor/symfony/polyfill-intl-normalizer/bootstrap.php): Failed to open stream: No such file or directory in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
+[19-May-2026 13:52:02 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/erpanrf/public_html/vendor/composer/../symfony/polyfill-intl-normalizer/bootstrap.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/erpanrf/public_html/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/erpanrf/public_html/vendor/composer/autoload_real.php(45): {closure}('e69f7f6ee287b96...', '/home/erpanrf/p...')
+#1 /home/erpanrf/public_html/vendor/autoload.php(25): ComposerAutoloaderInite1bc6d3872eef2fe0bb3d7b205b9ba76::getLoader()
+#2 /home/erpanrf/public_html/public/index.php(14): require('/home/erpanrf/p...')
+#3 {main}
+  thrown in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
+[19-May-2026 13:52:05 UTC] PHP Warning:  require(/home/erpanrf/public_html/vendor/symfony/polyfill-intl-idn/bootstrap.php): Failed to open stream: No such file or directory in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
+[19-May-2026 13:52:05 UTC] PHP Warning:  require(/home/erpanrf/public_html/vendor/symfony/polyfill-intl-idn/bootstrap.php): Failed to open stream: No such file or directory in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
+[19-May-2026 13:52:05 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/erpanrf/public_html/vendor/composer/../symfony/polyfill-intl-idn/bootstrap.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/erpanrf/public_html/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/erpanrf/public_html/vendor/composer/autoload_real.php(45): {closure}('f598d06aa772fa3...', '/home/erpanrf/p...')
+#1 /home/erpanrf/public_html/vendor/autoload.php(25): ComposerAutoloaderInite1bc6d3872eef2fe0bb3d7b205b9ba76::getLoader()
+#2 /home/erpanrf/public_html/public/index.php(14): require('/home/erpanrf/p...')
+#3 {main}
+  thrown in /home/erpanrf/public_html/vendor/composer/autoload_real.php on line 41
