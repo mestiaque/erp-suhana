@@ -128,6 +128,7 @@
                 <thead>
                     <tr>
                         <th style="min-width: 100px;width: 100px;">SL</th>
+                        <th style="min-width: 100px;">I.O.U Date</th>
                         <th style="min-width: 120px;">Adjust Date</th>
                         <th style="min-width: 100px;">Company</th>
                         <th style="min-width: 100px;">Receiver</th>
@@ -157,6 +158,8 @@
                             </span>
                             @endif
                         </td>
+
+                        <td>{{$Iou->created_at->format('d.m.Y')}}</td>
                         <td>{{$Iou->updated_at->format('d.m.Y')}}</td>
                         <td>{{ $Iou->company_name ?? '--' }}</td>
                         <td>{{ $Iou->receiver_name ?? '--' }}</td>
