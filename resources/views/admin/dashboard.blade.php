@@ -454,6 +454,11 @@ h4{
 @endpush
 
 @section('contents')
+{{-- @dd(can('accounts_center.all')) --}}
+
+{{-- @if(can('accounts_center.all') && view()->exists('erpaccount::phase4.dashboard.index'))
+    @include('erpaccount::phase4.dashboard.index')
+@else --}}
 <div class="flex-grow-1">
     <!-- Breadcrumb -->
     <div class="breadcrumb-area">
@@ -921,7 +926,7 @@ h4{
 
 
 </div>
-
+{{-- @endif --}}
 
 
 @endsection
