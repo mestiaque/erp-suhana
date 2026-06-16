@@ -316,70 +316,70 @@ return [
             'icon'       => 'fa-solid fa-file-invoice-dollar',
             'icon_color' => 'text-primary',
             'order'      => 7,
-            'permission' => '',
+            'permission' => 'no-access',
             'children'   => [
                 [
                     'title'       => 'Bank BTB LC',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/commercial/btb-lc',
                     'icon_color'  => 'text-warning',
-                    'permission'  => 'general'
+                    'permission'  => 'no-access'
                 ],
                 [
                     'title'      => 'Export LC/Sales Contact',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/export-lc',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 [
                     'title'      => 'Purchase Order (PO)',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/purchase-orders',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 [
                     'title'      => 'Proforma Invoice (PI)',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/proforma-invoice',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 [
                     'title'       => 'Pricing List',
                     'icon'        => 'fa-solid fa-arrow-right',
                     'route'       => '/admin/commercial/pricing-list',
                     'icon_color'  => 'text-warning',
-                    'permission'  => 'general'
+                    'permission'  => 'no-access'
                 ],
                 [
                     'title'      => 'Commercial Invoice',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/invoices',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 [
                     'title'      => 'Packing List',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/packing-list',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 [
                     'title'      => 'Shipping Bill/Docs',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/shipping-docs',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 [
                     'title'      => 'Export Realization',
                     'icon'       => 'fa-solid fa-arrow-right',
                     'route'      => '/admin/commercial/export-realization',
                     'icon_color' => 'text-warning',
-                    'permission' => 'general'
+                    'permission' => 'no-access'
                 ],
                 // [
                 //     'title'      => 'Commercial Reports',

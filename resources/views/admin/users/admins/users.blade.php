@@ -4,255 +4,220 @@
 @endsection
 @push('css')
 <style>
-    .adminProfile img {
-        height: 150px;
-        max-width: 100%;
-        width: unset;
-        margin: auto;
-    }
-    .info ul {
-        padding: 0;
-        margin: 0;
-    }
-    .adminProfile {
-        margin-bottom: 15px;
-    }
+    .table td, .table th { vertical-align: middle; }
 </style>
 @endpush
 @section('contents')
 
-
 @include(adminTheme().'alerts')
 <div class="flex-grow-1">
-    <!-- Start -->
-    <div class="card mb-30">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3>Admin List</h3>
-            <div class="dropdown">
-
-                @can('admin.add')
-                <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
-                    <i class="bx bx-plus"></i> User
-                </a>
-                @endcan
-                <a href="{{route('admin.usersAdmin')}}" class="btn-custom yellow">
-                    <i class="bx bx-rotate-left"></i>
-                </a>
-            </div>
+<div class="card mb-30">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">Admin List</h3>
+        <div>
+            @can('admin.add')
+            <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
+                <i class="bx bx-plus"></i> User
+            </a>
+            @endcan
+            <a href="{{route('admin.usersAdmin')}}" class="btn-custom yellow ml-1">
+                <i class="bx bx-rotate-left"></i>
+            </a>
         </div>
-        <div class="card-body">
-            <form action="{{route('admin.usersAdmin')}}">
-                <div class="row">
-                    <div class="col-md-4 mb-1">
-                    <select name="role" class="form-control {{$errors->has('role')?'error':''}}">
-                        <option value="">Select Role</option>
+    </div>
+    <div class="card-body">
+
+        {{-- Search / Filter --}}
+        <form action="{{route('admin.usersAdmin')}}" class="mb-3">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="mb-0 small">Role</label>
+                    <select name="role" class="form-control form-control-sm">
+                        <option value="">All Roles</option>
                         @foreach($roles as $role)
-                        <option value="{{$role->id}}" {{request()->role==$role->id?'selected':''}}>{{$role->name}}</option>
+                        <option value="{{$role->id}}" {{request()->role == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
                         @endforeach
                     </select>
-                    </div>
-                    <div class="col-md-8 mb-1">
-                        <div class="input-group">
-                            <input type="text" name="search" value="{{request()->search?request()->search:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
-                            <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                        </div>
+                </div>
+                <div class="col-md-5">
+                    <label class="mb-0 small">Search</label>
+                    <div class="d-flex">
+                        <input type="text" name="search" value="{{request()->search}}" placeholder="Name, Email, Phone, Employee ID" class="form-control form-control-sm">
+                        <button type="submit" class="btn btn-success btn-sm rounded-0 ml-1">Search</button>
                     </div>
                 </div>
-            </form>
-            <br>
+            </div>
+        </form>
 
-            <form action="{{route('admin.usersAdmin')}}">
-
-                <div class="row">
-                    <div class="col-md-4">
-                        @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
-                        <div class="input-group mb-1">
-                            <select class="form-control form-control-sm rounded-0" name="action" required="">
-                                <option value="">Select Action</option>
-                                @can('admin.edit')
-                                <option value="1">Active</option>
-                                <option value="2">Inactive</option>
-                                @endcan
-                                @can('admin.delete')
-                                <option value="5">Delete</option>
-                                @endcan
-                            </select>
-                            <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
-                        </div>
-                        @endif
-                    </div>
-
-                    <div class="col-md-4"></div>
-
-                    <div class="col-md-4">
-                        <ul class="statuslist">
-                            <li><a href="{{route('admin.usersAdmin')}}" class="{{request()->status?'':'active'}}">All ({{$totals->total}})</a></li>
-                            <li><a href="{{route('admin.usersAdmin',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}">Active ({{$totals->active}})</a></li>
-                            <li><a href="{{route('admin.usersAdmin',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}">Inactive ({{$totals->inactive}})</a></li>
-                            @if($totals->deleted > 0)
-                                <li><a href="{{route('admin.usersAdmin',['view'=>'deleted'])}}" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
-                            @endif
-                        </ul>
-                    </div>
+        {{-- Bulk Actions + Status Tabs --}}
+        <form action="{{route('admin.usersAdmin')}}">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+                @if(auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete'))
+                <div class="d-flex">
+                    <select class="form-control form-control-sm rounded-0 mr-1" name="action" required>
+                        <option value="">Select Action</option>
+                        @can('admin.edit')
+                        <option value="1">Active</option>
+                        <option value="2">Inactive</option>
+                        @endcan
+                        @can('admin.delete')
+                        <option value="5">Delete</option>
+                        @endcan
+                    </select>
+                    <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Confirm action?')">Go</button>
                 </div>
+                @else <div></div>
+                @endif
+                <ul class="statuslist mb-0">
+                    <li><a href="{{route('admin.usersAdmin')}}" class="{{!request()->status ? 'active' : ''}}">All ({{$totals->total}})</a></li>
+                    <li><a href="{{route('admin.usersAdmin',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}">Active ({{$totals->active}})</a></li>
+                    <li><a href="{{route('admin.usersAdmin',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}">Inactive ({{$totals->inactive}})</a></li>
+                    @if($totals->deleted > 0)
+                    <li><a href="{{route('admin.usersAdmin',['view'=>'deleted'])}}" class="text-danger">Deleted ({{$totals->deleted}})</a></li>
+                    @endif
+                </ul>
+            </div>
 
-                {{-- Staff Table --}}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th style="width:80px;">
+                                @if(auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete'))
+                                <div class="checkbox d-inline-block mr-1">
+                                    <input class="inp-cbx" id="checkall" type="checkbox" style="display:none;" />
+                                    <label class="cbx mb-0" for="checkall">
+                                        <span><svg width="12px" height="10px" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                                    </label>
+                                </div>
+                                @endif
+                                SL
+                            </th>
+                            <th style="width:60px;">Image</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Employee ID</th>
+                            <th>Added Date</th>
+                            <th>Added By</th>
+                            <th style="width:80px;">Status</th>
+                            <th style="width:80px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($users as $i => $user)
+                        <tr>
+                            <td>
+                                @if($user->id != Auth::id() && (auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete')))
+                                <div class="checkbox d-inline-block mr-1">
+                                    <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display:none;" />
+                                    <label class="cbx mb-0" for="cbx_{{$user->id}}">
+                                        <span><svg width="12px" height="10px" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                                    </label>
+                                </div>
+                                @endif
+                                {{$users->firstItem() + $i}}
+                            </td>
+                            <td style="padding:3px 5px;">
+                                <img src="{{asset($user->image())}}" style="max-width:48px;max-height:40px;border-radius:4px;" />
+                            </td>
+                            <td>
+                                <span class="font-weight-bold">{{$user->name}}</span>
+                                @if($user->permission)
+                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                @endif
+                            </td>
+                            <td>{{$user->email ?? '--'}}</td>
+                            <td>{{$user->mobile ?? '--'}}</td>
+                            <td>{{$user->employee_id ?? '--'}}</td>
+                            <td>{{$user->created_at ? $user->created_at->format('d.m.Y') : '--'}}</td>
+                            <td>{{$user->addedBy->name ?? '--'}}</td>
+                            <td>
+                                @if($user->status)
+                                <span class="badge badge-success">Active</span>
+                                @else
+                                <span class="badge badge-warning">Inactive</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    @can('admin.edit')
+                                    <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom success mr-1" title="Edit">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    @endcan
+                                    @if($user->id != Auth::id())
+                                    @can('admin.delete')
+                                    <a href="{{route('admin.usersAdminAction',['delete',$user->id])}}" onclick="return confirm('Delete this user?')" class="btn-custom danger" title="Delete">
+                                        <i class="bx bx-trash"></i>
+                                    </a>
+                                    @endcan
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="10" class="text-center text-muted py-4">No users found.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </form>
 
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                            <tr>
-                                <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
-                                    @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
-                                    <div class="checkbox mr-3">
-                                        <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
-                                        <label class="cbx" for="checkall">
-                                            <span>
-                                                <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                                    <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                </svg>
-                                            </span>
-                                            All <span class="checkCounter"></span>
-                                        </label>
-                                    </div>
-                                    @else -- @endif
-                                </th>
-                                <th style="min-width: 70px; width: 70px;">Image</th>
-                                <th style="min-width: 200px; width: 200px;">Name</th>
-                                <th style="min-width: 100px; width: 100px;">ID Number</th>
-                                <th style="min-width: 150px;">Mobile / Email</th>
-                                <th style="min-width: 100px;">Designation</th>
-                                <th style="min-width: 90px;">Join Date</th>
-                                <th style="min-width: 80px; width: 80px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($users as $i=>$user)
-                            <tr>
-                                <td style=" position: relative;">
-                                    @if($user->id==Auth::id()) @else
-                                    @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
-                                    <div class="checkbox">
-                                        <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
-                                        <label class="cbx" for="cbx_{{$user->id}}">
-                                            <span>
-                                                <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                                    <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                </svg>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    @endif
-                                    @endif
-                                    <span style="margin:0 5px;">{{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}</span>
-                                    @if($user->status)
-                                    <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
-                                        <i class="bx bx-check-circle"></i>
-                                    </span>
-                                    @else
-                                    <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
-                                        <i class="bx bx-analyse"></i>
-                                    </span>
-                                    @endif
-                                </td>
-                                <td style="padding: 0 3px;">
-                                    <span>
-                                        <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
-                                    </span>
-                                </td>
-                                <td><a href="{{route('admin.usersAdminAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
-                                    @if($user->permission)
-                                    <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
-                                    @endif
-                                </td>
-                                <td>{{ $user->employee_id ?? '--' }}</td>
-                                <td>{{$user->mobile ?? $user->email ?? '--'}}</td>
-                                <td>
-                                    @if($user->designation)
-                                    <span style="color: #009688;font-weight: bold;">{{$user->designation->name}}</span>
-                                    @else
-                                    <span style="color: #FF9800;">No Designation</span>
-                                    @endif
-                                </td>
-                                <td>{{ $user?->addedby_at?->format('d.m.Y') ?? '--' }}</td>
-                                <td style="padding: 8px 5px; text-align: center;">
-                                     @if(auth()->user()->hasPermission('admin.edit')  || auth()->user()->hasPermission('admin.delete'))
-                                        @can('admin.edit')
-                                            <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom success">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                        @endcan
-                                        @if($user->id==Auth::id()) @else
-                                            @can('admin.delete')
-                                                <a href="{{route('admin.usersAdminAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                                    <i class="bx bx-trash"></i>
-                                                </a>
-                                            @endcan
-                                        @endif
-                                    @else -- @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </form>
-
-        </div>
+        {{ $users->links('pagination::bootstrap-5') }}
     </div>
 </div>
+</div>
 
-<!-- Modal -->
-<div class="modal fade text-left" id="AddUser" tabindex="-1" >
+{{-- Add User Modal --}}
+@can('admin.add')
+<div class="modal fade" id="AddUser" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="{{route('admin.usersAdminAction','create')}}" method="post">
+            <form action="{{route('admin.usersAdminAction','create')}}" method="post" id="AddAdminForm">
                 @csrf
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel1">Add Admin User</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times; </span>
-                    </button>
+                    <h4 class="modal-title">Add Admin User</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                        <div class="form-group">
-                        <label for="name">Name* </label>
-                        <div class="controls">
-                            <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
-                            @if ($errors->has('name'))
-                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-                            @endif
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="name">Mobile* </label>
-                            <div class="controls">
-                                {{-- <input type="mobile" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required> --}}
-                                    <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" required>
-
-                                @if ($errors->has('mobile'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="name">Email </label>
-                            <div class="controls">
-                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
-                                @if ($errors->has('email'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
-                                @endif
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label>Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm {{$errors->has('name')?'is-invalid':''}}" name="name" placeholder="Enter Name" required>
+                        @error('name')<div class="invalid-feedback">{{$message}}</div>@enderror
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" class="form-control form-control-sm {{$errors->has('mobile')?'is-invalid':''}}" name="mobile" id="addAdminMobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="11 digits starting with 0" placeholder="01XXXXXXXXX">
+                        @error('mobile')<div class="invalid-feedback">{{$message}}</div>@enderror
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Email</label>
+                        <input type="email" class="form-control form-control-sm {{$errors->has('email')?'is-invalid':''}}" name="email" id="addAdminEmail" placeholder="Enter Email">
+                        @error('email')<div class="invalid-feedback">{{$message}}</div>@enderror
+                        <small class="text-muted">Phone বা Email যেকোনো একটা দিলেই হবে — password auto-generate হবে।</small>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add User</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add User</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+@endcan
 
-
- @endsection @push('js') @endpush
+@endsection
+@push('js')
+<script>
+$(document).on('submit', '#AddAdminForm', function (e) {
+    const mobile = ($('#addAdminMobile').val() || '').trim();
+    const email  = ($('#addAdminEmail').val() || '').trim();
+    if (!mobile && !email) {
+        e.preventDefault();
+        alert('Phone বা Email যেকোনো একটি দিতে হবে।');
+    }
+});
+</script>
+@endpush

@@ -1,329 +1,156 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('Customer Users')}}</title>
+<title>{{websiteTitle('User List')}}</title>
 @endsection
 @push('css')
-
+<style>
+    .table td, .table th { vertical-align: middle; }
+</style>
 @endpush
 @section('contents')
-
-
 @include(adminTheme().'alerts')
 <div class="flex-grow-1">
-<!-- Start -->
 <div class="card mb-30">
     <div class="card-header d-flex justify-content-between align-items-center">
-         <h3>Employee List</h3>
-         <div class="dropdown">
-
+        <h3 class="mb-0">User List</h3>
+        <div>
             @can('employee.add')
-             {{-- <a href="{{route('admin.usersCustomerAction',['employee-create'])}}" class="btn-custom primary" >
-                 <i class="bx bx-plus"></i> Employee
-             </a> --}}
-             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
-                 <i class="bx bx-plus"></i> User
-             </a>
-             @endcan
-             <a href="{{route('admin.usersCustomer')}}" class="btn-custom yellow">
-                 <i class="bx bx-rotate-left"></i>
-             </a>
-         </div>
+            <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
+                <i class="bx bx-plus"></i> User
+            </a>
+            @endcan
+            <a href="{{route('admin.usersCustomer')}}" class="btn-custom yellow ml-1">
+                <i class="bx bx-rotate-left"></i>
+            </a>
+        </div>
     </div>
     <div class="card-body">
 
-        <div class="accordionx-box">
-            <div class="accordionx">
-                <div class="accordionx-item">
-                 <div class="accordionx-content">
-                     <form action="{{route('admin.usersCustomer')}}">
-                        <div class="row">
-                            {{-- <div class="col-md-2 mb-1">
-                                <div class="input-group">
-                                    <label for="" class="mb-0">Joining Date</label>
-                                    <div class="d-flex">
-                                        <input type="date" name="joining_start" value="{{request()->joining_start?:''}}" class="form-control form-control-sm" title="Joining Date From" />
-                                        <input type="date" name="joining_end" value="{{request()->joining_end?:''}}" class="form-control form-control-sm" title="Joining Date To" />
-                                    </div>
-                                </div>
-                            </div> --}}
-                            <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Role</label>
-                                <select class="form-control form-control-sm" name="role_id">
-                                    <option value="">Select Role</option>
-                                    @foreach($roles as $role)
-                                    <option value="{{$role->id}}" {{request()->role_id==$role->id?'selected':''}} >{{$role->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            {{-- <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Division</label>
-                                <select class="form-control form-control-sm" name="division_id">
-                                    <option value="">Select Division</option>
-                                    @if(isset($divisions))
-                                    @foreach($divisions as $division)
-                                    <option value="{{$division->id}}" {{request()->division_id==$division->id?'selected':''}} >{{$division->name}}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div> --}}
-                            {{-- <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Designation</label>
-                                <select class="form-control form-control-sm" name="designation_id">
-                                    <option value="">Select Designation</option>
-                                    @if(isset($designations))
-                                    @foreach($designations as $designation)
-                                    <option value="{{$designation->id}}" {{request()->designation_id==$designation->id?'selected':''}} >{{$designation->name}}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div> --}}
-                            {{-- <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Department</label>
-                                <select class="form-control form-control-sm" name="department_id">
-                                    <option value="">Select Department</option>
-                                    @if(isset($departments))
-                                    @foreach($departments as $department)
-                                    <option value="{{$department->id}}" {{request()->department_id==$department->id?'selected':''}} >{{$department->name}}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Section</label>
-                                <select class="form-control form-control-sm" name="section_id">
-                                    <option value="">Select Section</option>
-                                    @if(isset($sections))
-                                    @foreach($sections as $section)
-                                    <option value="{{$section->id}}" {{request()->section_id==$section->id?'selected':''}} >{{$section->name}}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div> --}}
-                            {{-- <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Shift</label>
-                                <select class="form-control form-control-sm" name="shift_id">
-                                    <option value="">Select Shift</option>
-                                    @if(isset($shifts))
-                                    @foreach($shifts as $shift)
-                                    <option value="{{$shift->id}}" {{request()->shift_id==$shift->id?'selected':''}} >{{$shift->name_of_shift}}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="col-md-2 mb-1">
-                                <label for="" class="mb-0">Employee Type</label>
-                                <select class="form-control form-control-sm" name="employee_type">
-                                    <option value="">Select Employee Type</option>
-                                    @if(isset($empTypes))
-                                    @foreach($empTypes as $type)
-                                    <option value="{{$type->id}}" {{request()->employee_type==$type->id?'selected':''}} >{{$type->name}}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
-                            </div> --}}
-                            <div class="col-md-4 mb-1">
-                                <label for="" class="mb-0">Search</label>
-                                <div class="input-group">
-                                    <div class="d-flex w-100">
-                                        <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile, Employee ID" class="form-control form-control-sm {{$errors->has('search')?'error':''}}" />
-                                        <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                 </div>
+        {{-- Search / Filter --}}
+        <form action="{{route('admin.usersCustomer')}}" class="mb-3">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="mb-0 small">Role</label>
+                    <select class="form-control form-control-sm" name="role_id">
+                        <option value="">All Roles</option>
+                        @foreach($roles as $role)
+                        <option value="{{$role->id}}" {{request()->role_id == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
+                        @endforeach
+                    </select>
                 </div>
-            </div>
-        </div>
-        <br>
-        <form action="{{route('admin.usersCustomer')}}">
-            <div class="row">
-                <div class="col-md-4">
-                    @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
-                    <div class="input-group mb-1">
-                        <select class="form-control form-control-sm form-control form-control-sm-sm rounded-0" name="action" required="">
-                            <option value="">Select Action</option>
-                            @can('employee.edit')
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            @endcan
-                            @can('employee.delete')
-                            <option value="5">Delete</option>
-                            @endcan
-                        </select>
-                        <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
+                <div class="col-md-5">
+                    <label class="mb-0 small">Search</label>
+                    <div class="d-flex">
+                        <input type="text" name="search" value="{{request()->search}}" placeholder="Name, Email, Phone, Employee ID" class="form-control form-control-sm">
+                        <button type="submit" class="btn btn-success btn-sm rounded-0 ml-1">Search</button>
                     </div>
-                    @endif
-                </div>
-                <div class="col-md-4">
-
-                </div>
-                <div class="col-md-4">
-                    <ul class="statuslist">
-                        <li><a href="{{route('admin.usersCustomer')}}" class="{{request()->status?'':'active'}}" >All ({{$totals->total}})</a></li>
-                        <li><a href="{{route('admin.usersCustomer',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}" >Active ({{$totals->active}})</a></li>
-                        <li><a href="{{route('admin.usersCustomer',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}" >Inactive ({{$totals->inactive}})</a></li>
-                        @if($totals->deleted > 0)
-                        <li><a href="{{route('admin.usersCustomer',['view'=>'deleted'])}}" class="text-danger" >Deleted ({{$totals->deleted}})</a></li>
-                        @endif
-                    </ul>
                 </div>
             </div>
+        </form>
+
+        {{-- Bulk Actions + Status Tabs --}}
+        <form action="{{route('admin.usersCustomer')}}">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                @if(auth()->user()->hasPermission('employee.edit') || auth()->user()->hasPermission('employee.delete'))
+                <div class="d-flex">
+                    <select class="form-control form-control-sm rounded-0 mr-1" name="action" required>
+                        <option value="">Select Action</option>
+                        @can('employee.edit')
+                        <option value="1">Active</option>
+                        <option value="2">Inactive</option>
+                        @endcan
+                        @can('employee.delete')
+                        <option value="5">Delete</option>
+                        @endcan
+                    </select>
+                    <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Confirm action?')">Go</button>
+                </div>
+                @else <div></div>
+                @endif
+                <ul class="statuslist mb-0">
+                    <li><a href="{{route('admin.usersCustomer')}}" class="{{!request()->status ? 'active' : ''}}">All ({{$totals->total}})</a></li>
+                    <li><a href="{{route('admin.usersCustomer',['status'=>'active'])}}" class="{{request()->status=='active'?'active':''}}">Active ({{$totals->active}})</a></li>
+                    <li><a href="{{route('admin.usersCustomer',['status'=>'inactive'])}}" class="{{request()->status=='inactive'?'active':''}}">Inactive ({{$totals->inactive}})</a></li>
+                    @if($totals->deleted > 0)
+                    <li><a href="{{route('admin.usersCustomer',['view'=>'deleted'])}}" class="text-danger">Deleted ({{$totals->deleted}})</a></li>
+                    @endif
+                </ul>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
+                <table class="table table-hover table-striped table-sm">
                     <thead>
                         <tr>
-                            <th style="min-width: 100px; width: 100px;padding-right:0; position: relative;">
-                                @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
-                                <div class="checkbox mr-3">
-                                     <input class="inp-cbx" id="checkall" type="checkbox" style="display: none;" />
-                                     <label class="cbx" for="checkall">
-                                         <span>
-                                             <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                                 <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                             </svg>
-                                         </span>
-                                         All <span class="checkCounter"></span>
-                                     </label>
-                                 </div>
-                                 @else -- @endif
+                            <th style="width:80px;">
+                                @if(auth()->user()->hasPermission('employee.edit') || auth()->user()->hasPermission('employee.delete'))
+                                <div class="checkbox d-inline-block mr-1">
+                                    <input class="inp-cbx" id="checkall" type="checkbox" style="display:none;" />
+                                    <label class="cbx mb-0" for="checkall">
+                                        <span><svg width="12px" height="10px" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                                    </label>
+                                </div>
+                                @endif
+                                SL
                             </th>
-                            <th style="min-width: 70px; width: 70px;">Image</th>
-                            <th style="min-width: 200px; width: 200px;">Name</th>
-                            <th style="min-width: 100px; width: 100px;">ID Number</th>
-                            <th style="min-width: 150px;">Mobile / Email</th>
-                            <th style="min-width: 100px;">Designation</th>
-                            <th style="min-width: 100px;">Department</th>
-                            <th style="min-width: 100px;">Section</th>
-                            <th style="min-width: 100px;">Division</th>
-                            <th style="min-width: 80px;">Shift</th>
-                            <th style="min-width: 110px;">Employee Type</th>
-                            <th style="min-width: 90px;">Join Date</th>
-                            <th style="min-width: 70px;">Status</th>
-                            <th style="min-width: 70px; width: 70px;">Action</th>
+                            <th style="width:60px;">Image</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Employee ID</th>
+                            <th>Added Date</th>
+                            <th>Added By</th>
+                            <th style="width:80px;">Status</th>
+                            <th style="width:90px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($users as $i=>$user)
+                        @forelse($users as $i => $user)
                         <tr>
-                            <td style=" position: relative;">
-                                @if($user->id==Auth::id()) @else
-                                @if(auth()->user()->hasPermission('employee.edit')  || auth()->user()->hasPermission('employee.delete'))
-                                <div class="checkbox">
-                                     <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display: none;" />
-                                     <label class="cbx" for="cbx_{{$user->id}}">
-                                         <span>
-                                             <svg width="12px" height="10px" viewbox="0 0 12 10">
-                                                 <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                             </svg>
-                                         </span>
-                                     </label>
-                                 </div>
-                                 @endif
+                            <td>
+                                @if($user->id != Auth::id() && (auth()->user()->hasPermission('employee.edit') || auth()->user()->hasPermission('employee.delete')))
+                                <div class="checkbox d-inline-block mr-1">
+                                    <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display:none;" />
+                                    <label class="cbx mb-0" for="cbx_{{$user->id}}">
+                                        <span><svg width="12px" height="10px" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                                    </label>
+                                </div>
                                 @endif
-                                <span style="margin:0 5px;">{{$users->currentpage()==1?$i+1:$i+($users->perpage()*($users->currentpage() - 1))+1}}</span>
-                                @if($user->status)
-                                <span style="color: #43d39e;font-size: 20px;line-height: 20px;position:absolute;">
-                                    <i class="bx bx-check-circle"></i>
-                                </span>
-                                @else
-                                <span style="color: #FF9800;font-size: 20px;line-height: 20px;position:absolute;">
-                                    <i class="bx bx-analyse"></i>
-                                </span>
-                                @endif
+                                {{$users->firstItem() + $i}}
                             </td>
-                            <td style="padding: 0 3px;">
-                                <span>
-                                    <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
-                                </span>
+                            <td style="padding:3px 5px;">
+                                <img src="{{asset($user->image())}}" style="max-width:48px;max-height:40px;border-radius:4px;" />
                             </td>
-                            <td><a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="invoice-action-view mr-1">{{$user->name}}</a>
+                            <td>
+                                <span class="font-weight-bold">{{$user->name}}</span>
                                 @if($user->permission)
-                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}} badge-sm">{{$user->permission->name}}</span>
                                 @endif
                             </td>
-                            <td>{{ $user->employee_id ?? '--' }}</td>
-                            <td>{{$user->mobile ?? $user->email ?? '--'}}</td>
+                            <td>{{$user->email ?? '--'}}</td>
+                            <td>{{$user->mobile ?? '--'}}</td>
+                            <td>{{$user->employee_id ?? '--'}}</td>
+                            <td>{{$user->created_at ? $user->created_at->format('d.m.Y') : '--'}}</td>
+                            <td>{{$user->addedBy->name ?? '--'}}</td>
                             <td>
-                                @php($designationName = $user->designation->name ?? ($designationsMap[$user->designation_id] ?? null))
-                                @if($designationName)
-                                <span style="color: #009688;font-weight: bold;">{{$designationName}}</span>
-                                @else
-                                <span style="color: #FF9800;">No Designation</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php($departmentName = $user->department->name ?? ($departmentsMap[$user->department_id] ?? null))
-                                @if($departmentName)
-                                <span style="color: #009688;">{{$departmentName}}</span>
-                                @else
-                                <span style="color: #FF9800;">--</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php($sectionName = $sectionsMap[$user->section_id] ?? null)
-                                @if($sectionName)
-                                <span style="color: #009688;">{{$sectionName}}</span>
-                                @else
-                                <span style="color: #FF9800;">--</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php($divisionName = $divisionsMap[$user->division] ?? null)
-                                @if($divisionName)
-                                <span style="color: #009688;">{{$divisionName}}</span>
-                                @else
-                                <span style="color: #FF9800;">--</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php($shiftName = $shiftsMap[$user->shift_id] ?? null)
-                                @if($shiftName)
-                                <span style="color: #2196F3;">{{$shiftName}}</span>
-                                @else
-                                <span style="color: #FF9800;">--</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php($employeeTypeName = $empTypesMap[$user->employee_type] ?? null)
-                                @if($employeeTypeName)
-                                <span style="color: #009688;">{{$employeeTypeName}}</span>
-                                @else
-                                <span style="color: #FF9800;">--</span>
-                                @endif
-                            </td>
-                            {{-- @dd($user) --}}
-                            <td>{{$user->joining_date ? \Carbon\Carbon::parse($user->joining_date)->format('d.m.Y') : '--'}}</td>
-                            <td>
-                                @if($user->status == 1)
+                                @if($user->status)
                                 <span class="badge badge-success">Active</span>
                                 @else
                                 <span class="badge badge-warning">Inactive</span>
                                 @endif
                             </td>
-                            <td style="padding: 8px 5px; text-align: center;">
+                            <td>
                                 <div class="btn-group">
-                                    {{-- <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}" class="btn-custom yellow mr-1"><i class="bx bx-show"></i> </a> --}}
-                                    @if(can('employee.edit')  || can('employee.delete'))
-                                        @can('employee.edit')
-                                            <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success mr-1">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                        @endcan
-                                        @if($user->id==Auth::id()) @else
-                                            @can('employee.delete')
-                                                <a href="{{route('admin.usersCustomerAction',['delete',$user->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                                    <i class="bx bx-trash"></i>
-                                                </a>
-                                            @endcan
-                                        @endif
-                                    @else  @endif
+                                    @can('employee.edit')
+                                    <a href="{{route('admin.usersCustomerAction',['edit',$user->id])}}" class="btn-custom success mr-1" title="Edit"><i class="bx bx-edit"></i></a>
+                                    @endcan
+                                    @if($user->id != Auth::id())
+                                    @can('employee.delete')
+                                    <a href="{{route('admin.usersCustomerAction',['delete',$user->id])}}" onclick="return confirm('Delete this user?')" class="btn-custom danger" title="Delete"><i class="bx bx-trash"></i></a>
+                                    @endcan
+                                    @endif
                                     @can('employee.role')
-                                    <a href="javascript:void(0)"
-                                       class="btn-custom info ml-1 open-role-modal"
-                                       data-toggle="modal"
-                                       data-target="#AssignRoleModal"
+                                    <a href="javascript:void(0)" class="btn-custom info ml-1 open-role-modal"
+                                       data-toggle="modal" data-target="#AssignRoleModal"
                                        data-user-id="{{$user->id}}"
                                        data-user-name="{{$user->name}}"
                                        data-role-id="{{$user->permission_id}}"
@@ -334,146 +161,113 @@
                                 </div>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr><td colspan="10" class="text-center text-muted py-4">No users found.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </form>
-        {{-- {{$users->links('pagination')}} --}}
+
         {{ $users->links('pagination::bootstrap-5') }}
     </div>
 </div>
 </div>
 
-
- <!-- Modal -->
- <div class="modal fade text-left" id="AddUser" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document">
-	 <div class="modal-content">
-     	<form action="{{route('admin.usersCustomerAction','create')}}" method="post" id="AddUserForm">
-	   		@csrf
-	   <div class="modal-header">
-		 <h4 class="modal-title">Add Employee</h4>
-		 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-		   <span aria-hidden="true">&times; </span>
-		 </button>
-	   </div>
-	   <div class="modal-body">
-	   		<div class="form-group">
-			 <label for="name">Name* </label>
-             <div class="controls">
-                 <input type="text" class="form-control form-control-sm {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
-				@if ($errors->has('name'))
-				<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-				@endif
-				</div>
-         	</div>
-             <div class="form-group">
-                <label for="name">Mobile </label>
-				<div class="controls">
-					{{-- <input type="mobile" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required> --}}
-                    <input type="tel" class="form-control form-control-sm {{$errors->has('mobile')?'error':''}}" name="mobile" id="addUserMobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0">
-
-					@if ($errors->has('mobile'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
-					@endif
-				</div>
-         	</div>
-			 <div class="form-group">
-                <label for="name">Email </label>
-				<div class="controls">
-                    <input type="email" class="form-control form-control-sm {{$errors->has('email')?'error':''}}" name="email" id="addUserEmail" placeholder="Enter Email">
-					@if ($errors->has('email'))
-					<p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
-					@endif
-				</div>
-                <small class="text-muted">Phone or Email যেকোনো একটা দিলেই হবে।</small>
-         	</div>
-	   </div>
-	   <div class="modal-footer">
-		 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close </button>
-		 <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Employee</button>
-	   </div>
-	   </form>
-	 </div>
-   </div>
- </div>
-
- @can('employee.role')
- <div class="modal fade text-left" id="AssignRoleModal" tabindex="-1" role="dialog" aria-hidden="true">
-   <div class="modal-dialog" role="document">
-     <div class="modal-content">
-        <form method="post" id="assignRoleForm" action="">
-            @csrf
-            <div class="modal-header">
-                <h4 class="modal-title">Assign Employee Role</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-2">Employee: <strong id="assignRoleUserName">-</strong></p>
-                <div class="form-group mb-0">
-                    <label for="assignRoleSelect">Role</label>
-                    <select name="role" id="assignRoleSelect" class="form-control">
-                        <option value="" class="text-danger">No Role</option>
-                        @foreach($roles as $role)
-                        <option value="{{$role->id}}">{{$role->name}}</option>
-                        @endforeach
-                    </select>
+{{-- Add User Modal --}}
+@can('employee.add')
+<div class="modal fade" id="AddUser" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{route('admin.usersCustomerAction','create')}}" method="post" id="AddUserForm">
+                @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title">Add User</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save Role</button>
-            </div>
-        </form>
-     </div>
-   </div>
- </div>
- @endcan
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm {{$errors->has('name')?'is-invalid':''}}" name="name" placeholder="Enter Name" required>
+                        @error('name')<div class="invalid-feedback">{{$message}}</div>@enderror
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" class="form-control form-control-sm {{$errors->has('mobile')?'is-invalid':''}}" name="mobile" id="addUserMobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="11 digits starting with 0" placeholder="01XXXXXXXXX">
+                        @error('mobile')<div class="invalid-feedback">{{$message}}</div>@enderror
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Email</label>
+                        <input type="email" class="form-control form-control-sm {{$errors->has('email')?'is-invalid':''}}" name="email" id="addUserEmail" placeholder="Enter Email">
+                        @error('email')<div class="invalid-feedback">{{$message}}</div>@enderror
+                        <small class="text-muted">Phone বা Email যেকোনো একটা দিলেই হবে — password auto-generate হবে।</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
 
-
-
+{{-- Assign Role Modal --}}
+@can('employee.role')
+<div class="modal fade" id="AssignRoleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="post" id="assignRoleForm" action="">
+                @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title">Assign Role</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">User: <strong id="assignRoleUserName">-</strong></p>
+                    <div class="form-group mb-0">
+                        <label>Role</label>
+                        <select name="role" id="assignRoleSelect" class="form-control">
+                            <option value="">No Role</option>
+                            @foreach($roles as $role)
+                            <option value="{{$role->id}}">{{$role->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
 
 @endsection
 @push('js')
 @can('employee.role')
 <script>
 $(document).on('click', '.open-role-modal', function () {
-    const userId = $(this).data('user-id');
+    const userId   = $(this).data('user-id');
     const userName = $(this).data('user-name') || '-';
-    const roleId = $(this).data('role-id');
-    const actionTemplate = "{{ route('admin.usersCustomerAction', ['role', '__ID__']) }}";
-
+    const roleId   = $(this).data('role-id');
+    const tpl      = "{{ route('admin.usersCustomerAction', ['role', '__ID__']) }}";
     $('#assignRoleUserName').text(userName);
     $('#assignRoleSelect').val(roleId || '');
-    $('#assignRoleForm').attr('action', actionTemplate.replace('__ID__', userId));
+    $('#assignRoleForm').attr('action', tpl.replace('__ID__', userId));
 });
 </script>
 @endcan
-
 <script>
 $(document).on('submit', '#AddUserForm', function (e) {
-    const $form = $(this);
-    // Allow normal loader behavior for valid submissions by default.
-    $form.removeClass('no-loader');
-
     const mobile = ($('#addUserMobile').val() || '').trim();
-    const email = ($('#addUserEmail').val() || '').trim();
-
+    const email  = ($('#addUserEmail').val() || '').trim();
     if (!mobile && !email) {
         e.preventDefault();
-        // Tell global submit-listener to skip loader for this blocked submit.
-        $form.addClass('no-loader');
-        if (typeof XLoader !== 'undefined' && XLoader && typeof XLoader.hide === 'function') {
-            XLoader.hide();
-        }
-        alert('Phone or Email যেকোনো একটি দিতে হবে।');
-        // Re-enable loader for future valid submits.
-        setTimeout(function () {
-            $form.removeClass('no-loader');
-        }, 0);
+        alert('Phone বা Email যেকোনো একটি দিতে হবে।');
     }
 });
 </script>

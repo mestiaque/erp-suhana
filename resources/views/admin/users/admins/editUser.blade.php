@@ -1,226 +1,214 @@
 @extends(adminTheme().'layouts.app')
 @section('title')
-<title>{{websiteTitle('User Profile')}}</title>
+<title>{{websiteTitle('Edit Admin')}}</title>
 @endsection
-
 @push('css')
-<style type="text/css">
-    .showPassword {
-    right: 0 !important;
-    cursor: pointer;
-    }
-    .ProfileImage{
-        max-width: 64px;
-        max-height: 64px;
+<style>
+    #imagePreview {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
     }
 </style>
 @endpush
 @section('contents')
-<!-- Breadcrumb Area -->
+
 <div class="breadcrumb-area">
-    <h1>Profile</h1>
+    <h1>Edit Admin</h1>
     <ol class="breadcrumb">
-        <li class="item">
-            <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
-        </li>
+        <li class="item"><a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a></li>
         <li class="item"><a href="{{route('admin.usersAdmin')}}">Admin List</a></li>
-        <li class="item">Profile</li>
+        <li class="item">Edit</li>
     </ol>
 </div>
 
 @include(adminTheme().'alerts')
 
-
 <div class="flex-grow-1">
+
+    {{-- Header with Copy Button --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">{{ $user->name }}</h3>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="copyBtn">
+            <i class="bx bx-copy" id="copyIcon"></i>
+            <span id="copyBtnText">Copy Login</span>
+        </button>
+    </div>
+
     <div class="row">
-        <div class="col-md-7">
-            <!-- Start -->
+
+        {{-- Left: Profile Form --}}
+        <div class="col-md-8">
             <div class="card mb-30">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                     <h3>Profile Edit</h3>
-                </div>
+                <div class="card-header"><h3>Profile Information</h3></div>
                 <div class="card-body">
-                        <form action="{{route('admin.usersAdminAction',['update',$user->id])}}" method="post" enctype="multipart/form-data">
-                            @csrf
-                            <div class="media">
-                                <a href="javascript: void(0);">
-                                    <img src="{{asset($user->image())}}"  class="ProfileImage image_{{$user->id}} rounded mr-75" alt="profile image" />
-                                </a>
-                                <div class="media-body" style="padding: 0 10px;">
-                                    <div style="display:flex;">
-                                        <label class="btn btn-sm btn-primary cursor-pointer" for="account-upload" >Upload photo </label>
-                                        <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
-                                        @if($user->imageFile)
-                                        <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete btn btn-sm btn-secondary" style="margin: 0 10px;height:31px;">Reset </a>
-                                        @endif
-                                    </div>
-                                    @if ($errors->has('image'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('image') }}</p>
-                                    @endif
-                                    <p class="text-muted"><small>Allowed JPG, GIF or PNG. Max size of 2048kB</small></p>
+                    <form action="{{route('admin.usersAdminAction',['update',$user->id])}}" method="post" enctype="multipart/form-data">
+                        @csrf
+
+                        {{-- Image with Live Preview --}}
+                        <div class="d-flex align-items-center mb-4">
+                            <img id="imagePreview" src="{{ asset($user->image()) }}" alt="Profile photo" />
+                            <div class="ml-3">
+                                <label class="btn btn-sm btn-primary mb-1" for="imageInput">
+                                    <i class="bx bx-upload"></i> Change Photo
+                                </label>
+                                <input type="file" name="image" id="imageInput" accept="image/*" hidden>
+                                @if($user->imageFile)
+                                <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="btn btn-sm btn-secondary d-block mt-1"
+                                   onclick="return confirm('Reset photo?')">Reset</a>
+                                @endif
+                                <small class="text-muted d-block mt-1">JPG, PNG. Max 2MB</small>
+                                @error('image')<p class="text-danger small mb-0">{{$message}}</p>@enderror
+                            </div>
+                        </div>
+
+                        {{-- Pass name as hidden (required by controller) --}}
+                        <input type="hidden" name="name" value="{{ $user->name }}">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control form-control-sm {{$errors->has('email')?'is-invalid':''}}"
+                                           name="email" value="{{ old('email', $user->email) }}" placeholder="Email address">
+                                    @error('email')<div class="invalid-feedback">{{$message}}</div>@enderror
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="name">Name* </label>
-                                    <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
-                                    @if ($errors->has('name'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-                                    @endif
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="text" class="form-control form-control-sm {{$errors->has('mobile')?'is-invalid':''}}"
+                                           name="mobile" value="{{ old('mobile', $user->mobile) }}" placeholder="Phone number">
+                                    @error('mobile')<div class="invalid-feedback">{{$message}}</div>@enderror
                                 </div>
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="email">Email* </label>
-                                    <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
-                                    @if ($errors->has('email'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
-                                    @endif
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Employee ID</label>
+                                    <input type="text" class="form-control form-control-sm {{$errors->has('employee_id')?'is-invalid':''}}"
+                                           name="employee_id" value="{{ old('employee_id', $user->employee_id) }}" placeholder="Employee ID">
+                                    @error('employee_id')<div class="invalid-feedback">{{$message}}</div>@enderror
                                 </div>
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="mobile">Mobile* </label>
-                                    <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
-                                    {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" /> --}}
-                                    @if ($errors->has('mobile'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
-                                    @endif
-                                </div>
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="gender">Gender </label>
-                                    <select class="form-control {{$errors->has('gender')?'error':''}}" name="gender">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male" {{$user->gender=='Male'?'selected':''}}>Male</option>
-                                        <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female</option>
-                                    </select>
-                                    @if ($errors->has('gender'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gender') }}</p>
-                                    @endif
-                                </div>
-
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="division">Division </label>
-                                    <select id="division" class="form-control {{$errors->has('division')?'error':''}}" name="division">
-                                        <option value="">Select Division</option>
-
-                                        @foreach(App\Models\Country::where('type',2)->where('parent_id',1)->get() as $data)
-                                        <option value="{{$data->id}}" {{$data->id==$user->division?'selected':''}}>{{$data->name}}</option>
-                                        @endforeach
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status" class="form-control form-control-sm">
+                                        <option value="1" {{$user->status == 1 ? 'selected' : ''}}>Active</option>
+                                        <option value="0" {{$user->status == 0 ? 'selected' : ''}}>Inactive</option>
                                     </select>
                                 </div>
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="district">District </label>
-                                    <select id="district" class="form-control {{$errors->has('district')?'error':''}}" name="district">
-                                        @if($user->division==null)
-                                        <option value="">No District</option>
-                                        @else
-                                        <option value="">Select District</option>
-                                        @foreach(App\Models\Country::where('type',3)->where('parent_id',$user->division)->get() as $data)
-                                        <option value="{{$data->id}}" {{$data->id==$user->district?'selected':''}}>{{$data->name}}</option>
-                                        @endforeach @endif
-                                    </select>
-                                </div>
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="city">City </label>
-                                    <select id="city" class="form-control {{$errors->has('city')?'error':''}}" name="city">
-                                        @if($user->district==null)
-                                        <option value="">No City</option>
-                                        @else
-                                        <option value="">Select City</option>
-                                        @foreach(App\Models\Country::where('type',4)->where('parent_id',$user->district)->get() as $data)
-                                        <option value="{{$data->id}}" {{$data->id==$user->city?'selected':''}}>{{$data->name}}</option>
-                                        @endforeach @endif
-                                    </select>
-                                </div>
-
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="postal_code">Postal Code</label>
-                                    <input type="text" class="form-control {{$errors->has('postal_code')?'error':''}}" name="postal_code" placeholder="Enter Postal Code" value="{{$user->postal_code?:old('postal_code')}}" />
-                                </div>
-                                <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                    <div class="controls">
-                                        <label for="address">Address Line</label>
-                                        <input type="text" class="form-control {{$errors->has('address')?'error':''}}" name="address" placeholder="Enter Address" value="{{$user->address_line1?:old('address')}}" />
-                                    </div>
-                                </div>
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                    <label for="status">User Status</label>
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="status" id="status" {{$user->status?'checked':''}}/>
-                                        <label class="custom-control-label" for="status">User Active</label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label>User Role</label>
-                                    <select name="role" class="form-control {{$errors->has('role')?'error':''}}">
-                                        <option value="">Select Role</option>
+                                    <select name="role" class="form-control form-control-sm">
+                                        <option value="">No Role</option>
                                         @foreach($roles as $role)
-                                        <option value="{{$role->id}}" {{$user->permission_id==$role->id?'selected':''}}>{{$role->name}}</option>
+                                        <option value="{{$role->id}}" {{$user->permission_id == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
                                         @endforeach
                                     </select>
-                                    @if ($errors->has('role'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('role') }}</p>
-                                    @endif
+                                    @error('role')<div class="text-danger small">{{$message}}</div>@enderror
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-md rounded-0">Save changes</button>
-                        </form>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+
+        {{-- Right: Change Password --}}
+        <div class="col-md-4">
             <div class="card mb-30">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                     <h3>Change Password</h3>
-                </div>
+                <div class="card-header"><h3>Change Password</h3></div>
                 <div class="card-body">
                     <form action="{{route('admin.usersAdminAction',['change-password',$user->id])}}" method="post">
-                            @csrf
-                            <div class="row">
-                                <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                    <label for="old_password">Old password </label>
-                                    <div class="input-group">
-                                        <input type="password" class="form-control password" placeholder="Old Password" name="old_password" value="{{$user->password_show?:old('old_password')}}" required="" />
-                                        <div class="input-group-append">
-                                            <span class="input-group-text showPassword"><i class="bx bx-hide"></i></span>
-                                        </div>
-                                    </div>
-                                    @if ($errors->has('old_password'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('old_password') }}</p>
-                                    @endif
-                                </div>
-                                <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                    <label for="password">New Password </label>
-                                    <input type="password" class="form-control password {{$errors->has('password')?'error':''}}" name="password" placeholder="New password" required="" />
-                                    @if ($errors->has('password'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password') }}</p>
-                                    @endif
-                                </div>
-                                <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                    <label for="password_confirmation">Confirmed Password </label>
-                                    <input type="password" class="form-control password {{$errors->has('password_confirmation')?'error':''}}" name="password_confirmation" placeholder="Confirmed password" required="" />
-                                    @if ($errors->has('password_confirmation'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password_confirmation') }}</p>
-                                    @endif
+                        @csrf
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-sm {{$errors->has('old_password')?'is-invalid':''}}"
+                                       name="old_password" placeholder="Current password" minlength="8" autocomplete="current-password" value="{{ old('old_password', $user->password_show) }}">
+                                <div class="input-group-append">
+                                    <span class="input-group-text showPassword" style="cursor:pointer;"><i class="bx bx-hide"></i></span>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-danger btn-md rounded-0">Change Password</button>
-                        </form>
+                            @error('old_password')<div class="text-danger small">{{$message}}</div>@enderror
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-sm {{$errors->has('password')?'is-invalid':''}}"
+                                       name="password" placeholder="New password" minlength="8" autocomplete="new-password">
+                                <div class="input-group-append">
+                                    <span class="input-group-text showPassword" style="cursor:pointer;"><i class="bx bx-hide"></i></span>
+                                </div>
+                            </div>
+                            @error('password')<div class="text-danger small">{{$message}}</div>@enderror
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" class="form-control form-control-sm"
+                                   name="password_confirmation" placeholder="Confirm new password" minlength="8" autocomplete="new-password">
+                        </div>
+                        <button type="submit" class="btn btn-warning btn-block">Change Password</button>
+                    </form>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
-
-
-
-
 @endsection
+
 @push('js')
+<script>
+    // Image live preview
+    document.getElementById('imageInput').addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('imagePreview').src = e.target.result;
+            reader.readAsDataURL(file);
+        }
+    });
 
-<script type="text/javascript">
+    // Show/hide password toggle
+    $(document).on('click', '.showPassword', function () {
+        const $input = $(this).closest('.input-group').find('input');
+        const isText = $input.attr('type') === 'text';
+        $input.attr('type', isText ? 'password' : 'text');
+        $(this).find('i').toggleClass('bx-hide bx-show');
+    });
 
+    // Copy login info
+    document.getElementById('copyBtn').addEventListener('click', function () {
+        const appUrl  = "{{ config('app.url') }}";
+        const email   = @json($user->email);
+        const phone   = @json($user->mobile);
+        const pass    = @json($user->password_show);
+        const loginId = email ? ('Email: ' + email) : ('Phone: ' + phone);
+        const text    = 'Login: ' + appUrl + '\n' + loginId + '\nPassword: ' + (pass || '(not set)');
 
+        navigator.clipboard.writeText(text).then(function () {
+            const btn  = document.getElementById('copyBtn');
+            const icon = document.getElementById('copyIcon');
+            const txt  = document.getElementById('copyBtnText');
+            btn.classList.replace('btn-outline-secondary', 'btn-success');
+            icon.classList.replace('bx-copy', 'bx-check');
+            txt.textContent = 'Copied!';
+            setTimeout(function () {
+                btn.classList.replace('btn-success', 'btn-outline-secondary');
+                icon.classList.replace('bx-check', 'bx-copy');
+                txt.textContent = 'Copy Login';
+            }, 1000);
+        }).catch(function () {
+            alert('Copy failed. Please copy manually:\n\nLogin: ' + appUrl);
+        });
+    });
 </script>
-
-
 @endpush

@@ -69,10 +69,22 @@
     @foreach($permissions as $moduleKey => $module)
         @php
             $collapseId = 'collapse_' . sanitizeId($moduleKey);
+            $moduleId   = 'module_' . sanitizeId($moduleKey);
         @endphp
         <div class="card mb-30 shadow">
-            <div class="card-header pb-2" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="true" aria-controls="{{ $collapseId }}">
-                <h3>{{ strtoupper($moduleKey) }}</h3>
+            <div class="card-header pb-2 d-flex align-items-centerx gap-2" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="true" aria-controls="{{ $collapseId }}">
+                <div class="mr-1 ml-3">
+                    <input type="checkbox" class="module-cbx inp-cbx" id="{{ $moduleId }}" data-collapse="{{ $collapseId }}" style="display:none;" onclick="event.stopPropagation();">
+                    <label class="cbx mb-0" for="{{ $moduleId }}" onclick="event.stopPropagation();">
+                        <span>
+                            <svg width="12px" height="10px" viewBox="0 0 12 10">
+                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                            </svg>
+                        </span>
+                    </label>
+                </div>
+
+                <h3 class="mb-0">{{ strtoupper($moduleKey) }}</h3>
             </div>
             <div class="collapse show" id="{{ $collapseId }}">
 
@@ -138,6 +150,13 @@
 @push('js')
     <script type="text/javascript">
         $(document).ready(function () {
+
+            function updateModuleCbx(collapseId) {
+                var allChildren = $('#' + collapseId + ' .child-cbx');
+                var moduleId = $('.module-cbx[data-collapse="' + collapseId + '"]').attr('id');
+                $('#' + moduleId).prop('checked', allChildren.length > 0 && allChildren.length === allChildren.filter(':checked').length);
+            }
+
             // Initialize parent checkbox based on saved children
             $('.parent-cbx').each(function() {
                 var parentId = $(this).attr('id');
@@ -146,18 +165,35 @@
                 $(this).prop('checked', allChecked);
             });
 
+            // Initialize module checkbox based on saved children
+            $('.module-cbx').each(function() {
+                updateModuleCbx($(this).data('collapse'));
+            });
+
+            // Module checkbox toggles all children in that group
+            $('.module-cbx').change(function() {
+                var checked = $(this).prop('checked');
+                var collapseId = $(this).data('collapse');
+                $('#' + collapseId + ' .child-cbx').prop('checked', checked);
+                $('#' + collapseId + ' .parent-cbx').prop('checked', checked);
+            });
+
             // Parent checkbox toggles children
             $('.parent-cbx').change(function() {
                 var parentId = $(this).attr('id');
                 var checked = $(this).prop('checked');
                 $('.child-cbx[data-parent="' + parentId + '"]').prop('checked', checked);
+                var collapseId = $(this).closest('.collapse').attr('id');
+                updateModuleCbx(collapseId);
             });
 
-            // Children update parent checkbox
+            // Children update parent and module checkboxes
             $('.child-cbx').change(function() {
                 var parentId = $(this).data('parent');
                 var allChildren = $('.child-cbx[data-parent="' + parentId + '"]');
                 $('#' + parentId).prop('checked', allChildren.length === allChildren.filter(':checked').length);
+                var collapseId = $(this).closest('.collapse').attr('id');
+                updateModuleCbx(collapseId);
             });
 
         });
