@@ -3,63 +3,63 @@
 @endphp
 <div class="d-flex align-items-center justify-content-between mb-3 mt-1">
     <h4 class="mb-0" style="font-size:17px;font-weight:700;">
-        <i class="fa-solid fa-boxes-stacked me-2" style="color:#1671f9;"></i> Inventory Overview
+        <i class="fa-solid fa-boxes-stacked me-2" style="color:#1671f9;"></i> User & Role Overview
     </h4>
 </div>
 
     {{-- ── Stat Cards ── --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4 col-lg">
-        <a href="{{ route('admin.usersAdmin') }}" class="ac-stat-card-link">
-        <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:#ecf0fd;"><i class="fa-solid fa-users" style="color:#1671f9;"></i></div>
+        <a href="{{ route('admin.usersAdmin') }}" class="basic-stat-card-link">
+        <div class="basic-stat-card">
+            <div class="basic-stat-icon" style="background:#ecf0fd;"><i class="fa-solid fa-users" style="color:#1671f9;"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:#1671f9;">{{ $totalUsers }}</div>
-                <div class="ac-stat-lbl">Total Users</div>
+                <div class="basic-stat-val" style="color:#1671f9;">{{ $totalUsers }}</div>
+                <div class="basic-stat-lbl">Total Users</div>
             </div>
         </div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="{{ route('admin.usersAdmin', ['status' => 'active']) }}" class="ac-stat-card-link">
-        <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:#eef2ff;"><i class="fa-solid fa-user-check" style="color:#10b981;"></i></div>
+        <a href="{{ route('admin.usersAdmin', ['status' => 'active']) }}" class="basic-stat-card-link">
+        <div class="basic-stat-card">
+            <div class="basic-stat-icon" style="background:#eef2ff;"><i class="fa-solid fa-user-check" style="color:#10b981;"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:#10b981;">{{ $activeUsers }}</div>
-                <div class="ac-stat-lbl">Active Users</div>
+                <div class="basic-stat-val" style="color:#10b981;">{{ $activeUsers }}</div>
+                <div class="basic-stat-lbl">Active Users</div>
             </div>
         </div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="{{ route('admin.usersAdmin', ['status' => 'inactive']) }}" class="ac-stat-card-link">
-        <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:#fffbeb;"><i class="fa-solid fa-user-xmark" style="color:#f59e0b;"></i></div>
+        <a href="{{ route('admin.usersAdmin', ['status' => 'inactive']) }}" class="basic-stat-card-link">
+        <div class="basic-stat-card">
+            <div class="basic-stat-icon" style="background:#fffbeb;"><i class="fa-solid fa-user-xmark" style="color:#f59e0b;"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:#f59e0b;">{{ $inactiveUsers }}</div>
-                <div class="ac-stat-lbl">Inactive Users</div>
+                <div class="basic-stat-val" style="color:#f59e0b;">{{ $inactiveUsers }}</div>
+                <div class="basic-stat-lbl">Inactive Users</div>
             </div>
         </div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="javascript:void(0)" class="ac-stat-card-link">
-        <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:#fff1f2;"><i class="fa-solid fa-user-shield" style="color:#f43f5e;"></i></div>
+        <a href="javascript:void(0)" class="basic-stat-card-link">
+        <div class="basic-stat-card">
+            <div class="basic-stat-icon" style="background:#fff1f2;"><i class="fa-solid fa-user-shield" style="color:#f43f5e;"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:#f43f5e;">{{ $totalRoles }}</div>
-                <div class="ac-stat-lbl">Total Roles</div>
+                <div class="basic-stat-val" style="color:#f43f5e;">{{ $totalRoles }}</div>
+                <div class="basic-stat-lbl">Total Roles</div>
             </div>
         </div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="{{ route('admin.loginHistory') }}" class="ac-stat-card-link">
-        <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:{{ $todayLogins >= 0 ? '#ecfdf5' : '#fff1f2' }};"><i class="fa-solid fa-right-to-bracket" style="color:{{ $todayLogins >= 0 ? '#10b981' : '#f43f5e' }};"></i></div>
+        <a href="{{ route('admin.loginHistory') }}" class="basic-stat-card-link">
+        <div class="basic-stat-card">
+            <div class="basic-stat-icon" style="background:{{ $todayLogins >= 0 ? '#ecfdf5' : '#fff1f2' }};"><i class="fa-solid fa-right-to-bracket" style="color:{{ $todayLogins >= 0 ? '#10b981' : '#f43f5e' }};"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:{{ $todayLogins >= 0 ? '#10b981' : '#f43f5e' }};">{{ $todayLogins }}</div>
-                <div class="ac-stat-lbl">Today Logins</div>
+                <div class="basic-stat-val" style="color:{{ $todayLogins >= 0 ? '#10b981' : '#f43f5e' }};">{{ $todayLogins }}</div>
+                <div class="basic-stat-lbl">Today Logins</div>
             </div>
         </div>
         </a>
@@ -85,64 +85,6 @@
 
 @push('css')
     <style>
-        .stat-card {
-            border: 0;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(21, 32, 56, 0.06);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(21, 32, 56, 0.1);
-        }
-        .stat-card .card-body {
-            padding: 18px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex: 0 0 44px;
-            border-radius: 8px;
-            font-size: 22px;
-            background: #eef7f2;
-            color: #18a575;
-        }
-        .stat-icon.warning {
-            background: #fff5db;
-            color: #c68300;
-        }
-        .stat-icon.info {
-            background: #eaf3ff;
-            color: #1769e0;
-        }
-        .stat-icon.danger {
-            background: #fff0f0;
-            color: #d32f2f;
-        }
-        .stat-icon.primary {
-            background: #eaf3ff;
-            color: #1769e0;
-        }
-        .stat-card span {
-            display: block;
-            color: #667085;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .stat-card strong {
-            display: block;
-            margin-top: 3px;
-            color: #122033;
-            font-size: 24px;
-            line-height: 1;
-        }
         .chart-card {
             border: 0;
             border-radius: 8px;
@@ -154,9 +96,22 @@
         #dashboardStatusChart {
             min-height: 320px;
         }
-        .ac-stat-card-link {
-            text-decoration: none;
-        }
+
+    </style>
+    <style>
+        .basic-stat-card-link { display: block; text-decoration: none; color: inherit; height: 100%; }
+        .basic-stat-card { background: #fff; border-radius: 12px; padding: 20px 18px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); border: none; transition: transform .2s, box-shadow .2s; height: 100%; }
+        .basic-stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.11); }
+        .basic-stat-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .basic-stat-val { font-size: 24px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+        .basic-stat-lbl { font-size: 12px; color: #888; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+        .basic-section-title { font-size: 13px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #f97316; padding-left: 10px; margin-bottom: 16px; }
+        .basic-chart-card { background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,.07); height: 100%; }
+        .basic-quick-btn { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: #fff7ed; border: 1px solid #fde8d0; color: #444; font-size: 13px; font-weight: 500; text-decoration: none; transition: all .2s; }
+        .basic-quick-btn:hover { background: #f97316; color: #fff; border-color: #f97316; }
+        .basic-quick-btn i { width: 20px; text-align: center; }
+        .basic-recent-table td { font-size: 13px; vertical-align: middle; padding: 8px 10px; }
+        .basic-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
     </style>
 @endpush
 
