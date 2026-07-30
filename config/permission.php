@@ -2,7 +2,11 @@
 
 return [
     'modules' => [
-        'HR/Users Management' =>[
+        'Users Management' =>[
+            'user_dashboard' => [
+                'label' => 'User Dashboard',
+                'permissions' => ['view' => 'View', 'all' => 'All'],
+            ],
             'admin' => [
                 'label'       => 'Admin',
                 'permissions' => [
@@ -22,6 +26,15 @@ return [
                     'edit'   => 'Edit',
                     'delete' => 'Delete',
                     'all'    => 'All',
+                ],
+            ],
+            'login_history' => [
+                'label'       => 'Login History',
+                'permissions' => [
+                    'all'    => 'All',
+                    'list'   => 'List',
+                    'view'   => 'View',
+                    'dashboard' => 'Dashboard',
                 ],
             ],
         ],
@@ -56,17 +69,6 @@ return [
                 ],
             ],
 
-        ],
-        'Login History' =>[
-            'login_history' => [
-                'label'       => 'Login History',
-                'permissions' => [
-                    'all'    => 'All',
-                    'list'   => 'List',
-                    'view'   => 'View',
-                    'dashboard' => 'Dashboard',
-                ],
-            ],
         ],
     ],
 ];

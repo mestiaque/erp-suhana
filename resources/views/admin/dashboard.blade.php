@@ -64,7 +64,9 @@
         $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
     @endphp
 
-    @include('admin.basic-dashboard')
+    @can('user_dashboard.view')
+        @include('admin.user-dashboard')
+    @endcan
 
     @if($showHrWidget)
         @include('hr::partials.dashboard-widget')
