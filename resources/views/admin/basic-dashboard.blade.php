@@ -69,14 +69,14 @@
 {{-- ── Charts Row 1 ── --}}
 <div class="row g-3 mb-4">
     <div class="col-lg-8">
-        <div class="ac-chart-card">
-            <div class="ac-section-title">Login Flow – Last 30 Days</div>
+        <div class="basic-chart-card">
+            <div class="basic-section-title">Login Flow – Last 30 Days</div>
             <div id="{{ $widgetId }}_flow" style="height:220px;"></div>
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="ac-chart-card text-center">
-            <div class="ac-section-title">Today Logins</div>
+        <div class="basic-chart-card text-center">
+            <div class="basic-section-title">Today Logins</div>
             <div id="{{ $widgetId }}_donut" style="height:220px;"></div>
         </div>
     </div>
@@ -84,20 +84,6 @@
 
 
 @push('css')
-    <style>
-        .chart-card {
-            border: 0;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(21, 32, 56, 0.06);
-        }
-        .chart-card .card-body {
-            padding: 18px;
-        }
-        #dashboardStatusChart {
-            min-height: 320px;
-        }
-
-    </style>
     <style>
         .basic-stat-card-link { display: block; text-decoration: none; color: inherit; height: 100%; }
         .basic-stat-card { background: #fff; border-radius: 12px; padding: 20px 18px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); border: none; transition: transform .2s, box-shadow .2s; height: 100%; }
