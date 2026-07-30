@@ -59,14 +59,14 @@ class AdminController extends Controller
         $totalUsers = User::count();
         $activeUsers = User::where('status', 1)->count();
         $inactiveUsers = User::where('status', 0)->count();
-        $todayLogins = ActivityLog::where('event', 'login')
-            ->where('user_type', User::class)
+        $todayLogins = ActivityLog::
+            where('user_type', User::class)
             ->whereDate('created_at', today())
             ->count();
 
         $chartData = collect();
-        $dailyLogins = ActivityLog::where('event', 'login')
-            ->where('user_type', User::class)
+        $dailyLogins = ActivityLog::
+            where('user_type', User::class)
             ->whereDate('created_at', '>=', Carbon::now()->subDays(29))
             ->selectRaw('DATE(created_at) as date, COUNT(DISTINCT user_id) as active')
             ->groupBy('date')
