@@ -274,7 +274,6 @@
 
     <div class="login-history-page">
 
-
         <div class="history-card mb-30">
             <div class="history-card-header">
                 <div>
