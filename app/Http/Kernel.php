@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'redirectUser' => \App\Http\Middleware\RedirectUserMiddleware::class,
+        'logUserActivity' => \App\Http\Middleware\LogUserActivity::class,
     ];
 }

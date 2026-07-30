@@ -44,6 +44,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
     Route::get('/my-profile',[AdminController::class,'myProfile'])->name('myProfile');
     Route::any('/edit-profile',[AdminController::class,'editProfile'])->name('editProfile');
+    Route::get('/login-history',[AdminController::class,'loginHistory'])->name('loginHistory');
+    Route::get('/login-history/user/{user}',[AdminController::class,'userLoginHistory'])->name('userLoginHistory');
 
     //User Management
     Route::get('/users/admin/',[AdminController::class,'usersAdmin'])->name('usersAdmin');

@@ -3,161 +3,368 @@
 @endsection @push('css')
 
 <style type="text/css">
+    .edit-profile-page {
+        color: #17233c;
+    }
+
+    .edit-profile-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .edit-profile-card {
+        background: #ffffff;
+        border: 1px solid #e8edf5;
+        border-radius: 8px;
+        box-shadow: 0 12px 32px rgba(21, 32, 56, 0.06);
+        overflow: hidden;
+    }
+
+    .edit-profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 22px 24px;
+        background: linear-gradient(135deg, #f6fbff 0%, #eef7f2 100%);
+        border-bottom: 1px solid #e8edf5;
+    }
+
+    .edit-profile-header h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #122033;
+    }
+
+    .edit-profile-header p {
+        margin: 6px 0 0;
+        color: #6b778c;
+        font-size: 13px;
+    }
+
+    .view-profile-btn,
+    .save-profile-btn,
+    .change-password-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 38px;
+        padding: 9px 15px;
+        border: 0;
+        border-radius: 6px;
+        color: #ffffff;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .view-profile-btn {
+        background: #f2a900;
+        box-shadow: 0 8px 18px rgba(242, 169, 0, 0.24);
+    }
+
+    .view-profile-btn:hover {
+        color: #ffffff;
+        background: #d99500;
+        text-decoration: none;
+    }
+
+    .save-profile-btn {
+        background: #1769e0;
+        box-shadow: 0 8px 18px rgba(23, 105, 224, 0.18);
+    }
+
+    .change-password-btn {
+        background: #d94848;
+        box-shadow: 0 8px 18px rgba(217, 72, 72, 0.18);
+    }
+
+    .edit-profile-body {
+        padding: 24px;
+    }
+
+    .profile-upload-box {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 18px;
+        margin-bottom: 22px;
+        border: 1px solid #e8edf5;
+        border-radius: 8px;
+        background: #fbfcfe;
+    }
+
     .ProfileImage {
-        max-width: 64px;
-        max-height: 64px;
+        width: 92px;
+        height: 92px;
+        max-width: 92px;
+        max-height: 92px;
+        object-fit: cover;
+        border-radius: 50% !important;
+        border: 5px solid #ffffff;
+        box-shadow: 0 10px 24px rgba(21, 32, 56, 0.13);
+        background: #eef1f5;
+    }
+
+    .upload-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .upload-btn,
+    .reset-photo-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .upload-btn {
+        color: #ffffff;
+        background: #1769e0;
+        cursor: pointer;
+    }
+
+    .reset-photo-btn {
+        color: #17233c;
+        background: #eef1f5;
+    }
+
+    .reset-photo-btn:hover {
+        color: #17233c;
+        text-decoration: none;
+        background: #e0e7ef;
+    }
+
+    .upload-help {
+        margin: 9px 0 0;
+        color: #7b8794;
+        font-size: 12px;
+    }
+
+    .form-section-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 16px;
+    }
+
+    .form-section-title i {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #fff5db;
+        color: #c68300;
+        font-size: 18px;
+    }
+
+    .form-section-title h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .edit-profile-page .form-group label {
+        color: #667085;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .edit-profile-page .form-control {
+        min-height: 42px;
+        border: 1px solid #dce4ef;
+        border-radius: 6px;
+        color: #17233c;
+        font-size: 14px;
+        box-shadow: none;
+    }
+
+    .edit-profile-page .form-control:focus {
+        border-color: #8db6f5;
+        box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.1);
+    }
+
+    .readonly-field {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        padding: 9px 12px;
+        border: 1px solid #e8edf5;
+        border-radius: 6px;
+        background: #fbfcfe;
+        color: #17233c;
+        font-size: 14px;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .edit-profile-page .input-group-text {
+        min-height: 42px;
+        border-color: #dce4ef;
+        border-radius: 0 6px 6px 0;
+        background: #fbfcfe;
+    }
+
+    .field-error {
+        color: #d94848;
+        margin: 5px 0 0;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .password-note {
+        padding: 14px;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        border: 1px solid #fde3e3;
+        background: #fff8f8;
+        color: #8a3b3b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    @media only screen and (max-width: 991px) {
+        .edit-profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media only screen and (max-width: 575px) {
+        .edit-profile-header,
+        .profile-upload-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .edit-profile-body,
+        .edit-profile-header {
+            padding: 18px;
+        }
+
+        .view-profile-btn,
+        .save-profile-btn,
+        .change-password-btn {
+            width: 100%;
+        }
     }
 </style>
 @endpush @section('contents')
 
 <!-- Breadcrumb Area -->
-<div class="breadcrumb-area">
-    <h1>My Profile</h1>
 
-    <ol class="breadcrumb">
-        <li class="item">
-            <a href="{{route('admin.dashboard')}}"><i class="bx bx-home-alt"></i></a>
-        </li>
-        <li class="item">Dashboard </li>
-        <li class="item">Edit Profile</li>
-    </ol>
-</div>
 
 
 @include(adminTheme().'alerts')
-<div class="row">
-    <div class="col-md-7">
-        <!-- Start -->
-        <div class="card mb-30">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                 <h3>Profile Edit</h3>
-                 <a href="{{route('admin.myProfile')}}" class="btn-custom yellow"><i class="bx bx-eye"></i> View</a>
+<div class="edit-profile-page">
+    <div class="edit-profile-grid">
+        <div class="edit-profile-card mb-30">
+            <div class="edit-profile-header">
+                <div>
+                    <h3>Profile Edit</h3>
+                    <p>Update your essential account information.</p>
+                </div>
+                <a href="{{route('admin.myProfile')}}" class="view-profile-btn"><i class="bx bx-show"></i> View Profile</a>
             </div>
-            <div class="card-body">
-                    <form action="{{route('admin.editProfile')}}" method="post" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" value="profile" name="actionType">
-                        <div class="media">
-                            <a href="javascript: void(0);">
-                                <img src="{{asset($user->image())}}"  class="ProfileImage image_{{$user->id}} rounded mr-75" alt="profile image" />
-                            </a>
-                            <div class="media-body" style="padding: 0 10px;">
-                                <div style="display:flex;">
-                                    <label class="btn btn-sm btn-primary cursor-pointer" for="account-upload" >Upload photo </label>
-                                    <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
-                                    @if($user->imageFile)
-                                    <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete btn btn-sm btn-secondary" style="margin: 0 10px;height:31px;">Reset </a>
-                                    @endif
-                                </div>
-                                @if ($errors->has('image'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('image') }}</p>
+
+            <div class="edit-profile-body">
+                <form action="{{route('admin.editProfile')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" value="profile" name="actionType">
+
+                    <div class="profile-upload-box">
+                        <a href="javascript: void(0);">
+                            <img src="{{asset($user->image())}}" class="ProfileImage image_{{$user->id}}" alt="profile image" />
+                        </a>
+                        <div>
+                            <div class="upload-actions">
+                                <label class="upload-btn" for="account-upload"><i class="bx bx-upload"></i> Upload Photo</label>
+                                <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
+                                @if($user->imageFile)
+                                <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete reset-photo-btn"><i class="bx bx-reset"></i> Reset</a>
                                 @endif
-                                <p class="text-muted"><small>Allowed JPG, GIF or PNG. Max size of 2048kB</small></p>
                             </div>
+                            @if ($errors->has('image'))
+                            <p class="field-error">{{ $errors->first('image') }}</p>
+                            @endif
+                            <p class="upload-help">Allowed JPG, GIF or PNG. Max size of 2048kB.</p>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="name">Name* </label>
-                                <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
-                                @if ($errors->has('name'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="email">Email* </label>
-                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
-                                @if ($errors->has('email'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="mobile">Mobile* </label>
-                                <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
-                                {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" /> --}}
-                                @if ($errors->has('mobile'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="gender">Gender </label>
-                                <select class="form-control {{$errors->has('gender')?'error':''}}" name="gender">
-                                    <option value="">Select Gender</option>
-                                    <option value="Male" {{$user->gender=='Male'?'selected':''}}>Male</option>
-                                    <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female</option>
-                                </select>
-                                @if ($errors->has('gender'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gender') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="division">Division </label>
-                                <select id="division" class="form-control {{$errors->has('division')?'error':''}}" name="division">
-                                    <option value="">Select Division</option>
+                    <div class="form-section-title">
+                        <i class="bx bx-user-circle"></i>
+                        <h4>Personal Information</h4>
+                    </div>
 
-                                    @foreach(App\Models\Country::where('type',2)->where('parent_id',1)->get() as $data)
-                                    <option value="{{$data->id}}" {{$data->id==$user->division?'selected':''}}>{{$data->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="district">District </label>
-                                <select id="district" class="form-control {{$errors->has('district')?'error':''}}" name="district">
-                                    @if($user->division==null)
-                                    <option value="">No District</option>
-                                    @else
-                                    <option value="">Select District</option>
-                                    @foreach(App\Models\Country::where('type',3)->where('parent_id',$user->division)->get() as $data)
-                                    <option value="{{$data->id}}" {{$data->id==$user->district?'selected':''}}>{{$data->name}}</option>
-                                    @endforeach @endif
-                                </select>
-                            </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="city">City </label>
-                                <select id="city" class="form-control {{$errors->has('city')?'error':''}}" name="city">
-                                    @if($user->district==null)
-                                    <option value="">No City</option>
-                                    @else
-                                    <option value="">Select City</option>
-                                    @foreach(App\Models\Country::where('type',4)->where('parent_id',$user->district)->get() as $data)
-                                    <option value="{{$data->id}}" {{$data->id==$user->city?'selected':''}}>{{$data->name}}</option>
-                                    @endforeach @endif
-                                </select>
-                            </div>
-
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                                <label for="postal_code">Postal Code</label>
-                                <input type="text" class="form-control {{$errors->has('postal_code')?'error':''}}" name="postal_code" placeholder="Enter Postal Code" value="{{$user->postal_code?:old('postal_code')}}" />
-                                @if ($errors->has('postal_code'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('postal_code') }}</p>
-                                @endif
-                            </div>
-                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                                <label for="address">Address Line</label>
-                                <input type="text" class="form-control {{$errors->has('address')?'error':''}}" name="address" placeholder="Enter Address" value="{{$user->address_line1?:old('address')}}" />
-                                @if ($errors->has('address'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('address') }}</p>
-                                @endif
-                            </div>
+                    <div class="row">
+                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                            <label for="name">Name*</label>
+                            <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
+                            @if ($errors->has('name'))
+                            <p class="field-error">{{ $errors->first('name') }}</p>
+                            @endif
                         </div>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </form>
+                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                            <label>Role</label>
+                            <div class="readonly-field">{{$user->permission->name ?? 'N/A'}}</div>
+                        </div>
+                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                            <label>Employee ID</label>
+                            <div class="readonly-field">{{$user->employee_id ?: 'N/A'}}</div>
+                        </div>
+                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                            <label for="mobile">Mobile*</label>
+                            <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
+                            {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" /> --}}
+                            @if ($errors->has('mobile'))
+                            <p class="field-error">{{ $errors->first('mobile') }}</p>
+                            @endif
+                        </div>
+                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                            <label for="email">Email*</label>
+                            <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
+                            @if ($errors->has('email'))
+                            <p class="field-error">{{ $errors->first('email') }}</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <button type="submit" class="save-profile-btn"><i class="bx bx-save"></i> Save Changes</button>
+                </form>
             </div>
         </div>
-    </div>
-    <div class="col-md-5">
-        <!-- Start -->
-        <div class="card mb-30">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                 <h3>Change Password</h3>
+
+        <div class="edit-profile-card mb-30">
+            <div class="edit-profile-header">
+                <div>
+                    <h3>Change Password</h3>
+                    <p>Keep your account secure with a strong password.</p>
+                </div>
             </div>
-            <div class="card-body">
+
+            <div class="edit-profile-body">
+                <div class="password-note">
+                    Use a password that is hard to guess and different from your previous password.
+                </div>
                 <form action="{{route('admin.editProfile')}}" method="post">
                     @csrf
                     <input type="hidden" value="change-password" name="actionType">
                     <div class="row">
                         <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                            <label for="old_password">Old password </label>
+                            <label for="old_password">Old Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control password" placeholder="Old Password" name="old_password" value="{{old('old_password')}}" required="" />
                                 <div class="input-group-append">
@@ -166,21 +373,21 @@
                             </div>
                         </div>
                         <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                            <label for="password">New Password </label>
+                            <label for="password">New Password</label>
                             <input type="password" class="form-control password {{$errors->has('password')?'error':''}}" name="password" placeholder="New password" required="" />
                             @if ($errors->has('password'))
-                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password') }}</p>
+                            <p class="field-error">{{ $errors->first('password') }}</p>
                             @endif
                         </div>
                         <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                            <label for="password_confirmation">Confirmed Password </label>
+                            <label for="password_confirmation">Confirm Password</label>
                             <input type="password" class="form-control password {{$errors->has('password_confirmation')?'error':''}}" name="password_confirmation" placeholder="Confirmed password" required="" />
                             @if ($errors->has('password_confirmation'))
-                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password_confirmation') }}</p>
+                            <p class="field-error">{{ $errors->first('password_confirmation') }}</p>
                             @endif
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-danger">Change Password</button>
+                    <button type="submit" class="change-password-btn"><i class="bx bx-lock-alt"></i> Change Password</button>
                 </form>
             </div>
         </div>

@@ -75,6 +75,7 @@ trait ActivityLoggable
             'loggable_id' => $user->id,
             'data' => [
                 'last_active_at' => now()->toDateTimeString(),
+                'public_ip' => clientPublicIp(request()),
                 'ip' => request()->ip() ?? null,
                 'user_agent' => request()->userAgent() ?? null,
             ]

@@ -75,6 +75,7 @@ class AuthController extends Controller
                         'loggable_type' => get_class($user),
                         'loggable_id' => $user->id,
                         'data' => json_encode([
+                            'public_ip' => clientPublicIp($r),
                             'ip' => $r->ip(),
                             'user_agent' => $r->userAgent(),
                             'url' => $r->fullUrl(),
@@ -91,6 +92,7 @@ class AuthController extends Controller
                         'loggable_id' => $user->id,
                         'data' => json_encode([
                             'last_active_at' => now()->toDateTimeString(),
+                            'public_ip' => clientPublicIp($r),
                             'ip' => $r->ip(),
                             'user_agent' => $r->userAgent(),
                             'url' => $r->fullUrl(),
@@ -143,6 +145,7 @@ class AuthController extends Controller
                 'loggable_type' => get_class($user),
                 'loggable_id' => $user->id,
                 'data' => json_encode([
+                    'public_ip' => clientPublicIp($request),
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                     'url' => $request->fullUrl(),

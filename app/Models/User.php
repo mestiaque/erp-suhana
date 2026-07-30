@@ -27,6 +27,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use ME\Hr\Models\HrGeoLocation;
 
 class User extends Authenticatable
 {
@@ -363,20 +364,20 @@ class User extends Authenticatable
     }
 
     public function countryN(){
-        return $this->belongsTo(Country::class,'country');
+        return $this->belongsTo(HrGeoLocation::class,'country');
     }
 
     public function divitionN(){
-        return $this->belongsTo(Country::class,'division');
+        return $this->belongsTo(HrGeoLocation::class,'division');
     }
 
     public function districtN(){
-        return $this->belongsTo(Country::class,'district');
+        return $this->belongsTo(HrGeoLocation::class,'district');
     }
 
 
     public function cityN(){
-        return $this->belongsTo(Country::class,'city');
+        return $this->belongsTo(HrGeoLocation::class,'city');
     }
 
 

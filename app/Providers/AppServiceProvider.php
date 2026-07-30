@@ -62,7 +62,6 @@ class AppServiceProvider extends ServiceProvider
             \Config::set("mail.mailers.smtp.password", $general->mail_password);
 
             // observers
-            \App\Models\OrderDetail::observe(\App\Observers\OrderDetailObserver::class);
         }
     }
 

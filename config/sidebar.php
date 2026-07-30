@@ -19,6 +19,13 @@ return [
             'permission' => '',
             'order'      => 2,
         ],
+        [
+            'title'      => 'Login History',
+            'icon'       => 'fa-solid fa-clock-rotate-left',
+            'route'      => '/admin/login-history',
+            'permission' => '',
+            'order'      => 3,
+        ],
     ],
 
     // Purchases Management
@@ -588,6 +595,5 @@ return [
         ],
     ],
 ];
-
 
 

@@ -53,6 +53,35 @@ function isMobileDevice() {
 , $userAgent) === 1;
 }
 
+if (!function_exists('clientPublicIp')) {
+    function clientPublicIp(?\Illuminate\Http\Request $request = null): ?string
+    {
+        $request = $request ?: request();
+        $candidates = [];
+
+        foreach (['CF-Connecting-IP', 'True-Client-IP', 'X-Real-IP', 'X-Forwarded-For'] as $header) {
+            $value = $request->headers->get($header);
+            if (!$value) {
+                continue;
+            }
+
+            foreach (explode(',', $value) as $ip) {
+                $candidates[] = trim($ip);
+            }
+        }
+
+        $candidates[] = $request->ip();
+
+        foreach ($candidates as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return $ip;
+            }
+        }
+
+        return $request->ip();
+    }
+}
+
 // function adminTheme(){
 //   $theme=general()->adminTheme.'.';
 //   if(isMobileDevice()){
