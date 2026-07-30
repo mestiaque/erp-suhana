@@ -65,7 +65,7 @@
     @endphp
 
     @can('user_dashboard.view')
-        @include('admin.user-dashboard')
+        @include('admin.basic-dashboard')
     @endcan
 
     @if($showHrWidget)
