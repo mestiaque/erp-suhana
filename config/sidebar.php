@@ -38,7 +38,7 @@ return [
             'icon'       => 'fa-solid fa-users',
             'icon_color' => 'text-success',
             'permission' => '',
-            'order'      => 9,
+            'order'      => 19,
             'children'   => [
 
                 [

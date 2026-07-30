@@ -1,16 +1,20 @@
 @php
     $widgetId = 'basic_widget_'.uniqid();
 @endphp
-
+<div class="d-flex align-items-center justify-content-between mb-3 mt-1">
+    <h4 class="mb-0" style="font-size:17px;font-weight:700;">
+        <i class="fa-solid fa-boxes-stacked me-2" style="color:#1671f9;"></i> Inventory Overview
+    </h4>
+</div>
 
     {{-- ── Stat Cards ── --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4 col-lg">
         <a href="{{ route('admin.usersAdmin') }}" class="ac-stat-card-link">
         <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:#ecfdf5;"><i class="fa-solid fa-users" style="color:#10b981;"></i></div>
+            <div class="ac-stat-icon" style="background:#ecf0fd;"><i class="fa-solid fa-users" style="color:#1671f9;"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:#10b981;">{{ $totalUsers }}</div>
+                <div class="ac-stat-val" style="color:#1671f9;">{{ $totalUsers }}</div>
                 <div class="ac-stat-lbl">Total Users</div>
             </div>
         </div>
@@ -19,9 +23,9 @@
     <div class="col-6 col-md-4 col-lg">
         <a href="{{ route('admin.usersAdmin', ['status' => 'active']) }}" class="ac-stat-card-link">
         <div class="ac-stat-card">
-            <div class="ac-stat-icon" style="background:#eef2ff;"><i class="fa-solid fa-user-check" style="color:#6366f1;"></i></div>
+            <div class="ac-stat-icon" style="background:#eef2ff;"><i class="fa-solid fa-user-check" style="color:#10b981;"></i></div>
             <div>
-                <div class="ac-stat-val" style="color:#6366f1;">{{ $activeUsers }}</div>
+                <div class="ac-stat-val" style="color:#10b981;">{{ $activeUsers }}</div>
                 <div class="ac-stat-lbl">Active Users</div>
             </div>
         </div>
