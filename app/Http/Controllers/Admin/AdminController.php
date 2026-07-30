@@ -55,7 +55,7 @@ class AdminController extends Controller
     {
         $userActivity = $this->getUserActivityReport(new Request);
 
-        $totalRoles = Permission::count();
+        $totalRoles = Permission::where('status', 'active')->count();
         $totalUsers = User::count();
         $activeUsers = User::where('status', 1)->count();
         $inactiveUsers = User::where('status', 0)->count();

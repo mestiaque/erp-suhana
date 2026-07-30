@@ -13,7 +13,7 @@
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
-        margin-bottom: 12px;
+        margin-bottom: 0px;
     }
 
     .summary-card,
@@ -47,6 +47,10 @@
     .summary-card.warning .summary-icon {
         background: #fff5db;
         color: #c68300;
+    }
+
+    .summary-icon i{
+        font-size: 2rem;
     }
 
     .summary-card.info .summary-icon {
@@ -164,7 +168,7 @@
         vertical-align: middle;
         white-space: nowrap;
         padding: 8px 6px;
-        color: #6b778c;
+        color: white;
         font-weight: 700;
         font-size: 11px;
     }
@@ -269,35 +273,36 @@
     @include(adminTheme().'alerts')
 
     <div class="login-history-page">
-        <div class="history-summary">
-            <div class="summary-card warning">
-                <span class="summary-icon"><i class="bx bx-log-in-circle"></i></span>
-                <div>
-                    <span>Today Login</span>
-                    <strong>{{$todayLoginCount}}</strong>
-                </div>
-            </div>
-            <div class="summary-card">
-                <span class="summary-icon"><i class="bx bx-radio-circle-marked"></i></span>
-                <div>
-                    <span>Active Now</span>
-                    <strong>{{$activeUserCount}}</strong>
-                </div>
-            </div>
-            <div class="summary-card info">
-                <span class="summary-icon"><i class="bx bx-user-check"></i></span>
-                <div>
-                    <span>Tracked Users</span>
-                    <strong>{{$trackedUserCount}}</strong>
-                </div>
-            </div>
-        </div>
+
 
         <div class="history-card mb-30">
             <div class="history-card-header">
                 <div>
-                    <h3>User Login History</h3>
-                    <p>Active status is calculated from activity within the last {{$toleranceMinutes}} minutes.</p>
+                    <h2 class="m-0">User Login History</h2>
+                    <p class="text-muted m-0">Active status is calculated from activity within the last {{$toleranceMinutes}} minutes.</p>
+                </div>
+                <div class="history-summary">
+                    <div class="summary-card warning">
+                        <span class="summary-icon"><i class="bx bx-log-in-circle"></i></span>
+                        <div>
+                            <span>Today Login</span>
+                            <strong>{{$todayLoginCount}}</strong>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon"><i class="bx bx-radio-circle-marked"></i></span>
+                        <div>
+                            <span>Active Now</span>
+                            <strong>{{$activeUserCount}}</strong>
+                        </div>
+                    </div>
+                    <div class="summary-card info">
+                        <span class="summary-icon"><i class="bx bx-user-check"></i></span>
+                        <div>
+                            <span>Tracked Users</span>
+                            <strong>{{$trackedUserCount}}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
 
