@@ -12,34 +12,34 @@
     .history-summary {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 18px;
+        gap: 10px;
+        margin-bottom: 12px;
     }
 
     .summary-card,
     .history-card {
         background: #ffffff;
         border: 1px solid #e8edf5;
-        border-radius: 8px;
-        box-shadow: 0 12px 32px rgba(21, 32, 56, 0.06);
+        border-radius: 6px;
+        box-shadow: 0 6px 18px rgba(21, 32, 56, 0.05);
     }
 
     .summary-card {
-        padding: 18px;
+        padding: 10px 14px;
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 10px;
     }
 
     .summary-icon {
-        width: 44px;
-        height: 44px;
+        width: 34px;
+        height: 34px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 44px;
-        border-radius: 8px;
-        font-size: 22px;
+        flex: 0 0 34px;
+        border-radius: 6px;
+        font-size: 18px;
         background: #eef7f2;
         color: #18a575;
     }
@@ -57,17 +57,17 @@
     .summary-card span {
         display: block;
         color: #667085;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
     }
 
     .summary-card strong {
         display: block;
-        margin-top: 3px;
+        margin-top: 2px;
         color: #122033;
-        font-size: 24px;
-        line-height: 1;
+        font-size: 20px;
+        line-height: 1.1;
     }
 
     .history-card {
@@ -78,63 +78,66 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 18px;
-        padding: 22px 24px;
+        gap: 14px;
+        padding: 14px 16px;
         background: linear-gradient(135deg, #f6fbff 0%, #eef7f2 100%);
         border-bottom: 1px solid #e8edf5;
     }
 
     .history-card-header h3 {
         margin: 0;
-        font-size: 20px;
+        font-size: 17px;
         font-weight: 700;
     }
 
     .history-card-header p {
-        margin: 6px 0 0;
+        margin: 4px 0 0;
         color: #6b778c;
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .history-filter {
-        padding: 18px 24px 4px;
+        padding: 12px 16px 0;
     }
 
     .login-history-page .form-group label {
         color: #667085;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
+        margin-bottom: 4px;
     }
 
     .login-history-page .form-control {
-        min-height: 42px;
+        min-height: 34px;
         border: 1px solid #dce4ef;
         border-radius: 6px;
         color: #17233c;
-        font-size: 14px;
+        font-size: 13px;
         box-shadow: none;
+        padding: 6px 10px;
     }
 
     .history-actions {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
-        padding-top: 29px;
+        padding-top: 22px;
     }
 
     .history-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        min-height: 42px;
-        padding: 9px 14px;
+        gap: 5px;
+        min-height: 34px;
+        padding: 7px 12px;
         border: 0;
-        border-radius: 6px;
+        border-radius: 5px;
         color: #ffffff;
         background: #1769e0;
         font-weight: 700;
+        font-size: 13px;
     }
 
     .history-btn:hover {
@@ -148,22 +151,26 @@
     }
 
     .history-table-wrap {
-        padding: 0 24px 24px;
+        padding: 0 16px 14px;
     }
 
     .history-table {
         margin-bottom: 0;
-        font-size: 12px !important;
+        font-size: 11px !important;
     }
 
     .history-table thead th {
         border: 0;
         vertical-align: middle;
         white-space: nowrap;
+        padding: 8px 6px;
+        color: #6b778c;
+        font-weight: 700;
+        font-size: 11px;
     }
 
     .history-table tbody td {
-        padding: 14px 10px;
+        padding: 8px 6px;
         vertical-align: top;
         border-top: 1px solid #edf1f6;
     }
@@ -172,7 +179,7 @@
     .ip-cell strong {
         display: block;
         color: #17233c;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
     }
 
@@ -180,25 +187,26 @@
     .ip-cell span,
     .muted-line {
         display: block;
-        margin-top: 3px;
+        margin-top: 1px;
         color: #7b8794;
-        font-size: 12px;
+        font-size: 11px;
     }
 
     .agent-text {
-        max-width: 320px;
+        max-width: 240px;
         color: #4a5568;
-        line-height: 1.5;
+        line-height: 1.4;
         word-break: break-word;
+        font-size: 11px;
     }
 
     .status-pill {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
+        gap: 4px;
+        padding: 4px 8px;
         border-radius: 999px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         white-space: nowrap;
     }
@@ -214,13 +222,18 @@
     }
 
     .empty-history {
-        padding: 42px 18px;
+        padding: 28px 14px;
         text-align: center;
         color: #7b8794;
     }
 
     .history-pagination {
-        padding: 0 24px 24px;
+        padding: 0 16px 14px;
+    }
+
+    .history-table .btn-sm {
+        padding: 3px 8px;
+        font-size: 11px;
     }
 
     @media only screen and (max-width: 991px) {
@@ -239,8 +252,8 @@
         .history-filter,
         .history-table-wrap,
         .history-pagination {
-            padding-left: 18px;
-            padding-right: 18px;
+            padding-left: 14px;
+            padding-right: 14px;
         }
 
         .history-btn {
@@ -403,9 +416,11 @@
                                     <div class="agent-text">{{data_get($data, 'user_agent', 'N/A')}}</div>
                                 </td>
                                 <td>
+                                    @can('login_history.view')
                                     <a href="{{route('admin.userLoginHistory', $user->id)}}" class="btn btn-sm btn-primary" title="View Full History">
                                         <i class="bx bx-show"></i>
                                     </a>
+                                    @endcan
                                 </td>
                             </tr>
                             @empty

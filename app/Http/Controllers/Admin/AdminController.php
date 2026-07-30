@@ -16,6 +16,7 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -50,11 +51,39 @@ class AdminController extends Controller
         return true;
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $userActivity = $this->getUserActivityReport(new Request);
 
-        return view('admin.dashboard', compact('userActivity'));
+        $totalRoles = Permission::count();
+        $totalUsers = User::count();
+        $activeUsers = User::where('status', 1)->count();
+        $inactiveUsers = User::where('status', 0)->count();
+        $todayLogins = ActivityLog::where('event', 'login')
+            ->where('user_type', User::class)
+            ->whereDate('created_at', today())
+            ->count();
+
+        $chartData = collect();
+        $dailyLogins = ActivityLog::where('event', 'login')
+            ->where('user_type', User::class)
+            ->whereDate('created_at', '>=', Carbon::now()->subDays(29))
+            ->selectRaw('DATE(created_at) as date, COUNT(DISTINCT user_id) as active')
+            ->groupBy('date')
+            ->pluck('active', 'date');
+
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dateStr = $date->format('Y-m-d');
+            $activeCount = $dailyLogins->get($dateStr, 0);
+            $chartData->push([
+                'date' => $date->format('d M'),
+                'active' => $activeCount,
+                'inactive' => max(0, $totalUsers - $activeCount),
+            ]);
+        }
+
+        return view('admin.dashboard', compact('userActivity', 'totalRoles', 'totalUsers', 'activeUsers', 'inactiveUsers', 'todayLogins', 'chartData'));
     }
 
     public function getUserActivityReport(Request $request)
@@ -234,9 +263,49 @@ class AdminController extends Controller
         $perPage = in_array($perPage, [25, 50, 100]) ? $perPage : 25;
         $activeCutoff = now()->subMinutes($toleranceMinutes);
 
+        $baseQuery = ActivityLog::where('event', 'login')
+            ->where('user_type', User::class)
+            ->whereHas('user');
+
+        if ($request->filled('date_from')) {
+            $baseQuery->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $baseQuery->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $userIds = User::where(function ($userQuery) use ($search) {
+                $userQuery->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%");
+            })->pluck('id');
+
+            $baseQuery->whereIn('user_id', $userIds);
+        }
+
+        $latestLoginSub = ActivityLog::select(DB::raw('MAX(id) as max_id'))
+            ->where('event', 'login')
+            ->where('user_type', User::class)
+            ->whereIn('user_id', function ($q) use ($baseQuery) {
+                $q->select('user_id')->from($baseQuery);
+            })
+            ->groupBy('user_id');
+
+        $loginLogsQuery = ActivityLog::with('user')
+            ->whereIn('id', function ($query) use ($latestLoginSub) {
+                $query->select('max_id')->from($latestLoginSub);
+            })
+            ->orderByDesc('created_at');
+
+        $allLoginLogs = $loginLogsQuery->get();
+        $allUserIds = $allLoginLogs->pluck('user_id')->filter()->unique()->values();
+
         $recentActiveLogs = ActivityLog::where('event', 'user_active')
             ->where('user_type', User::class)
             ->where('created_at', '>=', $activeCutoff)
+            ->whereIn('user_id', $allUserIds)
             ->latest()
             ->get()
             ->groupBy('user_id');
@@ -244,6 +313,7 @@ class AdminController extends Controller
         $recentLogoutLogs = ActivityLog::where('event', 'logout')
             ->where('user_type', User::class)
             ->where('created_at', '>=', $activeCutoff)
+            ->whereIn('user_id', $allUserIds)
             ->latest()
             ->get()
             ->groupBy('user_id');
@@ -255,38 +325,21 @@ class AdminController extends Controller
             return ! $lastLogout || $lastActive->created_at->gt($lastLogout->created_at);
         })->keys()->values();
 
-        $query = ActivityLog::with('user')
-            ->where('event', 'login')
-            ->where('user_type', User::class)
-            ->whereHas('user');
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        if ($request->filled('search')) {
-            $search = trim($request->search);
-            $userIds = User::where(function ($userQuery) use ($search) {
-                $userQuery->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('mobile', 'like', "%{$search}%")
-                    ->orWhere('employee_id', 'like', "%{$search}%");
-            })->pluck('id');
-
-            $query->whereIn('user_id', $userIds);
-        }
-
         if ($request->status === 'active') {
-            $query->whereIn('user_id', $activeUserIds);
+            $allLoginLogs = $allLoginLogs->filter(fn ($log) => $activeUserIds->contains($log->user_id))->values();
         } elseif ($request->status === 'inactive') {
-            $query->whereNotIn('user_id', $activeUserIds);
+            $allLoginLogs = $allLoginLogs->filter(fn ($log) => ! $activeUserIds->contains($log->user_id))->values();
         }
 
-        $loginLogs = $query->latest()->paginate($perPage)->withQueryString();
+        $page = $request->input('page', 1);
+        $loginLogs = new LengthAwarePaginator(
+            $allLoginLogs->forPage($page, $perPage),
+            $allLoginLogs->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $pageUserIds = $loginLogs->getCollection()->pluck('user_id')->filter()->unique()->values();
 
         $latestActiveLogs = ActivityLog::where('event', 'user_active')

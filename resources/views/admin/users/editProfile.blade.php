@@ -269,126 +269,130 @@
 
 
 @include(adminTheme().'alerts')
-<div class="edit-profile-page">
-    <div class="edit-profile-grid">
-        <div class="edit-profile-card mb-30">
-            <div class="edit-profile-header">
-                <div>
-                    <h3>Profile Edit</h3>
-                    <p>Update your essential account information.</p>
+<div class="flex-grow-1">
+    <div class="edit-profile-page">
+        <div class="edit-profile-grid">
+            <div class="edit-profile-card mb-30">
+                <div class="edit-profile-header">
+                    <div>
+                        <h3>Profile Edit</h3>
+                        <p>Update your essential account information.</p>
+                    </div>
+                    <a href="{{route('admin.myProfile')}}" class="view-profile-btn"><i class="bx bx-show"></i> View Profile</a>
                 </div>
-                <a href="{{route('admin.myProfile')}}" class="view-profile-btn"><i class="bx bx-show"></i> View Profile</a>
-            </div>
 
-            <div class="edit-profile-body">
-                <form action="{{route('admin.editProfile')}}" method="post" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" value="profile" name="actionType">
+                <div class="edit-profile-body">
+                    <form action="{{route('admin.editProfile')}}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" value="profile" name="actionType">
 
-                    <div class="profile-upload-box">
-                        <a href="javascript: void(0);">
-                            <img src="{{asset($user->image())}}" class="ProfileImage image_{{$user->id}}" alt="profile image" />
-                        </a>
-                        <div>
-                            <div class="upload-actions">
-                                <label class="upload-btn" for="account-upload"><i class="bx bx-upload"></i> Upload Photo</label>
-                                <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
-                                @if($user->imageFile)
-                                <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete reset-photo-btn"><i class="bx bx-reset"></i> Reset</a>
+                        <div class="profile-upload-box">
+                            <a href="javascript: void(0);">
+                                <img src="{{asset($user->image())}}" class="ProfileImage image_{{$user->id}}" alt="profile image" />
+                            </a>
+                            <div>
+                                <div class="upload-actions">
+                                    <label class="upload-btn" for="account-upload"><i class="bx bx-upload"></i> Upload Photo</label>
+                                    <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
+                                    {{-- @if($user->imageFile)
+                                    <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete reset-photo-btn"><i class="bx bx-reset"></i> Reset</a>
+                                    @endif --}}
+                                </div>
+                                @if ($errors->has('image'))
+                                <p class="field-error">{{ $errors->first('image') }}</p>
+                                @endif
+                                <p class="upload-help">Allowed JPG, GIF or PNG. Max size of 2048kB.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">
+                            <i class="bx bx-user-circle"></i>
+                            <h4>Personal Information</h4>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                                <label for="name">Name*</label>
+                                <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
+                                @if ($errors->has('name'))
+                                <p class="field-error">{{ $errors->first('name') }}</p>
                                 @endif
                             </div>
-                            @if ($errors->has('image'))
-                            <p class="field-error">{{ $errors->first('image') }}</p>
-                            @endif
-                            <p class="upload-help">Allowed JPG, GIF or PNG. Max size of 2048kB.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-section-title">
-                        <i class="bx bx-user-circle"></i>
-                        <h4>Personal Information</h4>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                            <label for="name">Name*</label>
-                            <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
-                            @if ($errors->has('name'))
-                            <p class="field-error">{{ $errors->first('name') }}</p>
-                            @endif
-                        </div>
-                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                            <label>Role</label>
-                            <div class="readonly-field">{{$user->permission->name ?? 'N/A'}}</div>
-                        </div>
-                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                            <label>Employee ID</label>
-                            <div class="readonly-field">{{$user->employee_id ?: 'N/A'}}</div>
-                        </div>
-                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                            <label for="mobile">Mobile*</label>
-                            <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
-                            {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" /> --}}
-                            @if ($errors->has('mobile'))
-                            <p class="field-error">{{ $errors->first('mobile') }}</p>
-                            @endif
-                        </div>
-                        <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                            <label for="email">Email*</label>
-                            <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
-                            @if ($errors->has('email'))
-                            <p class="field-error">{{ $errors->first('email') }}</p>
-                            @endif
-                        </div>
-                    </div>
-
-                    <button type="submit" class="save-profile-btn"><i class="bx bx-save"></i> Save Changes</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="edit-profile-card mb-30">
-            <div class="edit-profile-header">
-                <div>
-                    <h3>Change Password</h3>
-                    <p>Keep your account secure with a strong password.</p>
-                </div>
-            </div>
-
-            <div class="edit-profile-body">
-                <div class="password-note">
-                    Use a password that is hard to guess and different from your previous password.
-                </div>
-                <form action="{{route('admin.editProfile')}}" method="post">
-                    @csrf
-                    <input type="hidden" value="change-password" name="actionType">
-                    <div class="row">
-                        <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                            <label for="old_password">Old Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control password" placeholder="Old Password" name="old_password" value="{{old('old_password')}}" required="" />
-                                <div class="input-group-append">
-                                    <span class="input-group-text showPassword"><i class='bx bx-hide'></i></span>
-                                </div>
+                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                                <label>Role</label>
+                                <div class="readonly-field">{{$user->permission->name ?? 'N/A'}}</div>
+                            </div>
+                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                                <label>Employee ID</label>
+                                <div class="readonly-field">{{$user->employee_id ?: 'N/A'}}</div>
+                            </div>
+                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                                <label for="mobile">Mobile*</label>
+                                <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
+                                {{-- <input type="text" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" placeholder="Enter Mobile" value="{{$user->mobile?:old('mobile')}}" /> --}}
+                                @if ($errors->has('mobile'))
+                                <p class="field-error">{{ $errors->first('mobile') }}</p>
+                                @endif
+                            </div>
+                            <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                                <label for="email">Email*</label>
+                                <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
+                                @if ($errors->has('email'))
+                                <p class="field-error">{{ $errors->first('email') }}</p>
+                                @endif
+                            </div>
+                            <div class="form-group col-xl-6 col-lg-6 col-md-12 align-self-end text-right">
+                                <button type="submit" class="save-profile-btn"><i class="bx bx-save"></i> Save Changes</button>
                             </div>
                         </div>
-                        <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                            <label for="password">New Password</label>
-                            <input type="password" class="form-control password {{$errors->has('password')?'error':''}}" name="password" placeholder="New password" required="" />
-                            @if ($errors->has('password'))
-                            <p class="field-error">{{ $errors->first('password') }}</p>
-                            @endif
-                        </div>
-                        <div class="form-group col-xl-12 col-lg-12 col-md-12">
-                            <label for="password_confirmation">Confirm Password</label>
-                            <input type="password" class="form-control password {{$errors->has('password_confirmation')?'error':''}}" name="password_confirmation" placeholder="Confirmed password" required="" />
-                            @if ($errors->has('password_confirmation'))
-                            <p class="field-error">{{ $errors->first('password_confirmation') }}</p>
-                            @endif
-                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <div class="edit-profile-card mb-30">
+                <div class="edit-profile-header">
+                    <div>
+                        <h3>Change Password</h3>
+                        <p>Keep your account secure with a strong password.</p>
                     </div>
-                    <button type="submit" class="change-password-btn"><i class="bx bx-lock-alt"></i> Change Password</button>
-                </form>
+                </div>
+
+                <div class="edit-profile-body">
+                    <div class="password-note">
+                        Use a password that is hard to guess and different from your previous password.
+                    </div>
+                    <form action="{{route('admin.editProfile')}}" method="post">
+                        @csrf
+                        <input type="hidden" value="change-password" name="actionType">
+                        <div class="row">
+                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
+                                <label for="old_password">Old Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control password" placeholder="Old Password" name="old_password" value="{{old('old_password')}}" required="" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text showPassword"><i class='bx bx-hide'></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
+                                <label for="password">New Password</label>
+                                <input type="password" class="form-control password {{$errors->has('password')?'error':''}}" name="password" placeholder="New password" required="" />
+                                @if ($errors->has('password'))
+                                <p class="field-error">{{ $errors->first('password') }}</p>
+                                @endif
+                            </div>
+                            <div class="form-group col-xl-12 col-lg-12 col-md-12">
+                                <label for="password_confirmation">Confirm Password</label>
+                                <input type="password" class="form-control password {{$errors->has('password_confirmation')?'error':''}}" name="password_confirmation" placeholder="Confirmed password" required="" />
+                                @if ($errors->has('password_confirmation'))
+                                <p class="field-error">{{ $errors->first('password_confirmation') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <button type="submit" class="change-password-btn float-right mb-4"><i class="bx bx-lock-alt"></i> Change Password</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -400,5 +404,20 @@
 
 @push('js')
 
+<script>
+        const imageInput = document.getElementById('account-upload');
 
+        if (imageInput) {
+            imageInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.querySelector('.ProfileImage').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+</script>
 @endpush
