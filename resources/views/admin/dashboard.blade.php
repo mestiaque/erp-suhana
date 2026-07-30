@@ -59,7 +59,7 @@
         $hrPackageExists = class_exists(\ME\Hr\Http\Controllers\HrDashboardController::class);
         $accSflPackageExists = class_exists(\ME\AccSfl\Http\Controllers\DashboardController::class);
         $sflInventoryPackageExists = class_exists(\ME\SflInventory\Http\Controllers\DashboardController::class);
-        $showHrWidget = $hrPackageExists && auth()->user()?->can('hr.all');
+        $showHrWidget = $hrPackageExists && auth()->user()?->can('hr_dashboard.all');
         $showAccSflWidget = $accSflPackageExists && auth()->user()?->can('ac_dashboard.view');
         $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
     @endphp
