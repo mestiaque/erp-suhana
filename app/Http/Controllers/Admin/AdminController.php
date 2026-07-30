@@ -62,6 +62,7 @@ class AdminController extends Controller
         $todayLogins = ActivityLog::
             where('user_type', User::class)
             ->whereDate('created_at', today())
+            ->distinct('user_id')
             ->count('user_id');
 
         $chartData = collect();
