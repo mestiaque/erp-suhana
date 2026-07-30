@@ -14,11 +14,26 @@
 
     @php
         $hrPackageExists = class_exists(\ME\Hr\Http\Controllers\HrDashboardController::class);
+        $accSflPackageExists = class_exists(\ME\AccSfl\Http\Controllers\DashboardController::class);
+        $sflInventoryPackageExists = class_exists(\ME\SflInventory\Http\Controllers\DashboardController::class);
+        $showHrWidget = $hrPackageExists && auth()->user()?->can('hr.all');
+        $showAccSflWidget = $accSflPackageExists && auth()->user()?->can('ac_dashboard.view');
+        $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
     @endphp
 
-    @if($hrPackageExists && auth()->user()?->can('hr.all'))
+    @if($showHrWidget)
         @include('hr::partials.dashboard-widget')
-    @else
+    @endif
+
+    @if($showAccSflWidget)
+        @include('acc-sfl::admin.partials.dashboard-widget')
+    @endif
+
+    @if($showInventoryWidget)
+        @include('sfl-inventory::admin.partials.dashboard-widget')
+    @endif
+
+    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget)
         <div class="d-flex align-items-center justify-content-center" style="min-height: 60vh;">
             <div class="text-center text-muted">
                 <i class="bx bx-home-circle" style="font-size: 64px; opacity: 0.3;"></i>
