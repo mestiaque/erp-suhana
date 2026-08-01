@@ -82,7 +82,10 @@ class SflInventoryStockEngineTest extends TestCase
         $store = InvStore::create(['name' => 'Store ' . uniqid(), 'code' => 'S' . uniqid(), 'type' => 'raw_material']);
         $item = $this->makeItem($store);
 
-        $this->assertStringStartsWith('ITM-', $item->item_code);
+        // Format: {company}-{category code}-{sequence}, e.g. SFL-SW-001.
+        // makeItem()'s fixture category has no explicit code, so this falls
+        // back to just the company prefix (SFL-<seq>).
+        $this->assertStringStartsWith('SFL-', $item->item_code);
     }
 
     public function test_opening_stock_posts_to_ledger_and_stock_service_reads_it_back(): void
