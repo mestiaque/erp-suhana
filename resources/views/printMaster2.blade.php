@@ -10,21 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@100..900&display=swap" rel="stylesheet">
     <style>
-        .letter-box{
-            width: 210mm;
-            min-height: 297mm;
-            padding: 5mm 7mm !important;
-            margin: auto;
-            /* background: white; */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-        }
         body {
             font-family: "Noto Sans Bengali", sans-serif !important;
-        }
-        @media print {
-            body { background: none; padding: 0; }
-            .letter-box { box-shadow: none; margin: 0; }
         }
     </style>
     <style>
