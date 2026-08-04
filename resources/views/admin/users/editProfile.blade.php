@@ -305,6 +305,27 @@
                             </div>
                         </div>
 
+                        <div class="profile-upload-box">
+                            @if($user->signature)
+                            <img src="{{asset($user->signature)}}" class="signature-preview" id="signature-preview" alt="signature" style="width:120px;height:60px;object-fit:contain;border-radius:6px;border:1px solid #e8edf5;background:#fff;" />
+                            @else
+                            <div class="signature-preview" id="signature-preview" style="width:120px;height:60px;border-radius:6px;border:1px solid #e8edf5;background:#fff;"></div>
+                            @endif
+                            <div>
+                                <div class="upload-actions">
+                                    <label class="upload-btn" for="signature-upload"><i class="bx bx-upload"></i> Upload Signature</label>
+                                    <input type="file" name="signature" id="signature-upload" hidden="" />
+                                    @if($user->signature)
+                                    <a href="{{route('admin.userFileReset',['signature',$user->id])}}" class="reset-photo-btn" onclick="return confirm('Reset signature?')"><i class="bx bx-reset"></i> Reset</a>
+                                    @endif
+                                </div>
+                                @if ($errors->has('signature'))
+                                <p class="field-error">{{ $errors->first('signature') }}</p>
+                                @endif
+                                <p class="upload-help">Allowed JPG, GIF or PNG. Max size of 2048kB.</p>
+                            </div>
+                        </div>
+
                         <div class="form-section-title">
                             <i class="bx bx-user-circle"></i>
                             <h4>Personal Information</h4>
@@ -414,6 +435,30 @@
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         document.querySelector('.ProfileImage').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        const signatureInput = document.getElementById('signature-upload');
+
+        if (signatureInput) {
+            signatureInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        let preview = document.getElementById('signature-preview');
+                        if (preview.tagName !== 'IMG') {
+                            const newImg = document.createElement('img');
+                            newImg.id = 'signature-preview';
+                            newImg.className = 'signature-preview';
+                            newImg.style.cssText = preview.style.cssText;
+                            preview.replaceWith(newImg);
+                            preview = newImg;
+                        }
+                        preview.src = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 }

@@ -67,6 +67,7 @@ class SflInventoryStockEngineTest extends TestCase
         $unit = InvUnit::create(['name' => 'Yard', 'short_name' => 'YD']);
 
         return InvItem::create([
+            'item_code'        => 'TST-' . uniqid(),
             'item_name'        => 'Test Fabric ' . uniqid(),
             'category_id'      => $category->id,
             'unit_id'          => $unit->id,
@@ -77,15 +78,24 @@ class SflInventoryStockEngineTest extends TestCase
         ]);
     }
 
-    public function test_item_code_is_auto_generated(): void
+    public function test_item_code_is_required_and_user_entered(): void
     {
+        // Item codes are entered manually by the user (not auto-generated) —
+        // create() must persist exactly the code given, and two items can't
+        // share one (enforced by the unique index + form validation).
         $store = InvStore::create(['name' => 'Store ' . uniqid(), 'code' => 'S' . uniqid(), 'type' => 'raw_material']);
         $item = $this->makeItem($store);
 
-        // Format: {company}-{category code}-{sequence}, e.g. SFL-SW-001.
-        // makeItem()'s fixture category has no explicit code, so this falls
-        // back to just the company prefix (SFL-<seq>).
-        $this->assertStringStartsWith('SFL-', $item->item_code);
+        $this->assertStringStartsWith('TST-', $item->item_code);
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        InvItem::create([
+            'item_code'   => $item->item_code,
+            'item_name'   => 'Duplicate Code Item',
+            'category_id' => $item->category_id,
+            'unit_id'     => $item->unit_id,
+            'item_type'   => 'raw_material',
+        ]);
     }
 
     public function test_opening_stock_posts_to_ledger_and_stock_service_reads_it_back(): void
@@ -192,6 +202,7 @@ class SflInventoryStockEngineTest extends TestCase
         $category = InvItemCategory::create(['name' => 'Cat ' . uniqid()]);
         $unit = InvUnit::create(['name' => 'Yard', 'short_name' => 'YD']);
         $item = InvItem::create([
+            'item_code' => 'LOW-' . uniqid(),
             'item_name' => 'Low Stock Item', 'category_id' => $category->id, 'unit_id' => $unit->id,
             'item_type' => 'raw_material', 'minimum_stock' => 500,
             'opening_stock' => 10, 'opening_value' => 100, 'opening_store_id' => $store->id,

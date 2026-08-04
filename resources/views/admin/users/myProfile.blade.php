@@ -308,6 +308,14 @@
                         <label><i class="bx bx-envelope"></i> Email</label>
                         <p>{{$user->email ?: 'N/A'}}</p>
                     </div>
+                    <div class="profile-info-item">
+                        <label><i class="bx bx-pen"></i> Signature</label>
+                        @if($user->signature)
+                        <p><img src="{{asset($user->signature)}}" alt="Signature" style="max-width:150px;max-height:60px;object-fit:contain;"></p>
+                        @else
+                        <p>N/A</p>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

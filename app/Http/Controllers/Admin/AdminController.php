@@ -463,6 +463,7 @@ class AdminController extends Controller
                     'city' => 'nullable|numeric',
                     'postal_code' => 'nullable|max:20',
                     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 ]);
 
                 $user->name = $r->name;
@@ -503,6 +504,17 @@ class AdminController extends Controller
 
                 }
                 // /////Image Upload End////////////
+
+                // /////Signature Upload Start////////////
+                if ($r->hasFile('signature')) {
+                    if ($user->signature && File::exists($user->signature)) {
+                        File::delete($user->signature);
+                    }
+                    $signaturePath = $r->file('signature')->store('employees/signatures', 'public');
+                    $user->signature = 'storage/'.$signaturePath;
+                }
+                // /////Signature Upload End////////////
+
                 $user->save();
 
                 Session()->flash('success', 'Your Updated Are Successfully Done!');
@@ -763,6 +775,7 @@ class AdminController extends Controller
                 'status' => 'nullable|in:0,1',
                 'role' => 'nullable|exists:permissions,id',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+                'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
 
             $user->name = $r->name;
@@ -776,6 +789,14 @@ class AdminController extends Controller
 
             if ($r->hasFile('image')) {
                 uploadFile($r->image, $user->id, 6, 1, Auth::id());
+            }
+
+            if ($r->hasFile('signature')) {
+                if ($user->signature && File::exists($user->signature)) {
+                    File::delete($user->signature);
+                }
+                $signaturePath = $r->file('signature')->store('employees/signatures', 'public');
+                $user->signature = 'storage/'.$signaturePath;
             }
 
             $user->save();
@@ -1456,6 +1477,51 @@ class AdminController extends Controller
 
         return view(adminTheme().'users.roles.userRoleEdit', compact('role'));
 
+    }
+
+    public function userFileReset($field, $id)
+    {
+        if (! in_array($field, ['photo', 'signature'])) {
+            abort(404);
+        }
+
+        $user = User::findOrFail($id);
+
+        if ($user->{$field} && File::exists($user->{$field})) {
+            File::delete($user->{$field});
+        }
+        $user->{$field} = null;
+        $user->save();
+
+        Session()->flash('success', ucfirst($field).' Reset Successfully Done!');
+
+        return redirect()->back();
+    }
+
+    public function mediesDelete(Request $r, $id)
+    {
+        $media = Media::find($id);
+
+        if ($media) {
+            if (File::exists($media->file_url)) {
+                File::delete($media->file_url);
+            }
+            $media->delete();
+
+            if ($r->ajax() || $r->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+
+            Session()->flash('success', 'Photo Reset Successfully Done!');
+        } else {
+            if ($r->ajax() || $r->wantsJson()) {
+                return response()->json(['success' => false], 404);
+            }
+
+            Session()->flash('error', 'Photo Not Found!');
+        }
+
+        return redirect()->back();
     }
 
     public function setting($type)

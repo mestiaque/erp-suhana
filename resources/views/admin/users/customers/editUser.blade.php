@@ -66,6 +66,27 @@
                             </div>
                         </div>
 
+                        {{-- Signature with Preview --}}
+                        <div class="d-flex align-items-center mb-4">
+                            @if($user->signature)
+                            <img id="signaturePreview" src="{{ asset($user->signature) }}" alt="Signature" style="width:150px;height:60px;object-fit:contain;border-radius:4px;border:2px dashed #dee2e6;" />
+                            @else
+                            <div id="signaturePreview" style="width:150px;height:60px;border-radius:4px;border:2px dashed #dee2e6;"></div>
+                            @endif
+                            <div class="ml-3">
+                                <label class="btn btn-sm btn-primary mb-1" for="signatureInput">
+                                    <i class="bx bx-upload"></i> Change Signature
+                                </label>
+                                <input type="file" name="signature" id="signatureInput" accept="image/*" hidden>
+                                @if($user->signature)
+                                <a href="{{route('admin.userFileReset',['signature',$user->id])}}" class="btn btn-sm btn-secondary d-block mt-1"
+                                   onclick="return confirm('Reset signature?')">Reset</a>
+                                @endif
+                                <small class="text-muted d-block mt-1">JPG, PNG. Max 2MB</small>
+                                @error('signature')<p class="text-danger small mb-0">{{$message}}</p>@enderror
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -166,6 +187,26 @@
         if (file) {
             const reader = new FileReader();
             reader.onload = e => document.getElementById('imagePreview').src = e.target.result;
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Signature live preview
+    document.getElementById('signatureInput').addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                let img = document.getElementById('signaturePreview');
+                if (img.tagName !== 'IMG') {
+                    const newImg = document.createElement('img');
+                    newImg.id = 'signaturePreview';
+                    newImg.style.cssText = img.style.cssText;
+                    img.replaceWith(newImg);
+                    img = newImg;
+                }
+                img.src = e.target.result;
+            };
             reader.readAsDataURL(file);
         }
     });
