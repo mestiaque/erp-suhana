@@ -37,6 +37,14 @@ return [
                     'dashboard' => 'Dashboard',
                 ],
             ],
+            'data_change_log' => [
+                'label'       => 'Data Change Log',
+                'permissions' => [
+                    'all'    => 'All',
+                    'list'   => 'List',
+                    'view'   => 'View',
+                ],
+            ],
         ],
 
         'Setting' =>[

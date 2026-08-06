@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\ActivityLoggable;
 
 class Attribute extends Model
 {
-
-    use ActivityLoggable;
 
     protected $guarded = [];
     //Models Information Data

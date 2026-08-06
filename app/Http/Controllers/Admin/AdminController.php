@@ -446,6 +446,61 @@ class AdminController extends Controller
         ]);
     }
 
+    public function dataChangeLog(Request $r)
+    {
+        $perPage = (int) $r->input('per_page', 25);
+        $perPage = in_array($perPage, [25, 50, 100]) ? $perPage : 25;
+
+        $query = ActivityLog::with('user')
+            ->whereIn('event', ['create', 'update', 'delete']);
+
+        if ($r->filled('event')) {
+            $query->where('event', $r->event);
+        }
+
+        if ($r->filled('model')) {
+            $query->where('loggable_type', 'like', '%'.$r->model);
+        }
+
+        if ($r->filled('search')) {
+            $search = trim($r->search);
+            $userIds = User::where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })->pluck('id');
+
+            $query->whereIn('user_id', $userIds);
+        }
+
+        if ($r->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $r->date_from);
+        }
+        if ($r->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $r->date_to);
+        }
+
+        $logs = $query->latest()->paginate($perPage)->withQueryString();
+
+        $modelOptions = ActivityLog::whereIn('event', ['create', 'update', 'delete'])
+            ->select('loggable_type')
+            ->distinct()
+            ->pluck('loggable_type')
+            ->filter()
+            ->values();
+
+        return view(adminTheme().'users.dataChangeLog', [
+            'logs' => $logs,
+            'modelOptions' => $modelOptions,
+        ]);
+    }
+
+    public function dataChangeLogShow(ActivityLog $activityLog)
+    {
+        return view(adminTheme().'users.dataChangeLogShow', [
+            'log' => $activityLog,
+        ]);
+    }
+
     public function editProfile(Request $r)
     {
 

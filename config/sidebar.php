@@ -26,6 +26,13 @@ return [
             'permission' => 'login_history',
             'order'      => 3,
         ],
+        [
+            'title'      => 'Data Change Log',
+            'icon'       => 'fa-solid fa-file-pen',
+            'route'      => '/admin/data-change-log',
+            'permission' => 'data_change_log',
+            'order'      => 4,
+        ],
     ],
 
 

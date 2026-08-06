@@ -21,6 +21,10 @@ class ActivityLog extends Model
         'loggable_type',
         'loggable_id',
         'data',
+        'ip_address',
+        'user_agent',
+        'url',
+        'method',
     ];
 
     protected $casts = [
