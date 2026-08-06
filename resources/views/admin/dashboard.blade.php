@@ -53,88 +53,84 @@
 
 
 
-
-
-
-
-
-
-
-
             <div class="banner-container">
                 <div class="dice-wrapper">
 
-                    <!-- DASHBOARD -->
+                    <!-- SUHANA -->
                     <div class="dice-cube c-red" style="animation-delay: 0.1s;">
-                    <div class="face front">D</div><div class="face back">D</div><div class="face left">D</div><div class="face right">D</div><div class="face top">D</div><div class="face bottom">D</div>
+                    <div class="face front">S</div><div class="face back">S</div><div class="face left">S</div><div class="face right">S</div><div class="face top">S</div><div class="face bottom">S</div>
                     </div>
 
                     <div class="dice-cube c-orange" style="animation-delay: 0.3s;">
-                    <div class="face front">a</div><div class="face back">a</div><div class="face left">a</div><div class="face right">a</div><div class="face top">a</div><div class="face bottom">a</div>
+                    <div class="face front">u</div><div class="face back">u</div><div class="face left">u</div><div class="face right">u</div><div class="face top">u</div><div class="face bottom">u</div>
                     </div>
 
                     <div class="dice-cube c-yellow" style="animation-delay: 0.5s;">
-                    <div class="face front">s</div><div class="face back">s</div><div class="face left">s</div><div class="face right">s</div><div class="face top">s</div><div class="face bottom">s</div>
-                    </div>
-
-                    <div class="dice-cube c-green" style="animation-delay: 0.7s;">
                     <div class="face front">h</div><div class="face back">h</div><div class="face left">h</div><div class="face right">h</div><div class="face top">h</div><div class="face bottom">h</div>
                     </div>
 
-                    <div class="dice-cube c-teal" style="animation-delay: 0.9s;">
-                    <div class="face front">b</div><div class="face back">b</div><div class="face left">b</div><div class="face right">b</div><div class="face top">b</div><div class="face bottom">b</div>
-                    </div>
-
-                    <div class="dice-cube c-blue" style="animation-delay: 1.1s;">
-                    <div class="face front">o</div><div class="face back">o</div><div class="face left">o</div><div class="face right">o</div><div class="face top">o</div><div class="face bottom">o</div>
-                    </div>
-
-                    <div class="dice-cube c-purple" style="animation-delay: 1.3s;">
+                    <div class="dice-cube c-green" style="animation-delay: 0.7s;">
                     <div class="face front">a</div><div class="face back">a</div><div class="face left">a</div><div class="face right">a</div><div class="face top">a</div><div class="face bottom">a</div>
                     </div>
 
-                    <div class="dice-cube c-pink" style="animation-delay: 1.5s;">
-                    <div class="face front">r</div><div class="face back">r</div><div class="face left">r</div><div class="face right">r</div><div class="face top">r</div><div class="face bottom">r</div>
+                    <div class="dice-cube c-teal" style="animation-delay: 0.9s;">
+                    <div class="face front">n</div><div class="face back">n</div><div class="face left">n</div><div class="face right">n</div><div class="face top">n</div><div class="face bottom">n</div>
                     </div>
 
-                    <div class="dice-cube c-dark" style="animation-delay: 1.7s;">
-                    <div class="face front">d</div><div class="face back">d</div><div class="face left">d</div><div class="face right">d</div><div class="face top">d</div><div class="face bottom">d</div>
+                    <div class="dice-cube c-blue" style="animation-delay: 1.1s;">
+                    <div class="face front">a</div><div class="face back">a</div><div class="face left">a</div><div class="face right">a</div><div class="face top">a</div><div class="face bottom">a</div>
                     </div>
+
 
                     <!-- মাঝের খালি স্পেস -->
                     <div class="space"></div>
 
-                    <!-- OVERVIEW -->
+                    <!-- FASHIONS -->
                     <div class="dice-cube c-red" style="animation-delay: 1.9s;">
-                    <div class="face front">O</div><div class="face back">O</div><div class="face left">O</div><div class="face right">O</div><div class="face top">O</div><div class="face bottom">O</div>
+                    <div class="face front">F</div><div class="face back">F</div><div class="face left">F</div><div class="face right">F</div><div class="face top">F</div><div class="face bottom">F</div>
                     </div>
 
                     <div class="dice-cube c-orange" style="animation-delay: 2.1s;">
-                    <div class="face front">v</div><div class="face back">v</div><div class="face left">v</div><div class="face right">v</div><div class="face top">v</div><div class="face bottom">v</div>
+                    <div class="face front">a</div><div class="face back">a</div><div class="face left">a</div><div class="face right">a</div><div class="face top">a</div><div class="face bottom">a</div>
                     </div>
 
                     <div class="dice-cube c-yellow" style="animation-delay: 2.3s;">
-                    <div class="face front">e</div><div class="face back">e</div><div class="face left">e</div><div class="face right">e</div><div class="face top">e</div><div class="face bottom">e</div>
+                    <div class="face front">s</div><div class="face back">s</div><div class="face left">s</div><div class="face right">s</div><div class="face top">s</div><div class="face bottom">s</div>
                     </div>
 
                     <div class="dice-cube c-green" style="animation-delay: 2.5s;">
-                    <div class="face front">r</div><div class="face back">r</div><div class="face left">r</div><div class="face right">r</div><div class="face top">r</div><div class="face bottom">r</div>
+                    <div class="face front">h</div><div class="face back">h</div><div class="face left">h</div><div class="face right">h</div><div class="face top">h</div><div class="face bottom">h</div>
                     </div>
 
                     <div class="dice-cube c-teal" style="animation-delay: 2.7s;">
-                    <div class="face front">v</div><div class="face back">v</div><div class="face left">v</div><div class="face right">v</div><div class="face top">v</div><div class="face bottom">v</div>
-                    </div>
-
-                    <div class="dice-cube c-blue" style="animation-delay: 2.9s;">
                     <div class="face front">i</div><div class="face back">i</div><div class="face left">i</div><div class="face right">i</div><div class="face top">i</div><div class="face bottom">i</div>
                     </div>
 
+                    <div class="dice-cube c-blue" style="animation-delay: 2.9s;">
+                    <div class="face front">o</div><div class="face back">o</div><div class="face left">o</div><div class="face right">o</div><div class="face top">o</div><div class="face bottom">o</div>
+                    </div>
+
                     <div class="dice-cube c-purple" style="animation-delay: 3.1s;">
-                    <div class="face front">e</div><div class="face back">e</div><div class="face left">e</div><div class="face right">e</div><div class="face top">e</div><div class="face bottom">e</div>
+                    <div class="face front">n</div><div class="face back">n</div><div class="face left">n</div><div class="face right">n</div><div class="face top">n</div><div class="face bottom">n</div>
                     </div>
 
                     <div class="dice-cube c-dark" style="animation-delay: 3.3s;">
-                    <div class="face front">w</div><div class="face back">w</div><div class="face left">w</div><div class="face right">w</div><div class="face top">w</div><div class="face bottom">w</div>
+                    <div class="face front">s</div><div class="face back">s</div><div class="face left">s</div><div class="face right">s</div><div class="face top">s</div><div class="face bottom">s</div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <!-- LTD -->
+                    <div class="dice-cube c-pink" style="animation-delay: 3.5s;">
+                    <div class="face front">L</div><div class="face back">L</div><div class="face left">L</div><div class="face right">L</div><div class="face top">L</div><div class="face bottom">L</div>
+                    </div>
+
+                    <div class="dice-cube c-red" style="animation-delay: 3.7s;">
+                    <div class="face front">t</div><div class="face back">t</div><div class="face left">t</div><div class="face right">t</div><div class="face top">t</div><div class="face bottom">t</div>
+                    </div>
+
+                    <div class="dice-cube c-blue" style="animation-delay: 3.9s;">
+                    <div class="face front">d</div><div class="face back">d</div><div class="face left">d</div><div class="face right">d</div><div class="face top">d</div><div class="face bottom">d</div>
                     </div>
 
                 </div>
@@ -157,9 +153,13 @@
         $hrPackageExists = class_exists(\ME\Hr\Http\Controllers\HrDashboardController::class);
         $accSflPackageExists = class_exists(\ME\AccSfl\Http\Controllers\DashboardController::class);
         $sflInventoryPackageExists = class_exists(\ME\SflInventory\Http\Controllers\DashboardController::class);
+        $productionSflPackageExists = class_exists(\ME\ProductionSfl\Http\Controllers\DashboardController::class);
+        $merchandisingPackageExists = class_exists(\ME\Merchandising\Http\Controllers\DashboardController::class);
         $showHrWidget = $hrPackageExists && auth()->user()?->can('hr_dashboard.all');
         $showAccSflWidget = $accSflPackageExists && auth()->user()?->can('ac_dashboard.view');
         $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
+        $showProductionWidget = $productionSflPackageExists && auth()->user()?->can('prod_dashboard.view');
+        $showMerchandisingWidget = $merchandisingPackageExists && auth()->user()?->can('merch_dashboard.view');
     @endphp
 
     @can('user_dashboard.view')
@@ -178,7 +178,15 @@
         @include('sfl-inventory::admin.partials.dashboard-widget')
     @endif
 
-    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget)
+    @if($showProductionWidget)
+        @include('production-sfl::admin.partials.dashboard-widget')
+    @endif
+
+    @if($showMerchandisingWidget)
+        @include('merchandising::admin.partials.dashboard-widget')
+    @endif
+
+    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget && !$showProductionWidget && !$showMerchandisingWidget)
         <div class="d-none"></div>
     @endif
 
@@ -276,32 +284,43 @@
   /* মূল ব্যানার কন্টেইনার */
   .banner-container {
     background: #ffffff;
-    padding: 40px 60px;
+        padding: clamp(10px, 3cqw, 40px) clamp(8px, 4cqw, 60px);
     border-radius: 20px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, .08);
     text-align: center;
     max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        container-type: inline-size;
+        container-name: banner;
   }
 
   /* ডাইসগুলোর জন্য কন্টেইনার ও ৩ডি পারসপেক্টিভ */
   .banner-container .dice-wrapper {
+        --dice-size: clamp(14px, 2.6vw, 50px);
+        --dice-gap: clamp(1px, 1vw, 30px);
+        --dice-font: clamp(10px, 2.1vw, 26px);
+        --dice-radius: clamp(4px, 1vw, 12px);
     display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
+        flex-wrap: nowrap;
+        gap: var(--dice-gap);
     justify-content: center;
+        align-items: center;
     perspective: 1200px; /* ৩ডি গভীরতা বাড়ানোর জন্য */
     margin-bottom: 20px;
   }
 
   /* স্পেস বা গ্যাপের জন্য (Dashboard এবং Overview এর মাঝে) */
   .banner-container .space {
-    width: 30px;
+        width: clamp(4px, 1.8vw, 30px);
+        flex: 0 0 auto;
   }
 
   /* প্রতিটা ডাইসের ৩ডি কন্টেইনার */
   .banner-container .dice-cube {
-    width: 50px;
-    height: 50px;
+        width: var(--dice-size);
+        height: var(--dice-size);
+        flex: 0 0 auto;
     position: relative;
     transform-style: preserve-3d;
     cursor: pointer;
@@ -322,9 +341,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px;
+    font-size: var(--dice-font);
     font-weight: 800;
-    border-radius: 12px; /* লুডু ডাইসের মতো নিখুঁত রাউন্ড কর্নার */
+    border-radius: var(--dice-radius); /* লুডু ডাইসের মতো নিখুঁত রাউন্ড কর্নার */
     border: 2px solid rgba(255, 255, 255, 0.6);
     box-sizing: border-box;
     /* ডাইসে গ্লসি এবং শ্যাডো ইফেক্ট */
@@ -333,12 +352,12 @@
   }
 
   /* ৩ডি স্পেসে ৬টি সারফেসের অবস্থান নির্ধারণ */
-  .banner-container .front  { transform: rotateY(0deg) translateZ(25px); }
-  .banner-container .back   { transform: rotateY(180deg) translateZ(25px); }
-  .banner-container .left   { transform: rotateY(-90deg) translateZ(25px); }
-  .banner-container .right  { transform: rotateY(90deg) translateZ(25px); }
-  .banner-container .top    { transform: rotateX(90deg) translateZ(25px); }
-  .banner-container .bottom { transform: rotateX(-90deg) translateZ(25px); }
+    .banner-container .front  { transform: rotateY(0deg) translateZ(calc(var(--dice-size) / 2)); }
+    .banner-container .back   { transform: rotateY(180deg) translateZ(calc(var(--dice-size) / 2)); }
+    .banner-container .left   { transform: rotateY(-90deg) translateZ(calc(var(--dice-size) / 2)); }
+    .banner-container .right  { transform: rotateY(90deg) translateZ(calc(var(--dice-size) / 2)); }
+    .banner-container .top    { transform: rotateX(90deg) translateZ(calc(var(--dice-size) / 2)); }
+    .banner-container .bottom { transform: rotateX(-90deg) translateZ(calc(var(--dice-size) / 2)); }
 
   /* থিম অনুযায়ী গ্লসি কালার প্যালেট (Background ও Text Color) */
   .c-red .face    { background: #ffebee; color: #e53935; }
