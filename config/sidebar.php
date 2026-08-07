@@ -33,6 +33,13 @@ return [
             'permission' => 'data_change_log',
             'order'      => 4,
         ],
+        [
+            'title'      => 'Approvals',
+            'icon'       => 'fa-solid fa-clipboard-check',
+            'route'      => '/admin/approvals',
+            'permission' => 'approvals',
+            'order'      => 5,
+        ],
     ],
 
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\CommercialController;
 // ----------------------
 // Admin Controller
@@ -44,6 +45,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/login-history/user/{user}', [AdminController::class, 'userLoginHistory'])->name('userLoginHistory');
     Route::get('/data-change-log', [AdminController::class, 'dataChangeLog'])->name('dataChangeLog');
     Route::get('/data-change-log/{activityLog}', [AdminController::class, 'dataChangeLogShow'])->name('dataChangeLogShow');
+
+    Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+    Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
+    Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
 
     // User Management
     Route::get('/users/admin/', [AdminController::class, 'usersAdmin'])->name('usersAdmin');

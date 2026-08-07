@@ -45,6 +45,15 @@ return [
                     'view'   => 'View',
                 ],
             ],
+            'approvals' => [
+                'label'       => 'Approvals',
+                'permissions' => [
+                    'all'     => 'All',
+                    'list'    => 'List',
+                    'approve' => 'Approve',
+                    'reject'  => 'Reject',
+                ],
+            ],
         ],
 
         'Setting' =>[
