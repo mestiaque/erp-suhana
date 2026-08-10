@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ApprovalController;
-use App\Http\Controllers\Admin\CommercialController;
 // ----------------------
 // Admin Controller
 // ----------------------
@@ -15,7 +14,7 @@ use App\Http\Controllers\Admin\PurchasesController;
 // Staff Controller
 // ----------------------
 use App\Http\Controllers\Admin\RequisitionController;
-use App\Http\Controllers\Api\ZKTecoPushController;
+// use App\Http\Controllers\Api\ZKTecoPushController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Staff\StaffController;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +29,7 @@ Route::get('/', function () {
 Route::any('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/log-out', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/`test-zkteco`', [ZKTecoPushController::class, 'test'])->name('test-zkteco');
+// Route::get('/`test-zkteco`', [ZKTecoPushController::class, 'test'])->name('test-zkteco');
 
 // ----------------------
 // ADMIN ROUTES
@@ -236,51 +235,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
 
     // Route::get('/sales',[RequisitionController::class,'sales'])->name('sales');
     // Route::any('/sales/{action}/{id?}',[RequisitionController::class,'salesAction'])->name('salesAction');
-
-    // --- Commercial Management Routes ---
-    // --- Commercial Management Routes ---
-    Route::group(['prefix' => 'commercial', 'as' => 'commercial.'], function () {
-        // 1. Bank BTB LC
-        Route::get('/btb-lc', [CommercialController::class, 'btbLc'])->name('btbLc');
-        Route::any('/btb-lc/{action}/{id?}', [CommercialController::class, 'btbLcAction'])->name('btbLcAction');
-
-        // 2. Export LC/Sales Contact
-        Route::get('/export-lc', [CommercialController::class, 'exportLc'])->name('exportLc');
-        Route::any('/export-lc/{action}/{id?}', [CommercialController::class, 'exportLcAction'])->name('exportLcAction');
-
-        // 3. Purchase Order (PO)
-        Route::get('/purchase-orders', [CommercialController::class, 'purchaseOrders'])->name('purchaseOrders');
-        Route::any('/purchase-orders/{action}/{id?}', [CommercialController::class, 'purchaseOrdersAction'])->name('purchaseOrdersAction');
-
-        // 4. Proforma Invoice (PI)
-        Route::get('/proforma-invoice', [CommercialController::class, 'pi'])->name('pi');
-        Route::any('/proforma-invoice/{action}/{id?}', [CommercialController::class, 'piAction'])->name('piAction');
-
-        // 5. Commercial Invoice
-        Route::get('/invoices', [CommercialController::class, 'invoice'])->name('invoice');
-        Route::get('/invoices/create', [CommercialController::class, 'createInvoice'])->name('invoiceCreate');
-        Route::post('/invoices/store', [CommercialController::class, 'invoiceAction'])->name('invoiceStore');
-        Route::any('/invoices/{action}/{id?}', [CommercialController::class, 'invoiceAction'])->name('invoiceAction');
-
-        // 6. Packing List
-        Route::get('/pricing-list', [CommercialController::class, 'pricingList'])->name('pricingList');
-        Route::any('/pricing-list/{action}/{id?}', [CommercialController::class, 'pricingListAction'])->name('pricingListAction');
-
-        // 6. Packing List
-        Route::get('/packing-list', [CommercialController::class, 'packingList'])->name('packingList');
-        Route::any('/packing-list/{action}/{id?}', [CommercialController::class, 'packingListAction'])->name('packingListAction');
-
-        // 7. Shipping Bill/Docs
-        Route::get('/shipping-docs', [CommercialController::class, 'shippingDocs'])->name('shippingDocs');
-        Route::any('/shipping-docs/{action}/{id?}', [CommercialController::class, 'shippingDocsAction'])->name('shippingDocsAction');
-
-        // 8. Export Realization
-        Route::get('/export-realization', [CommercialController::class, 'realization'])->name('realization');
-        Route::any('/export-realization/{action}/{id?}', [CommercialController::class, 'realizationAction'])->name('realizationAction');
-
-        // 9. Commercial Reports
-        Route::get('/reports', [CommercialController::class, 'reports'])->name('reports');
-    });
 
     Route::get('/roadmap', [PostsController::class, 'roadmap']);
 

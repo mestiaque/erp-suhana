@@ -46,7 +46,7 @@ return [
 
     // HR / User Management
     [
-        'group_title' => '',
+        'group_title' => 'USER MANAGEMENT',
         [
             'title'      => 'User Management',
             'icon'       => 'fa-solid fa-users',

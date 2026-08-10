@@ -155,11 +155,13 @@
         $sflInventoryPackageExists = class_exists(\ME\SflInventory\Http\Controllers\DashboardController::class);
         $productionSflPackageExists = class_exists(\ME\ProductionSfl\Http\Controllers\DashboardController::class);
         $merchandisingPackageExists = class_exists(\ME\Merchandising\Http\Controllers\DashboardController::class);
+        $commercialPackageExists = class_exists(\ME\Commercial\Http\Controllers\DashboardController::class);
         $showHrWidget = $hrPackageExists && auth()->user()?->can('hr_dashboard.all');
         $showAccSflWidget = $accSflPackageExists && auth()->user()?->can('ac_dashboard.view');
         $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
         $showProductionWidget = $productionSflPackageExists && auth()->user()?->can('prod_dashboard.view');
         $showMerchandisingWidget = $merchandisingPackageExists && auth()->user()?->can('merch_dashboard.view');
+        $showCommercialWidget = $commercialPackageExists && auth()->user()?->can('view_dashboard.view');
     @endphp
 
     @can('user_dashboard.view')
@@ -186,7 +188,11 @@
         @include('merchandising::admin.partials.dashboard-widget')
     @endif
 
-    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget && !$showProductionWidget && !$showMerchandisingWidget)
+    @if($showCommercialWidget)
+        @include('commercial::admin.partials.dashboard-widget')
+    @endif
+
+    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget && !$showProductionWidget && !$showMerchandisingWidget && !$showCommercialWidget)
         <div class="d-none"></div>
     @endif
 
