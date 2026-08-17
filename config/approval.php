@@ -33,6 +33,7 @@ return [
         // 'commercial.master_lc'    => \App\Approvals\Handlers\ExampleApprovalHandler::class,
 
         'inventory.requisition' => \ME\SflInventory\Approvals\InvRequisitionApprovalHandler::class,
+        'accounts.expense' => \ME\AccSfl\Approvals\ExpenseApprovalHandler::class,
 
     ],
 

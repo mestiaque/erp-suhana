@@ -28,6 +28,7 @@
                             <th style="min-width: 100px; width: 100px;">SL</th>
                             <th style="min-width: 250px; width: 250px;">Name</th>
                             <th style="min-width: 250px;">Users</th>
+                            <th style="min-width: 150px;">Permissions</th>
                             <th style="min-width: 120px; width: 120px;">Action</th>
                         </tr>
                     </thead>
@@ -37,6 +38,7 @@
                             <td>{{$i+1}}</td>
                             <td>{{$role->name}}</td>
                             <td><a href="{{route('admin.usersCustomer',['role_id'=>$role->id])}}">Users ({{$role->users->count()}})</a></td>
+                            <td>Permissions ({{count(json_decode($role->permission ?? '{}', true))}})</td>
                             <td class="text-center">
                                  @if(auth()->user()->hasPermission('roles.edit')  || auth()->user()->hasPermission('roles.delete'))
                                     @can('roles.edit')

@@ -1467,7 +1467,7 @@ class AdminController extends Controller
                 }
 
             })
-            ->select(['id', 'name', 'created_at', 'addedby_id', 'status'])
+            ->select(['id', 'name', 'permission', 'created_at', 'addedby_id', 'status'])
             ->paginate(25)->appends([
                 'search' => $r->search,
                 'startDate' => $r->startDate,
