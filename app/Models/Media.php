@@ -34,6 +34,7 @@ class Media extends Model
      * src_type  ==5 : review
      * src_type  ==6 : Users
      * src_type  ==7 : General
+     * src_type  ==8 : HR Employees
      *
      *
      * Column:
