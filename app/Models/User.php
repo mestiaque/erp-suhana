@@ -307,7 +307,7 @@ class User extends Authenticatable
     }
 
     public function imageFile(){
-    	return $this->hasOne(Media::class,'src_id')->where('src_type',6)->where('use_Of_file',1);
+    	return $this->hasOne(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','profile');
     }
 
     public function image($type=null){
@@ -323,8 +323,28 @@ class User extends Authenticatable
                return $this->imageFile->file_url;
             }
         }else{
-            return 'medies/profile.png';
+            return asset('medies/profile.png');
         }
+    }
+
+    public function signatureUrl(): ?string
+    {
+        $file = $this->hasOne(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','signature')->first();
+        if ($file) {
+            return $file->file_url;
+        }
+
+        return $this->signature ? asset($this->signature) : null;
+    }
+
+    public function photoUrl(): ?string
+    {
+        $file = $this->hasOne(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','photo')->first();
+        if ($file) {
+            return $file->file_url;
+        }
+
+        return $this->photo ? asset($this->photo) : null;
     }
 
     public function imageName(){
@@ -338,7 +358,7 @@ class User extends Authenticatable
 
 
     public function bannerFile(){
-        return $this->hasOne(Media::class,'src_id')->where('src_type',6)->where('use_Of_file',2);
+        return $this->hasOne(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','banner');
     }
 
     public function banner(){
@@ -360,7 +380,7 @@ class User extends Authenticatable
     }
 
     public function galleryFiles(){
-        return $this->hasMany(Media::class,'src_id')->where('src_type',6)->where('use_Of_file',3);
+        return $this->hasMany(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','gallery');
     }
 
     public function countryN(){

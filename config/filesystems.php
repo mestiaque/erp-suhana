@@ -47,6 +47,17 @@ return [
             'report' => false,
         ],
 
+        // Read/delete access to files uploaded before the files-table migration,
+        // which live directly under public/ (e.g. public/medies/...), not storage/app/public.
+        'legacy_public' => [
+            'driver' => 'local',
+            'root' => public_path(),
+            'url' => env('APP_URL'),
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -44,7 +44,7 @@
                             @csrf
                             <div class="media">
                                 <a href="javascript: void(0);">
-                                    <img src="{{asset($user->image())}}"  class="ProfileImage image_{{$user->id}} rounded mr-75" alt="profile image" />
+                                    <img src="{{$user->image()}}"  class="ProfileImage image_{{$user->id}} rounded mr-75" alt="profile image" />
                                 </a>
                                 <div class="media-body" style="padding: 0 10px;">
                                     <div style="display:flex;">

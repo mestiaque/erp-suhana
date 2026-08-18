@@ -11,7 +11,7 @@ use Session;
 use Carbon\Carbon;
 use App\Models\Country;
 use App\Models\Post;
-use App\Models\Media;
+use App\Models\File;
 use App\Models\PostExtra;
 use App\Models\User;
 use App\Models\Attribute;
@@ -58,9 +58,11 @@ class WelcomeController extends Controller
         $filePath='public/medies/noimage.jpg';
 
         if($image){
-            $file =Media::where('file_rename',$image)->select(['file_url'])->first();
+            $file = File::where('file_name', $image)
+                ->orWhere('meta->legacy_file_rename', $image)
+                ->first();
             if($file){
-                $filePath = $file->file_url;
+                $filePath = $file->absolutePath() ?? $filePath;
             }
         }
 

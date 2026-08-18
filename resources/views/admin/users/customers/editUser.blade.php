@@ -51,7 +51,7 @@
 
                         {{-- Image with Preview --}}
                         <div class="d-flex align-items-center mb-4">
-                            <img id="imagePreview" src="{{ asset($user->image()) }}" alt="Profile photo" />
+                            <img id="imagePreview" src="{{ $user->image() }}" alt="Profile photo" />
                             <div class="ml-3">
                                 <label class="btn btn-sm btn-primary mb-1" for="imageInput">
                                     <i class="bx bx-upload"></i> Change Photo
@@ -69,7 +69,7 @@
                         {{-- Signature with Preview --}}
                         <div class="d-flex align-items-center mb-4">
                             @if($user->signature)
-                            <img id="signaturePreview" src="{{ asset($user->signature) }}" alt="Signature" style="width:150px;height:60px;object-fit:contain;border-radius:4px;border:2px dashed #dee2e6;" />
+                            <img id="signaturePreview" src="{{ $user->signatureUrl() }}" alt="Signature" style="width:150px;height:60px;object-fit:contain;border-radius:4px;border:2px dashed #dee2e6;" />
                             @else
                             <div id="signaturePreview" style="width:150px;height:60px;border-radius:4px;border:2px dashed #dee2e6;"></div>
                             @endif

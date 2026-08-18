@@ -304,81 +304,61 @@ function pageTemplate($template=null){
 
 function uploadFile($file,$src,$srcType,$fileUse,$author=null,$fileStatus=true){
 
+  [$fileableType, $useCase] = \App\Models\File::resolveFileable((int) $srcType, (int) $fileUse);
 
   if($fileStatus){
-      $media = Media::where('src_type',$srcType)->where('use_Of_file',$fileUse)->where('src_id',$src)->first();
+      $existing = \App\Models\File::where('fileable_type',$fileableType)->where('fileable_id',$src)->where('use_case',$useCase)->first();
   }else{
-      $media = null;
+      $existing = null;
   }
 
-  if(!$media){
-    $media =new Media();
-    }else{
+  if($existing){
+      // Remove the previously uploaded physical file before replacing it.
+      \Illuminate\Support\Facades\Storage::disk($existing->disk ?: 'public')->delete(array_filter([
+          $existing->file_path,
+          $existing->file_path_sm,
+          $existing->file_path_md,
+          $existing->file_path_lg,
+      ]));
+      $record = $existing;
+  }else{
+      $record = new \App\Models\File();
+      $record->file_name = (string) Str::uuid();
+  }
 
-        $file0 = $media->file_url;
-        if(str_starts_with($file0, 'public/')){
-            $file0 = substr($file0, 7);
-        }
-        if(File::exists($file0)){
-          File::delete($file0);
-        }
+  $originalName = basename($file->getClientOriginalName());
+  $name = basename($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension());
+  $ext = $file->getClientOriginalExtension();
+  $size = $file->getSize();
 
-        if(File::exists($media->file_url_sm)){
-            File::delete($media->file_url_sm);
-        }
-        if(File::exists($media->file_url_md)){
-            File::delete($media->file_url_md);
-        }
-        if(File::exists($media->file_url_lg)){
-            File::delete($media->file_url_lg);
-        }
-    }
+  $folder = carbon::now()->format('M_Y');
+  $storedName = Str::uuid().'.'.$ext;
+  $relativeDir = 'medies/'.$folder;
 
-    $name = basename($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension());
-    $fullname = basename($file->getClientOriginalName());
-    $ext =$file->getClientOriginalExtension();
-    $size =$file->getSize();
+  $storedPath = $file->storeAs($relativeDir, $storedName, 'public');
 
-    $year =carbon::now()->format('Y');
-    $month =carbon::now()->format('M');
-    $folder = $month.'_'.$year;
+  $record->fileable_type = $fileableType;
+  $record->fileable_id = $src;
+  $record->use_case = $useCase;
+  $record->original_name = Str::limit($originalName, 250, '');
+  $record->alt_text = Str::limit($name, 250, '');
+  $record->file_path = $storedPath;
+  $record->file_full_path = asset('storage/'.$storedPath);
+  $record->disk = 'public';
+  $record->extension = $ext;
+  $record->size = $size;
+  $record->file_type = $file->getMimeType();
+  $record->addedby_id = $author;
+  $record->save();
 
-    $img =time().'.'.uniqid().'.'.$file->getClientOriginalExtension();
-    $path ="medies/".$folder;
-    $fullpath ="medies/".$folder.'/'.$img;
-    $media->src_type=$srcType;
-    $media->use_Of_file=$fileUse;
-    $media->src_id=$src;
-    $media->file_name=Str::limit($fullname,250);
-    $media->alt_text=Str::limit($name,250);
-    $media->file_rename=Str::limit($img,100);
-    $media->file_size=$size;
-    if($ext=='png' || $ext=='jpeg' || $ext=='svg' || $ext=='gif' || $ext=='jpg' || $ext=='webp'){
-      $media->file_type=1;
-      }elseif($ext=='pdf'){
-      $media->file_type=2;
-      }elseif($ext=='docx'){
-      $media->file_type=3;
-      }elseif($ext=='zip' || $ext=='rar'){
-      $media->file_type=4;
-      }elseif($ext=='mp4' || $ext=='webm' || $ext=='mov' || $ext=='wmv'){
-      $media->file_type=5;
-      }elseif($ext=='mp3'){
-      $media->file_type=6;
-    }
-    $file->move(public_path($path), $img);
-    $media->file_url =$fullpath;
-    $media->file_path =$path;
-    $media->addedby_id=$author;
-    $media->save();
-
-    return $media;
+  return $record;
 
 }
 
 if (!function_exists('deleteUserFiles')) {
   function deleteUserFiles($userId)
   {
+    // Legacy media-table rows (historical, pre-files-table uploads)
     $medias = Media::where('src_type', 6)->where('src_id', $userId)->get();
 
     foreach ($medias as $media) {
@@ -404,11 +384,71 @@ if (!function_exists('deleteUserFiles')) {
       $media->delete();
     }
 
+    // Current files-table rows
+    $files = \App\Models\File::where('fileable_type', \App\Models\User::class)->where('fileable_id', $userId)->get();
+
+    foreach ($files as $file) {
+      \Illuminate\Support\Facades\Storage::disk($file->disk ?: 'public')->delete(array_filter([
+        $file->file_path,
+        $file->file_path_sm,
+        $file->file_path_md,
+        $file->file_path_lg,
+      ]));
+
+      $file->delete();
+    }
+
     return true;
   }
 }
 
+if (!function_exists('recordFileColumn')) {
+  /**
+   * Mirror a file that a model stores directly on one of its own columns
+   * (e.g. users.signature, users.photo, general.signature) into the central
+   * files table, in addition to the column value itself. Never touches the
+   * column — call this right after you set/save it.
+   *
+   * $relativePath must be the path already stored on the column, with any
+   * 'storage/' prefix stripped (i.e. relative to the given $disk).
+   */
+  function recordFileColumn($fileableType, $fileableId, string $useCase, ?string $relativePath, $uploadedFile = null, ?int $author = null, string $disk = 'public')
+  {
+    if (!$relativePath) {
+      return null;
+    }
 
+    $record = \App\Models\File::firstOrNew([
+      'fileable_type' => $fileableType,
+      'fileable_id' => $fileableId,
+      'use_case' => $useCase,
+    ]);
+
+    if ($record->exists && $record->file_path && $record->file_path !== $relativePath) {
+      \Illuminate\Support\Facades\Storage::disk($record->disk ?: $disk)->delete($record->file_path);
+    }
+
+    if (!$record->exists) {
+      $record->file_name = (string) \Illuminate\Support\Str::uuid();
+    }
+
+    $record->disk = $disk;
+    $record->file_path = $relativePath;
+    $record->file_full_path = $disk === 'public' ? asset('storage/'.$relativePath) : asset($relativePath);
+
+    if ($uploadedFile) {
+      $record->original_name = $uploadedFile->getClientOriginalName();
+      $record->extension = $uploadedFile->getClientOriginalExtension();
+      $record->size = $uploadedFile->getSize();
+      $record->file_type = $uploadedFile->getMimeType();
+    }
+
+    $record->addedby_id = $author;
+    $record->save();
+
+    return $record;
+  }
+}
 
 if (!function_exists('hasParentPermission')) {
     function hasParentPermission(string $parent): bool

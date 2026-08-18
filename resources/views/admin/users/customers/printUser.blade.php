@@ -68,7 +68,7 @@
             <p><strong>Department:</strong> {{ $user->department?->name ?? 'N/A' }}</p>
         </td>
         <td style="width:20%; text-align:right; vertical-align:top;">
-            <img src="{{ asset($user->image()) }}" class="photo" alt="Employee Photo">
+            <img src="{{ $user->image() }}" class="photo" alt="Employee Photo">
         </td>
     </tr>
 </table>

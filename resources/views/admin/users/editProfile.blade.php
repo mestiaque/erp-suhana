@@ -288,7 +288,7 @@
 
                         <div class="profile-upload-box">
                             <a href="javascript: void(0);">
-                                <img src="{{asset($user->image())}}" class="ProfileImage image_{{$user->id}}" alt="profile image" />
+                                <img src="{{$user->image()}}" class="ProfileImage image_{{$user->id}}" alt="profile image" />
                             </a>
                             <div>
                                 <div class="upload-actions">
@@ -307,7 +307,7 @@
 
                         <div class="profile-upload-box">
                             @if($user->signature)
-                            <img src="{{asset($user->signature)}}" class="signature-preview" id="signature-preview" alt="signature" style="width:120px;height:60px;object-fit:contain;border-radius:6px;border:1px solid #e8edf5;background:#fff;" />
+                            <img src="{{$user->signatureUrl()}}" class="signature-preview" id="signature-preview" alt="signature" style="width:120px;height:60px;object-fit:contain;border-radius:6px;border:1px solid #e8edf5;background:#fff;" />
                             @else
                             <div class="signature-preview" id="signature-preview" style="width:120px;height:60px;border-radius:6px;border:1px solid #e8edf5;background:#fff;"></div>
                             @endif

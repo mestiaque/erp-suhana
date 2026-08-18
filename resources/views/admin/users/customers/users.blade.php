@@ -118,7 +118,7 @@
                                 {{$users->firstItem() + $i}}
                             </td>
                             <td style="padding:3px 5px;">
-                                <img src="{{asset($user->image())}}" style="max-width:48px;max-height:40px;border-radius:4px;" />
+                                <img src="{{$user->image()}}" style="max-width:48px;max-height:40px;border-radius:4px;" />
                             </td>
                             <td>
                                 <span class="font-weight-bold">{{$user->name}}</span>

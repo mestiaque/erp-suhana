@@ -58,7 +58,7 @@
         <div class="col-md-4">
             <div class="card mb-30">
                 <div class="card-body">
-                    <img src="{{asset($user->image())}}">
+                    <img src="{{$user->image()}}">
                     <br>
                     <div class="info">
                         <ul>

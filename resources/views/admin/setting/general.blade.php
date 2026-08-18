@@ -104,7 +104,7 @@
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                    <img src="{{asset($general->favicon())}}" style="max-width: 60px;" />
+                    <img src="{{$general->faviconUrl()}}" style="max-width: 60px;" />
                     @if($general->favicon)
                     <a href="{{route('admin.setting','favicon')}}" style="color: red;" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                     @endif
@@ -120,7 +120,7 @@
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                     <img src="{{asset($general->logo())}}" style="max-width: 150px;" />
+                     <img src="{{$general->logoUrl()}}" style="max-width: 150px;" />
                     @if($general->logo)
                     <a href="{{route('admin.setting','logo')}}" style="color: red;" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                     @endif
@@ -166,7 +166,7 @@
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
-                    <img src="{{asset($general->signature())}}" style="max-width: 150px;" />
+                    <img src="{{$general->signatureUrl()}}" style="max-width: 150px;" />
                     @if($general->signature)
                     <a href="{{route('admin.setting','signature')}}" style="color: red;" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                     @endif

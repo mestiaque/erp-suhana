@@ -131,7 +131,7 @@
 
                     <div class="row">
                         <div class="col-md-4">
-                            <img src="{{asset($user->image())}}" style="max-height:200px;"><br>
+                            <img src="{{$user->image()}}" style="max-height:200px;"><br>
                             <div class="info">
                                 <ul>
                                     <li class="d-flex"><i class="bx bx-user mr-2 pt-2"></i> <span><b>ID</b><br>{{$user->employee_id}}</span></li>

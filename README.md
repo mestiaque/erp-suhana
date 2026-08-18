@@ -57,3 +57,17 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+``` media sync
+php artisan media:sync-to-files
+```
+
+
+check image/file
+    user , user signature
+    expense, iou (multiple)
+    employee profile , nominee, documents(multiple with title [show create blade, here add file with title])
+    hr factory seal, signature
+    general Favicon, Logo, Signature 
+ei sob gula data must be fils e save hote hobe and must be asset use na kore url use korbe 

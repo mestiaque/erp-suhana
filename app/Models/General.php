@@ -120,7 +120,7 @@ class General extends Model
             return 'medies/no-favicon.png';
         }
     }
-    
+
     public function signature()
     {
         if($this->signature)
@@ -129,6 +129,40 @@ class General extends Model
         }else{
             return 'medies/noimage.jpg';
         }
+    }
+
+    public function brandFile(string $field)
+    {
+        return $this->hasOne(File::class, 'fileable_id')->where('fileable_type', self::class)->where('use_case', $field);
+    }
+
+    public function logoUrl(): string
+    {
+        return $this->brandingUrl('logo', 'medies/no-logo.png');
+    }
+
+    public function faviconUrl(): string
+    {
+        return $this->brandingUrl('favicon', 'medies/no-favicon.png');
+    }
+
+    public function signatureUrl(): string
+    {
+        return $this->brandingUrl('signature', 'medies/noimage.jpg');
+    }
+
+    protected function brandingUrl(string $field, string $default): string
+    {
+        $file = $this->brandFile($field)->first();
+        if ($file) {
+            return $file->file_url;
+        }
+
+        if ($this->{$field}) {
+            return asset($this->{$field});
+        }
+
+        return asset($default);
     }
 
 

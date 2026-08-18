@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
@@ -285,16 +284,20 @@ class UserService
 
         // Handle Photo Upload
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('employees/photos', 'public');
+            $photoFile = $request->file('photo');
+            $photoPath = $photoFile->store('employees/photos', 'public');
             $user->photo = 'storage/' . $photoPath;
             $user->save();
+            recordFileColumn(User::class, $user->id, 'photo', $photoPath, $photoFile, Auth::id());
         }
 
         // Handle Signature Upload
         if ($request->hasFile('signature')) {
-            $signaturePath = $request->file('signature')->store('employees/signatures', 'public');
+            $signatureFile = $request->file('signature');
+            $signaturePath = $signatureFile->store('employees/signatures', 'public');
             $user->signature = 'storage/' . $signaturePath;
             $user->save();
+            recordFileColumn(User::class, $user->id, 'signature', $signaturePath, $signatureFile, Auth::id());
         }
 
         return $user;
@@ -385,13 +388,7 @@ class UserService
      */
     public function deleteMediaFiles(User $user): void
     {
-        $mediaFiles = Media::where('src_type', 6)->where('src_id', $user->id)->get();
-        foreach ($mediaFiles as $media) {
-            if (File::exists($media->file_url)) {
-                File::delete($media->file_url);
-            }
-            $media->delete();
-        }
+        deleteUserFiles($user->id);
     }
 
     /**

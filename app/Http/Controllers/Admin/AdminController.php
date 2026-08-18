@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Attribute;
+use App\Models\File as FileModel;
 use App\Models\General;
-use App\Models\Media;
 use App\Models\Permission;
 use App\Models\User;
 use App\Services\UserService;
@@ -18,6 +18,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Image;
@@ -565,8 +566,10 @@ class AdminController extends Controller
                     if ($user->signature && File::exists($user->signature)) {
                         File::delete($user->signature);
                     }
-                    $signaturePath = $r->file('signature')->store('employees/signatures', 'public');
+                    $signatureFile = $r->file('signature');
+                    $signaturePath = $signatureFile->store('employees/signatures', 'public');
                     $user->signature = 'storage/'.$signaturePath;
+                    recordFileColumn(User::class, $user->id, 'signature', $signaturePath, $signatureFile, Auth::id());
                 }
                 // /////Signature Upload End////////////
 
@@ -850,8 +853,10 @@ class AdminController extends Controller
                 if ($user->signature && File::exists($user->signature)) {
                     File::delete($user->signature);
                 }
-                $signaturePath = $r->file('signature')->store('employees/signatures', 'public');
+                $signatureFile = $r->file('signature');
+                $signaturePath = $signatureFile->store('employees/signatures', 'public');
                 $user->signature = 'storage/'.$signaturePath;
+                recordFileColumn(User::class, $user->id, 'signature', $signaturePath, $signatureFile, Auth::id());
             }
 
             $user->save();
@@ -939,13 +944,7 @@ class AdminController extends Controller
                             break;
                         case 5: // Soft Delete
                             // Delete user media
-                            $userFiles = Media::where('src_type', 6)->where('src_id', $data->id)->get();
-                            foreach ($userFiles as $media) {
-                                if (File::exists($media->file_url)) {
-                                    File::delete($media->file_url);
-                                }
-                                $media->delete();
-                            }
+                            deleteUserFiles($data->id);
                             $data->deleted_by = auth()->id();
                             $data->save();
                             $data->delete();
@@ -1079,13 +1078,7 @@ class AdminController extends Controller
                 }
                 $user = User::onlyTrashed()->find($id);
                 if ($user) {
-                    $userFiles = Media::where('src_type', 6)->where('src_id', $user->id)->get();
-                    foreach ($userFiles as $media) {
-                        if (File::exists($media->file_url)) {
-                            File::delete($media->file_url);
-                        }
-                        $media->delete();
-                    }
+                    deleteUserFiles($user->id);
                     $user->forceDelete();
                 }
                 Session()->flash('success', 'User permanently deleted!');
@@ -1216,43 +1209,26 @@ class AdminController extends Controller
 
                     if ($r->hasFile('file')) {
                         $file = $r->file('file');
-                        $ext = strtolower($file->getClientOriginalExtension());
-                        $size = $file->getSize();
                         $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                         $folder = now()->format('M_Y');
-                        $imgName = time().'.'.uniqid().'.'.$ext;
-                        $path = 'medies/'.$folder;
-                        $fullPath = $path.'/'.$imgName;
+                        $storedName = Str::uuid().'.'.$file->getClientOriginalExtension();
+                        $storedPath = $file->storeAs('medies/'.$folder, $storedName, 'public');
 
-                        if (! File::isDirectory(public_path($path))) {
-                            File::makeDirectory(public_path($path), 0755, true);
-                        }
-
-                        $fileType = match ($ext) {
-                            'png', 'jpeg', 'jpg', 'gif', 'svg', 'webp' => 1,
-                            'pdf' => 2,
-                            'doc', 'docx' => 3,
-                            'zip', 'rar' => 4,
-                            'mp4', 'webm', 'mov', 'wmv' => 5,
-                            'mp3' => 6,
-                            default => 0,
-                        };
-
-                        Media::create([
-                            'src_id' => $user->id,
-                            'src_type' => 6,
-                            'use_Of_file' => 3,
+                        FileModel::create([
+                            'fileable_id' => $user->id,
+                            'fileable_type' => User::class,
+                            'use_case' => 'gallery',
                             'addedby_id' => Auth::id(),
-                            'file_name' => Str::limit($name, 250),
-                            'alt_text' => Str::limit($name, 250),
-                            'file_rename' => $imgName,
-                            'file_size' => $size,
-                            'file_type' => $fileType,
-                            'file_url' => $fullPath,
-                            'file_path' => $path,
+                            'file_name' => $storedName,
+                            'original_name' => Str::limit($name, 250, ''),
+                            'alt_text' => Str::limit($name, 250, ''),
+                            'size' => $file->getSize(),
+                            'file_type' => $file->getMimeType(),
+                            'extension' => $file->getClientOriginalExtension(),
+                            'file_path' => $storedPath,
+                            'file_full_path' => asset('storage/'.$storedPath),
+                            'disk' => 'public',
                         ]);
-
-                        $file->move(public_path($path), $imgName);
                     }
 
                     Session()->flash('success', 'Update Successful!');
@@ -1348,18 +1324,19 @@ class AdminController extends Controller
                 $fileId = $r->file_id ?? null;
 
                 if ($fileAction == 'addfile') {
-                    Media::create([
-                        'src_id' => $user->id,
-                        'src_type' => 6,
-                        'use_Of_file' => 3,
+                    FileModel::create([
+                        'fileable_id' => $user->id,
+                        'fileable_type' => User::class,
+                        'use_case' => 'gallery',
                         'addedby_id' => Auth::id(),
+                        'file_name' => (string) Str::uuid(),
                     ]);
                 }
 
                 if (in_array($fileAction, ['removeData', 'removeFile']) && $fileId) {
                     $file = $user->galleryFiles()->find($fileId);
-                    if ($file && File::exists($file->file_url)) {
-                        File::delete($file->file_url);
+                    if ($file && $file->file_path) {
+                        Storage::disk($file->disk ?: 'public')->delete($file->file_path);
                     }
 
                     if ($fileAction == 'removeData') {
@@ -1367,7 +1344,8 @@ class AdminController extends Controller
                     }
                     if ($fileAction == 'removeFile') {
                         $file?->update([
-                            'file_url' => null, 'file_path' => null, 'alt_text' => null, 'file_rename' => null, 'file_size' => null,
+                            'file_full_path' => null, 'file_path' => null, 'alt_text' => null,
+                            'original_name' => null, 'size' => null, 'file_type' => null, 'extension' => null,
                         ]);
                     }
                 }
@@ -1375,44 +1353,33 @@ class AdminController extends Controller
                 if ($fileAction == 'updateTitle' && $fileId) {
                     $file = $user->galleryFiles()->find($fileId);
                     if ($file) {
-                        $file->update(['file_name' => $r->title]);
+                        $file->update(['original_name' => $r->title]);
                     }
                 }
 
                 if ($fileAction == 'updateFile' && $fileId && $r->hasFile('file')) {
                     $fileData = $user->galleryFiles()->find($fileId);
                     if ($fileData) {
-                        if (File::exists($fileData->file_url)) {
-                            File::delete($fileData->file_url);
+                        if ($fileData->file_path) {
+                            Storage::disk($fileData->disk ?: 'public')->delete($fileData->file_path);
                         }
 
                         $file = $r->file;
-                        $ext = $file->getClientOriginalExtension();
-                        $size = $file->getSize();
                         $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                         $folder = now()->format('M_Y');
-                        $imgName = time().'.'.uniqid().'.'.$ext;
-                        $path = 'medies/'.$folder;
-                        $fullPath = ''.$path.'/'.$imgName;
+                        $storedName = Str::uuid().'.'.$file->getClientOriginalExtension();
+                        $storedPath = $file->storeAs('medies/'.$folder, $storedName, 'public');
 
                         $fileData->update([
-                            'alt_text' => Str::limit($name, 250),
-                            'file_rename' => $imgName,
-                            'file_size' => $size,
-                            'file_type' => match (strtolower($ext)) {
-                                'png','jpeg','jpg','gif','svg','webp' => 1,
-                                'pdf' => 2,
-                                'docx' => 3,
-                                'zip','rar' => 4,
-                                'mp4','webm','mov','wmv' => 5,
-                                'mp3' => 6,
-                                default => 0
-                            },
-                            'file_url' => $fullPath,
-                            'file_path' => $path,
+                            'file_name' => $storedName,
+                            'alt_text' => Str::limit($name, 250, ''),
+                            'file_type' => $file->getMimeType(),
+                            'extension' => $file->getClientOriginalExtension(),
+                            'size' => $file->getSize(),
+                            'file_path' => $storedPath,
+                            'file_full_path' => asset('storage/'.$storedPath),
+                            'disk' => 'public',
                         ]);
-
-                        $file->move(public_path($path), $imgName);
                     }
                 }
                 $view = view(adminTheme().'users.customers.includes.userFiles', compact('user'))->render();
@@ -1553,13 +1520,38 @@ class AdminController extends Controller
         return redirect()->back();
     }
 
+    private function deleteBrandField(General $general, string $field): void
+    {
+        if ($general->{$field}) {
+            $path = str_starts_with($general->{$field}, 'storage/') ? substr($general->{$field}, 8) : $general->{$field};
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            } elseif (File::exists($general->{$field})) {
+                File::delete($general->{$field});
+            }
+        }
+
+        $file = FileModel::where('fileable_type', General::class)->where('fileable_id', $general->id)->where('use_case', $field)->first();
+        if ($file) {
+            if ($file->file_path) {
+                Storage::disk($file->disk ?: 'public')->delete($file->file_path);
+            }
+            $file->delete();
+        }
+    }
+
     public function mediesDelete(Request $r, $id)
     {
-        $media = Media::find($id);
+        $media = FileModel::find($id);
 
         if ($media) {
-            if (File::exists($media->file_url)) {
-                File::delete($media->file_url);
+            if ($media->file_path) {
+                Storage::disk($media->disk ?: 'public')->delete(array_filter([
+                    $media->file_path,
+                    $media->file_path_sm,
+                    $media->file_path_md,
+                    $media->file_path_lg,
+                ]));
             }
             $media->delete();
 
@@ -1595,35 +1587,12 @@ class AdminController extends Controller
             return view(adminTheme().'setting.document', compact('general', 'type'));
         } elseif ($type == 'support') {
             return view(adminTheme().'setting.support', compact('general', 'type'));
-        } elseif ($type == 'logo') {
-
-            if (File::exists($general->logo)) {
-                File::delete($general->logo);
-            }
-            $general->logo = null;
+        } elseif (in_array($type, ['logo', 'favicon', 'signature'])) {
+            $this->deleteBrandField($general, $type);
+            $general->{$type} = null;
             $general->save();
 
-            Session()->flash('success', 'Logo Deleted Are Successfully Done!');
-
-            return redirect()->back();
-        } elseif ($type == 'favicon') {
-            if (File::exists($general->favicon)) {
-                File::delete($general->favicon);
-            }
-            $general->favicon = null;
-            $general->save();
-
-            Session()->flash('success', 'Logo Deleted Are Successfully Done!');
-
-            return redirect()->back();
-        } elseif ($type == 'signature') {
-            if (File::exists($general->signature)) {
-                File::delete($general->signature);
-            }
-            $general->signature = null;
-            $general->save();
-
-            Session()->flash('success', 'Banner Deleted Are Successfully Done!');
+            Session()->flash('success', ucfirst($type).' Deleted Are Successfully Done!');
 
             return redirect()->back();
         } elseif ($type == 'cache-clear') {
@@ -1698,83 +1667,25 @@ class AdminController extends Controller
 
             // /////Image UploadStart////////////
 
-            if ($r->hasFile('logo')) {
-
-                $file = $r->logo;
-                if (File::exists($general->logo)) {
-                    File::delete($general->logo);
+            foreach (['logo', 'favicon', 'signature'] as $brandField) {
+                if (! $r->hasFile($brandField)) {
+                    continue;
                 }
 
-                $name = basename($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension());
-                $fullName = basename($file->getClientOriginalName());
-                $ext = $file->getClientOriginalExtension();
-                $size = $file->getSize();
+                $file = $r->file($brandField);
 
-                $year = Carbon::now()->format('Y');
-                $month = Carbon::now()->format('M');
-                $folder = $month.'_'.$year;
-
-                $img = time().'.'.uniqid().'.'.$file->getClientOriginalExtension();
-                $path = 'medies/'.$folder;
-                $fullPath = 'medies/'.$folder.'/'.$img;
-
-                $file->move(public_path($path), $img);
-                $general->logo = $fullPath;
-
-            }
-
-            // /////Image UploadStart////////////
-
-            if ($r->hasFile('favicon')) {
-
-                $file = $r->favicon;
-
-                if (File::exists($general->favicon)) {
-                    File::delete($general->favicon);
+                if ($general->{$brandField}) {
+                    $oldPath = str_starts_with($general->{$brandField}, 'storage/') ? substr($general->{$brandField}, 8) : $general->{$brandField};
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    } elseif (File::exists($general->{$brandField})) {
+                        File::delete($general->{$brandField});
+                    }
                 }
 
-                $name = basename($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension());
-                $fullName = basename($file->getClientOriginalName());
-                $ext = $file->getClientOriginalExtension();
-                $size = $file->getSize();
-
-                $year = Carbon::now()->format('Y');
-                $month = Carbon::now()->format('M');
-                $folder = $month.'_'.$year;
-
-                $img = time().'.'.uniqid().'.'.$file->getClientOriginalExtension();
-                $path = 'medies/'.$folder;
-                $fullPath = 'medies/'.$folder.'/'.$img;
-
-                $file->move(public_path($path), $img);
-                $general->favicon = $fullPath;
-
-            }
-
-            if ($r->hasFile('signature')) {
-
-                $file = $r->signature;
-
-                if (File::exists($general->signature)) {
-                    File::delete($general->signature);
-                }
-
-                $name = basename($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension());
-                $fullName = basename($file->getClientOriginalName());
-                $ext = $file->getClientOriginalExtension();
-                $size = $file->getSize();
-
-                $year = Carbon::now()->format('Y');
-                $month = Carbon::now()->format('M');
-                $folder = $month.'_'.$year;
-
-                $img = time().'.'.uniqid().'.'.$file->getClientOriginalExtension();
-                $path = 'medies/'.$folder;
-                $fullPath = 'medies/'.$folder.'/'.$img;
-
-                $file->move(public_path($path), $img);
-                $general->signature = $fullPath;
-
+                $storedPath = $file->store('branding', 'public');
+                $general->{$brandField} = 'storage/'.$storedPath;
+                recordFileColumn(General::class, $general->id ?: 1, $brandField, $storedPath, $file, Auth::id());
             }
             $general->commingsoon_mode = $r->commingsoon_mode ? true : false;
             $general->save();

@@ -150,7 +150,7 @@
                             </td>
                             <td style="padding: 0 3px;">
                                 <span>
-                                    <img src="{{asset($user->image())}}" style="max-width: 60px; max-height: 50px;" />
+                                    <img src="{{$user->image()}}" style="max-width: 60px; max-height: 50px;" />
                                 </span>
                             </td>
                             <td><a href="{{route('admin.staffAdminAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>

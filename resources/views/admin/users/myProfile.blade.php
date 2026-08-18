@@ -291,7 +291,7 @@
             </div>
 
             <div class="profile-body">
-                <img src="{{asset($user->image())}}" class="profile-photo" alt="Profile photo" onerror="this.src='{{asset('backend/images/avatar.png')}}'">
+                <img src="{{$user->image()}}" class="profile-photo" alt="Profile photo" onerror="this.src='{{asset('backend/images/avatar.png')}}'">
                 <div class="profile-name">{{$user->name ?: 'N/A'}}</div>
                 <span class="profile-role"><i class="bx bx-shield-quarter"></i> {{$user->permission->name ?? 'N/A'}}</span>
 
@@ -311,7 +311,7 @@
                     <div class="profile-info-item">
                         <label><i class="bx bx-pen"></i> Signature</label>
                         @if($user->signature)
-                        <p><img src="{{asset($user->signature)}}" alt="Signature" style="max-width:150px;max-height:60px;object-fit:contain;"></p>
+                        <p><img src="{{$user->signatureUrl()}}" alt="Signature" style="max-width:150px;max-height:60px;object-fit:contain;"></p>
                         @else
                         <p>N/A</p>
                         @endif

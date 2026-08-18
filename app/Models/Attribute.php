@@ -59,7 +59,7 @@ class Attribute extends Model
      *
      * *********/
     public function imageFile(){
-        return $this->hasOne(Media::class,'src_id')->where('src_type',3)->where('use_Of_file',1);
+        return $this->hasOne(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','image');
     }
 
     public function image(){
@@ -80,7 +80,7 @@ class Attribute extends Model
     }
 
     public function bannerFile(){
-        return $this->hasOne(Media::class,'src_id')->where('src_type',3)->where('use_Of_file',2);
+        return $this->hasOne(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','banner');
     }
 
     public function banner(){
@@ -101,7 +101,7 @@ class Attribute extends Model
     }
 
     public function galleryImages(){
-        return $this->hasMany(Media::class,'src_id')->where('use_Of_file',3)->orderBy('drag','asc');
+        return $this->hasMany(File::class,'fileable_id')->where('fileable_type',self::class)->where('use_case','gallery')->orderBy('sort_order','asc');
     }
 
     //Image and Banner Functions End

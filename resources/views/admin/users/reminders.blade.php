@@ -115,7 +115,7 @@
                                         @endif
                                     </p>
                                     @if($task->imageFile)
-                                        <b>Attachment:</b> <a href="{{asset($task->image())}}" download="">Download</a>
+                                        <b>Attachment:</b> <a href="{{$task->image()}}" download="">Download</a>
                                     @endif
                                 </div>
                                 <div class="action">
@@ -228,7 +228,7 @@
                                         @endif
                                     </p>
                                     @if($visit->imageFile)
-                                        <b>Attachment:</b> <a href="{{asset($visit->image())}}" download="">Download</a>
+                                        <b>Attachment:</b> <a href="{{$visit->image()}}" download="">Download</a>
                                     @endif
                                 </div>
                                 <div class="action">

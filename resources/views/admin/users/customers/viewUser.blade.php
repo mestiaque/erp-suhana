@@ -126,7 +126,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-2 text-center">
                         <div class="position-relative">
-                            <img src="{{asset($user->image())}}" class="ProfileImage" alt="" />
+                            <img src="{{$user->image()}}" class="ProfileImage" alt="" />
                         </div>
                     </div>
                     <div class="col-md-7">
