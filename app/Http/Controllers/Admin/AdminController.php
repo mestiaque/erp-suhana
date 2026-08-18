@@ -567,7 +567,7 @@ class AdminController extends Controller
                         File::delete($user->signature);
                     }
                     $signatureFile = $r->file('signature');
-                    $signaturePath = $signatureFile->store('employees/signatures', 'public');
+                    $signaturePath = $signatureFile->store('user/signature', 'public');
                     $user->signature = 'storage/'.$signaturePath;
                     recordFileColumn(User::class, $user->id, 'signature', $signaturePath, $signatureFile, Auth::id());
                 }
@@ -854,7 +854,7 @@ class AdminController extends Controller
                     File::delete($user->signature);
                 }
                 $signatureFile = $r->file('signature');
-                $signaturePath = $signatureFile->store('employees/signatures', 'public');
+                $signaturePath = $signatureFile->store('user/signature', 'public');
                 $user->signature = 'storage/'.$signaturePath;
                 recordFileColumn(User::class, $user->id, 'signature', $signaturePath, $signatureFile, Auth::id());
             }
@@ -1683,7 +1683,7 @@ class AdminController extends Controller
                     }
                 }
 
-                $storedPath = $file->store('branding', 'public');
+                $storedPath = $file->store('general/'.$brandField, 'public');
                 $general->{$brandField} = 'storage/'.$storedPath;
                 recordFileColumn(General::class, $general->id ?: 1, $brandField, $storedPath, $file, Auth::id());
             }

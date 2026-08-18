@@ -331,9 +331,8 @@ function uploadFile($file,$src,$srcType,$fileUse,$author=null,$fileStatus=true){
   $ext = $file->getClientOriginalExtension();
   $size = $file->getSize();
 
-  $folder = carbon::now()->format('M_Y');
   $storedName = Str::uuid().'.'.$ext;
-  $relativeDir = 'medies/'.$folder;
+  $relativeDir = \App\Models\File::storageFolderFor($fileableType, $useCase);
 
   $storedPath = $file->storeAs($relativeDir, $storedName, 'public');
 

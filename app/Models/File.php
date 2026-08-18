@@ -50,6 +50,28 @@ class File extends Model
         return static::legacySrcTypeMap()[$srcType][$fileUse] ?? [null, 'general'];
     }
 
+    /**
+     * Central per-module storage folder taxonomy (on the 'public' disk), so
+     * new uploads land under a predictable module path instead of a flat
+     * 'medies/<month>' bucket. Existing files already on disk keep their
+     * original path — this only governs where new uploads are written.
+     */
+    public static function storageFolderFor(?string $fileableType, string $useCase, $fileableId = null): string
+    {
+        return match ($fileableType) {
+            User::class => 'user/'.$useCase,
+            General::class => 'general/'.$useCase,
+            'ME\\Hr\\Models\\HrEmployee' => $useCase === 'documents'
+                ? 'hr/document'.($fileableId ? '/'.$fileableId : '')
+                : 'hr/employee',
+            'ME\\Hr\\Models\\HrEmployeeNominee' => 'hr/nominee',
+            'ME\\Hr\\Models\\HrFactory' => 'hr/factory',
+            'ME\\AccSfl\\Models\\AcExpense' => 'accounts/expense',
+            'ME\\AccSfl\\Models\\AcExpenseIou' => 'accounts/iou',
+            default => 'general/other',
+        };
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'addedby_id');

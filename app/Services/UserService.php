@@ -285,7 +285,7 @@ class UserService
         // Handle Photo Upload
         if ($request->hasFile('photo')) {
             $photoFile = $request->file('photo');
-            $photoPath = $photoFile->store('employees/photos', 'public');
+            $photoPath = $photoFile->store('user/photo', 'public');
             $user->photo = 'storage/' . $photoPath;
             $user->save();
             recordFileColumn(User::class, $user->id, 'photo', $photoPath, $photoFile, Auth::id());
@@ -294,7 +294,7 @@ class UserService
         // Handle Signature Upload
         if ($request->hasFile('signature')) {
             $signatureFile = $request->file('signature');
-            $signaturePath = $signatureFile->store('employees/signatures', 'public');
+            $signaturePath = $signatureFile->store('user/signature', 'public');
             $user->signature = 'storage/' . $signaturePath;
             $user->save();
             recordFileColumn(User::class, $user->id, 'signature', $signaturePath, $signatureFile, Auth::id());
