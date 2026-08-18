@@ -9,49 +9,6 @@
 
     <div class="row mb-4">
         <div class="col-12">
-            <div class="dashboard-header d-none">
-
-                <!-- Watermark Icons -->
-                <i class="fas fa-users bg-icon icon-1"></i>
-                <i class="fas fa-dollar-sign bg-icon icon-2"></i>
-                <i class="fas fa-industry bg-icon icon-3"></i>
-                <i class="fas fa-clipboard-list bg-icon icon-4"></i>
-                <i class="fas fa-boxes bg-icon icon-5"></i>
-                <i class="fas fa-tshirt bg-icon icon-6"></i>
-                <i class="fas fa-pencil-alt bg-icon icon-7"></i>
-                <i class="fas fa-chart-line bg-icon icon-8"></i>
-
-                <h2 class="dashboard-title">
-                    <span>D</span>
-                    <span>a</span>
-                    <span>s</span>
-                    <span>h</span>
-                    <span>b</span>
-                    <span>o</span>
-                    <span>a</span>
-                    <span>r</span>
-                    <span>d</span>
-
-                    <span class="mx-2"></span>
-
-                    <span>O</span>
-                    <span>v</span>
-                    <span>e</span>
-                    <span>r</span>
-                    <span>v</span>
-                    <span>i</span>
-                    <span>e</span>
-                    <span>w</span>
-                </h2>
-
-                <p class="dashboard-subtitle">
-                    Garments ERP Management System
-                </p>
-
-            </div>
-
-
-
 
             <div class="banner-container">
                 <div class="dice-wrapper">
@@ -137,11 +94,6 @@
 
                 <div class="subtitle">Garments ERP Management System</div>
             </div>
-
-
-
-
-
 
         </div>
     </div>
