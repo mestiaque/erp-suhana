@@ -39,7 +39,13 @@
                             <td>{{$i+1}}</td>
                             <td>{{$role->name}}</td>
                             <td><a href="{{route('admin.usersCustomer',['role_id'=>$role->id])}}">Users ({{$role->users->count()}})</a></td>
-                            <td>Permissions ({{count(json_decode($role->permission ?? '{}', true))}})</td>
+                            <td>Permissions (
+                                @if($role->id== 999)
+                                &divonx;
+                                @else
+                                {{count(json_decode($role->permission ?? '{}', true))}}
+                                @endif
+                                )</td>
                             <td class="text-center">
                                  @if(auth()->user()->hasPermission('roles.edit')  || auth()->user()->hasPermission('roles.delete'))
                                     @can('roles.edit')
