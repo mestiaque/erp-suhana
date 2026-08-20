@@ -5,6 +5,7 @@
 @endpush @section('contents')
 
 <div class="flex-grow-1">
+    @include(adminTheme().'alerts')
     <!-- Start -->
     <div class="card mb-30">
         <div class="card-header d-flex justify-content-between align-items-center">

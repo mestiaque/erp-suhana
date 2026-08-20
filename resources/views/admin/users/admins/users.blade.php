@@ -124,7 +124,7 @@
                             <td>
                                 <span class="font-weight-bold">{{$user->name}}</span>
                                 @if($user->permission)
-                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}} text-dark" style="background:{{$user?->permission?->color}}">{{$user->permission->name}}</span>
                                 @endif
                             </td>
                             <td>{{$user->email ?? '--'}}</td>
@@ -140,6 +140,7 @@
                                 @endif
                             </td>
                             <td>
+                                {{-- @if($user?->permission?->id == 999 && auth()->user()?->permission?->id == 999) --}}
                                 <div class="btn-group">
                                     @can('admin.edit')
                                     <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom success mr-1" title="Edit">
@@ -152,8 +153,9 @@
                                         <i class="bx bx-trash"></i>
                                     </a>
                                     @endcan
-                                    @endif
+                                    {{-- @endif --}}
                                 </div>
+                                @endif
                             </td>
                         </tr>
                         @empty

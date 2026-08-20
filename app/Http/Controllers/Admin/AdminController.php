@@ -855,6 +855,10 @@ class AdminController extends Controller
         /* ================= UPDATE ================= */
         if ($action == 'update' && $r->isMethod('post')) {
 
+            if($user?->permission?->id == 999 && auth()->user()?->permission?->id !== 999){
+                return redirect()->route('admin.usersAdmin')->with('error', 'You do not have permission to update this user.');
+            }
+
             $r->validate([
                 'name' => 'required|max:100|unique:users,name,'.$user->id,
                 'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)->whereNull('deleted_at')],
@@ -899,6 +903,10 @@ class AdminController extends Controller
         /* ================= PASSWORD ================= */
         if ($action == 'change-password' && $r->isMethod('post')) {
 
+            if($user?->permission?->id == 999 && auth()->user()?->permission?->id !== 999){
+                return redirect()->route('admin.usersAdmin')->with('error', 'You do not have permission to update this user.');
+            }
+
             $r->validate([
                 'old_password' => 'required|min:8',
                 'password' => 'required|min:8|confirmed|different:old_password',
@@ -921,6 +929,10 @@ class AdminController extends Controller
 
         /* ================= SOFT DELETE ================= */
         if ($action == 'delete') {
+
+            if($user?->permission?->id == 999 && auth()->user()?->permission?->id !== 999){
+                return redirect()->route('admin.usersAdmin')->with('error', 'You do not have permission to delete this user.');
+            }
 
             $user->deleted_at = Carbon::now();
             $user->deleted_by = Auth::id();
@@ -1435,6 +1447,40 @@ class AdminController extends Controller
         }
     }
 
+    /**
+     * Lets a Super Admin pick permission modules (e.g. "Login History", "Data
+     * Change Log") to hide from everyone's Role Update checklist — for
+     * internal/developer-only capabilities that shouldn't be casually granted
+     * or revoked while editing a role.
+     */
+    public function developerPermissions()
+    {
+        if ((int) Auth::user()->permission_id !== 999) {
+            abort(403);
+        }
+
+        $modules = config('permission.modules');
+        $general = General::first();
+        $hidden = $general->hidden_permission_modules ?? [];
+
+        return view(adminTheme().'users.roles.developerPermissions', compact('modules', 'hidden'));
+    }
+
+    public function developerPermissionsUpdate(Request $r)
+    {
+        if ((int) Auth::user()->permission_id !== 999) {
+            abort(403);
+        }
+
+        $general = General::first() ?: new General();
+        $general->hidden_permission_modules = $r->input('hidden_modules', []);
+        $general->save();
+
+        Session()->flash('success', 'Developer Permissions Updated Successfully!');
+
+        return redirect()->back();
+    }
+
     public function userRoles(Request $r)
     {
 
@@ -1497,6 +1543,10 @@ class AdminController extends Controller
         }
 
         if ($action == 'update') {
+
+            if($role->id == 999 && auth()->user()?->permission?->id !== 999){
+                return redirect()->route('admin.userRoles')->with('error', 'You do not have permission to update this role.');
+            }
             // Role Update
             $check = $r->validate([
                 'name' => 'required|max:100',
@@ -1519,6 +1569,9 @@ class AdminController extends Controller
 
         if ($action == 'delete') {
             // Role Delete
+            if($role->id == 999 && auth()->user()?->permission?->id !== 999){
+                return redirect()->route('admin.userRoles')->with('error', 'You do not have permission to delete this role.');
+            }
             $role->delete();
 
             Session()->flash('success', 'Role Deleted Are Successfully Done!');

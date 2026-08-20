@@ -113,7 +113,7 @@
                             <td>
                                 {{$user->deletedBy?->name }}</td>
                             <td style="padding: 8px 5px; text-align: center;">
-                                @if(can('employee.delete'))
+                                @if(can('admin.delete'))
                                     <a href="{{ route('admin.usersAdminAction', ['restore', $user->id]) }}" class="btn-custom success" onclick="return confirm('Are you sure you want to restore this user?')">
                                         <i class="bx bx-reset"></i>
                                     </a>

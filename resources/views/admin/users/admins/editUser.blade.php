@@ -348,8 +348,8 @@
                                         <select name="role" class="form-control form-control-sm">
                                             <option value="">No Role</option>
                                             @foreach($roles as $role)
-                                                @if(!str_contains(strtolower(auth()->user()->permission), 'dev'))
-                                                    @continue(str_contains(strtolower($role->name), 'dev'))
+                                                @if($role->id == 999 && auth()->user()?->permission?->id != 999)
+                                                    @continue
                                                 @endif
                                             <option value="{{$role->id}}" {{$user->permission_id == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
                                             @endforeach

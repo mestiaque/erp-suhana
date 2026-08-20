@@ -90,6 +90,7 @@
 
                 <div class="card-body" style="font-size: 15px !important">
                     @foreach($module as $subKey => $subModule)
+                        @continue(general() && general()->isPermissionModuleHidden($subKey))
                         @if(is_array($subModule) && isset($subModule['permissions']))
                             @php
                                 $parentId = sanitizeId($moduleKey . '_' . $subKey);
@@ -112,6 +113,7 @@
                                     <!-- Child checkboxes grid (80%) -->
                                     <div style="flex: 0 0 80%; display:grid; grid-template-columns: repeat(7, 1fr); gap:10px;">
                                         @foreach($subModule['permissions'] as $permKey => $permLabel)
+                                            @continue(general() && general()->isPermissionActionHidden($subKey, $permKey))
                                             @php
                                                 $childId = $parentId . '_' . $permKey;
                                             @endphp

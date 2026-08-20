@@ -540,7 +540,21 @@ if (!function_exists('hasChildPermission')) {
         if (!$roles) return false;
 
         $permissions = json_decode($roles->permission, true);
-        if (!is_array($permissions)) return false;
+        if (!is_array($permissions)) {
+          $permissions = [];
+        }
+
+        // Developer role (999) auto-inherits whatever a Super Admin checked in
+        // Developer Permissions — those modules/actions are hidden from the Role
+        // Update checklist entirely, so this is the only way to grant them.
+        if ((int) Auth::user()->permission_id === 999) {
+          $general = \App\Models\General::first();
+          if ($general) {
+            $permissions = array_replace_recursive($permissions, $general->developerGrantedPermissions());
+          }
+        }
+
+        if (empty($permissions)) return false;
 
         // Support dot notation directly: hasChildPermission('dev.all')
         $module = trim($module);

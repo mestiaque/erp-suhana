@@ -45,6 +45,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/users/employee/{action}/{id?}', [AdminController::class, 'usersCustomerAction'])->name('usersCustomerAction');
 
     Route::get('/users/roles', [AdminController::class, 'userRoles'])->name('userRoles');
+    Route::get('/users/developer-permissions', [AdminController::class, 'developerPermissions'])->name('developerPermissions');
+    Route::post('/users/developer-permissions', [AdminController::class, 'developerPermissionsUpdate'])->name('developerPermissionsUpdate');
     Route::any('/users/roles/{action}/{id?}', [AdminController::class, 'userRoleAction'])->name('userRoleAction');
 
     Route::get('/merchandisers', [AdminController::class, 'merchandisers'])->name('merchandisers');

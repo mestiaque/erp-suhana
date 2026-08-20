@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class General extends Model
 {
-    
+    protected $casts = [
+        'hidden_permission_modules' => 'array',
+    ];
 
     //Models Information Data
     /********
@@ -100,6 +102,71 @@ class General extends Model
      * 
      ****/
 
+
+    /**
+     * Whether a whole permission module (e.g. 'login_history') is hidden from
+     * the Role Update checklist, via Developer Permissions.
+     */
+    public function isPermissionModuleHidden(string $moduleKey): bool
+    {
+        $hiddenActions = ($this->hidden_permission_modules ?? [])[$moduleKey] ?? [];
+
+        return array_key_exists('_module_', $hiddenActions);
+    }
+
+    /**
+     * Whether a single action (e.g. 'delete') on a permission module is hidden
+     * from the Role Update checklist, via Developer Permissions.
+     */
+    public function isPermissionActionHidden(string $moduleKey, string $actionKey): bool
+    {
+        $hiddenActions = ($this->hidden_permission_modules ?? [])[$moduleKey] ?? [];
+
+        return array_key_exists($actionKey, $hiddenActions);
+    }
+
+    /**
+     * Expands Developer Permissions (hidden_permission_modules) into a
+     * permissions-shaped array — {module_key: {action_key: 'on', ...}} —
+     * that gets merged into permission_id=999 (Developer role) users'
+     * effective permissions. Since these modules/actions are hidden from the
+     * Role Update checklist entirely, there's no other way to grant them to
+     * that role, so the Developer role auto-inherits whatever a Super Admin
+     * has checked here. A whole-module check ('_module_') expands to every
+     * action that module actually defines, looked up from config('permission.modules').
+     *
+     * @return array<string, array<string, string>>
+     */
+    public function developerGrantedPermissions(): array
+    {
+        $hidden = $this->hidden_permission_modules ?? [];
+        if (empty($hidden)) {
+            return [];
+        }
+
+        $allModules = collect(config('permission.modules'))->collapse();
+        $grants = [];
+
+        foreach ($hidden as $moduleKey => $hiddenActions) {
+            if (! is_array($hiddenActions) || empty($hiddenActions)) {
+                continue;
+            }
+
+            if (array_key_exists('_module_', $hiddenActions)) {
+                $actionKeys = array_keys($allModules->get($moduleKey)['permissions'] ?? []);
+                foreach ($actionKeys as $actionKey) {
+                    $grants[$moduleKey][$actionKey] = 'on';
+                }
+                continue;
+            }
+
+            foreach (array_keys($hiddenActions) as $actionKey) {
+                $grants[$moduleKey][$actionKey] = 'on';
+            }
+        }
+
+        return $grants;
+    }
 
     public function logo()
     {
