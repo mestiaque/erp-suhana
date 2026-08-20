@@ -34,6 +34,7 @@ return [
 
         'inventory.requisition' => \ME\SflInventory\Approvals\InvRequisitionApprovalHandler::class,
         'accounts.expense' => \ME\AccSfl\Approvals\ExpenseApprovalHandler::class,
+        'accounts.balance_receive' => \ME\AccSfl\Approvals\BalanceReceiveApprovalHandler::class,
 
     ],
 

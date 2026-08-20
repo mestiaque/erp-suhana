@@ -168,11 +168,11 @@
                     </select>
                 </div>
                 <div class="form-group col-xl-3 col-lg-4 col-md-6">
-                    <label for="model">Model</label>
+                    <label for="model">Feature</label>
                     <select id="model" name="model" class="form-control">
                         <option value="">All</option>
                         @foreach($modelOptions as $modelClass)
-                        <option value="{{$modelClass}}" {{request('model')==$modelClass?'selected':''}}>{{class_basename($modelClass)}}</option>
+                        <option value="{{$modelClass}}" {{request('model')==$modelClass?'selected':''}}>{{friendlyModelName($modelClass)}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -199,7 +199,7 @@
                     <thead>
                         <tr>
                             <th>Event</th>
-                            <th>Model</th>
+                            <th>Feature</th>
                             <th>User</th>
                             <th>IP Address</th>
                             <th>URL</th>
@@ -212,7 +212,7 @@
                         <tr>
                             <td><span class="event-pill {{$log->event}}">{{$log->event}}</span></td>
                             <td>
-                                <strong>{{class_basename($log->loggable_type)}}</strong>
+                                <strong>{{friendlyModelName($log->loggable_type)}}</strong>
                                 <span class="muted-line">#{{$log->loggable_id}}</span>
                             </td>
                             <td>

@@ -90,12 +90,27 @@
         $data = is_array($log->data) ? $log->data : (json_decode($log->data, true) ?: []);
         $old = $data['old'] ?? null;
         $new = $data['new'] ?? null;
-        $keys = collect(array_keys((array) $old))->merge(array_keys((array) $new))->unique();
+        $keys = collect(array_keys((array) $old))->merge(array_keys((array) $new))->unique()
+            ->sortBy(fn ($key) => friendlyFieldName($key));
+
+        $formatValue = function ($value) {
+            if ($value === null) {
+                return null;
+            }
+            if (is_bool($value)) {
+                return $value ? 'Yes' : 'No';
+            }
+            if (is_array($value)) {
+                return json_encode($value);
+            }
+
+            return $value;
+        };
     @endphp
 
     <div class="history-card mb-30">
         <div class="history-card-header d-flex justify-content-between align-items-center">
-            <h2>{{class_basename($log->loggable_type)}} — {{ucfirst($log->event)}} (#{{$log->loggable_id}})</h2>
+            <h2>{{friendlyModelName($log->loggable_type)}} — {{ucfirst($log->event)}} (#{{$log->loggable_id}})</h2>
             <a href="{{route('admin.dataChangeLog')}}" class="history-btn secondary" style="display:inline-flex;padding:7px 12px;border-radius:5px;background:#eef1f5;color:#17233c;font-size:13px;font-weight:700;">
                 <i class="bx bx-arrow-back"></i> Back
             </a>
@@ -141,11 +156,11 @@
                     @php
                         $oldVal = is_array($old) ? ($old[$key] ?? null) : null;
                         $newVal = is_array($new) ? ($new[$key] ?? null) : null;
-                        $oldDisplay = is_array($oldVal) ? json_encode($oldVal) : $oldVal;
-                        $newDisplay = is_array($newVal) ? json_encode($newVal) : $newVal;
+                        $oldDisplay = $formatValue($oldVal);
+                        $newDisplay = $formatValue($newVal);
                     @endphp
                     <tr>
-                        <td><strong>{{$key}}</strong></td>
+                        <td><strong>{{friendlyFieldName($key)}}</strong></td>
                         <td class="diff-old">{{$oldDisplay === null ? '—' : $oldDisplay}}</td>
                         <td class="diff-new">{{$newDisplay === null ? '—' : $newDisplay}}</td>
                     </tr>

@@ -449,6 +449,73 @@ if (!function_exists('recordFileColumn')) {
   }
 }
 
+if (!function_exists('friendlyModelName')) {
+  /**
+   * Turns a logged model's FQCN (e.g. ME\AccSfl\Models\AcExpenseIou) into a
+   * human name (e.g. "Expense IOU") for the Data Change Log, without needing
+   * a hand-maintained label per model across every module in the app.
+   */
+  function friendlyModelName(?string $modelClass): string
+  {
+    if (!$modelClass) {
+      return 'Unknown';
+    }
+
+    $base = class_basename($modelClass);
+
+    // Strip the module's class-name prefix (Ac, Hr, Inv, Prod, Trc, Comm, ...).
+    foreach (['Ac', 'Hr', 'Inv', 'Prod', 'Trc', 'Comm', 'Mer'] as $prefix) {
+      if (str_starts_with($base, $prefix) && strlen($base) > strlen($prefix) && ctype_upper($base[strlen($prefix)])) {
+        $base = substr($base, strlen($prefix));
+        break;
+      }
+    }
+
+    $spaced = trim((string) preg_replace('/(?<!^)(?=[A-Z])/', ' ', $base));
+    $words = explode(' ', $spaced);
+
+    $acronyms = [
+      'id' => 'ID', 'lc' => 'LC', 'ud' => 'UD', 'btma' => 'BTMA', 'qc' => 'QC',
+      'iou' => 'IOU', 'grn' => 'GRN', 'api' => 'API', 'fg' => 'FG', 'po' => 'PO',
+      'b2b' => 'B2B', 'nid' => 'NID', 'uom' => 'UOM',
+    ];
+
+    foreach ($words as &$word) {
+      $lower = strtolower($word);
+      if (isset($acronyms[$lower])) {
+        $word = $acronyms[$lower];
+      }
+    }
+
+    return implode(' ', $words) ?: $base;
+  }
+}
+
+if (!function_exists('friendlyFieldName')) {
+  /**
+   * Turns a raw DB column name (e.g. nid_number, employee_id) into a
+   * human label (e.g. "NID Number", "Employee ID") for the Data Change Log.
+   */
+  function friendlyFieldName(string $key): string
+  {
+    $acronyms = [
+      'id' => 'ID', 'nid' => 'NID', 'bn' => 'Bangla', 'uom' => 'UOM', 'qty' => 'Quantity',
+      'ip' => 'IP', 'url' => 'URL', 'lc' => 'LC', 'po' => 'PO', 'ud' => 'UD', 'qc' => 'QC',
+      'btma' => 'BTMA', 'grn' => 'GRN', 'iou' => 'IOU', 'fg' => 'FG', 'api' => 'API',
+      'etin' => 'ETIN',
+    ];
+
+    $words = explode('_', $key);
+
+    foreach ($words as &$word) {
+      $lower = strtolower($word);
+      $word = $acronyms[$lower] ?? ucfirst($word);
+    }
+
+    return implode(' ', $words);
+  }
+}
+
 if (!function_exists('hasParentPermission')) {
     function hasParentPermission(string $parent): bool
     {

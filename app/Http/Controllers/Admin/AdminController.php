@@ -487,6 +487,7 @@ class AdminController extends Controller
             ->distinct()
             ->pluck('loggable_type')
             ->filter()
+            ->sortBy(fn ($modelClass) => friendlyModelName($modelClass))
             ->values();
 
         return view(adminTheme().'users.dataChangeLog', [
