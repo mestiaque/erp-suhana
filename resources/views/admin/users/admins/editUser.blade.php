@@ -378,7 +378,33 @@
                                 <p class="field-error">{{ $errors->first('email') }}</p>
                                 @endif
                             </div>
-                            <div class="form-group col-xl-6 col-lg-6 col-md-12 align-self-end text-right">
+                            @php
+                                $isSelf = $user->id === auth()->id();
+                                $isActive = (int) old('status', $user->status) === 1;
+                            @endphp
+                            <div class="form-group col-xl-3 col-lg-3 col-md-12">
+                                <label for="status">Status</label>
+                                <input type="hidden" name="status" value="{{ $isSelf ? (int) $user->status : 0 }}">
+                                <div class="custom-control custom-switch mt-1">
+                                    <input
+                                        class="custom-control-input"
+                                        id="status"
+                                        type="checkbox"
+                                        name="status"
+                                        value="1"
+                                        @checked($isActive)
+                                        @disabled($isSelf)
+                                    >
+                                    <label class="custom-control-label" for="status">{{ $isActive ? 'Active' : 'Inactive' }}</label>
+                                </div>
+                                @if($isSelf)
+                                <small class="text-muted d-block mt-1">You can't change your own active status.</small>
+                                @endif
+                                @if ($errors->has('status'))
+                                <p class="field-error">{{ $errors->first('status') }}</p>
+                                @endif
+                            </div>
+                            <div class="form-group col-xl-3 col-lg-3 col-md-12 align-self-end text-right">
                                 <button type="submit" class="save-profile-btn"><i class="bx bx-save"></i> Save Changes</button>
                             </div>
                         </div>

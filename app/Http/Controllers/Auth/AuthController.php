@@ -64,6 +64,11 @@ class AuthController extends Controller
 
             if($user){
                 if(Hash::check($r->password, $user->password)){
+                    if((int) $user->status !== 1){
+                        Session::flash('error','Your account has been deactivated. Please contact the administrator.');
+                        return back();
+                    }
+
                     Auth::login($user, $remember_me);
 
                     ActivityLog::create([

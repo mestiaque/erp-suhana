@@ -43,6 +43,12 @@ class SyncMediaToFiles extends Command
 
     protected function syncMediaTable(): void
     {
+        if (! Schema::hasTable('media')) {
+            $this->info('media table not found (already retired), skipping.');
+
+            return;
+        }
+
         $count = 0;
 
         Media::query()->orderBy('id')->chunk(200, function ($medias) use (&$count) {

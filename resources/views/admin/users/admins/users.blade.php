@@ -54,7 +54,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
                 @if(auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete'))
                 <div class="d-flex">
-                    <select class="form-control form-control-sm rounded-0 mr-1" name="action" required>
+                    {{-- <select class="form-control form-control-sm rounded-0 mr-1" name="action" required>
                         <option value="">Select Action</option>
                         @can('admin.edit')
                         <option value="1">Active</option>
@@ -64,7 +64,7 @@
                         <option value="5">Delete</option>
                         @endcan
                     </select>
-                    <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Confirm action?')">Go</button>
+                    <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Confirm action?')">Go</button> --}}
                 </div>
                 @else <div></div>
                 @endif
@@ -83,14 +83,14 @@
                     <thead>
                         <tr>
                             <th style="width:80px;">
-                                @if(auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete'))
+                                {{-- @if(auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete'))
                                 <div class="checkbox d-inline-block mr-1">
                                     <input class="inp-cbx" id="checkall" type="checkbox" style="display:none;" />
                                     <label class="cbx mb-0" for="checkall">
                                         <span><svg width="12px" height="10px" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
                                     </label>
                                 </div>
-                                @endif
+                                @endif --}}
                                 SL
                             </th>
                             <th style="width:60px;">Image</th>
@@ -108,14 +108,14 @@
                         @forelse($users as $i => $user)
                         <tr>
                             <td>
-                                @if($user->id != Auth::id() && (auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete')))
+                                {{-- @if($user->id != Auth::id() && (auth()->user()->hasPermission('admin.edit') || auth()->user()->hasPermission('admin.delete')))
                                 <div class="checkbox d-inline-block mr-1">
                                     <input class="inp-cbx" id="cbx_{{$user->id}}" type="checkbox" name="checkid[]" value="{{$user->id}}" style="display:none;" />
                                     <label class="cbx mb-0" for="cbx_{{$user->id}}">
                                         <span><svg width="12px" height="10px" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
                                     </label>
                                 </div>
-                                @endif
+                                @endif --}}
                                 {{$users->firstItem() + $i}}
                             </td>
                             <td style="padding:3px 5px;">

@@ -2,7 +2,6 @@
 
 use Carbon\Carbon;
 use App\Models\Post;
-use App\Models\Media;
 use App\Models\Country;
 use App\Models\General;
 use App\Models\Attribute;
@@ -357,32 +356,6 @@ function uploadFile($file,$src,$srcType,$fileUse,$author=null,$fileStatus=true){
 if (!function_exists('deleteUserFiles')) {
   function deleteUserFiles($userId)
   {
-    // Legacy media-table rows (historical, pre-files-table uploads)
-    $medias = Media::where('src_type', 6)->where('src_id', $userId)->get();
-
-    foreach ($medias as $media) {
-      $paths = [
-        $media->file_url,
-        $media->file_url_sm,
-        $media->file_url_md,
-        $media->file_url_lg,
-      ];
-
-      foreach ($paths as $path) {
-        if (!$path) {
-          continue;
-        }
-
-        $normalizedPath = str_starts_with($path, 'public/') ? substr($path, 7) : $path;
-
-        if (File::exists($normalizedPath)) {
-          File::delete($normalizedPath);
-        }
-      }
-
-      $media->delete();
-    }
-
     // Current files-table rows
     $files = \App\Models\File::where('fileable_type', \App\Models\User::class)->where('fileable_id', $userId)->get();
 

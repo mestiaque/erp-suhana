@@ -794,7 +794,7 @@ class AdminController extends Controller
             $user->email = $r->email ?? null;
             $user->password_show = $password;
             $user->password = Hash::make($password);
-            $user->permission_id = 1;
+            $user->permission_id = null;
             $user->addedby_at = Carbon::now();
             $user->addedby_id = Auth::id();
 

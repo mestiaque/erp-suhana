@@ -15,6 +15,16 @@ class RedirectUserMiddleware
             return redirect()->route('login');
         }
 
+        // Deactivated mid-session (e.g. an admin flips their Status switch off
+        // while they're still logged in) — kick them out on their very next request.
+        if ((int) $user->status !== 1) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact the administrator.');
+        }
+
         // current path
         $path = trim($request->path(), '/');
 
