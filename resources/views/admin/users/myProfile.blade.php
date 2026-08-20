@@ -176,6 +176,74 @@
         padding: 0 18px 18px;
     }
 
+    .history-pagination {
+        padding: 0 18px 18px;
+    }
+
+    .history-filter {
+        padding: 18px 18px 0;
+    }
+
+    .history-filter .form-group label {
+        color: #667085;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .history-filter .form-control {
+        min-height: 34px;
+        border: 1px solid #dce4ef;
+        border-radius: 6px;
+        color: #17233c;
+        font-size: 13px;
+        box-shadow: none;
+        padding: 6px 10px;
+    }
+
+    .history-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding-top: 22px;
+    }
+
+    .history-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 34px;
+        padding: 7px 12px;
+        border: 0;
+        border-radius: 5px;
+        color: #ffffff;
+        background: #1769e0;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .history-btn:hover { color: #ffffff; text-decoration: none; }
+
+    .history-btn.secondary { color: #17233c; background: #eef1f5; }
+
+    .event-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+        text-transform: uppercase;
+    }
+
+    .event-pill.create { background: #e8fff5; color: #13895f; }
+    .event-pill.update { background: #eaf3ff; color: #1769e0; }
+    .event-pill.delete { background: #ffeceb; color: #d92d20; }
+
     .history-table {
         margin-bottom: 0;
         font-size: 12px !important;
@@ -291,7 +359,7 @@
             </div>
 
             <div class="profile-body">
-                <img src="{{$user->image()}}" class="profile-photo" alt="Profile photo" onerror="this.src='{{asset('backend/images/avatar.png')}}'">
+                <img src="{{$user->image()}}" class="profile-photo" alt="Profile photo" onerror="this.onerror=null;this.src='{{asset('medies/profile.png')}}'">
                 <div class="profile-name">{{$user->name ?: 'N/A'}}</div>
                 <span class="profile-role"><i class="bx bx-shield-quarter"></i> {{$user->permission->name ?? 'N/A'}}</span>
 
@@ -324,7 +392,7 @@
             <div class="history-card-header">
                 <div>
                     <h3>Login History</h3>
-                    <p>Your last {{$loginLogs->count()}} login records.</p>
+                    <p>Your login records ({{$loginLogs->total()}} total).</p>
                 </div>
             </div>
 
@@ -408,6 +476,112 @@
                     </table>
                 </div>
             </div>
+
+            @if($loginLogs->hasPages())
+            <div class="history-pagination">
+                {{$loginLogs->onEachSide(1)->links('pagination::bootstrap-5')}}
+            </div>
+            @endif
+        </div>
+
+        <div class="history-card" style="grid-column: span 2;">
+            <div class="history-card-header">
+                <div>
+                    <h3>Data Change Log</h3>
+                    <p>Every create, update, and delete you personally made ({{$changeLogs->total()}} total).</p>
+                </div>
+            </div>
+
+            <form method="get" action="{{route('admin.myProfile')}}" class="history-filter">
+                <div class="row">
+                    <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                        <label for="log_event">Event</label>
+                        <select id="log_event" name="log_event" class="form-control">
+                            <option value="">All</option>
+                            <option value="create" {{request('log_event')=='create'?'selected':''}}>Create</option>
+                            <option value="update" {{request('log_event')=='update'?'selected':''}}>Update</option>
+                            <option value="delete" {{request('log_event')=='delete'?'selected':''}}>Delete</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                        <label for="log_model">Feature</label>
+                        <select id="log_model" name="log_model" class="form-control">
+                            <option value="">All</option>
+                            @foreach($changeLogModelOptions as $modelClass)
+                            <option value="{{$modelClass}}" {{request('log_model')==$modelClass?'selected':''}}>{{friendlyModelName($modelClass)}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                        <label for="log_date_from">From</label>
+                        <input type="date" id="log_date_from" name="log_date_from" class="form-control" value="{{request('log_date_from')}}">
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                        <label for="log_date_to">To</label>
+                        <input type="date" id="log_date_to" name="log_date_to" class="form-control" value="{{request('log_date_to')}}">
+                    </div>
+                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                        <div class="history-actions">
+                            <button type="submit" class="history-btn"><i class="bx bx-search"></i> Filter</button>
+                            <a href="{{route('admin.myProfile')}}" class="history-btn secondary"><i class="bx bx-reset"></i> Reset</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="history-table-wrap">
+                <div class="table-responsive">
+                    <table class="table history-table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Feature</th>
+                                <th>URL</th>
+                                <th>Time</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($changeLogs as $log)
+                            <tr>
+                                <td><span class="event-pill {{$log->event}}">{{$log->event}}</span></td>
+                                <td>
+                                    <strong>{{friendlyModelName($log->loggable_type)}}</strong>
+                                    <span class="muted-line">#{{$log->loggable_id}}</span>
+                                </td>
+                                <td>
+                                    <div class="agent-text" style="max-width:220px;">{{$log->url ?? 'N/A'}}</div>
+                                </td>
+                                <td>
+                                    <strong>{{$log->created_at->format('d M Y')}}</strong>
+                                    <span class="muted-line">{{$log->created_at->format('h:i A')}}</span>
+                                </td>
+                                <td>
+                                    <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-primary" title="View Details">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-history">
+                                        <i class="bx bx-search" style="font-size: 36px;"></i>
+                                        <p class="mb-0 mt-2">No data change log found.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @if($changeLogs->hasPages())
+            <div class="history-pagination">
+                {{$changeLogs->onEachSide(1)->links('pagination::bootstrap-5')}}
+            </div>
+            @endif
         </div>
     </div>
 </div>

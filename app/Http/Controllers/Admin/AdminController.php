@@ -230,7 +230,7 @@ class AdminController extends Controller
             ->where('user_type', User::class)
             ->where('user_id', $user->id);
 
-        $loginLogs = $loginLogsQuery->latest()->take(5)->get();
+        $loginLogs = $loginLogsQuery->latest()->paginate(10, ['*'], 'login_page')->withQueryString();
 
         $latestActiveLog = ActivityLog::where('event', 'user_active')
             ->where('user_type', User::class)
@@ -244,7 +244,7 @@ class AdminController extends Controller
             ->latest()
             ->first();
 
-        $loginLogs->transform(function ($log) use ($latestActiveLog, $latestLogoutLog, $activeCutoff) {
+        $loginLogs->getCollection()->transform(function ($log) use ($latestActiveLog, $latestLogoutLog, $activeCutoff) {
             $log->login_data = is_array($log->data) ? $log->data : (json_decode($log->data, true) ?: []);
             $log->last_active_log = $latestActiveLog;
             $log->last_logout_log = $latestLogoutLog;
@@ -255,7 +255,36 @@ class AdminController extends Controller
             return $log;
         });
 
-        return view(adminTheme().'users.myProfile', compact('user', 'loginLogs'));
+        // Own Data Change Log — every create/update/delete this user personally made,
+        // scoped strictly to their own user_id (never another user's changes).
+        $changeLogQuery = ActivityLog::where('user_id', $user->id)
+            ->whereIn('event', ['create', 'update', 'delete']);
+
+        if ($r->filled('log_event')) {
+            $changeLogQuery->where('event', $r->log_event);
+        }
+        if ($r->filled('log_model')) {
+            $changeLogQuery->where('loggable_type', $r->log_model);
+        }
+        if ($r->filled('log_date_from')) {
+            $changeLogQuery->whereDate('created_at', '>=', $r->log_date_from);
+        }
+        if ($r->filled('log_date_to')) {
+            $changeLogQuery->whereDate('created_at', '<=', $r->log_date_to);
+        }
+
+        $changeLogs = $changeLogQuery->latest()->paginate(10, ['*'], 'log_page')->withQueryString();
+
+        $changeLogModelOptions = ActivityLog::where('user_id', $user->id)
+            ->whereIn('event', ['create', 'update', 'delete'])
+            ->select('loggable_type')
+            ->distinct()
+            ->pluck('loggable_type')
+            ->filter()
+            ->sortBy(fn ($modelClass) => friendlyModelName($modelClass))
+            ->values();
+
+        return view(adminTheme().'users.myProfile', compact('user', 'loginLogs', 'changeLogs', 'changeLogModelOptions'));
     }
 
     public function loginHistory(Request $request)
