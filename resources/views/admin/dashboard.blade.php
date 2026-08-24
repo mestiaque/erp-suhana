@@ -109,6 +109,7 @@
         $merchandisingPackageExists = class_exists(\ME\Merchandising\Http\Controllers\DashboardController::class);
         $commercialPackageExists = class_exists(\ME\Commercial\Http\Controllers\DashboardController::class);
         $productionTracePackageExists = class_exists(\ME\ProductionTrace\Http\Controllers\TrcDashboardController::class);
+        $merchandisingTracePackageExists = class_exists(\ME\MerchandisingTrace\Http\Controllers\DashboardController::class);
         $showHrWidget = $hrPackageExists && auth()->user()?->can('hr_dashboard.all');
         $showAccSflWidget = $accSflPackageExists && auth()->user()?->can('ac_dashboard.view');
         $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
@@ -116,6 +117,7 @@
         $showMerchandisingWidget = $merchandisingPackageExists && auth()->user()?->can('merch_dashboard.view');
         $showCommercialWidget = $commercialPackageExists && auth()->user()?->can('view_dashboard.view');
         $showProductionTraceWidget = $productionTracePackageExists && auth()->user()?->can('trc_reports.view');
+        $showMerchandisingTraceWidget = $merchandisingTracePackageExists && auth()->user()?->can('merch_dashboard.view');
     @endphp
 
     @can('user_dashboard.view')
@@ -134,23 +136,27 @@
         @include('sfl-inventory::admin.partials.dashboard-widget')
     @endif
 
-    @if($showProductionWidget)
+    {{-- @if($showProductionWidget)
         @include('production-sfl::admin.partials.dashboard-widget')
-    @endif
+    @endif --}}
 
-    @if($showMerchandisingWidget)
+    {{-- @if($showMerchandisingWidget)
         @include('merchandising::admin.partials.dashboard-widget')
     @endif
 
     @if($showCommercialWidget)
         @include('commercial::admin.partials.dashboard-widget')
+    @endif --}}
+
+    @if($showMerchandisingTraceWidget)
+        @include('merchandising-trace::admin.partials.dashboard-widget')
     @endif
 
     @if($showProductionTraceWidget)
         @include('production-trace::admin.partials.dashboard-widget')
     @endif
 
-    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget && !$showProductionWidget && !$showMerchandisingWidget && !$showCommercialWidget && !$showProductionTraceWidget)
+    @if(!$showHrWidget && !$showAccSflWidget && !$showInventoryWidget && !$showProductionWidget && !$showMerchandisingWidget && !$showCommercialWidget && !$showProductionTraceWidget && !$showMerchandisingTraceWidget)
         <div class="d-none"></div>
     @endif
 
