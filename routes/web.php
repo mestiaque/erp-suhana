@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ApprovalController;
+use App\Http\Controllers\Admin\MenuSearchController;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::post('/log-out', [AuthController::class, 'logout'])->name('logout');
 // ----------------------
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserActivity', 'auth', 'redirectUser']], function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/menu-search', [MenuSearchController::class, 'search'])->name('menuSearch');
 
     Route::get('/my-profile', [AdminController::class, 'myProfile'])->name('myProfile');
     Route::any('/edit-profile', [AdminController::class, 'editProfile'])->name('editProfile');

@@ -62,6 +62,10 @@ class RoleSeeder extends Seeder
                 'trc_line' => 'all', 'trc_operator' => 'all', 'trc_machine' => 'all',
                 'trc_workflow_stage' => 'all', 'trc_part' => 'all', 'trc_style_part' => 'all',
                 'trc_size_group' => 'all', 'trc_product' => 'all', 'trc_season' => 'all',
+                // Dynamic per-style routing (StageGateService) is IE Plan's territory
+                'trc_style_workflow' => 'all',
+                // Capacity/manpower-shortage planning (IECalculationService)
+                'trc_capacity_plan' => 'all',
                 // The plan itself, incl. Approve/Confirm
                 'trc_production_plan' => 'all', 'trc_production_plan_import' => 'all',
                 'trc_sewing_board' => 'all',

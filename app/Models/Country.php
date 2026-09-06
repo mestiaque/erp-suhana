@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasAudit;
 
 class Country extends Model
 {
+    use HasAudit;
     //Models Information Data
     /********
      * type ==0 : null

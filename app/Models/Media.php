@@ -4,9 +4,11 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasAudit;
 
 class Media extends Model
 {
+    use HasAudit;
 
 	//Models Information Data
     /********

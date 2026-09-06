@@ -63,9 +63,11 @@
                         $collapseClass = ($hasChildren && $isActive) ? 'mm-show' : '';
                         $linkClass = $hasChildren ? 'collapsed-nav-link nav-link' : 'nav-link';
                         $href = !empty($menu['route']) ? url($menu['route']) : 'javascript:void(0)';
+                        $isExternal = !empty($menu['route']) && preg_match('#^https?://#i', $menu['route']);
+                        $linkTarget = $isExternal ? ' target="_blank" rel="noopener"' : '';
 
                         $html .= '<li class="nav-item ' . $activeClass . '">';
-                        $html .= '<a href="' . $href . '" class="' . $linkClass . '">';
+                        $html .= '<a href="' . $href . '"' . $linkTarget . ' class="' . $linkClass . '">';
                         $html .= '<span class="icon"><i class="' . ($menu['icon'] ?? '') . '"></i></span>';
                         $html .= '<span class="menu-title">' . e($menu['title'] ?? '') . '</span>';
                         $html .= '</a>';

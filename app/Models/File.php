@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HasAudit;
 
 class File extends Model
 {
+    use HasAudit;
     protected $table = 'files';
 
     protected $guarded = [];

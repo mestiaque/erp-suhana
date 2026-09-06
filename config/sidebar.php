@@ -13,6 +13,13 @@ return [
             'order'      => 1,
         ],
         [
+            'title'      => 'Order Journey Guide',
+            'icon'       => 'fa-solid fa-diagram-project',
+            'route'      => 'https://claude.ai/code/artifact/c13ed8d7-cdb3-417d-9d68-490dd5fa58f1',
+            'permission' => '',
+            'order'      => 1,
+        ],
+        [
             'title'      => 'My Profile',
             'icon'       => 'fa-solid fa-user',
             'route'      => '/admin/my-profile',
@@ -31,6 +38,13 @@ return [
             'icon'       => 'fa-solid fa-file-pen',
             'route'      => '/admin/data-change-log',
             'permission' => 'data_change_log',
+            'order'      => 4,
+        ],
+        [
+            'title'      => 'Audit Log',
+            'icon'       => 'fa-solid fa-shield-halved',
+            'route'      => '/audit',
+            'permission' => '',
             'order'      => 4,
         ],
         [

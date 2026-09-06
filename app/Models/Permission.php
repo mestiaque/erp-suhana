@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasAudit;
 
 class Permission extends Model
 {
+    use HasAudit;
     
     //Models Information Data
     /********

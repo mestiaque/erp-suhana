@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasAudit;
 
 class Attribute extends Model
 {
+    use HasAudit;
 
     protected $guarded = [];
     //Models Information Data

@@ -28,9 +28,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use ME\Hr\Models\HrGeoLocation;
+use App\Traits\HasAudit;
 
 class User extends Authenticatable
 {
+    use HasAudit;
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
