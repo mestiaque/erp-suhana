@@ -116,6 +116,7 @@
         }
         .signature-box { text-align: center; width: 200px; }
         .signature-line { border-top: 1px solid #333; margin-top: 30px; padding-top: 5px; }
+        .generated-note { text-align: center; margin-top: 20px; font-size: 10px; font-style: italic; color: #888; }
 
         /* Print adjustments */
         @media print {
@@ -160,21 +161,7 @@
         </div>
 
         @yield('contents')
-        <div class=" print-footer">
-                @php
-                    $signatures = isset($signatures) ? $signatures : ['Prepared By', 'Checked By', 'Approved By'];
-                    if(is_string($signatures)) {
-                        $signatures = json_decode($signatures, true);
-                    }
-                @endphp
-
-            @foreach($signatures as $signature)
-                <div class="sig signature-box">
-                    <div class="signature-line"></div>
-                    {{ $signature }}
-                </div>
-            @endforeach
-        </div>
+        <div class="generated-note">This is a system generated report, no signature required.</div>
     </div>
     @stack('js')
 </body>

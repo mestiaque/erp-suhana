@@ -82,14 +82,14 @@
         .company-address, .company-contact { font-size: 12px; color: #555; }
 
         /* Report title */
-        .report-title { font-size: 14px; font-weight: bold; margin: -20px 0 0px; text-transform: uppercase; }
+        /* .report-title { font-size: 14px; font-weight: bold; margin: -20px 0 0px; text-transform: uppercase; }
         .report-title span {
             display: inline-block;
             padding: 5px 15px;
             background: #333333b5;
             color: #fff;
             border-radius: 4px;
-        }
+        } */
 
         /* Tables */
         table {
@@ -137,6 +137,7 @@
         .text-end { text-align: right; }
         .grandtotal-row { background: #d1d1d1 !important; font-weight: bold; }
         .subtotal-row { background: #e7e7e7 !important; font-weight: bold; }
+        .generated-note { text-align: center; margin-top: 20px; font-size: 10px; font-style: italic; color: #888; }
     </style>
     @stack('css')
 </head>
@@ -152,6 +153,7 @@
 
     <div class="container">
         @yield('contents')
+        <div class="generated-note">This is a system generated report, no signature required.</div>
     </div>
     @stack('js')
 </body>

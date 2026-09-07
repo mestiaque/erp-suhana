@@ -40,13 +40,13 @@ return [
             'permission' => 'data_change_log',
             'order'      => 4,
         ],
-        [
-            'title'      => 'Audit Log',
-            'icon'       => 'fa-solid fa-shield-halved',
-            'route'      => '/audit',
-            'permission' => '',
-            'order'      => 4,
-        ],
+        // [
+        //     'title'      => 'Audit Log',
+        //     'icon'       => 'fa-solid fa-shield-halved',
+        //     'route'      => '/audit',
+        //     'permission' => '',
+        //     'order'      => 4,
+        // ],
         [
             'title'      => 'Approvals',
             'icon'       => 'fa-solid fa-clipboard-check',
