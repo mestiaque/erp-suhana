@@ -189,91 +189,91 @@
 
 @push('js')
 <script>
-(function () {
-    var $input = $('#menuSearchInput');
-    var $results = $('#menuSearchResults');
-    var searchUrl = '{{ route('admin.menuSearch') }}';
-    var debounceTimer = null;
-    var activeIndex = -1;
+    (function () {
+        var $input = $('#menuSearchInput');
+        var $results = $('#menuSearchResults');
+        var searchUrl = '{{ route('admin.menuSearch') }}';
+        var debounceTimer = null;
+        var activeIndex = -1;
 
-    function hideResults() {
-        $results.hide().empty();
-        activeIndex = -1;
-    }
-
-    function renderResults(items) {
-        $results.empty();
-        activeIndex = -1;
-
-        if (!items.length) {
-            $results.append('<div class="menu-search-empty">No matching menu found.</div>');
-            $results.show();
-            return;
+        function hideResults() {
+            $results.hide().empty();
+            activeIndex = -1;
         }
 
-        items.forEach(function (item) {
-            var $a = $('<a>', {
-                'class': 'menu-search-item',
-                href: item.route,
-            });
-            var $icon = $('<span>', { 'class': 'menu-search-icon' }).append('<i class="' + item.icon + '"></i>');
-            var $text = $('<span>', { 'class': 'menu-search-text' });
-            $text.append($('<span>', { 'class': 'menu-search-title', text: item.title }));
-            if (item.breadcrumb) {
-                $text.append($('<span>', { 'class': 'menu-search-breadcrumb', text: item.breadcrumb }));
+        function renderResults(items) {
+            $results.empty();
+            activeIndex = -1;
+
+            if (!items.length) {
+                $results.append('<div class="menu-search-empty">No matching menu found.</div>');
+                $results.show();
+                return;
             }
-            $a.append($icon, $text);
-            $results.append($a);
+
+            items.forEach(function (item) {
+                var $a = $('<a>', {
+                    'class': 'menu-search-item',
+                    href: item.route,
+                });
+                var $icon = $('<span>', { 'class': 'menu-search-icon' }).append('<i class="' + item.icon + '"></i>');
+                var $text = $('<span>', { 'class': 'menu-search-text' });
+                $text.append($('<span>', { 'class': 'menu-search-title', text: item.title }));
+                if (item.breadcrumb) {
+                    $text.append($('<span>', { 'class': 'menu-search-breadcrumb', text: item.breadcrumb }));
+                }
+                $a.append($icon, $text);
+                $results.append($a);
+            });
+
+            $results.show();
+        }
+
+        $input.on('input', function () {
+            var term = $(this).val().trim();
+
+            clearTimeout(debounceTimer);
+
+            if (term.length < 2) {
+                hideResults();
+                return;
+            }
+
+            debounceTimer = setTimeout(function () {
+                $.get(searchUrl, { q: term }).done(function (items) {
+                    renderResults(items);
+                });
+            }, 250);
         });
 
-        $results.show();
-    }
+        $input.on('keydown', function (e) {
+            var $items = $results.find('.menu-search-item');
+            if (!$items.length) return;
 
-    $input.on('input', function () {
-        var term = $(this).val().trim();
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = Math.min(activeIndex + 1, $items.length - 1);
+                $items.removeClass('active').eq(activeIndex).addClass('active');
+                $items.get(activeIndex).scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = Math.max(activeIndex - 1, 0);
+                $items.removeClass('active').eq(activeIndex).addClass('active');
+                $items.get(activeIndex).scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var $target = activeIndex >= 0 ? $items.eq(activeIndex) : $items.first();
+                window.location.href = $target.attr('href');
+            } else if (e.key === 'Escape') {
+                hideResults();
+            }
+        });
 
-        clearTimeout(debounceTimer);
-
-        if (term.length < 2) {
-            hideResults();
-            return;
-        }
-
-        debounceTimer = setTimeout(function () {
-            $.get(searchUrl, { q: term }).done(function (items) {
-                renderResults(items);
-            });
-        }, 250);
-    });
-
-    $input.on('keydown', function (e) {
-        var $items = $results.find('.menu-search-item');
-        if (!$items.length) return;
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            activeIndex = Math.min(activeIndex + 1, $items.length - 1);
-            $items.removeClass('active').eq(activeIndex).addClass('active');
-            $items.get(activeIndex).scrollIntoView({ block: 'nearest' });
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            activeIndex = Math.max(activeIndex - 1, 0);
-            $items.removeClass('active').eq(activeIndex).addClass('active');
-            $items.get(activeIndex).scrollIntoView({ block: 'nearest' });
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            var $target = activeIndex >= 0 ? $items.eq(activeIndex) : $items.first();
-            window.location.href = $target.attr('href');
-        } else if (e.key === 'Escape') {
-            hideResults();
-        }
-    });
-
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('.nav-search-form').length) {
-            hideResults();
-        }
-    });
-})();
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.nav-search-form').length) {
+                hideResults();
+            }
+        });
+    })();
 </script>
 @endpush

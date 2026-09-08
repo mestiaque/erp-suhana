@@ -153,7 +153,9 @@
 
     <div class="container">
         @yield('contents')
-        <div class="generated-note">This is a system generated report, no signature required.</div>
+        @unless($hideGeneratedNote ?? false)
+            <div class="generated-note">This is a system generated report, no signature required.</div>
+        @endunless
     </div>
     @stack('js')
 </body>
