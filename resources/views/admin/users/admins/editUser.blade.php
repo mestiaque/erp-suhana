@@ -1,6 +1,7 @@
 @extends(adminTheme().'layouts.app') @section('title')
 <title>{{websiteTitle('Edit User')}}</title>
-@endsection @push('css')
+@endsection
+@push('css')
 
 <style type="text/css">
     .edit-profile-page {
@@ -262,7 +263,8 @@
         }
     }
 </style>
-@endpush @section('contents')
+@endpush
+@section('contents')
 
 <!-- Breadcrumb Area -->
 

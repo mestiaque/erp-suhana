@@ -32,6 +32,7 @@ return [
         // 'hr.leave_request'        => \App\Approvals\Handlers\ExampleApprovalHandler::class,
         // 'commercial.master_lc'    => \App\Approvals\Handlers\ExampleApprovalHandler::class,
 
+        'inventory.purchase_requisition' => \ME\SflInventory\Approvals\InvPurchaseRequisitionApprovalHandler::class,
         'inventory.requisition' => \ME\SflInventory\Approvals\InvRequisitionApprovalHandler::class,
         'accounts.expense' => \ME\AccSfl\Approvals\ExpenseApprovalHandler::class,
         'accounts.balance_receive' => \ME\AccSfl\Approvals\BalanceReceiveApprovalHandler::class,
