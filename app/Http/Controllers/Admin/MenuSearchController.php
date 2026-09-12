@@ -27,12 +27,26 @@ class MenuSearchController extends Controller
         $items = $this->flatten(config('sidebar', []));
 
         $matches = [];
+
         foreach ($items as $item) {
-            if (stripos($item['title'], $term) === false) {
+            $title = $item['title'] ?? '';
+            $meta = $item['meta'] ?? '';
+
+            // Meta array হলে string বানাও
+            if (is_array($meta)) {
+                $meta = collect($meta)->flatten()->implode(' ');
+            }
+
+            // Title অথবা Meta - যেকোনো একটাতে match হলেই হবে
+            $titleMatch = stripos((string) $title, $term) !== false;
+            $metaMatch  = stripos((string) $meta, $term) !== false;
+
+            if (! $titleMatch && ! $metaMatch) {
                 continue;
             }
 
             $permission = $item['permission'] ?? '';
+
             if (! empty($permission) && ! hasChildPermission($permission)) {
                 continue;
             }
@@ -78,6 +92,7 @@ class MenuSearchController extends Controller
                         'icon'       => $node['icon'] ?? 'fa-solid fa-circle',
                         'breadcrumb' => implode(' / ', $trail),
                         'permission' => $node['permission'] ?? '',
+                        'meta'       => $node['meta'] ?? [],
                     ];
                 }
             }

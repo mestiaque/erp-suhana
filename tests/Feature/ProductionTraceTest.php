@@ -6,8 +6,17 @@ use App\Models\Permission as RolePermission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
+use ME\MerchandisingTrace\Models\Bom;
+use ME\MerchandisingTrace\Models\BomItem;
 use ME\MerchandisingTrace\Models\Buyer;
+use ME\MerchandisingTrace\Models\FabricConsumption;
+use ME\MerchandisingTrace\Models\Item;
+use ME\MerchandisingTrace\Models\MaterialBooking;
+use ME\MerchandisingTrace\Models\MaterialReceipt;
+use ME\MerchandisingTrace\Models\SalesContract;
+use ME\MerchandisingTrace\Models\SalesContractPo;
 use ME\MerchandisingTrace\Models\Style;
+use ME\MerchandisingTrace\Models\Supplier;
 use ME\ProductionTrace\Exceptions\BundleIncompleteException;
 use ME\ProductionTrace\Exceptions\PackingNotAuthorizedException;
 use ME\ProductionTrace\Exceptions\StageNotAllowedException;
@@ -17,10 +26,15 @@ use ME\ProductionTrace\Models\TrcBuyerInspection;
 use ME\ProductionTrace\Models\TrcCapacityPlan;
 use ME\ProductionTrace\Models\TrcCutting;
 use ME\ProductionTrace\Models\TrcCuttingItem;
+use ME\ProductionTrace\Models\TrcDailyTarget;
+use ME\ProductionTrace\Models\TrcFabricIssue;
+use ME\ProductionTrace\Models\TrcFabricIssueItem;
+use ME\ProductionTrace\Models\TrcFabricRoll;
 use ME\ProductionTrace\Models\TrcGarmentUnit;
 use ME\ProductionTrace\Models\TrcLine;
 use ME\ProductionTrace\Models\TrcOperator;
 use ME\ProductionTrace\Models\TrcPart;
+use ME\ProductionTrace\Models\TrcPartProcessJob;
 use ME\ProductionTrace\Models\TrcPlanLine;
 use ME\ProductionTrace\Models\TrcPlanLineSize;
 use ME\ProductionTrace\Models\TrcPlanStyle;
@@ -31,12 +45,14 @@ use ME\ProductionTrace\Models\TrcSizeGroup;
 use ME\ProductionTrace\Models\TrcStyleWorkflow;
 use ME\ProductionTrace\Models\TrcWorkflowStage;
 use ME\ProductionTrace\Services\BarcodeService;
+use ME\ProductionTrace\Services\BundleStageGateService;
 use ME\ProductionTrace\Services\BuyerApprovalGateService;
 use ME\ProductionTrace\Services\CapacityPlanningService;
 use ME\ProductionTrace\Services\GarmentStageGateService;
 use ME\ProductionTrace\Services\IECalculationService;
 use ME\ProductionTrace\Services\KpiService;
 use ME\ProductionTrace\Services\StageGateService;
+use ME\ProductionTrace\Services\TrcExtendedReportService;
 use Tests\TestCase;
 
 /**
@@ -60,11 +76,11 @@ class ProductionTraceTest extends TestCase
         // for why (DatabaseTransactions starts its transaction during boot).
         $overrides = [
             'DB_CONNECTION' => 'mysql',
-            'DB_HOST'       => '127.0.0.1',
-            'DB_PORT'       => '3306',
-            'DB_DATABASE'   => 'suhana_erp_actual',
-            'DB_USERNAME'   => 'root',
-            'DB_PASSWORD'   => 'admin',
+            'DB_HOST' => '127.0.0.1',
+            'DB_PORT' => '3306',
+            'DB_DATABASE' => 'suhana_erp_actual',
+            'DB_USERNAME' => 'root',
+            'DB_PASSWORD' => 'admin',
         ];
         foreach ($overrides as $key => $value) {
             putenv("{$key}={$value}");
@@ -111,6 +127,14 @@ class ProductionTraceTest extends TestCase
         $this->assertSame(95.5, $kpi->overallProductionAchievementPercent(955, 1000));
     }
 
+    public function test_rft_percent(): void
+    {
+        $kpi = new KpiService;
+
+        $this->assertSame(96.0, $kpi->rftPercent(480, 500));
+        $this->assertSame(0.0, $kpi->rftPercent(0, 0));
+    }
+
     // -----------------------------------------------------------------
     // BundleStageGateService — §5.4 hard gate: an incomplete bundle
     // (ok_qty + replaced_qty < bundle_qty) may never advance, and the
@@ -119,7 +143,7 @@ class ProductionTraceTest extends TestCase
 
     public function test_incomplete_bundle_is_blocked_with_exact_shortage(): void
     {
-        $bundle = new \ME\ProductionTrace\Models\TrcBundle([
+        $bundle = new TrcBundle([
             'bundle_no' => 'BDL-TEST-001',
             'bundle_qty' => 10,
             'ok_qty' => 7,
@@ -130,12 +154,12 @@ class ProductionTraceTest extends TestCase
         $this->expectException(BundleIncompleteException::class);
         $this->expectExceptionMessage('shortage of 3 pcs');
 
-        (new \ME\ProductionTrace\Services\BundleStageGateService)->assertIssuable($bundle);
+        (new BundleStageGateService)->assertIssuable($bundle);
     }
 
     public function test_complete_bundle_passes_the_gate(): void
     {
-        $bundle = new \ME\ProductionTrace\Models\TrcBundle([
+        $bundle = new TrcBundle([
             'bundle_no' => 'BDL-TEST-002',
             'bundle_qty' => 10,
             'ok_qty' => 10,
@@ -143,7 +167,7 @@ class ProductionTraceTest extends TestCase
             'status' => 'complete',
         ]);
 
-        (new \ME\ProductionTrace\Services\BundleStageGateService)->assertIssuable($bundle);
+        (new BundleStageGateService)->assertIssuable($bundle);
         $this->addToAssertionCount(1); // reaching here without an exception is the assertion
     }
 
@@ -273,13 +297,13 @@ class ProductionTraceTest extends TestCase
         $this->assertTrue($gate->canMove($style->id, 'garment', 'washing_qc', 'finishing'));
 
         $this->expectException(StageNotAllowedException::class);
-        $this->expectExceptionMessage("only: finishing");
+        $this->expectExceptionMessage('only: finishing');
         $gate->assertCanMove($style->id, 'garment', 'washing_qc', 'printing');
     }
 
     public function test_garment_stage_gate_service_uses_stage_gate_for_finishing_readiness(): void
     {
-        $garment = new \ME\ProductionTrace\Models\TrcGarmentUnit([
+        $garment = new TrcGarmentUnit([
             'code' => 'G-TEST-001',
             'status' => 'active',
             'current_stage' => 'sewing_qc',
@@ -465,7 +489,7 @@ class ProductionTraceTest extends TestCase
             'requires_print' => $processType === 'print',
         ]);
 
-        $job = \ME\ProductionTrace\Models\TrcPartProcessJob::create([
+        $job = TrcPartProcessJob::create([
             'job_no' => 'JOB-'.uniqid(),
             'process_type' => $processType,
             'is_inhouse' => true,
@@ -516,8 +540,8 @@ class ProductionTraceTest extends TestCase
     public function test_scan_api_part_process_issue_rejects_unflagged_bundle(): void
     {
         // Bundle flagged for print, but we try to issue it to an embroidery job.
-        [$bundle, ] = $this->makeCompleteBundleForProcess('print');
-        $embJob = \ME\ProductionTrace\Models\TrcPartProcessJob::create([
+        [$bundle] = $this->makeCompleteBundleForProcess('print');
+        $embJob = TrcPartProcessJob::create([
             'job_no' => 'JOB-'.uniqid(), 'process_type' => 'embroidery', 'is_inhouse' => true,
             'plan_line_id' => $bundle->plan_line_id, 'issue_date' => now(), 'status' => 'issued',
         ]);
@@ -634,5 +658,169 @@ class ProductionTraceTest extends TestCase
             'idempotency_key' => 'test-'.uniqid(),
         ]);
         $second->assertStatus(422)->assertJson(['ok' => false]);
+    }
+
+    // -----------------------------------------------------------------
+    // TrcExtendedReportService — src/work/report.md's 6 extended daily
+    // reports. Buyer/Style/PO come through the SalesContractPo <->
+    // TrcPlanLine bridge (production_plan_line_id), the same join
+    // ShipmentPlanService/ProductionHandoverService already rely on, so
+    // this is the highest-risk part of the new code to leave unverified.
+    // -----------------------------------------------------------------
+
+    /**
+     * @return array{po: SalesContractPo, planLine: TrcPlanLine}
+     */
+    private function makeReportFixture(string $tag, int $orderQty = 500): array
+    {
+        $buyer = Buyer::create(['code' => "{$tag}BUY", 'name' => "{$tag} Buyer"]);
+        $style = Style::create(['style_no' => "{$tag}-STY", 'name' => "{$tag} Style", 'buyer_id' => $buyer->id]);
+        $merchandiser = User::factory()->create(['name' => "{$tag} Merchandiser"]);
+        $sc = SalesContract::create([
+            'contract_no' => "{$tag}-SC", 'buyer_id' => $buyer->id, 'merchandiser_id' => $merchandiser->id,
+            'contract_date' => now()->toDateString(), 'status' => 'confirmed',
+        ]);
+
+        $product = TrcProduct::create(['code' => "{$tag}PRD", 'name' => "{$tag} Product"]);
+        $sizeGroup = TrcSizeGroup::create(['name' => "{$tag} Size Group"]);
+        $plan = TrcProductionPlan::create([
+            'plan_no' => "{$tag}-PP", 'buyer_id' => $buyer->id, 'product_id' => $product->id,
+            'size_group_id' => $sizeGroup->id, 'up_date' => now(), 'status' => 'confirmed',
+        ]);
+        $planStyle = TrcPlanStyle::create(['production_plan_id' => $plan->id, 'style_id' => $style->id, 'style_name' => $style->name]);
+        $planLine = TrcPlanLine::create(['plan_style_id' => $planStyle->id, 'po_number' => "{$tag}-PO", 'color_id' => 1]);
+        TrcPlanLineSize::create(['plan_line_id' => $planLine->id, 'size_id' => 1, 'order_qty' => $orderQty]);
+
+        $po = SalesContractPo::create([
+            'sales_contract_id' => $sc->id, 'style_id' => $style->id, 'color_id' => 1,
+            'po_no' => "{$tag}-PO", 'po_qty' => $orderQty, 'unit_price' => 4, 'cost_smv' => 12,
+            'production_plan_line_id' => $planLine->id,
+            'shipment_date' => now()->addDays(30)->toDateString(),
+            'fty_committed_delivery' => now()->addDays(25)->toDateString(),
+        ]);
+
+        return ['po' => $po, 'planLine' => $planLine, 'buyer' => $buyer, 'style' => $style, 'merchandiser' => $merchandiser];
+    }
+
+    public function test_daily_cutting_report_computes_achievement_and_consumption_variance(): void
+    {
+        $fixture = $this->makeReportFixture('T30', orderQty: 1000);
+        $planLine = $fixture['planLine'];
+        $today = now()->toDateString();
+
+        TrcDailyTarget::create(['date' => $today, 'plan_line_id' => $planLine->id, 'stage' => 'cutting', 'target_qty' => 200]);
+
+        $issue = TrcFabricIssue::create(['issue_no' => 'T30-ISS', 'plan_line_id' => $planLine->id, 'issue_date' => $today]);
+        $roll = TrcFabricRoll::firstOrFail();
+        TrcFabricIssueItem::create(['fabric_issue_id' => $issue->id, 'fabric_roll_id' => $roll->id, 'issued_qty' => 190]); // 190m issued
+
+        $cutting = TrcCutting::create([
+            'cut_no' => 'T30-CUT', 'plan_line_id' => $planLine->id, 'cut_date' => $today, 'fabric_issue_id' => $issue->id,
+        ]);
+        $part = TrcPart::create(['code' => 'T30PT', 'name' => 'T30 Part']);
+        TrcCuttingItem::create([
+            'cutting_id' => $cutting->id, 'part_id' => $part->id, 'size_id' => 1,
+            'required_qty' => 200, 'cut_qty' => 190, 'rejected_qty' => 10, 'replaced_qty' => 8,
+        ]);
+
+        FabricConsumption::create(['style_id' => $fixture['style']->id, 'color_id' => 1, 'yy' => 1.0000, 'marker_efficiency' => 85.5]);
+
+        $data = app(TrcExtendedReportService::class)->run('daily_cutting', ['date_from' => $today, 'date_to' => $today, 'plan_line_id' => $planLine->id]);
+        $this->assertCount(1, $data['rows']);
+        $row = $data['rows'][0];
+
+        $this->assertSame($fixture['buyer']->name, $row['Buyer']);
+        $this->assertSame($fixture['style']->style_no, $row['Style No.']);
+        $this->assertSame($fixture['po']->po_no, $row['PO No.']);
+        $this->assertSame(200, $row['Planned Cut']);
+        $this->assertSame(190, $row['Actual Cut']);
+        $this->assertSame(10, $row['Cut Reject']);
+        $this->assertSame(8, $row['Recut Qty']);
+        $this->assertSame(180, $row['Net Good Cut']); // 190 actual - 10 reject
+        $this->assertSame(95.0, $row['Achievement %']); // 190/200
+        $this->assertSame(190.0, $row['Fabric Issued (m)']);
+        $this->assertSame(85.5, $row['Marker Efficiency %']);
+        $this->assertSame(1.0, $row['Standard Cons./Pc']);
+        // Actual Cons./Pc = 190m / 190 actual cut = 1.0 exactly, so 0% variance.
+        $this->assertSame(1.0, $row['Actual Cons./Pc']);
+        $this->assertSame(0.0, $row['Consumption Var. %']);
+    }
+
+    public function test_order_po_status_report_flags_delay_and_risk_before_ex_factory(): void
+    {
+        $fixture = $this->makeReportFixture('T31', orderQty: 1000);
+        $planLine = $fixture['planLine'];
+
+        // Ex-factory date already 2 days in the past and nothing shipped —
+        // must be flagged Delayed with positive Delay Days.
+        $fixture['po']->update(['fty_committed_delivery' => now()->subDays(2)->toDateString()]);
+
+        $size = TrcPlanLineSize::where('plan_line_id', $planLine->id)->first();
+        $size->update(['cut_qty' => 1000, 'sewn_qty' => 800, 'finished_qty' => 500, 'packed_qty' => 200, 'shipped_qty' => 0]);
+
+        $data = app(TrcExtendedReportService::class)->run('order_po_status', ['plan_line_id' => $planLine->id]);
+        $this->assertCount(1, $data['rows']);
+        $row = $data['rows'][0];
+
+        $this->assertSame($fixture['merchandiser']->name, $row['Responsible']);
+        // cut_qty (1000) already meets order_qty; sewn_qty (800) is the first shortfall.
+        $this->assertSame('Sewing', $row['Current Stage']);
+        $this->assertSame(1000, $row['Order Qty']);
+        $this->assertSame(0.0, $row['Completion %']); // shipped 0 / order 1000
+        $this->assertSame(1000, $row['Balance Qty']); // order 1000 - shipped 0
+        $this->assertSame(2, $row['Delay Days']);
+        $this->assertSame('Delayed', $row['Risk Status']);
+    }
+
+    /**
+     * Regression test for a real bug caught while building this: the
+     * bookings query originally matched by style only (mirroring
+     * ReportService::bomShortage()), so a style-wide with(['items' => ...])
+     * eager-load left OTHER items' bookings in the collection too —
+     * Supplier/Expected Arrival for Thread ended up reporting the Fabric
+     * supplier. Fixed with an added whereHas('items', ...) so each
+     * material's row only ever draws from bookings that actually book it.
+     */
+    public function test_material_shortage_report_keeps_each_items_supplier_separate(): void
+    {
+        $fixture = $this->makeReportFixture('T32', orderQty: 1000);
+        $po = $fixture['po'];
+
+        $bom = Bom::create(['bom_no' => 'T32-BOM', 'style_id' => $fixture['style']->id, 'version' => 1, 'status' => 'approved']);
+        $fabricItem = Item::create(['code' => 'T32FAB', 'name' => 'T32 Fabric', 'type' => 'fabric']);
+        $threadItem = Item::create(['code' => 'T32THR', 'name' => 'T32 Thread', 'type' => 'trim']);
+        BomItem::create(['bom_id' => $bom->id, 'item_id' => $fabricItem->id, 'item_type' => 'fabric', 'consumption' => 1.0, 'wastage_percent' => 0]);
+        BomItem::create(['bom_id' => $bom->id, 'item_id' => $threadItem->id, 'item_type' => 'trim', 'consumption' => 0.01, 'wastage_percent' => 0]);
+
+        $fabricSupplier = Supplier::create(['code' => 'T32SUPF', 'name' => 'T32 Fabric Mill', 'type' => 'fabric']);
+        $threadSupplier = Supplier::create(['code' => 'T32SUPT', 'name' => 'T32 Thread Co', 'type' => 'trims']);
+
+        $fabricBooking = MaterialBooking::create([
+            'booking_no' => 'T32-MB-FAB', 'type' => 'fabric', 'sales_contract_id' => $po->sales_contract_id,
+            'style_id' => $fixture['style']->id, 'supplier_id' => $fabricSupplier->id, 'status' => 'booked',
+            'expected_inhouse_date' => now()->addDays(10)->toDateString(),
+        ]);
+        $fabricBooking->items()->create(['item_id' => $fabricItem->id, 'booked_qty' => 900]);
+
+        $threadBooking = MaterialBooking::create([
+            'booking_no' => 'T32-MB-THR', 'type' => 'trims', 'sales_contract_id' => $po->sales_contract_id,
+            'style_id' => $fixture['style']->id, 'supplier_id' => $threadSupplier->id, 'status' => 'booked',
+            'expected_inhouse_date' => now()->addDays(3)->toDateString(),
+        ]);
+        $threadBooking->items()->create(['item_id' => $threadItem->id, 'booked_qty' => 20]);
+
+        MaterialReceipt::create(['booking_id' => $fabricBooking->id, 'item_id' => $fabricItem->id, 'receive_date' => now()->toDateString(), 'qty' => 900]);
+        MaterialReceipt::create(['booking_id' => $threadBooking->id, 'item_id' => $threadItem->id, 'receive_date' => now()->toDateString(), 'qty' => 20]);
+
+        $data = app(TrcExtendedReportService::class)->run('material_shortage', ['plan_line_id' => null, 'po_no' => $po->po_no]);
+        $rows = collect($data['rows'])->keyBy('Material Description');
+
+        $this->assertSame('T32 Fabric Mill', $rows['T32 Fabric']['Supplier']);
+        $this->assertSame('T32 Thread Co', $rows['T32 Thread']['Supplier']);
+        $this->assertSame(1000.0, $rows['T32 Fabric']['Required Qty']); // 1.0 consumption x 1000 order qty
+        $this->assertSame(900.0, $rows['T32 Fabric']['Received Qty']);
+        $this->assertSame(100.0, $rows['T32 Fabric']['Shortage Qty']);
+        $this->assertSame(10.0, $rows['T32 Thread']['Required Qty']); // 0.01 x 1000
+        $this->assertSame(0.0, $rows['T32 Thread']['Shortage Qty']); // 20 received > 10 required
     }
 }
