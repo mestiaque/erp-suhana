@@ -205,13 +205,15 @@ class MerchandisingTraceTest extends TestCase
         $chain = $this->makeChain('T26');
         $plan = app(TnaPlanGenerationService::class)->generateFor($chain['po']);
 
-        $view = app(\ME\MerchandisingTrace\Http\Controllers\TnaPlanController::class)->grid(request());
+        $view = app(\ME\MerchandisingTrace\Http\Controllers\TnaPlanController::class)->grid(request(), app(\ME\MerchandisingTrace\Services\TnaSheetService::class));
         $data = $view->getData();
 
         $this->assertTrue(collect($data['plans']->items())->contains('id', $plan->id));
-        $allColumns = $data['columnGroups']->flatten();
-        $this->assertTrue($allColumns->contains('task_name', '1st PP submit'));
-        $this->assertTrue($data['columnGroups']->has('Sample Status'));
+        // The buyer's 81-column T&A sheet in 9 merged groups (work/tna.md).
+        $groups = $data['sheet']->groups();
+        $this->assertSame(81, $data['sheet']->columnCount());
+        $this->assertArrayHasKey('Sample Status', $groups);
+        $this->assertSame('1st PP submit', $groups['Sample Status']['task:pp1_submit'][0]);
     }
 
     /**

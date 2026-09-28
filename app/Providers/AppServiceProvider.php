@@ -61,6 +61,16 @@ class AppServiceProvider extends ServiceProvider
             \Config::set("mail.mailers.smtp.username", $general->mail_username);
             \Config::set("mail.mailers.smtp.password", $general->mail_password);
 
+            // Without this the .env MAIL_MAILER (e.g. "log") stays the default mailer
+            // and the SMTP settings above are never used.
+            if ($general->mail_host) {
+                \Config::set("mail.default", "smtp");
+            }
+            if ($general->mail_from_address) {
+                \Config::set("mail.from.address", $general->mail_from_address);
+                \Config::set("mail.from.name", $general->mail_from_name ?: config('app.name'));
+            }
+
             // observers
         }
     }

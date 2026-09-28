@@ -12,13 +12,13 @@ return [
             'permission' => '',
             'order'      => 1,
         ],
-        [
-            'title'      => 'Order Journey Guide',
-            'icon'       => 'fa-solid fa-diagram-project',
-            'route'      => 'https://claude.ai/code/artifact/c13ed8d7-cdb3-417d-9d68-490dd5fa58f1',
-            'permission' => '',
-            'order'      => 1,
-        ],
+        // [
+        //     'title'      => 'Order Journey Guide',
+        //     'icon'       => 'fa-solid fa-diagram-project',
+        //     'route'      => 'https://claude.ai/code/artifact/c13ed8d7-cdb3-417d-9d68-490dd5fa58f1',
+        //     'permission' => '',
+        //     'order'      => 1,
+        // ],
         [
             'title'      => 'My Profile',
             'icon'       => 'fa-solid fa-user',

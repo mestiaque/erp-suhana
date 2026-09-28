@@ -715,8 +715,8 @@ class AdminController extends Controller
                         ->orWhere('employee_id', 'LIKE', "%{$r->search}%");
                 }
 
-                if ($r->role) {
-                    $q->where('permission_id', $r->role);
+                if ($r->role || $r->role_id) {
+                    $q->where('permission_id', $r->role ?: $r->role_id);
                 }
 
                 if ($r->status) {

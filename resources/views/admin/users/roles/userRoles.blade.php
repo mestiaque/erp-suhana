@@ -38,7 +38,7 @@
                         <tr>
                             <td>{{$i+1}}</td>
                             <td>{{$role->name}}</td>
-                            <td><a href="{{route('admin.usersCustomer',['role_id'=>$role->id])}}">Users ({{$role->users->count()}})</a></td>
+                            <td><a href="{{route('admin.usersAdmin',['role_id'=>$role->id])}}">Users ({{$role->users->count()}})</a></td>
                             <td>Permissions (
                                 @if($role->id== 999)
                                 &divonx;
