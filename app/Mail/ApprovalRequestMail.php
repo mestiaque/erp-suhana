@@ -13,7 +13,8 @@ class ApprovalRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Approval $approval)
+    /** @param array $content see BaseApprovalHandler::mailContent() */
+    public function __construct(public Approval $approval, public array $content = [])
     {
     }
 
@@ -24,7 +25,9 @@ class ApprovalRequestMail extends Mailable
 
         return new Envelope(
             from: $fromAddress ? new \Illuminate\Mail\Mailables\Address($fromAddress, $fromName) : null,
-            subject: 'Approval Needed: '.$this->approval->title,
+            subject: 'Approval Needed: '.$this->approval->title
+                .(isset($this->content['total']['value']) && ($this->content['total']['money'] ?? false)
+                    ? ' - Tk '.number_format((float) $this->content['total']['value'], 2) : ''),
         );
     }
 
@@ -32,7 +35,24 @@ class ApprovalRequestMail extends Mailable
     {
         return new Content(
             view: 'emails.approval-request',
-            with: ['approval' => $this->approval],
+            with: [
+                'approval'      => $this->approval,
+                'content'       => $this->content,
+                'amountInWords' => $this->amountInWords(),
+            ],
         );
+    }
+
+    /** Taka in words for a money total, via the Accounts package's converter when installed. */
+    private function amountInWords(): ?string
+    {
+        $total = $this->content['total'] ?? null;
+        $converter = 'ME\\AccSfl\\Services\\NumberToWordsService';
+
+        if (! $total || ! ($total['money'] ?? false) || ! class_exists($converter)) {
+            return null;
+        }
+
+        return app($converter)->taka((float) $total['value']);
     }
 }

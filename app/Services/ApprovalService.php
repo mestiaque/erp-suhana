@@ -115,16 +115,23 @@ class ApprovalService
 
         $recipients = collect($handler->recipients($approvable, $approval))
             ->map(fn ($recipient) => $recipient instanceof User ? $recipient->email : $recipient)
-            ->filter()
+            ->filter(fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL) !== false)
             ->unique()
             ->values();
+
+        // Testing: every approval email goes only to the test address(es).
+        if ($testRecipients = config('approval.test_recipients', [])) {
+            $recipients = collect($testRecipients);
+        }
 
         if ($recipients->isEmpty()) {
             return;
         }
 
+        $content = method_exists($handler, 'mailContent') ? (array) $handler->mailContent($approvable, $approval) : [];
+
         try {
-            Mail::to($recipients->all())->send(new ApprovalRequestMail($approval));
+            Mail::to($recipients->all())->send(new ApprovalRequestMail($approval, $content));
         } catch (\Throwable $e) {
             report($e);
         }

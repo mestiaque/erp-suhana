@@ -26,7 +26,7 @@ class TestMail extends Mailable
     {
         return new Content(
             view: 'emails.test-mail',
-            with: ['body' => $this->body ?: 'This is a test mail.'],
+            with: ['body' => $this->body ?: 'This is a test mail.Please ignore it.'],
         );
     }
 }

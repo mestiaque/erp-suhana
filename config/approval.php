@@ -34,6 +34,7 @@ return [
 
         'inventory.purchase_requisition' => \ME\SflInventory\Approvals\InvPurchaseRequisitionApprovalHandler::class,
         'inventory.requisition' => \ME\SflInventory\Approvals\InvRequisitionApprovalHandler::class,
+        'inventory.grn_receive' => \ME\SflInventory\Approvals\InvGrnApprovalHandler::class,
         'accounts.expense' => \ME\AccSfl\Approvals\ExpenseApprovalHandler::class,
         'accounts.balance_receive' => \ME\AccSfl\Approvals\BalanceReceiveApprovalHandler::class,
 
@@ -50,5 +51,18 @@ return [
     */
     'mail_from_address' => null,
     'mail_from_name'    => null,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Test Recipients
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated addresses (APPROVAL_TEST_RECIPIENTS in .env). While set,
+    | EVERY email the app sends — approval emails and any other mail, from
+    | any module — goes only to these addresses (see AppServiceProvider::
+    | redirectAllMailInTestMode()). Leave empty in production.
+    |
+    */
+    'test_recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('APPROVAL_TEST_RECIPIENTS', ''))))),
 
 ];

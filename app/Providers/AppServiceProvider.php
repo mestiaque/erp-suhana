@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -39,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->mergePackageSidebar();
+        $this->redirectAllMailInTestMode();
 
         $general = general(); // helper function
 
@@ -73,6 +76,39 @@ class AppServiceProvider extends ServiceProvider
 
             // observers
         }
+    }
+
+    /**
+     * Test mode safety net: while APPROVAL_TEST_RECIPIENTS is set, EVERY email
+     * the app sends — approval or not, any module, any mailer, queued or not —
+     * is re-addressed to those test addresses only (Cc/Bcc dropped) right
+     * before it leaves. The real recipients are kept in an X-Original-To
+     * header so the test mail shows who it would have gone to.
+     */
+    private function redirectAllMailInTestMode(): void
+    {
+        $testRecipients = config('approval.test_recipients', []);
+
+        if (! $testRecipients) {
+            return;
+        }
+
+        Event::listen(MessageSending::class, function (MessageSending $event) use ($testRecipients) {
+            $message = $event->message;
+            $headers = $message->getHeaders();
+
+            $original = collect([...$message->getTo(), ...$message->getCc(), ...$message->getBcc()])
+                ->map(fn ($address) => $address->getAddress())->unique()->implode(', ');
+
+            $headers->remove('Cc');
+            $headers->remove('Bcc');
+            $message->to(...$testRecipients);
+
+            if ($original !== '') {
+                $headers->remove('X-Original-To');
+                $headers->addTextHeader('X-Original-To', $original);
+            }
+        });
     }
 
     /**
