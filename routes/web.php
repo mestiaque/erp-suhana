@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ApprovalController;
+use App\Http\Controllers\Admin\MailNotificationSettingController;
 use App\Http\Controllers\Admin\MenuSearchController;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -56,9 +57,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::any('/merchandisers/{action}/{id?}', [AdminController::class, 'merchandisersAction'])->name('merchandisersAction');
 
     // Apps Setting
+    Route::post('/setting/mail/test', [AdminController::class, 'sendTestMail'])->name('setting.mail.test');
+    Route::get('/setting/mail-notifications', [MailNotificationSettingController::class, 'index'])->name('setting.mailNotifications');
+    Route::post('/setting/mail-notifications/{actionKey}/update', [MailNotificationSettingController::class, 'update'])
+        ->where('actionKey', '.*')
+        ->name('setting.mailNotifications.update');
     Route::get('/setting/{type}', [AdminController::class, 'setting'])->name('setting');
     Route::post('/setting/{type}/update', [AdminController::class, 'settingUpdate'])->name('settingUpdate');
-    Route::post('/setting/mail/test', [AdminController::class, 'sendTestMail'])->name('setting.mail.test');
 
     // Theme Route
     Route::get('/theme-setting', [AdminController::class, 'themeSetting'])->name('themeSetting');

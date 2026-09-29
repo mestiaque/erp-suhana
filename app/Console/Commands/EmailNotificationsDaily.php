@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 use Mail;
 use Carbon\Carbon;
 use App\Models\Attribute;
+use App\Models\MailNotificationSetting;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
 
@@ -37,6 +38,11 @@ class EmailNotificationsDaily extends Command
      */
     public function handle()
     {
+        if (!MailNotificationSetting::enabled('daily_summary_report')) {
+            \Log::info('Daily summary mail skipped — disabled in Settings > Mail Notifications.');
+
+            return;
+        }
 
         $accounts =Attribute::with('user')->where('type',10)->where('status','active')->orderBy('name')->select(['id','name','amount'])->get();
         $from =Carbon::now();
@@ -73,7 +79,8 @@ class EmailNotificationsDaily extends Command
         });
 
 
-        $emails =['info@natoreit.com','rabiulk449@gmail.com'];
+        $emails = MailNotificationSetting::recipientEmailOverride('daily_summary_report')
+            ?? ['info@natoreit.com','rabiulk449@gmail.com'];
         $toName =general()->title;
         $subject ='Erp Software Daily Summery Report Mail Form '.general()->title;
         $datas =['accounts'=>$accounts];

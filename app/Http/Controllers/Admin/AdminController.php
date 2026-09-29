@@ -1697,7 +1697,7 @@ class AdminController extends Controller
             return redirect(url('/ecom9/admin/dashboard'));
 
         } else {
-            return redirect()->route('admin.setting', 'general', 'type');
+            return redirect()->route('admin.setting', 'general');
         }
 
     }

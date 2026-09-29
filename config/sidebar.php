@@ -126,6 +126,13 @@ return [
                     'icon_color'  => 'text-secondary',
                     'permission'  => 'sms'
                 ],
+                [
+                    'title'       => 'Mail Notifications',
+                    'icon'        => 'fa-solid fa-bell',
+                    'route'       => '/admin/setting/mail-notifications',
+                    'icon_color'  => 'text-secondary',
+                    'permission'  => 'mail'
+                ],
                 // [
                 //     'title'       => 'Roadmap',
                 //     'icon'        => 'fa-solid fa-route',

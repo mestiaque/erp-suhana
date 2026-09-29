@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\ApprovalHandlerInterface;
 use App\Mail\ApprovalRequestMail;
 use App\Models\Approval;
+use App\Models\MailNotificationSetting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -155,11 +156,22 @@ class ApprovalService
             return false;
         }
 
+        // Admin-controlled kill switch (Settings > Mail Notifications):
+        // this action's mail is turned off entirely.
+        if (!MailNotificationSetting::enabled($approval->module)) {
+            return false;
+        }
+
         $recipients = collect($handler->recipients($approvable, $approval))
             ->map(fn ($recipient) => $recipient instanceof User ? $recipient->email : $recipient)
             ->filter(fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL) !== false)
             ->unique()
             ->values();
+
+        // Admin-picked recipients override the handler's default list, if set.
+        if ($override = MailNotificationSetting::recipientEmailOverride($approval->module)) {
+            $recipients = collect($override);
+        }
 
         // Testing: every approval email goes only to the test address(es).
         if ($testRecipients = config('approval.test_recipients', [])) {
