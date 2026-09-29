@@ -117,9 +117,30 @@
                          </label>
                      </div>
                 </div>
-                
+
             </div>
+
+            <hr>
+            <h5>Send Test Mail</h5>
+            <div class="form-row">
+                <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                    <label for="test_mail_to">Send To (email address)</label>
+                    <input type="email" name="test_mail_to" value="{{ old('test_mail_to', Auth::user()->email) }}" placeholder="recipient@example.com" class="form-control {{$errors->has('test_mail_to')?'error':''}}" />
+                    @if ($errors->has('test_mail_to'))
+                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('test_mail_to') }}</p>
+                    @endif
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                    <label for="test_mail_message">Message</label>
+                    <textarea name="test_mail_message" rows="1" placeholder="This is a test mail." class="form-control {{$errors->has('test_mail_message')?'error':''}}">{{ old('test_mail_message') }}</textarea>
+                    @if ($errors->has('test_mail_message'))
+                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('test_mail_message') }}</p>
+                    @endif
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary btn-md rounded-0">Save changes</button>
+            <button type="submit" formaction="{{ route('admin.setting.mail.test') }}" class="btn btn-outline-primary btn-md rounded-0">Send Test Mail</button>
         </div>
     </div>
 </form>

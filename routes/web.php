@@ -57,6 +57,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     // Apps Setting
     Route::get('/setting/{type}', [AdminController::class, 'setting'])->name('setting');
     Route::post('/setting/{type}/update', [AdminController::class, 'settingUpdate'])->name('settingUpdate');
+    Route::post('/setting/mail/test', [AdminController::class, 'sendTestMail'])->name('setting.mail.test');
 
     // Theme Route
     Route::get('/theme-setting', [AdminController::class, 'themeSetting'])->name('themeSetting');

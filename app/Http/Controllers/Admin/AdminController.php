@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TestMail;
 use App\Models\ActivityLog;
 use App\Models\Attribute;
 use App\Models\File as FileModel;
@@ -16,8 +17,10 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -1884,5 +1887,46 @@ class AdminController extends Controller
 
         return redirect()->route('admin.setting', $type);
 
+    }
+
+    public function sendTestMail(Request $r)
+    {
+        $r->validate([
+            'mail_from_address' => 'nullable|email|max:100',
+            'mail_from_name' => 'nullable|max:100',
+            'mail_driver' => 'nullable|max:100',
+            'mail_host' => 'nullable|max:100',
+            'mail_port' => 'nullable|max:100',
+            'mail_encryption' => 'nullable|max:100',
+            'mail_username' => 'nullable|max:100',
+            'mail_password' => 'nullable|max:100',
+            'test_mail_to' => 'required|email|max:150',
+            'test_mail_message' => 'nullable|max:2000',
+        ]);
+
+        // Use the (possibly unsaved) values currently in the form, not just the saved DB values,
+        // so the admin can test before clicking "Save changes".
+        Config::set('mail.mailers.smtp.transport', 'smtp');
+        Config::set('mail.mailers.smtp.host', $r->mail_host);
+        Config::set('mail.mailers.smtp.port', $r->mail_port);
+        Config::set('mail.mailers.smtp.encryption', $r->mail_encryption ?: null);
+        Config::set('mail.mailers.smtp.username', $r->mail_username);
+        Config::set('mail.mailers.smtp.password', $r->mail_password);
+        Config::set('mail.default', $r->mail_driver ?: 'smtp');
+        if ($r->mail_from_address) {
+            Config::set('mail.from.address', $r->mail_from_address);
+            Config::set('mail.from.name', $r->mail_from_name ?: config('app.name'));
+        }
+
+        $to = $r->test_mail_to;
+
+        try {
+            Mail::to($to)->send(new TestMail($r->test_mail_message));
+            Session()->flash('success', 'Test mail sent successfully to '.$to.'. Please check the inbox.');
+        } catch (\Throwable $e) {
+            Session()->flash('error', 'Test mail failed: '.$e->getMessage());
+        }
+
+        return redirect()->back();
     }
 }
