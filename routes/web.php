@@ -35,6 +35,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
     Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
+    Route::post('/approvals/{approval}/remind', [ApprovalController::class, 'remind'])->name('approvals.remind');
 
     // User Management
     Route::get('/users/admin/', [AdminController::class, 'usersAdmin'])->name('usersAdmin');

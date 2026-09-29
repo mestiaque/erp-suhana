@@ -56,6 +56,16 @@ class ApprovalController extends Controller
         return redirect()->back();
     }
 
+    /** Bell 🔔 button: re-send the approval email while the request is still pending. */
+    public function remind(Approval $approval, Request $r, ApprovalService $service)
+    {
+        $error = $service->remind($approval, $r->user());
+
+        session()->flash($error ? 'error' : 'success', $error ?? 'Reminder sent to the approvers.');
+
+        return redirect()->back();
+    }
+
     public function reject(Approval $approval, Request $r, ApprovalService $service)
     {
         if (!$approval->isPending()) {

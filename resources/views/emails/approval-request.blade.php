@@ -57,12 +57,23 @@
                                     @if($date)
                                         <div style="font-size:12px;color:#555;">Date: <strong style="color:#17233c;">{{ $date }}</strong></div>
                                     @endif
-                                    <div style="font-size:12px;color:#b7791f;font-weight:700;margin-top:4px;">PENDING APPROVAL</div>
+                                    <div style="font-size:12px;color:#b7791f;font-weight:700;margin-top:4px;">{{ ($reminder ?? false) ? 'REMINDER — STILL PENDING' : 'PENDING APPROVAL' }}</div>
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
+
+                @if($reminder ?? false)
+                    <tr>
+                        <td style="padding:12px 24px 0;">
+                            <div style="background:#fff8e6;border:1px solid #f0d58c;border-radius:4px;padding:9px 12px;font-size:13px;color:#7a5a00;">
+                                <strong>Reminder:</strong> this request has been waiting for approval since
+                                {{ $approval->created_at?->format('d.m.Y h:i A') }} ({{ $approval->created_at?->diffForHumans(null, true) }}).
+                            </div>
+                        </td>
+                    </tr>
+                @endif
 
                 {{-- Title + description --}}
                 <tr>

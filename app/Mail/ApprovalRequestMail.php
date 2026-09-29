@@ -14,7 +14,7 @@ class ApprovalRequestMail extends Mailable
     use Queueable, SerializesModels;
 
     /** @param array $content see BaseApprovalHandler::mailContent() */
-    public function __construct(public Approval $approval, public array $content = [])
+    public function __construct(public Approval $approval, public array $content = [], public bool $reminder = false)
     {
     }
 
@@ -25,7 +25,7 @@ class ApprovalRequestMail extends Mailable
 
         return new Envelope(
             from: $fromAddress ? new \Illuminate\Mail\Mailables\Address($fromAddress, $fromName) : null,
-            subject: 'Approval Needed: '.$this->approval->title
+            subject: ($this->reminder ? 'Reminder - ' : '').'Approval Needed: '.$this->approval->title
                 .(isset($this->content['total']['value']) && ($this->content['total']['money'] ?? false)
                     ? ' - Tk '.number_format((float) $this->content['total']['value'], 2) : ''),
         );
@@ -39,6 +39,7 @@ class ApprovalRequestMail extends Mailable
                 'approval'      => $this->approval,
                 'content'       => $this->content,
                 'amountInWords' => $this->amountInWords(),
+                'reminder'      => $this->reminder,
             ],
         );
     }

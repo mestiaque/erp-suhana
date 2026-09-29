@@ -216,6 +216,7 @@
                             <td>
                                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
                                     <a href="{{$approval->url}}" class="btn btn-sm btn-secondary" title="Open Page"><i class="bx bx-link-external"></i></a>
+                                    <x-approval-remind :approval="$approval" />
 
                                     @if($approval->isPending())
                                     @can('approvals.approve')

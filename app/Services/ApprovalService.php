@@ -105,12 +105,54 @@ class ApprovalService
         return app($class);
     }
 
-    protected function notify(Approval $approval, ?Model $approvable): void
+    /** Minimum gap between two reminders for the same request. */
+    public const REMIND_INTERVAL_MINUTES = 5;
+
+    /**
+     * Re-sends the approval email for a still-pending request (the bell 🔔
+     * button next to every approvable document and on the Approvals page).
+     * Records how many reminders went out and when in the request's meta.
+     * Returns null on success, otherwise the reason it wasn't sent.
+     */
+    public function remind(Approval $approval, ?User $by = null): ?string
+    {
+        $by ??= Auth::user();
+
+        if (!$approval->isPending()) {
+            return 'This request has already been actioned — no reminder needed.';
+        }
+
+        $meta = $approval->meta ?? [];
+        $lastAt = $meta['reminders']['last_at'] ?? null;
+        if ($lastAt) {
+            $minutes = (int) floor(abs(\Carbon\Carbon::parse($lastAt)->diffInMinutes(now())));
+            if ($minutes < self::REMIND_INTERVAL_MINUTES) {
+                return 'A reminder was already sent '.($minutes ? "{$minutes} minute(s)" : 'less than a minute').' ago — please wait '
+                    .(self::REMIND_INTERVAL_MINUTES - $minutes).' more minute(s).';
+            }
+        }
+
+        if (!$this->notify($approval, $approval->approvable, true)) {
+            return 'Reminder could not be sent — no approver has a valid email, or the mail server failed (see log).';
+        }
+
+        $meta['reminders'] = [
+            'count'   => ($meta['reminders']['count'] ?? 0) + 1,
+            'last_at' => now()->toDateTimeString(),
+            'last_by' => $by?->name,
+        ];
+        $approval->update(['meta' => $meta]);
+
+        return null;
+    }
+
+    /** Emails the module's approvers. Returns whether an email actually went out. */
+    protected function notify(Approval $approval, ?Model $approvable, bool $reminder = false): bool
     {
         $handler = $this->handler($approval->module);
 
         if (!$handler) {
-            return;
+            return false;
         }
 
         $recipients = collect($handler->recipients($approvable, $approval))
@@ -125,15 +167,19 @@ class ApprovalService
         }
 
         if ($recipients->isEmpty()) {
-            return;
+            return false;
         }
 
         $content = method_exists($handler, 'mailContent') ? (array) $handler->mailContent($approvable, $approval) : [];
 
         try {
-            Mail::to($recipients->all())->send(new ApprovalRequestMail($approval, $content));
+            Mail::to($recipients->all())->send(new ApprovalRequestMail($approval, $content, $reminder));
         } catch (\Throwable $e) {
             report($e);
+
+            return false;
         }
+
+        return true;
     }
 }
