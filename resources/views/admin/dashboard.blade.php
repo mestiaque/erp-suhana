@@ -110,6 +110,7 @@
         $commercialPackageExists = class_exists(\ME\Commercial\Http\Controllers\DashboardController::class);
         $productionTracePackageExists = class_exists(\ME\ProductionTrace\Http\Controllers\TrcDashboardController::class);
         $merchandisingTracePackageExists = class_exists(\ME\MerchandisingTrace\Http\Controllers\DashboardController::class);
+        $merchandisingV2PackageExists = class_exists(\ME\MerchandisingSfl\Services\DashboardStats::class);
         $showHrWidget = $hrPackageExists && auth()->user()?->can('hr_dashboard.all');
         $showAccSflWidget = $accSflPackageExists && auth()->user()?->can('ac_dashboard.view');
         $showInventoryWidget = $sflInventoryPackageExists && auth()->user()?->can('inv_dashboard.all');
@@ -118,6 +119,7 @@
         $showCommercialWidget = $commercialPackageExists && auth()->user()?->can('view_dashboard.view');
         $showProductionTraceWidget = $productionTracePackageExists && auth()->user()?->can('trc_reports.view');
         $showMerchandisingTraceWidget = $merchandisingTracePackageExists && auth()->user()?->can('merch_dashboard.view');
+        $showMerchandisingV2Widget = $merchandisingV2PackageExists && auth()->user()?->can('msfl_dashboard.view');
     @endphp
 
     @can('user_dashboard.view')
@@ -147,6 +149,10 @@
     @if($showCommercialWidget)
         @include('commercial::admin.partials.dashboard-widget')
     @endif --}}
+
+    @if($showMerchandisingV2Widget)
+        @include('merchandising-sfl::admin.partials.dashboard-widget')
+    @endif
 
     @if($showMerchandisingTraceWidget)
         @include('merchandising-trace::admin.partials.dashboard-widget')
