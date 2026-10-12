@@ -1513,7 +1513,7 @@ class AdminController extends Controller
                 }
 
             })
-            ->select(['id', 'name', 'permission', 'created_at', 'addedby_id', 'status'])
+            ->select(['id', 'name', 'permission', 'created_at', 'addedby_id', 'status', 'color'])
             ->paginate(25)->appends([
                 'search' => $r->search,
                 'startDate' => $r->startDate,
@@ -1553,6 +1553,7 @@ class AdminController extends Controller
             // Role Update
             $check = $r->validate([
                 'name' => 'required|max:100',
+                'color' => ['nullable', 'regex:/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             ]);
 
             if ($role->id == 1) {
@@ -1561,6 +1562,12 @@ class AdminController extends Controller
             } else {
                 $role->name = $r->name;
                 $role->permission = $r->permission;
+            }
+            // Role color is cosmetic (badge color on the Admin Users list) but
+            // only the Developer role (999) is allowed to set it, so any
+            // color posted by a non-999 user is simply ignored here.
+            if (auth()->user()?->permission?->id === 999) {
+                $role->color = $r->input('color') ?: null;
             }
             $role->status = 'active';
             $role->save();

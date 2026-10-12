@@ -53,6 +53,17 @@
                         <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
                     @endif
                 </div>
+                @if(auth()->user()?->permission?->id === 999)
+                <div class="form-group">
+                    <label>Role Color <small>(badge color on the Admin Users list — Developer only. Hex, with optional alpha for transparency: #RRGGBB or #RRGGBBAA)</small></label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="text" id="roleColorInput" name="color" value="{{ $role->color }}" placeholder="#ff0000bb" maxlength="9"
+                               class="form-control" style="max-width:160px;"
+                               oninput="document.getElementById('roleColorPreview').style.background = this.value;" />
+                        <span id="roleColorPreview" style="display:inline-block; width:38px; height:38px; border-radius:4px; border:1px solid #ced4da; background:{{ $role->color ?: 'transparent' }};"></span>
+                    </div>
+                </div>
+                @endif
                 <button type="submit" class="btn btn-primary btn-md rounded-0" style="position: fixed; z-index: 1; right: 1rem; bottom: 1rem;">Save changes</button>
             </div>
         </div>

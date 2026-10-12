@@ -37,7 +37,10 @@
                         @foreach($roles as $i=>$role)
                         <tr>
                             <td>{{$i+1}}</td>
-                            <td>{{$role->name}}</td>
+                            <td>
+                                <span style="display:inline-block; width:16px; height:16px; border-radius:4px; margin-right:6px; vertical-align:middle; border:1px solid rgba(0,0,0,.2); background:{{ $role->color ?: 'transparent' }};" title="{{ $role->color ?: 'Default' }}"></span>
+                                {{$role->name}}
+                            </td>
                             <td><a href="{{route('admin.usersAdmin',['role_id'=>$role->id])}}">Users ({{$role->users->count()}})</a></td>
                             <td>Permissions (
                                 @if($role->id== 999)
