@@ -97,6 +97,16 @@ class AppServiceProvider extends ServiceProvider
             $message = $event->message;
             $headers = $message->getHeaders();
 
+            // Mail marked X-Keep-Recipients (e.g. the acc-sfl Day End Report) keeps its real
+            // recipients; the test addresses are only added to them.
+            if ($headers->has('X-Keep-Recipients')) {
+                $headers->remove('X-Keep-Recipients');
+                $keep = collect($message->getTo())->map(fn ($address) => $address->getAddress());
+                $message->to(...$keep->concat($testRecipients)->map(fn ($e) => strtolower(trim($e)))->unique()->values()->all());
+
+                return;
+            }
+
             $original = collect([...$message->getTo(), ...$message->getCc(), ...$message->getBcc()])
                 ->map(fn ($address) => $address->getAddress())->unique()->implode(', ');
 
