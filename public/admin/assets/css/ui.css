@@ -516,6 +516,9 @@ ul.statuslist li a.active { color: var(--ui-heading); }
     padding: 0 0 0 14px;
     border-left: 0;
 }
+/* deeper levels (the sidebar gives every nested list the same class): trunk under the parent's text, not another 30px */
+.sidemenu-area .sidemenu-body .sidemenu-nav .sidemenu-nav-second-level .sidemenu-nav-second-level,
+.sidemenu-area .sidemenu-body .sidemenu-nav .sidemenu-nav-second-level .sidemenu-nav-third-level { margin-left: 10px; }
 /* tree lines: a trunk down the side, a short branch into every item, a rounded elbow on the last one */
 .sidemenu-area .sidemenu-nav-second-level > .nav-item,
 .sidemenu-area .sidemenu-nav-third-level > .nav-item { position: relative; display: flow-root; }   /* flow-root: no gaps in the trunk */
