@@ -36,6 +36,19 @@ function random_color($seed = 0) {
   // mestiaque/hr package (src/helpers.php) — single source of truth, loaded
   // automatically via composer 'files' autoload. Do not redefine them here.
 
+if (! function_exists('report_logo_url')) {
+    /** URL of the logo every report / print header shows (General Setting → Report Logo, else the main logo); null if none. */
+    function report_logo_url(): ?string
+    {
+        static $url = false;
+        if ($url === false) {
+            $url = optional(general())->reportLogoUrl();
+        }
+
+        return $url;
+    }
+}
+
 function websiteTitle($title=null){
 
   $hasTitle =$title?' - ':'';

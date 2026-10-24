@@ -29,6 +29,7 @@ class General extends Model
      * subtitle         =varchar(200):null,
      * website          =varchar(100):null,
      * logo             =varchar(100):null,
+     * report_logo      =varchar(255):null, (logo used on every report / print header)
      * favicon          =varchar(100):null,
      * mobile           =varchar(100):null,
      * email            =varchar(100):null,
@@ -213,6 +214,25 @@ class General extends Model
     public function faviconUrl(): string
     {
         return $this->brandingUrl('favicon', 'medies/no-favicon.png');
+    }
+
+    /**
+     * Logo for report and print headers: the Report Logo from General Setting, else the main
+     * logo. Null when neither is uploaded, so a print shows no image instead of a broken one.
+     */
+    public function reportLogoUrl(): ?string
+    {
+        foreach (['report_logo', 'logo'] as $field) {
+            $file = $this->brandFile($field)->first();
+            if ($file) {
+                return $file->file_url;
+            }
+            if ($this->{$field}) {
+                return asset($this->{$field});
+            }
+        }
+
+        return null;
     }
 
     public function signatureUrl(): string

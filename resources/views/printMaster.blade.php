@@ -142,8 +142,8 @@
         <!-- Header -->
         <div class="print-header">
             <div class="company-info">
-                @if(general() && general()->logo())
-                <img src="{{ asset(general()->logo()) }}" alt="Logo" class="company-logo">
+                @if(report_logo_url())
+                <img src="{{ report_logo_url() }}" alt="Logo" class="company-logo">
                 @endif
                 <div class="company-name">{{ general()->title ?? 'Company Name' }}</div>
                 <div class="text-right" style="text-align: end; width: 42mm;">

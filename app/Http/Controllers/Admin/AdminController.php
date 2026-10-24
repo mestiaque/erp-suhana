@@ -1680,7 +1680,7 @@ class AdminController extends Controller
             return view(adminTheme().'setting.document', compact('general', 'type'));
         } elseif ($type == 'support') {
             return view(adminTheme().'setting.support', compact('general', 'type'));
-        } elseif (in_array($type, ['logo', 'favicon', 'signature'])) {
+        } elseif (in_array($type, ['logo', 'report_logo', 'favicon', 'signature'])) {
             $this->deleteBrandField($general, $type);
             $general->{$type} = null;
             $general->save();
@@ -1731,6 +1731,7 @@ class AdminController extends Controller
                 'meta_title' => 'nullable|max:200',
                 'meta_description' => 'nullable|max:200',
                 'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'report_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
                 'favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
@@ -1760,7 +1761,7 @@ class AdminController extends Controller
 
             // /////Image UploadStart////////////
 
-            foreach (['logo', 'favicon', 'signature'] as $brandField) {
+            foreach (['logo', 'report_logo', 'favicon', 'signature'] as $brandField) {
                 if (! $r->hasFile($brandField)) {
                     continue;
                 }

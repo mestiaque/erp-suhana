@@ -125,6 +125,25 @@
                     <a href="{{route('admin.setting','logo')}}" style="color: red;" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
                     @endif
                 </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                    <label for="report_logo">Report Logo</label>
+                    <div class="custom-file">
+                         <input type="file" name="report_logo" class="custom-file-input {{$errors->has('report_logo')?'error':''}}">
+                         <label class="custom-file-label">Choose file... </label>
+                    </div>
+                    <small class="text-muted d-block">Shown on every report and print. Leave empty to use the main logo.</small>
+                    @if ($errors->has('report_logo'))
+                    <p class="text-danger small mb-0">{{ $errors->first('report_logo') }}</p>
+                    @endif
+                </div>
+                <div class="form-group col-xl-6 col-lg-6 col-md-12">
+                    @if($general->reportLogoUrl())
+                    <img src="{{$general->reportLogoUrl()}}" style="max-width: 150px;" />
+                    @endif
+                    @if($general->report_logo)
+                    <a href="{{route('admin.setting','report_logo')}}" style="color: red;" onclick="return confirm('Are You Want To Delete?')"><i class="bx bx-trash"></i></a>
+                    @endif
+                </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 form-group">
                     <label for="helpInputTop">Finance Currency</label>
                         <div class="input-group">
