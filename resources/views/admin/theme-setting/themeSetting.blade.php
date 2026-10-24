@@ -38,7 +38,7 @@
     </div>
     <div class="content-header-right col-md-6 col-12 mb-md-0 mb-2">
         <div class="btn-group float-md-right" role="group" aria-label="Button group with nested dropdown">
-            <a class="btn btn-outline-primary" href="{{route('admin.themeSetting')}}">
+            <a class="btn btn-outline-primary btn-icon" href="{{route('admin.themeSetting')}}">
                 <i class="fa-solid fa-rotate"></i>
             </a>
         </div>

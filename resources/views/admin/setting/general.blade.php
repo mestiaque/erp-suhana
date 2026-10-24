@@ -39,42 +39,42 @@
                     <label for="title">Website Title </label>
                     <input type="text" name="title" value="{{ $general->title }}" placeholder="Website Title" class="form-control {{$errors->has('title')?'error':''}}" />
                     @if ($errors->has('title'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('title') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('title') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="subtitle">Website Subtitle</label>
                     <input type="text" name="subtitle" value="{{ $general->subtitle }}" placeholder="Website subtitle" class="form-control {{$errors->has('subtitle')?'error':''}}" />
                     @if ($errors->has('subtitle'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('subtitle') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('subtitle') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="mobile">Mobile Number</label>
                     <input type="text" name="mobile" value="{{ $general->mobile }}" placeholder="Website mobile" class="form-control {{$errors->has('mobile')?'error':''}}" />
                     @if ($errors->has('mobile'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mobile') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="mobile2">Mobile Number 2</label>
                     <input type="text" name="mobile2" value="{{ $general->mobile2 }}" placeholder="Website mobile 2" class="form-control {{$errors->has('mobile2')?'error':''}}" />
                     @if ($errors->has('mobile2'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile2') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mobile2') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="email">Email Address</label>
                     <input type="text" name="email" value="{{ $general->email }}" placeholder="Website email" class="form-control {{$errors->has('email')?'error':''}}" />
                     @if ($errors->has('email'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('email') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="email2">Email Address 2</label>
                     <input type="text" name="email2" value="{{ $general->email2 }}" placeholder="Website email 2" class="form-control {{$errors->has('email2')?'error':''}}" />
                     @if ($errors->has('email2'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email2') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('email2') }}</p>
                     @endif
                 </div>
 
@@ -82,7 +82,7 @@
                     <label for="address_one">Address line 1</label>
                     <textarea name="address_one" placeholder="Address Line 1" rows="5" class="form-control  {{$errors->has('address_one')?'error':''}}">{{ $general->address_one}}</textarea>
                     @if ($errors->has('address_one'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('address_one') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('address_one') }}</p>
                     @endif
                 </div>
 
@@ -90,7 +90,7 @@
                     <label for="address_two">Address line 2</label>
                     <textarea name="address_two" placeholder="Address Line 1" rows="5" class="form-control {{$errors->has('address_two')?'error':''}}">{{ $general->address_two}}</textarea>
                     @if ($errors->has('address_two'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('address_two') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('address_two') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -100,7 +100,7 @@
                          <label class="custom-file-label">Choose file... </label>
                     </div>
                     @if ($errors->has('favicon'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('favicon') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('favicon') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -116,7 +116,7 @@
                          <label class="custom-file-label">Choose file... </label>
                     </div>
                     @if ($errors->has('logo'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('logo') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('logo') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -140,14 +140,14 @@
                          </select>
                         </div>
                         @if ($errors->has('currency'))
-    				    	<p style="color: red;margin: 0;font-size: 10px;">{{ $errors->first('currency') }}</p>
+    				    	<p class="text-danger small mb-0">{{ $errors->first('currency') }}</p>
     				    @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="website">Website Url</label>
                     <input type="text" name="website" value="{{ $general->website }}" placeholder="Website website" class="form-control {{$errors->has('website')?'error':''}}" />
                     @if ($errors->has('website'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('website') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('website') }}</p>
                     @endif
                 </div>
 
@@ -162,7 +162,7 @@
                          <label class="custom-file-label">Choose file... </label>
                     </div>
                     @if ($errors->has('signature'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('signature') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('signature') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">

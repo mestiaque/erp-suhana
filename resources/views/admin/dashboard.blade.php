@@ -5,7 +5,7 @@
 
 
 @section('contents')
-<div class="flex-grow-1 p-4">
+<div class="flex-grow-1 ">
 
     <div class="row mb-4">
         <div class="col-12">

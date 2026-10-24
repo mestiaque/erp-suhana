@@ -16,14 +16,8 @@
          <div class="dropdown">
 
             @can('merchandisers.add')
-             <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddMerchandisers">
-                 <i class="bx bx-plus"></i> Add Merchandisers
-             </a>
+             <a href="javascript:void(0)" class="btn btn-primary btn-sm btn-icon" data-toggle="modal" data-target="#AddMerchandisers" title="Add Merchandisers"><i class="bx bx-plus"></i></a>
              @endcan
-
-             <a href="{{route('admin.merchandisers')}}" class="btn-custom yellow">
-                 <i class="bx bx-rotate-left"></i>
-             </a>
 
          </div>
     </div>
@@ -31,36 +25,33 @@
     <div class="card-body">
 
         {{-- Search Filter --}}
-        <form action="{{route('admin.merchandisers')}}">
-           <div class="row">
-
-               <div class="col-md-5 mb-1">
-                   <div class="input-group">
-                       <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control">
-                       <input type="date" name="endDate" value="{{request()->endDate?:''}}" class="form-control">
-                   </div>
-               </div>
-
-               <div class="col-md-2 mb-1">
-                   <select class="form-control" name="role_id">
-                       <option value="">Select Role</option>
-                       @foreach($roles as $role)
-                       <option value="{{$role->id}}" {{request()->role_id==$role->id?'selected':''}}>{{$role->name}}</option>
-                       @endforeach
-                   </select>
-               </div>
-
-               <div class="col-md-5 mb-1">
-                   <div class="input-group">
-                       <input type="text" name="search" value="{{request()->search?:''}}" placeholder="Name, Email, Mobile" class="form-control">
-                       <button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
-                   </div>
-               </div>
-
-           </div>
-       </form>
-
-        <br>
+        <form action="{{route('admin.merchandisers')}}" method="GET" class="row mb-3 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input type="date" name="startDate" value="{{request()->startDate?:''}}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input type="date" name="endDate" value="{{request()->endDate?:''}}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Role</label>
+                <select class="form-control form-control-sm" name="role_id">
+                    <option value="">All Roles</option>
+                    @foreach($roles as $role)
+                    <option value="{{$role->id}}" {{request()->role_id == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" value="{{request()->search?:''}}" placeholder="Name, Email, Mobile" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
+                <a href="{{route('admin.merchandisers')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
+            </div>
+        </form>
 
         {{-- Bulk Action --}}
         <form action="{{route('admin.merchandisers')}}">
@@ -226,7 +217,7 @@
                         <div class="controls">
                             <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" required="">
                             @if ($errors->has('name'))
-                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                            <p class="text-danger small mb-0">{{ $errors->first('name') }}</p>
                             @endif
                             </div>
                         </div>
@@ -236,7 +227,7 @@
                                 {{-- <input type="mobile" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" maxlength="11" oninput="this.value = this.value.slice(0, 11);" placeholder="Enter Mobile" required> --}}
                                     <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" required>
                                 @if ($errors->has('mobile'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
+                                <p class="text-danger small mb-0">{{ $errors->first('mobile') }}</p>
                                 @endif
                             </div>
                         </div>
@@ -245,7 +236,7 @@
                             <div class="controls">
                                 <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email">
                                 @if ($errors->has('email'))
-                                <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
+                                <p class="text-danger small mb-0">{{ $errors->first('email') }}</p>
                                 @endif
                             </div>
                         </div>

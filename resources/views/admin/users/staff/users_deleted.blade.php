@@ -37,7 +37,7 @@
                             <div class="col-md-5 mb-1">
                                 <div class="input-group">
                                     <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0 mr-1">Search</button>
+                                    <button type="submit" class="btn btn-success btn-sm rounded-0 mr-1 btn-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
                                     <a href="{{route('admin.staffAdmin', ['view' => 'deleted'])}}" class="btn-custom yellow" style="height: auto;">
                                         <i class="bx bx-rotate-left"></i>
                                     </a>

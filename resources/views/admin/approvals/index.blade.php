@@ -23,7 +23,7 @@
         border-bottom: 1px solid #e8edf5;
     }
 
-    .history-card-header h2 { margin: 0; font-size: 17px; font-weight: 700; }
+    .history-card-header h2 { margin: 0; font-size: 16px; font-weight: 600; }
     .history-card-header p { margin: 4px 0 0; color: #6b778c; font-size: 12px; }
 
     .summary-pill {
@@ -39,24 +39,6 @@
     }
 
     .history-filter { padding: 12px 16px 0; }
-
-    .history-filter .form-group label {
-        color: #667085;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-
-    .history-filter .form-control {
-        min-height: 34px;
-        border: 1px solid #dce4ef;
-        border-radius: 6px;
-        color: #17233c;
-        font-size: 13px;
-        box-shadow: none;
-        padding: 6px 10px;
-    }
 
     .history-actions { display: flex; gap: 6px; align-items: center; padding-top: 22px; }
 
@@ -79,7 +61,7 @@
     .history-btn.secondary { color: #17233c; background: #eef1f5; }
 
     .history-table-wrap { padding: 0 16px 14px; }
-    .history-table { margin-bottom: 0; font-size: 11px !important; }
+    .history-table { margin-bottom: 0; }
 
     .history-table thead th {
         border: 0;
@@ -139,11 +121,11 @@
 
         <form method="get" action="{{route('admin.approvals.index')}}" class="history-filter">
             <div class="row">
-                <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="search">Search Title</label>
                     <input type="text" id="search" name="search" class="form-control" value="{{request('search')}}" placeholder="Approval title">
                 </div>
-                <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="status">Status</label>
                     <select id="status" name="status" class="form-control">
                         <option value="">All (pending first)</option>
@@ -153,7 +135,7 @@
                         <option value="cancelled" {{request('status')=='cancelled'?'selected':''}}>Cancelled</option>
                     </select>
                 </div>
-                <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="module">Module</label>
                     <select id="module" name="module" class="form-control">
                         <option value="">All</option>
@@ -162,10 +144,10 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <div class="history-actions">
-                        <button type="submit" class="history-btn"><i class="bx bx-search"></i> Filter</button>
-                        <a href="{{route('admin.approvals.index')}}" class="history-btn secondary"><i class="bx bx-reset"></i> Reset</a>
+                        <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
+                        <a href="{{route('admin.approvals.index')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
                     </div>
                 </div>
             </div>
@@ -215,19 +197,19 @@
                             </td>
                             <td>
                                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                                    <a href="{{$approval->url}}" class="btn btn-sm btn-secondary" title="Open Page"><i class="bx bx-link-external"></i></a>
+                                    <a href="{{$approval->url}}" class="btn btn-sm btn-secondary btn-icon" title="Open Page"><i class="bx bx-link-external"></i></a>
                                     <x-approval-remind :approval="$approval" />
 
                                     @if($approval->isPending())
                                     @can('approvals.approve')
                                     <form method="post" action="{{route('admin.approvals.approve', $approval->id)}}" onsubmit="return confirm('Approve this request?');">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bx bx-check"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-success btn-icon" title="Approve"><i class="bx bx-check"></i></button>
                                     </form>
                                     @endcan
 
                                     @can('approvals.reject')
-                                    <button type="button" class="btn btn-sm btn-danger" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectModal{{$approval->id}}"><i class="bx bx-x"></i></button>
+                                    <button type="button" class="btn btn-sm btn-danger btn-icon" title="Reject" data-toggle="modal" data-target="#rejectModal{{$approval->id}}"><i class="bx bx-x"></i></button>
 
                                     <div class="modal fade" id="rejectModal{{$approval->id}}" tabindex="-1">
                                         <div class="modal-dialog">
@@ -236,14 +218,14 @@
                                                     @csrf
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">Reject: {{$approval->title}}</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        <button type="button" class="btn-close" data-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <label class="mb-1">Reason</label>
                                                         <textarea name="remarks" class="form-control" rows="3" required></textarea>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                                         <button type="submit" class="btn btn-danger">Reject</button>
                                                     </div>
                                                 </form>

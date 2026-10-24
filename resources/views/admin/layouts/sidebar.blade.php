@@ -1,8 +1,14 @@
 <div class="sidemenu-area">
     <div class="sidemenu-header">
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand d-flex align-items-center">
-            <!-- Site logo -->
-            <img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height: 50px;" />
+            <!-- Site logo; without an uploaded logo file: brand icon + the first word of the site title -->
+            @php $logoPath = general()->logo(); @endphp
+            @if($logoPath && is_file(public_path($logoPath)))
+                <img src="{{ asset($logoPath) }}" alt="{{ general()->title }}" style="max-height: 40px;" />
+            @else
+                <span class="ui-brand-mark"><i class="fa-solid fa-shirt"></i></span>
+                <span class="ui-brand-text" title="{{ general()->title }}">{{ \Illuminate\Support\Str::before(trim(general()->title ?: 'ERP'), ' ') ?: 'ERP' }}</span>
+            @endif
         </a>
         <div class="burger-menu d-none d-lg-block">
             <span class="top-bar"></span>
@@ -48,11 +54,10 @@
                             $show = !empty($permission) ? hasChildPermission($permission) : true;
                         }
 
-                    // Active route check
+                    // Active route check: only the most specific matching menu route is active, so
+                    // "HR Dashboard" (/admin/hr-center) does not light up on /admin/hr-center/employees.
                     $route = $menu['route'] ?? '';
-                    $pattern = trim($route, '/');
-                    $prefix = $pattern . '/*';
-                    $selfActive = !empty($route) && (request()->is($pattern) || request()->is($prefix));
+                    $selfActive = !empty($route) && trim($route, '/') === ($GLOBALS['sidebarActiveRoute'] ?? null);
                     if ($selfActive) $isActive = true;
 
                     // Only show HTML if show = true
@@ -90,6 +95,18 @@
             {{-- Sidebar configuration loading and sorting --}}
             @php
                 $sidebarGroups = config('sidebar', []);
+
+                // The longest menu route that the current URL is, or sits under — read by renderMenu().
+                $sidebarRoutes = [];
+                array_walk_recursive($sidebarGroups, function ($value, $key) use (&$sidebarRoutes) {
+                    if ($key === 'route' && is_string($value) && trim($value, '/') !== '' && !preg_match('#^https?://#i', $value)) {
+                        $sidebarRoutes[] = trim($value, '/');
+                    }
+                });
+                $GLOBALS['sidebarActiveRoute'] = collect($sidebarRoutes)
+                    ->filter(fn ($r) => request()->is($r) || request()->is($r . '/*'))
+                    ->sortByDesc(fn ($r) => strlen($r))
+                    ->first();
                 usort($sidebarGroups, function ($a, $b) {
                     $minA = PHP_INT_MAX;
                     $minB = PHP_INT_MAX;
@@ -136,27 +153,6 @@
     </div>
 </div>
 
-<style>
-    /* Sidebar CSS: color for child/active/normal state */
-    .sidemenu-area .sidemenu-body .sidemenu-nav
-        .nav-item .sidemenu-nav-second-level .nav-item .nav-link {
-        color: #7e7e7e !important;
-        background-color: transparent !important;
-    }
-    .sidemenu-area .sidemenu-body .sidemenu-nav
-        .nav-item .sidemenu-nav-second-level .nav-item .nav-link svg {
-        color: #7e7e7e !important;
-        background-color: transparent !important;
-    }
-    .sidemenu-area .sidemenu-body .sidemenu-nav
-        .nav-item .sidemenu-nav-second-level .nav-item.mm-active > .nav-link {
-        color: #e1000a !important;
-    }
-    .sidemenu-area .sidemenu-body .sidemenu-nav
-        .nav-item .sidemenu-nav-second-level .nav-item.mm-active > .nav-link svg {
-        color: #e1000a !important;
-    }
-</style>
 
 <script>
     (function () {

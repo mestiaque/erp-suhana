@@ -35,14 +35,14 @@
                     <label for="mail_from_address">Mail Form Address </label>
                     <input type="text" name="mail_from_address" value="{{ $general->mail_from_address }}" placeholder="Mail From Address" class="form-control  {{$errors->has('mail_from_address')?'error':''}}" />
                     @if ($errors->has('mail_from_address'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_from_address') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_from_address') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="mail_from_name">Mail Form Name</label>
                     <input type="text" name="mail_from_name" value="{{ $general->mail_from_name }}" placeholder="Mail From Name" class="form-control  {{$errors->has('mail_from_name')?'error':''}}" />
                     @if ($errors->has('mail_from_name'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_from_name') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_from_name') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -54,21 +54,21 @@
                         <option value="mail" {{$general->mail_driver=='mail'?'selected':''}}>Mail</option>
                     </select>
                     @if ($errors->has('mail_driver'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_driver') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_driver') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="mail_host">Mail Host</label>
                     <input type="text" name="mail_host" value="{{ $general->mail_host }}" placeholder="Mail Host" class="form-control  {{$errors->has('mail_host')?'error':''}}" />
                     @if ($errors->has('mail_host'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_host') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_host') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="mail_port">Mail Port</label>
                     <input type="text" name="mail_port" value="{{ $general->mail_port }}" placeholder="Mail Port" class="form-control  {{$errors->has('mail_port')?'error':''}}" />
                     @if ($errors->has('mail_port'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_port') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_port') }}</p>
                     @endif
                 </div>
     
@@ -80,14 +80,14 @@
                         <option value="" {{$general->mail_encryption==null?'selected':''}}>Null</option>
                     </select>
                     @if ($errors->has('mail_encryption'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_encryption') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_encryption') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="mail_username">Mail Username</label>
                     <input type="text" name="mail_username" value="{{ $general->mail_username }}" placeholder="Mail Username  " class="form-control  {{$errors->has('mail_username')?'error':''}}" />
                     @if ($errors->has('mail_username'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_username') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_username') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -99,7 +99,7 @@
                         </div>
                     </div>
                     @if ($errors->has('mail_password'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mail_password') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('mail_password') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -127,14 +127,14 @@
                     <label for="test_mail_to">Send To (email address)</label>
                     <input type="email" name="test_mail_to" value="{{ old('test_mail_to', Auth::user()->email) }}" placeholder="recipient@example.com" class="form-control {{$errors->has('test_mail_to')?'error':''}}" />
                     @if ($errors->has('test_mail_to'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('test_mail_to') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('test_mail_to') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="test_mail_message">Message</label>
                     <textarea name="test_mail_message" rows="1" placeholder="This is a test mail." class="form-control {{$errors->has('test_mail_message')?'error':''}}">{{ old('test_mail_message') }}</textarea>
                     @if ($errors->has('test_mail_message'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('test_mail_message') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('test_mail_message') }}</p>
                     @endif
                 </div>
             </div>

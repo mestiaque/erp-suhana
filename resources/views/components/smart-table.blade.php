@@ -92,7 +92,7 @@
             {{-- Modal Header --}}
             {{-- <div class="modal-header bg-primary text-white py-2 px-3">
                 <h5 class="modal-title mb-0">Actions</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
             </div> --}}
 
             {{-- Modal Body --}}

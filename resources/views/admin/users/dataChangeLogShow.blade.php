@@ -19,7 +19,7 @@
         border-bottom: 1px solid #e8edf5;
     }
 
-    .history-card-header h2 { margin: 0; font-size: 17px; font-weight: 700; }
+    .history-card-header h2 { margin: 0; font-size: 16px; font-weight: 600; }
 
     .meta-grid {
         display: grid;
@@ -111,9 +111,7 @@
     <div class="history-card mb-30">
         <div class="history-card-header d-flex justify-content-between align-items-center">
             <h2>{{friendlyModelName($log->loggable_type)}} — {{ucfirst($log->event)}} (#{{$log->loggable_id}})</h2>
-            <a href="{{route('admin.dataChangeLog')}}" class="history-btn secondary" style="display:inline-flex;padding:7px 12px;border-radius:5px;background:#eef1f5;color:#17233c;font-size:13px;font-weight:700;">
-                <i class="bx bx-arrow-back"></i> Back
-            </a>
+            <a href="{{route('admin.dataChangeLog')}}" class="btn btn-light btn-sm btn-icon" title="Back"><i class="fa-solid fa-arrow-left"></i></a>
         </div>
 
         <div class="meta-grid">

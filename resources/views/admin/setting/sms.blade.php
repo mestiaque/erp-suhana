@@ -35,35 +35,35 @@
                         <option value="mailgun" {{$general->sms_type=='Masking'?'selected':''}}>Masking</option>
                     </select>
                     @if ($errors->has('sms_type'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('sms_type') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('sms_type') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="sms_senderid">SMS Sender ID</label>
                     <input type="text" name="sms_senderid" value="{{ $general->sms_senderid }}" placeholder="SMS Sender ID" class="form-control {{$errors->has('sms_senderid')?'error':''}}" />
                     @if ($errors->has('sms_senderid'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('sms_senderid') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('sms_senderid') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="sms_url_nonmasking">SMS Url Non-Masking</label>
                     <input type="text" name="sms_url_nonmasking" value="{{ $general->sms_url_nonmasking }}" placeholder="SMS Url Non-Masking" class="form-control {{$errors->has('sms_url_nonmasking')?'error':''}}" />
                     @if ($errors->has('sms_url_nonmasking'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('sms_url_nonmasking') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('sms_url_nonmasking') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="sms_url_masking">SMS Url Masking</label>
                     <input type="text" name="sms_url_masking" value="{{ $general->sms_url_masking }}" placeholder="SMS Url Masking" class="form-control {{$errors->has('sms_url_masking')?'error':''}}" />
                     @if ($errors->has('sms_url_masking'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('sms_url_masking') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('sms_url_masking') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                     <label for="sms_username">SMS Username</label>
                     <input type="text" name="sms_username" value="{{ $general->sms_username }}" placeholder="SMS Username  " class="form-control {{$errors->has('sms_username')?'error':''}}" />
                     @if ($errors->has('sms_username'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('sms_username') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('sms_username') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     @if ($errors->has('sms_password'))
-                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('sms_password') }}</p>
+                    <p class="text-danger small mb-0">{{ $errors->first('sms_password') }}</p>
                     @endif
                 </div>
                 <div class="form-group col-xl-6 col-lg-6 col-md-12">

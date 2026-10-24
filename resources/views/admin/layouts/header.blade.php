@@ -1,45 +1,48 @@
 <!-- Top Navbar Area -->
-<nav class="navbar top-navbar navbar-expand">
-    <div class="collapse navbar-collapse" id="navbarSupportContent">
-        <div class="responsive-burger-menu d-block d-lg-none">
-            <span class="top-bar"></span>
-            <span class="middle-bar"></span>
-            <span class="bottom-bar"></span>
-        </div>
+@php
+    $userInitials = collect(preg_split('/\s+/', trim(Auth::user()->name ?? '')))->filter()->take(2)
+        ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: 'U';
+@endphp
+<nav class="navbar top-navbar navbar-expand ui-topbar">
+    <div class="responsive-burger-menu d-block d-lg-none">
+        <span class="top-bar"></span>
+        <span class="middle-bar"></span>
+        <span class="bottom-bar"></span>
+    </div>
 
-        <ul class="navbar-nav left-nav align-items-center">
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Employee">
-                    <i class="bx bx-group"></i>
-                </a>
-            </li>
-        </ul>
+    <form class="nav-search-form d-none d-md-block ml-auto" autocomplete="off" onsubmit="return false;">
+        <label for="menuSearchInput"><i class="fa-solid fa-magnifying-glass"></i></label>
+        <input type="text" id="menuSearchInput" class="form-control" placeholder="Search menu…" />
+        <div id="menuSearchResults" class="menu-search-results" style="display:none;"></div>
+    </form>
 
-        <form class="nav-search-form d-none ml-auto d-md-block" autocomplete="off" onsubmit="return false;">
-            <label style="color: green"><i class="bx bx-search"></i></label>
-            <input type="text" id="menuSearchInput" class="form-control" placeholder="Search here..." />
-            <div id="menuSearchResults" class="menu-search-results" style="display:none;"></div>
-        </form>
+    <ul class="navbar-nav right-nav align-items-center">
+        <li class="nav-item">
+            <a class="nav-link ui-topbar-icon bx-fullscreen-btn" id="fullscreen-button" title="Full screen">
+                <i class="bx bx-fullscreen"></i>
+            </a>
+        </li>
+        <li class="nav-item dropdown profile-nav-item">
+            <a href="#" class="nav-link dropdown-toggle ui-profile-chip" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="ui-avatar">
+                    <span>{{ $userInitials }}</span>
+                    <img src="{{asset(Auth::user()->image())}}" alt="" onerror="this.remove()" />
+                </span>
+                <span class="ui-profile-text d-none d-sm-flex">
+                    <span class="ui-profile-name">{{ Auth::user()->name }}</span>
+                    @if(Auth::user()->permission?->name)
+                        <span class="ui-profile-role">{{ Auth::user()->permission->name }}</span>
+                    @endif
+                </span>
+                <i class="fa-solid fa-chevron-down ui-profile-caret"></i>
+            </a>
 
-        <ul class="navbar-nav right-nav align-items-center">
-            <li class="nav-item">
-                <a class="nav-link bx-fullscreen-btn" id="fullscreen-button">
-                    <i class="bx bx-fullscreen"></i>
-                </a>
-            </li>
-            <li class="nav-item dropdown profile-nav-item">
-                <a href="#" class="nav-link dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <div class="menu-profile">
-                        <span class="name">{{ Auth::user()->name }}</span>
-                        <img src="{{asset(Auth::user()->image())}}" class="rounded-circle" alt="Admin" />
-                    </div>
-                </a>
-
-                <div class="dropdown-menu">
+            <div class="dropdown-menu dropdown-menu-right">
                     <div class="dropdown-header d-flex flex-column align-items-center">
-                        <div class="figure mb-3">
-                            <img src="{{asset(Auth::user()->image())}}" class="rounded-circle" alt="image" />
-                        </div>
+                        <span class="ui-avatar ui-avatar-lg mb-2">
+                            <span>{{ $userInitials }}</span>
+                            <img src="{{asset(Auth::user()->image())}}" alt="" onerror="this.remove()" />
+                        </span>
 
                         <div class="info text-center">
                             <span class="name">{{ Auth::user()->name }}</span>
@@ -75,7 +78,7 @@
                                 <a href="{{ route('admin.myProfile') }}" class="nav-link"> <i class="bx bx-user"></i> <span>Profile </span></a>
                             </li>
                             <li class="nav-item">
-                                <a href="" class="nav-link"> <i class="bx bx-bell"></i> <span>Reminder List <span style="background: #f80e5d;color: white;padding: 2px 10px;border-radius: 5px;margin-left: 5px;">0</span></span></a>
+                                <a href="" class="nav-link"> <i class="bx bx-bell"></i> <span>Reminder List</span></a>
                             </li>
                         </ul>
                     </div>
@@ -91,9 +94,8 @@
                         </ul>
                     </div>
                 </div>
-            </li>
-        </ul>
-    </div>
+        </li>
+    </ul>
 </nav>
 <!-- End Top Navbar Area -->
 

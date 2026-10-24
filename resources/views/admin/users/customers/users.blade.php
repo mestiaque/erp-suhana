@@ -15,36 +15,30 @@
         <h3 class="mb-0">User List</h3>
         <div>
             @can('employee.add')
-            <a href="javascript:void(0)" class="btn-custom primary" data-toggle="modal" data-target="#AddUser">
-                <i class="bx bx-plus"></i> User
-            </a>
+            <a href="javascript:void(0)" class="btn btn-primary btn-sm btn-icon" data-toggle="modal" data-target="#AddUser" title="Add User"><i class="fa-solid fa-plus"></i></a>
             @endcan
-            <a href="{{route('admin.usersCustomer')}}" class="btn-custom yellow ml-1">
-                <i class="bx bx-rotate-left"></i>
-            </a>
         </div>
     </div>
     <div class="card-body">
 
-        {{-- Search / Filter --}}
-        <form action="{{route('admin.usersCustomer')}}" class="mb-3">
-            <div class="row align-items-end">
-                <div class="col-md-3">
-                    <label class="mb-0 small">Role</label>
-                    <select class="form-control form-control-sm" name="role_id">
-                        <option value="">All Roles</option>
-                        @foreach($roles as $role)
-                        <option value="{{$role->id}}" {{request()->role_id == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <label class="mb-0 small">Search</label>
-                    <div class="d-flex">
-                        <input type="text" name="search" value="{{request()->search}}" placeholder="Name, Email, Phone, Employee ID" class="form-control form-control-sm">
-                        <button type="submit" class="btn btn-success btn-sm rounded-0 ml-1">Search</button>
-                    </div>
-                </div>
+        {{-- Search Filter --}}
+        <form action="{{route('admin.usersCustomer')}}" method="GET" class="row mb-3 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">Role</label>
+                <select class="form-control form-control-sm" name="role_id">
+                    <option value="">All Roles</option>
+                    @foreach($roles as $role)
+                    <option value="{{$role->id}}" {{request()->role_id == $role->id ? 'selected' : ''}}>{{$role->name}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" value="{{request()->search?:''}}" placeholder="Name, Email, Phone, Employee ID" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
+                <a href="{{route('admin.usersCustomer')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
             </div>
         </form>
 
@@ -149,7 +143,7 @@
                                     @endcan
                                     @endif
                                     @can('employee.role')
-                                    <a href="javascript:void(0)" class="btn-custom info ml-1 open-role-modal"
+                                    <a href="javascript:void(0)" class="btn-custom info ml-1 open-role-modal primary"
                                        data-toggle="modal" data-target="#AssignRoleModal"
                                        data-user-id="{{$user->id}}"
                                        data-user-name="{{$user->name}}"

@@ -81,7 +81,7 @@
             <div class="card mb-30">
                 <div class="card-header d-flex justify-content-between align-items-center">
                      <h3>Salary Detials</h3>
-                     <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}"  class="btn-custom yellow"><i class="bx bx-edit"></i> Back</a>
+                     <a href="{{route('admin.usersCustomerAction',['view',$user->id])}}"  class="btn-custom yellow btn-icon" title="Back"><i class="bx bx-edit"></i></a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">

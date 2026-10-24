@@ -26,7 +26,7 @@
    </div>
    <div class="content-header-right col-md-6 col-12 mb-md-0 mb-2">
      <div class="btn-group float-md-right" role="group" aria-label="Button group with nested dropdown">
-       	<a class="btn btn-outline-primary" href="{{route('admin.subscribes')}}">
+       	<a class="btn btn-outline-primary btn-icon" href="{{route('admin.subscribes')}}">
        		<i class="fa-solid fa-rotate"></i>
        	</a>
      </div>
@@ -61,7 +61,7 @@
 											<div class="col-md-6 mb-1">
 												<div class="input-group">
 													<input type="text" name="search" value="{{request()->search?:''}}" placeholder="Subscriber Email" class="form-control {{$errors->has('search')?'error':''}}">
-													<button type="submit" class="btn btn-success btn-sm rounded-0">Search</button>
+													<button type="submit" class="btn btn-success btn-sm rounded-0 btn-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
 												</div>
 											</div>
 										</div>

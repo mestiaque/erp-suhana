@@ -55,7 +55,7 @@
                                         @endif
                                     </div>
                                     @if ($errors->has('image'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('image') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('image') }}</p>
                                     @endif
                                     <p class="text-muted"><small>Allowed JPG, GIF or PNG. Max size of 2048kB</small></p>
                                 </div>
@@ -66,14 +66,14 @@
                                     <label for="name">Name* </label>
                                     <input type="text" class="form-control {{$errors->has('name')?'error':''}}" name="name" placeholder="Enter Name" value="{{$user->name?:old('name')}}" required="" />
                                     @if ($errors->has('name'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('name') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
                                     <label for="email">Email* </label>
                                     <input type="email" class="form-control {{$errors->has('email')?'error':''}}" name="email" placeholder="Enter Email" value="{{$user->email?:old('email')}}" required="" />
                                     @if ($errors->has('email'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('email') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('email') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -82,7 +82,7 @@
                                     <input type="tel" class="form-control {{$errors->has('mobile')?'error':''}}" name="mobile" minlength="11" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" oninput="this.value = this.value.slice(0, 11);" placeholder="Please enter exactly 11 digits with start 0" value="{{$user->mobile?:old('mobile')}}" required>
 
                                     @if ($errors->has('mobile'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('mobile') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('mobile') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-12">
@@ -93,7 +93,7 @@
                                         <option value="Female" {{$user->gender=='Female'?'selected':''}}>Female</option>
                                     </select>
                                     @if ($errors->has('gender'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('gender') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('gender') }}</p>
                                     @endif
                                 </div>
 
@@ -159,7 +159,7 @@
                                         @endforeach
                                     </select>
                                     @if ($errors->has('role'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('role') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('role') }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -186,21 +186,21 @@
                                         </div>
                                     </div>
                                     @if ($errors->has('old_password'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('old_password') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('old_password') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-12 col-lg-12 col-md-12">
                                     <label for="password">New Password </label>
                                     <input type="password" class="form-control password {{$errors->has('password')?'error':''}}" name="password" placeholder="New password" required="" />
                                     @if ($errors->has('password'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('password') }}</p>
                                     @endif
                                 </div>
                                 <div class="form-group col-xl-12 col-lg-12 col-md-12">
                                     <label for="password_confirmation">Confirmed Password </label>
                                     <input type="password" class="form-control password {{$errors->has('password_confirmation')?'error':''}}" name="password_confirmation" placeholder="Confirmed password" required="" />
                                     @if ($errors->has('password_confirmation'))
-                                    <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('password_confirmation') }}</p>
+                                    <p class="text-danger small mb-0">{{ $errors->first('password_confirmation') }}</p>
                                     @endif
                                 </div>
                             </div>

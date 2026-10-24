@@ -184,24 +184,6 @@
         padding: 18px 18px 0;
     }
 
-    .history-filter .form-group label {
-        color: #667085;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-
-    .history-filter .form-control {
-        min-height: 34px;
-        border: 1px solid #dce4ef;
-        border-radius: 6px;
-        color: #17233c;
-        font-size: 13px;
-        box-shadow: none;
-        padding: 6px 10px;
-    }
-
     .history-actions {
         display: flex;
         gap: 6px;
@@ -355,7 +337,7 @@
                     <h3>My Profile</h3>
                     <p>Essential account information.</p>
                 </div>
-                <a href="{{route('admin.editProfile')}}" class="profile-edit-btn"><i class="bx bx-edit"></i> Edit</a>
+                <a href="{{route('admin.editProfile')}}" class="profile-edit-btn btn-icon" title="Edit"><i class="bx bx-edit"></i></a>
             </div>
 
             <div class="profile-body">
@@ -494,7 +476,7 @@
 
             <form method="get" action="{{route('admin.myProfile')}}" class="history-filter">
                 <div class="row">
-                    <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="log_event">Event</label>
                         <select id="log_event" name="log_event" class="form-control">
                             <option value="">All</option>
@@ -503,7 +485,7 @@
                             <option value="delete" {{request('log_event')=='delete'?'selected':''}}>Delete</option>
                         </select>
                     </div>
-                    <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="log_model">Feature</label>
                         <select id="log_model" name="log_model" class="form-control">
                             <option value="">All</option>
@@ -512,18 +494,18 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="log_date_from">From</label>
                         <input type="date" id="log_date_from" name="log_date_from" class="form-control" value="{{request('log_date_from')}}">
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="log_date_to">To</label>
                         <input type="date" id="log_date_to" name="log_date_to" class="form-control" value="{{request('log_date_to')}}">
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <div class="history-actions">
-                            <button type="submit" class="history-btn"><i class="bx bx-search"></i> Filter</button>
-                            <a href="{{route('admin.myProfile')}}" class="history-btn secondary"><i class="bx bx-reset"></i> Reset</a>
+                            <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
+                            <a href="{{route('admin.myProfile')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
                         </div>
                     </div>
                 </div>
@@ -557,7 +539,7 @@
                                     <span class="muted-line">{{$log->created_at->format('h:i A')}}</span>
                                 </td>
                                 <td>
-                                    <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-primary" title="View Details">
+                                    <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-primary btn-icon" title="View Details">
                                         <i class="bx bx-show"></i>
                                     </a>
                                 </td>

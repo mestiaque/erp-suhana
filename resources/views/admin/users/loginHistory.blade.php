@@ -90,7 +90,7 @@
 
     .history-card-header h3 {
         margin: 0;
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 700;
     }
 
@@ -160,7 +160,6 @@
 
     .history-table {
         margin-bottom: 0;
-        font-size: 11px !important;
     }
 
     .history-table thead th {
@@ -307,11 +306,11 @@
 
             <form method="get" action="{{route('admin.loginHistory')}}" class="history-filter">
                 <div class="row">
-                    <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="search">Search User</label>
                         <input type="text" id="search" name="search" class="form-control" value="{{request('search')}}" placeholder="Name, email, mobile, ID">
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="status">Status</label>
                         <select id="status" name="status" class="form-control">
                             <option value="">All</option>
@@ -319,15 +318,15 @@
                             <option value="inactive" {{request('status')=='inactive'?'selected':''}}>Inactive</option>
                         </select>
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="date_from">From</label>
                         <input type="date" id="date_from" name="date_from" class="form-control" value="{{request('date_from')}}">
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="date_to">To</label>
                         <input type="date" id="date_to" name="date_to" class="form-control" value="{{request('date_to')}}">
                     </div>
-                    <div class="form-group col-xl-1 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <label for="per_page">Show</label>
                         <select id="per_page" name="per_page" class="form-control">
                             @foreach([25, 50, 100] as $size)
@@ -335,10 +334,10 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                    <div class="form-group col-md-2">
                         <div class="history-actions">
-                            <button type="submit" class="history-btn"><i class="bx bx-search"></i> Filter</button>
-                            <a href="{{route('admin.loginHistory')}}" class="history-btn secondary"><i class="bx bx-reset"></i> Reset</a>
+                            <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
+                            <a href="{{route('admin.loginHistory')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
                         </div>
                     </div>
                 </div>
@@ -421,7 +420,7 @@
                                 </td>
                                 <td>
                                     @can('login_history.view')
-                                    <a href="{{route('admin.userLoginHistory', $user->id)}}" class="btn btn-sm btn-primary" title="View Full History">
+                                    <a href="{{route('admin.userLoginHistory', $user->id)}}" class="btn btn-sm btn-primary btn-icon" title="View Full History">
                                         <i class="bx bx-show"></i>
                                     </a>
                                     @endcan

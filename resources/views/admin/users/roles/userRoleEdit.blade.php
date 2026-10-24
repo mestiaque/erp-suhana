@@ -50,7 +50,7 @@
                     <label>Role Name </label>
                     <input type="text" class="form-control" name="name" placeholder="Role name" value="{{ $role->name }}" required />
                     @if ($errors->has('name'))
-                        <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('name') }}</p>
+                        <p class="text-danger small mb-0">{{ $errors->first('name') }}</p>
                     @endif
                 </div>
                 @if(auth()->user()?->permission?->id === 999)
@@ -83,7 +83,7 @@
             $moduleId   = 'module_' . sanitizeId($moduleKey);
         @endphp
         <div class="card mb-30 shadow">
-            <div class="card-header pb-2 d-flex align-items-centerx gap-2" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" aria-expanded="true" aria-controls="{{ $collapseId }}">
+            <div class="card-header pb-2 d-flex align-items-centerx gap-2" style="cursor: pointer;" data-toggle="collapse" data-target="#{{ $collapseId }}" aria-expanded="true" aria-controls="{{ $collapseId }}">
                 <div class="mr-1 ml-3">
                     <input type="checkbox" class="module-cbx inp-cbx" id="{{ $moduleId }}" data-collapse="{{ $collapseId }}" style="display:none;" onclick="event.stopPropagation();">
                     <label class="cbx mb-0" for="{{ $moduleId }}" onclick="event.stopPropagation();">

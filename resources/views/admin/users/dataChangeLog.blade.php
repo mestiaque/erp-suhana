@@ -25,7 +25,7 @@
 
     .history-card-header h2 {
         margin: 0;
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 700;
     }
 
@@ -37,24 +37,6 @@
 
     .history-filter {
         padding: 12px 16px 0;
-    }
-
-    .history-filter .form-group label {
-        color: #667085;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-
-    .history-filter .form-control {
-        min-height: 34px;
-        border: 1px solid #dce4ef;
-        border-radius: 6px;
-        color: #17233c;
-        font-size: 13px;
-        box-shadow: none;
-        padding: 6px 10px;
     }
 
     .history-actions {
@@ -85,7 +67,7 @@
 
     .history-table-wrap { padding: 0 16px 14px; }
 
-    .history-table { margin-bottom: 0; font-size: 11px !important; }
+    .history-table { margin-bottom: 0; }
 
     .history-table thead th {
         border: 0;
@@ -154,11 +136,11 @@
 
         <form method="get" action="{{route('admin.dataChangeLog')}}" class="history-filter">
             <div class="row">
-                <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="search">Search User</label>
                     <input type="text" id="search" name="search" class="form-control" value="{{request('search')}}" placeholder="Name or email">
                 </div>
-                <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="event">Event</label>
                     <select id="event" name="event" class="form-control">
                         <option value="">All</option>
@@ -167,7 +149,7 @@
                         <option value="delete" {{request('event')=='delete'?'selected':''}}>Delete</option>
                     </select>
                 </div>
-                <div class="form-group col-xl-3 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="model">Feature</label>
                     <select id="model" name="model" class="form-control">
                         <option value="">All</option>
@@ -176,18 +158,18 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="date_from">From</label>
                     <input type="date" id="date_from" name="date_from" class="form-control" value="{{request('date_from')}}">
                 </div>
-                <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <label for="date_to">To</label>
                     <input type="date" id="date_to" name="date_to" class="form-control" value="{{request('date_to')}}">
                 </div>
-                <div class="form-group col-xl-2 col-lg-4 col-md-6">
+                <div class="form-group col-md-2">
                     <div class="history-actions">
-                        <button type="submit" class="history-btn"><i class="bx bx-search"></i> Filter</button>
-                        <a href="{{route('admin.dataChangeLog')}}" class="history-btn secondary"><i class="bx bx-reset"></i> Reset</a>
+                        <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
+                        <a href="{{route('admin.dataChangeLog')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
                     </div>
                 </div>
             </div>
@@ -234,7 +216,7 @@
                                 <span class="muted-line">{{$log->created_at->format('h:i A')}}</span>
                             </td>
                             <td>
-                                <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-primary" title="View Details">
+                                <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-primary btn-icon" title="View Details">
                                     <i class="bx bx-show"></i>
                                 </a>
                             </td>

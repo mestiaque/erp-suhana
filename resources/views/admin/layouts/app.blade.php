@@ -28,27 +28,17 @@
      <link rel="stylesheet" type="text/css" href="{{asset('admin/assets/css/responsive.css')}}" />
 
      <link rel="stylesheet" type="text/css" href="{{asset('admin/assets/css/custom.css')}}" />
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+     <link rel="stylesheet" type="text/css" href="{{asset('admin/assets/css/ui.css')}}?v={{ @filemtime(public_path('admin/assets/css/ui.css')) }}" />
 
      <!-- END: Custom CSS-->
      <meta http-equiv='cache-control' content='no-cache'>
      <meta http-equiv='expires' content='0'>
      <meta http-equiv='pragma' content='no-cache'>
      <style>
+        /* Components (buttons, badges, tables, forms, select2, pagination, sidebar) are styled in ui.css. */
         .select2-container--default .select2-search--inline .select2-search__field {
             width: 100% !important;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 35px;
-        }
-
-        .select2-container .select2-selection--single {
-            height: 35px;
-        }
-
-         .card .card-header {
-            border-bottom: 1px solid #e3ebf3;
-            padding-bottom: 15px;
         }
         .checkbox {
             display: inline-block;
@@ -91,36 +81,6 @@
             padding: 5px;
             border-bottom: 1px solid #e3d9d9;
         }
-        table.table thead {
-          background: #7c7c7c;
-          color: #fff !important;
-        }
-
-       .badge-warning
-        {
-            color: white;
-            background-color:#d9a50c;
-        }
-        .table{
-            font-size: 11px  !important;
-        }
-
-        table.table a { color: #000; }
-        .badge-warning { color: #000; background-color: #d9a50c4d; }
-        .badge-success { color: #035415; background-color: #17e64642; }
-        .badge-secondary { color: #fff; background-color: #6c757d; }
-        .badge-danger { color: #fff; background-color: #dc3545; }
-        .card-header{
-            margin-bottom: 5px !important;
-            padding-bottom: 5px !important;
-        }
-        .flex-grow-1 .card{
-            padding: 1rem !important;
-        }
-        /* .main-content{
-            min-height: 80vh !important;
-            height: 101vh !important;
-        } */
      </style>
 
      @stack('css')

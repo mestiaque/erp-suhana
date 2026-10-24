@@ -18,7 +18,7 @@
     </div>
     <div class="content-header-right col-md-6 col-12 mb-md-0 mb-2">
         <div class="btn-group float-md-right" role="group" aria-label="Button group with nested dropdown">
-            <a class="btn btn-outline-primary reloadPage" href="javascript:void(0)">
+            <a class="btn btn-outline-primary reloadPage btn-icon" href="javascript:void(0)">
                 <i class="fa-solid fa-rotate"></i>
             </a>
         </div>
@@ -45,7 +45,7 @@
                                             <label for="facebook_link">Facebook Link </label>
                                             <input type="text" name="facebook_link" value="{{ $general->facebook_link }}" placeholder="Facebook Link" class="form-control {{$errors->has('facebook_link')?'error':''}}" />
                                             @if ($errors->has('facebook_link'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('facebook_link') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('facebook_link') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -55,7 +55,7 @@
                                             <label for="twitter_link">Twitter Link</label>
                                             <input type="text" name="twitter_link" value="{{ $general->twitter_link }}" placeholder="Twitter Link" class="form-control {{$errors->has('twitter_link')?'error':''}}" />
                                             @if ($errors->has('twitter_link'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('twitter_link') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('twitter_link') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -65,7 +65,7 @@
                                             <label for="instagram_link">Instagram Link</label>
                                             <input type="text" name="instagram_link" value="{{ $general->instagram_link }}" placeholder="Instagram Link" class="form-control {{$errors->has('instagram_link')?'error':''}}" />
                                             @if ($errors->has('instagram_link'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('instagram_link') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('instagram_link') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -75,7 +75,7 @@
                                             <label for="linkedin_link">Linkedin Link</label>
                                             <input type="text" name="linkedin_link" value="{{ $general->linkedin_link }}" placeholder="Linkedin Link" class="form-control {{$errors->has('linkedin_link')?'error':''}}" />
                                             @if ($errors->has('linkedin_link'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('linkedin_link') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('linkedin_link') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -85,7 +85,7 @@
                                             <label for="youtube_link">Youtube Link</label>
                                             <input type="text" name="youtube_link" value="{{ $general->youtube_link }}" placeholder="Youtube Link" class="form-control {{$errors->has('youtube_link')?'error':''}}" />
                                             @if ($errors->has('youtube_link'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('youtube_link') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('youtube_link') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -95,7 +95,7 @@
                                             <label for="pinterest_link">Pinterest Link</label>
                                             <input type="text" name="pinterest_link" value="{{ $general->pinterest_link }}" placeholder="Pinterest Link" class="form-control {{$errors->has('pinterest_link')?'error':''}}" />
                                             @if ($errors->has('pinterest_link'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('pinterest_link') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('pinterest_link') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -116,7 +116,7 @@
                                             <label for="fb_app_id">Facebook App ID </label>
                                             <input type="text" name="fb_app_id" value="{{ $general->fb_app_id }}" placeholder="Facebook App ID" class="form-control {{$errors->has('fb_app_id')?'error':''}}" />
                                             @if ($errors->has('fb_app_id'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('fb_app_id') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('fb_app_id') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -126,7 +126,7 @@
                                             <label for="fb_app_secret">Facebook App Secret</label>
                                             <input type="text" name="fb_app_secret" value="{{ $general->fb_app_secret }}" placeholder="Facebook App Secret" class="form-control {{$errors->has('fb_app_secret')?'error':''}}" />
                                             @if ($errors->has('fb_app_secret'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('fb_app_secret') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('fb_app_secret') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -142,7 +142,7 @@
                                                 class="form-control {{$errors->has('fb_app_redirect_url')?'error':''}}"
                                             />
                                             @if ($errors->has('fb_app_redirect_url'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('fb_app_redirect_url') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('fb_app_redirect_url') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -152,7 +152,7 @@
                                             <label for="google_client_id">Google App ID </label>
                                             <input type="text" name="google_client_id" value="{{ $general->google_client_id }}" placeholder="Google App ID" class="form-control {{$errors->has('google_client_id')?'error':''}}" />
                                             @if ($errors->has('google_client_id'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('google_client_id') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('google_client_id') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -168,7 +168,7 @@
                                                 class="form-control {{$errors->has('google_client_secret')?'error':''}}"
                                             />
                                             @if ($errors->has('google_client_secret'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('google_client_secret') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('google_client_secret') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -184,7 +184,7 @@
                                                 class="form-control {{$errors->has('google_client_redirect_url')?'error':''}}"
                                             />
                                             @if ($errors->has('google_client_redirect_url'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('google_client_redirect_url') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('google_client_redirect_url') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -194,7 +194,7 @@
                                             <label for="tw_app_id">Twitter App ID </label>
                                             <input type="text" name="tw_app_id" value="{{ $general->tw_app_id }}" placeholder="Twitter App ID" class="form-control {{$errors->has('tw_app_id')?'error':''}}" />
                                             @if ($errors->has('tw_app_id'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('tw_app_id') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('tw_app_id') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -204,7 +204,7 @@
                                             <label for="tw_app_secret">Twitter App Secret</label>
                                             <input type="text" name="tw_app_secret" value="{{ $general->tw_app_secret }}" placeholder="Twitter App Secret" class="form-control {{$errors->has('tw_app_secret')?'error':''}}" />
                                             @if ($errors->has('tw_app_secret'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('tw_app_secret') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('tw_app_secret') }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -220,7 +220,7 @@
                                                 class="form-control {{$errors->has('tw_app_redirect_url')?'error':''}}"
                                             />
                                             @if ($errors->has('tw_app_redirect_url'))
-                                            <p style="color: red; margin: 0; font-size: 10px;">{{ $errors->first('tw_app_redirect_url') }}</p>
+                                            <p class="text-danger small mb-0">{{ $errors->first('tw_app_redirect_url') }}</p>
                                             @endif
                                         </div>
                                     </div>
