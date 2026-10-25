@@ -687,3 +687,9 @@ ul.statuslist li a.active { color: var(--ui-heading); }
 
 /* ---------------------------------------------------------------- footer */
 .footer-area p { font-size: var(--ui-fs-sm); color: var(--ui-text-muted); margin: 0; }
+
+/* Toasts (toastr) — flash messages; Bootstrap 4's own .toast (opacity 0) must not leak in. */
+#toast-container { top: 70px; }
+#toast-container > .toast { opacity: 1; max-width: none; border-radius: 8px; padding: 12px 14px 12px 46px; font-size: 13px; line-height: 1.45; box-shadow: 0 6px 18px rgba(0, 0, 0, .14); background-position: 14px center; }
+#toast-container > .toast:hover { box-shadow: 0 8px 22px rgba(0, 0, 0, .2); }
+#toast-container > .toast .toast-close-button { opacity: .8; text-shadow: none; }
