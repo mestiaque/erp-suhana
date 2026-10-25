@@ -21,6 +21,7 @@
          <!-- Responsive CSS -->
          <link rel="stylesheet" href="{{asset('admin/assets/css/responsive.css')}}" />
         
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" />
         @stack('css')
     </head>
     
@@ -65,6 +66,10 @@
         });
         </script>
         
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+        <style>#toast-container > .toast { opacity: 1; max-width: none; border-radius: 8px; font-size: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.14); }</style>
+        {{-- Login errors stay until closed, so a lock message is not missed. --}}
+        @include('admin.partials.toasts', ['errorTimeout' => 0])
         @stack('js')
         
         

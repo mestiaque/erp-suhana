@@ -20,7 +20,6 @@
                              <a href="javascript:void(0)"><img src="{{ asset(general()->logo()) }}" alt="logo" style="max-height: 150px;" /></a>
                          </div>
                          <h2>Welcome </h2>
-                         @include('alerts')
                         <form action="#" method="post">
                             @csrf
                             <div class="form-group">
@@ -33,7 +32,7 @@
                             </div>
 
                             <div class="form-group">
-                                <input type="password" class="form-control" name="password" placeholder="Password" value="{{old('password')}}" required="" />
+                                <input type="password" class="form-control" name="password" placeholder="Password" required="" />
                                 <span class="label-title"><i class='bx bx-lock'></i></span>
                             </div>
 
