@@ -74,7 +74,6 @@
                             <th style="min-width: 200px; width: 200px;">Name</th>
                             <th style="min-width: 100px; width: 100px;">ID Number</th>
                             <th style="min-width: 150px;">Mobile / Email</th>
-                            <th style="min-width: 100px;">Designation</th>
                             <th style="min-width: 90px;">Join Date</th>
                             <th style="min-width: 90px;">Deleted Time</th>
                             <th style="min-width: 90px;">Deleted By</th>
@@ -100,13 +99,6 @@
                             </td>
                             <td>{{ $user->employee_id ?? '--' }}</td>
                             <td>{{$user->mobile ?? $user->email ?? '--'}}</td>
-                            <td>
-                                @if($user->designation)
-                                <span style="color: #009688;font-weight: bold;">{{$user->designation->name}}</span>
-                                @else
-                                <span style="color: #FF9800;">No Designation</span>
-                                @endif
-                            </td>
                             <td>{{$user->created_at->format('d.m.Y')}}</td>
                             <td>{{ $user->deleted_at?->format('d.m.Y, h:i A') }}</td>
 

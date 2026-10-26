@@ -25,12 +25,11 @@ class SyncMediaToFiles extends Command
 {
     protected $signature = 'media:sync-to-files';
 
-    protected $description = 'Sync media, user photo/signature, and HR employee documents into the central files table';
+    protected $description = 'Sync media, user signature, and HR employee documents into the central files table';
 
     public function handle(): int
     {
         $this->syncMediaTable();
-        $this->syncUserColumn('photo', 'photo');
         $this->syncUserColumn('signature', 'signature');
         $this->syncHrEmployeeDocuments();
         $this->syncModelFileColumn(\ME\Hr\Models\HrFactory::class, 'hr_factories', 'hr_seal', 'hr_seal');

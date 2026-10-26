@@ -42,19 +42,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['logUserAc
     Route::get('/users/admin/', [AdminController::class, 'usersAdmin'])->name('usersAdmin');
     Route::any('/users/admin/{action}/{id?}', [AdminController::class, 'usersAdminAction'])->name('usersAdminAction');
 
-    Route::get('/users/staff/', [AdminController::class, 'staffAdmin'])->name('staffAdmin');
-    Route::any('/users/staff/{action}/{id?}', [AdminController::class, 'staffAdminAction'])->name('staffAdminAction');
-
-    Route::get('/users/employee/', [AdminController::class, 'usersCustomer'])->name('usersCustomer');
-    Route::any('/users/employee/{action}/{id?}', [AdminController::class, 'usersCustomerAction'])->name('usersCustomerAction');
-
     Route::get('/users/roles', [AdminController::class, 'userRoles'])->name('userRoles');
     Route::get('/users/dev-permissions', [AdminController::class, 'developerPermissions'])->name('developerPermissions');
     Route::post('/users/dev-permissions', [AdminController::class, 'developerPermissionsUpdate'])->name('developerPermissionsUpdate');
     Route::any('/users/roles/{action}/{id?}', [AdminController::class, 'userRoleAction'])->name('userRoleAction');
-
-    Route::get('/merchandisers', [AdminController::class, 'merchandisers'])->name('merchandisers');
-    Route::any('/merchandisers/{action}/{id?}', [AdminController::class, 'merchandisersAction'])->name('merchandisersAction');
 
     // Apps Setting
     Route::post('/setting/mail/test', [AdminController::class, 'sendTestMail'])->name('setting.mail.test');

@@ -137,12 +137,7 @@
                                     <li class="d-flex"><i class="bx bx-user mr-2 pt-2"></i> <span><b>ID</b><br>{{$user->employee_id}}</span></li>
                                     <li class="d-flex"><i class="bx bx-mobile mr-2 pt-2"></i> <span><b>Mobile</b><br>{{$user->mobile}}</span></li>
                                     <li class="d-flex"><i class="bx bx-envelope mr-2 pt-2"></i><span><b>Email</b><br>{{$user->email}}</span></li>
-                                    <li class="d-flex"><i class="bx bx-check-shield mr-2 pt-2"></i><span><span><b>Designation</b><br>{{$user->designation?$user->designation->name:''}}</span></li>
-                                    <li class="d-flex"><i class="bx bx-briefcase mr-2 pt-2"></i> <span><span><b>Department</b><br>{{$user->department?$user->department->name:''}}</span></li>
                                 </ul>
-                                <div class="content">
-                                    {{$user->profile}}
-                                </div>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -153,36 +148,6 @@
                                         <th style="width: 150px;min-width: 150px;">Name</th>
                                         <th style="width: 20px;min-width: 20px;">:</th>
                                         <td>{{$user->name}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Address</th>
-                                        <th>:</th>
-                                        <td>{{$user->fullAddress()}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Present Address</th>
-                                        <th>:</th>
-                                        <td>{{$user->address_line2}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Gender</th>
-                                        <th>:</th>
-                                        <td>{{$user->gender}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Date Of Birth</th>
-                                        <th>:</th>
-                                        <td>{{$user->dob?Carbon\Carbon::parse($user->dob)->format('d M Y'):''}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Marital Status</th>
-                                        <th>:</th>
-                                        <td>{{$user->marital_status}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Employment</th>
-                                        <th>:</th>
-                                        <td>{{$user->employment_status}}</td>
                                     </tr>
                                     <tr>
                                         <th>User Status</th>
