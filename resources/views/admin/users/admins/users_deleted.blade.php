@@ -94,7 +94,11 @@
                             </td>
                             <td><a href="{{route('admin.usersAdminAction',['view',$user->id])}}" target="_blank" class="invoice-action-view mr-1">{{$user->name}}</a>
                                 @if($user->permission)
+                                @if($user->permission->color)
+                                <br><span class="badge text-dark" style="background:{{$user->permission->color}}">{{$user->permission->name}}</span>
+                                @else
                                 <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                @endif
                                 @endif
                             </td>
                             <td>{{ $user->employee_id ?? '--' }}</td>

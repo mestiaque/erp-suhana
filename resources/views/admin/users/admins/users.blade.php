@@ -118,7 +118,12 @@
                             <td>
                                 <span class="font-weight-bold">{{$user->name}}</span>
                                 @if($user->permission)
-                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}} text-dark" style="background:{{$user?->permission?->color ?? '#ffeb3bbb'}}">{{$user->permission->name}}</span>
+                                {{-- badge-success/badge-info set an !important background, so they only apply when the role has no color --}}
+                                @if($user->permission->color)
+                                <br><span class="badge text-dark" style="background:{{$user->permission->color}}">{{$user->permission->name}}</span>
+                                @else
+                                <br><span class="badge {{$user->permission->id==1?'badge-success':'badge-info'}}">{{$user->permission->name}}</span>
+                                @endif
                                 @else
                                 <br><span class="badge text-muted" style="background:#f1eeea">No Permission</span>
                                 @endif
