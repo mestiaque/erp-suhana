@@ -254,7 +254,7 @@ td > form { display: inline-block; margin: 0; }
      auto fa-wand-magic-sparkles · revise fa-code-branch · merge fa-code-merge · start fa-play ·
      move-up/-down fa-arrow-up/-down · report fa-chart-column · line-input fa-arrow-right-to-bracket ·
      hourly-output fa-clock · password fa-key · apply fa-check-double · help fa-circle-question ·
-     nav (links to other pages) keeps its own icon ·
+     return fa-reply · nav (links to other pages) keeps its own icon ·
      employee list: emp-basic … emp-document (see the colours below). */
 .ui-act-create { --act: #2563eb; }
 .ui-act-edit { --act: #d97706; }
@@ -292,6 +292,7 @@ td > form { display: inline-block; margin: 0; }
 .ui-act-password { --act: #92400e; }
 .ui-act-apply { --act: #3730a3; }
 .ui-act-help { --act: #5b21b6; }
+.ui-act-return { --act: #0c4a6e; }
 .ui-act-nav { --act: #475569; }      /* links to other pages: one colour, each keeps its own icon */
 .ui-act-emp-basic { --act: #0ea5e9; }
 .ui-act-emp-salary { --act: #059669; }
