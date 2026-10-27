@@ -22,7 +22,7 @@
     <form method="POST" action="{{ route('admin.approvals.remind', $approval) }}" class="d-inline"
           onsubmit="return confirm('Send the approval email to the approvers again?');">
         @csrf
-        <button type="submit" {{ $attributes->merge(['class' => 'btn btn-sm btn-outline-warning position-relative', 'style' => 'padding:2px 7px;']) }} title="{{ $tip }}">
+        <button type="submit" {{ $attributes->merge(['class' => 'btn btn-sm btn-icon ui-act ui-act-notify position-relative']) }} title="{{ $tip }}">
             <i class="fa-solid fa-bell"></i>
             @if($reminders)
                 <span class="badge badge-warning" style="font-size:9px;position:absolute;top:-6px;right:-6px;">{{ $reminders['count'] }}</span>

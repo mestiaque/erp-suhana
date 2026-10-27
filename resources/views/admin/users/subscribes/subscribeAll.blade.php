@@ -26,9 +26,7 @@
    </div>
    <div class="content-header-right col-md-6 col-12 mb-md-0 mb-2">
      <div class="btn-group float-md-right" role="group" aria-label="Button group with nested dropdown">
-       	<a class="btn btn-outline-primary btn-icon" href="{{route('admin.subscribes')}}">
-       		<i class="fa-solid fa-rotate"></i>
-       	</a>
+       	<a class="btn btn-icon ui-act ui-act-reset" href="{{route('admin.subscribes')}}" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
      </div>
    </div>
 </div>
@@ -61,7 +59,7 @@
 											<div class="col-md-6 mb-1">
 												<div class="input-group">
 													<input type="text" name="search" value="{{request()->search?:''}}" placeholder="Subscriber Email" class="form-control {{$errors->has('search')?'error':''}}">
-													<button type="submit" class="btn btn-success btn-sm rounded-0 btn-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+													<button type="submit" class="btn btn-sm rounded-0 ui-act ui-act-filter" title="Search"><i class="fa-solid fa-filter"></i> Search</button>
 												</div>
 											</div>
 										</div>
@@ -88,7 +86,7 @@
                                           <option value="">Select Action</option>
                                           <option value="1">Subscribe Delete</option>
                                       </select>
-                                      <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Are You Want To Action?')">Action</button>
+                                      <button class="btn btn-sm rounded-0 ui-act ui-act-apply" onclick="return confirm('Are You Want To Action?')" title="Action"><i class="fa-solid fa-check-double"></i> Action</button>
                                   </div>
                               </div>
                           </div>

@@ -111,7 +111,7 @@
     <div class="history-card mb-30">
         <div class="history-card-header d-flex justify-content-between align-items-center">
             <h2>{{friendlyModelName($log->loggable_type)}} — {{ucfirst($log->event)}} (#{{$log->loggable_id}})</h2>
-            <a href="{{route('admin.dataChangeLog')}}" class="btn btn-light btn-sm btn-icon" title="Back"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="{{route('admin.dataChangeLog')}}" class="btn btn-sm ui-act ui-act-back" title="Back"><i class="fa-solid fa-arrow-left"></i> Back</a>
         </div>
 
         <div class="meta-grid">

@@ -280,11 +280,8 @@
                         <h3>Edit User : <span class="text-primary">{{$user->name}}</span></h3>
                         <p>Update your essential account information.</p>
                     </div>
-                    <button type="button" class=" view-profile-btn" id="copyBtn">
-                        <i class="bx bx-copy" id="copyIcon"></i>
-                        <span id="copyBtnText">Copy Login</span>
-                    </button>
-                    {{-- <a href="{{route('admin.myProfile')}}" class="view-profile-btn"><i class="bx bx-show"></i> View Profile</a> --}}
+                    <button type="button" class="btn btn-sm view-profile-btn ui-act ui-act-copy" id="copyBtn" title="Copy Login"><i class="fa-solid fa-copy"></i> <span id="copyBtnText">Copy Login</span></button>
+                    {{-- <a href="{{route('admin.myProfile')}}" class="btn btn-sm view-profile-btn ui-act ui-act-view" title="View Profile"><i class="fa-solid fa-eye"></i> View Profile</a> --}}
                 </div>
 
                 <div class="edit-profile-body">
@@ -301,7 +298,7 @@
                                     <label class="upload-btn" for="account-upload"><i class="bx bx-upload"></i> Upload Photo</label>
                                     <input type="file" name="image" id="account-upload" class="account-upload" data-imageshow="image_{{$user->id}}" hidden="" />
                                     @if($user->imageFile)
-                                    <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="mediaDelete reset-photo-btn"><i class="bx bx-reset"></i> Reset</a>
+                                    <a href="{{route('admin.mediesDelete',$user->imageFile->id)}}" class="btn btn-sm mediaDelete reset-photo-btn ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                                     @endif
                                 </div>
                                 @if ($errors->has('image'))
@@ -322,7 +319,7 @@
                                     <label class="upload-btn" for="signature-upload"><i class="bx bx-upload"></i> Upload Signature</label>
                                     <input type="file" name="signature" id="signature-upload" hidden="" />
                                     @if($user->signature)
-                                    <a href="{{route('admin.userFileReset',['signature',$user->id])}}" class="reset-photo-btn" onclick="return confirm('Reset signature?')"><i class="bx bx-reset"></i> Reset</a>
+                                    <a href="{{route('admin.userFileReset',['signature',$user->id])}}" class="btn btn-sm reset-photo-btn ui-act ui-act-reset" onclick="return confirm('Reset signature?')" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                                     @endif
                                 </div>
                                 @if ($errors->has('signature'))
@@ -407,7 +404,7 @@
                                 @endif
                             </div>
                             <div class="form-group col-xl-3 col-lg-3 col-md-12 align-self-end text-right">
-                                <button type="submit" class="save-profile-btn"><i class="bx bx-save"></i> Save Changes</button>
+                                <button type="submit" class="btn btn-sm save-profile-btn ui-act ui-act-save" title="Save Changes"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
                             </div>
                         </div>
 
@@ -455,7 +452,7 @@
                                 @endif
                             </div>
                         </div>
-                        <button type="submit" class="change-password-btn float-right mb-4"><i class="bx bx-lock-alt"></i> Change Password</button>
+                        <button type="submit" class="btn btn-sm change-password-btn float-right mb-4 ui-act ui-act-password" title="Change Password"><i class="fa-solid fa-key"></i> Change Password</button>
                     </form>
                 </div>
             </div>

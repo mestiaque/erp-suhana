@@ -64,7 +64,7 @@
                     </div>
                 </div>
                 @endif
-                <button type="submit" class="btn btn-primary btn-md rounded-0" style="position: fixed; z-index: 1; right: 1rem; bottom: 1rem;">Save changes</button>
+                <button type="submit" class="btn btn-md rounded-0 ui-act ui-act-save" style="position: fixed; z-index: 1; right: 1rem; bottom: 1rem;" title="Save changes"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
             </div>
         </div>
 

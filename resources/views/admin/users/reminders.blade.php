@@ -63,9 +63,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
              <h3>Reminder List</h3>
              <div class="dropdown">
-                 <a href="{{route('admin.reminders')}}" class="btn-custom yellow">
-                     <i class="bx bx-rotate-left"></i>
-                 </a>
+                 <a href="{{route('admin.reminders')}}" class="btn-custom ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
              </div>
         </div>
         <div class="card-body">

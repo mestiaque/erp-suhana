@@ -336,8 +336,8 @@
                     </div>
                     <div class="form-group col-md-2">
                         <div class="history-actions">
-                            <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
-                            <a href="{{route('admin.loginHistory')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
+                            <button type="submit" class="btn btn-sm ui-act ui-act-filter" title="Filter"><i class="fa-solid fa-filter"></i> Filter</button>
+                            <a href="{{route('admin.loginHistory')}}" class="btn btn-sm ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                         </div>
                     </div>
                 </div>
@@ -420,9 +420,7 @@
                                 </td>
                                 <td>
                                     @can('login_history.view')
-                                    <a href="{{route('admin.userLoginHistory', $user->id)}}" class="btn btn-sm btn-primary btn-icon" title="View Full History">
-                                        <i class="bx bx-show"></i>
-                                    </a>
+                                    <a href="{{route('admin.userLoginHistory', $user->id)}}" class="btn btn-sm btn-icon ui-act ui-act-view" title="View Full History"><i class="fa-solid fa-eye"></i></a>
                                     @endcan
                                 </td>
                             </tr>

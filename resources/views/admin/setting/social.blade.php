@@ -18,9 +18,7 @@
     </div>
     <div class="content-header-right col-md-6 col-12 mb-md-0 mb-2">
         <div class="btn-group float-md-right" role="group" aria-label="Button group with nested dropdown">
-            <a class="btn btn-outline-primary reloadPage btn-icon" href="javascript:void(0)">
-                <i class="fa-solid fa-rotate"></i>
-            </a>
+            <a class="btn reloadPage btn-icon ui-act ui-act-reset" href="javascript:void(0)" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
         </div>
     </div>
 </div>
@@ -233,7 +231,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-xl-12 col-lg-12 col-md-12 mb-1">
-                                        <button type="submit" class="btn btn-primary btn-md rounded-0 mr-sm-1 mb-1 mb-sm-0">Save changes</button>
+                                        <button type="submit" class="btn btn-md rounded-0 mr-sm-1 mb-1 mb-sm-0 ui-act ui-act-save" title="Save changes"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
                                     </div>
                                 </div>
                             </div>

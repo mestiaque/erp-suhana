@@ -139,8 +139,8 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-md rounded-0">Save changes</button>
-            <button type="submit" formaction="{{ route('admin.setting.mail.test') }}" class="btn btn-outline-primary btn-md rounded-0">Send Test Mail</button>
+            <button type="submit" class="btn btn-md rounded-0 ui-act ui-act-save" title="Save changes"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+            <button type="submit" formaction="{{ route('admin.setting.mail.test') }}" class="btn btn-md rounded-0 ui-act ui-act-mail" title="Send Test Mail"><i class="fa-solid fa-envelope"></i> Send Test Mail</button>
         </div>
     </div>
 </form>

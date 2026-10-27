@@ -178,7 +178,7 @@
                     <h3>All Login Records - {{$user->name ?? 'User'}}</h3>
                     <p>Total {{$loginLogs->total()}} login records found.</p>
                 </div>
-                <a href="{{route('admin.loginHistory')}}" class="back-btn"><i class="bx bx-arrow-back"></i> Back to Login History</a>
+                <a href="{{route('admin.loginHistory')}}" class="btn btn-sm back-btn ui-act ui-act-back" title="Back to Login History"><i class="fa-solid fa-arrow-left"></i> Back to Login History</a>
             </div>
 
             <div class="user-history-table-wrap">

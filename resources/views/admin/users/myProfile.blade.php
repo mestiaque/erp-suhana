@@ -51,7 +51,7 @@
         align-items: center;
         gap: 6px;
         min-height: 34px;
-        padding: 7px 12px;
+        padding: 7px 10px !important;
         border-radius: 6px;
         color: #ffffff;
         background: #f2a900;
@@ -337,7 +337,7 @@
                     <h3>My Profile</h3>
                     <p>Essential account information.</p>
                 </div>
-                <a href="{{route('admin.editProfile')}}" class="profile-edit-btn btn-icon" title="Edit"><i class="bx bx-edit"></i></a>
+                <a href="{{route('admin.editProfile')}}" class="btn btn-sm profile-edit-btn btn-icon ui-act ui-act-edit" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
             </div>
 
             <div class="profile-body">
@@ -504,8 +504,8 @@
                     </div>
                     <div class="form-group col-md-2">
                         <div class="history-actions">
-                            <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
-                            <a href="{{route('admin.myProfile')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
+                            <button type="submit" class="btn btn-sm ui-act ui-act-filter" title="Filter"><i class="fa-solid fa-filter"></i> Filter</button>
+                            <a href="{{route('admin.myProfile')}}" class="btn btn-sm ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                         </div>
                     </div>
                 </div>
@@ -539,9 +539,7 @@
                                     <span class="muted-line">{{$log->created_at->format('h:i A')}}</span>
                                 </td>
                                 <td>
-                                    <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-primary btn-icon" title="View Details">
-                                        <i class="bx bx-show"></i>
-                                    </a>
+                                    <a href="{{route('admin.dataChangeLogShow', $log->id)}}" class="btn btn-sm btn-icon ui-act ui-act-view" title="View Details"><i class="fa-solid fa-eye"></i></a>
                                 </td>
                             </tr>
                             @empty

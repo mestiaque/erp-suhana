@@ -12,13 +12,9 @@
              <h3>User Roles</h3>
              <div class="dropdown">
                 @can('roles.add')
-                 <a href="{{route('admin.userRoleAction','create')}}" class="btn-custom primary">
-                     <i class="bx bx-plus"></i> Role
-                 </a>
+                 <a href="{{route('admin.userRoleAction','create')}}" class="btn-custom ui-act ui-act-create" title="Role"><i class="fa-solid fa-plus"></i> Role</a>
                  @endcan
-                 <a href="{{route('admin.userRoles')}}" class="btn-custom yellow">
-                     <i class="bx bx-rotate-left"></i>
-                 </a>
+                 <a href="{{route('admin.userRoles')}}" class="btn-custom ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
              </div>
         </div>
         <div class="card-body">
@@ -52,15 +48,11 @@
                             <td class="text-center">
                                  @if(auth()->user()->hasPermission('roles.edit')  || auth()->user()->hasPermission('roles.delete'))
                                     @can('roles.edit')
-                                        <a href="{{route('admin.userRoleAction',['edit',$role->id])}}" class="btn-custom success">
-                                            <i class="bx bx-edit"></i>
-                                        </a>
+                                        <a href="{{route('admin.userRoleAction',['edit',$role->id])}}" class="btn-custom ui-act ui-act-edit" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
                                     @endcan
                                     @can('roles.delete')
                                         @if($role->id!=1)
-                                            <a href="{{route('admin.userRoleAction',['delete',$role->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom danger">
-                                                <i class="bx bx-trash"></i>
-                                            </a>
+                                            <a href="{{route('admin.userRoleAction',['delete',$role->id])}}" onclick="return confirm('Are You Want To Delete')" class="btn-custom ui-act ui-act-delete" title="Delete"><i class="fa-solid fa-trash"></i></a>
                                         @endif
                                     @endcan
                                 @else -- @endif

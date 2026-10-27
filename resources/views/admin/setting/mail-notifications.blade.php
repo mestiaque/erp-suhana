@@ -172,9 +172,7 @@
                             </div>
 
                             <div class="mn-save-row">
-                                <button type="submit" class="btn btn-primary mn-save-btn">
-                                    <i class='bx bx-save'></i> Save
-                                </button>
+                                <button type="submit" class="btn mn-save-btn ui-act ui-act-save" title="Save"><i class="fa-solid fa-floppy-disk"></i> <i class='bx bx-save'></i> Save</button>
                             </div>
                         </form>
                     </div>

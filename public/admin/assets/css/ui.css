@@ -8,8 +8,9 @@
  *
  * Conventions
  *   .btn-icon            square icon-only button (toolbar / filter actions), always with a title="".
- *   .btn-custom          row-action icon button (success = view/edit, yellow = edit, danger = delete,
- *                        primary = print). Icon only.
+ *   .btn-custom          row-action icon button. Icon only.
+ *   .ui-act .ui-act-<x>  action button colour + icon (create, edit, view, delete, print, approve, …);
+ *                        see "Action buttons" below.
  *   form.row[method=get] filter bar — laid out as an even grid automatically. Add .ui-filter to
  *                        any other filter container to get the same layout.
  */
@@ -241,6 +242,81 @@ td > form { display: inline-block; margin: 0; }
 /* modals that live inside a table cell keep normal sizes */
 .table td .modal { font-size: var(--ui-fs); white-space: normal; text-align: left; }
 .table td .modal .btn:not(.btn-block):not(.w-100) { min-height: var(--ui-h); padding: 0 12px; font-size: var(--ui-fs); }
+
+/* Action buttons: every action has one icon and one colour everywhere (class ui-act ui-act-<action>).
+   In a table row the button is icon-only with a title=""; in a card header it is icon + text.
+     create fa-plus · edit fa-pen-to-square · view fa-eye · delete fa-trash · print fa-print ·
+     approve fa-check · reject fa-xmark · link fa-arrow-up-right-from-square · notify fa-bell ·
+     cancel fa-ban · dispatch fa-truck-fast · save fa-floppy-disk · restore fa-trash-arrow-up ·
+     filter fa-filter · reset fa-rotate-left · back fa-arrow-left · excel fa-file-excel ·
+     lock fa-lock · unlock fa-lock-open · receive fa-box-open · import fa-file-import ·
+     download fa-download · copy fa-copy · mail fa-envelope · assign fa-user-check ·
+     auto fa-wand-magic-sparkles · revise fa-code-branch · merge fa-code-merge · start fa-play ·
+     move-up/-down fa-arrow-up/-down · report fa-chart-column · line-input fa-arrow-right-to-bracket ·
+     hourly-output fa-clock · password fa-key · apply fa-check-double · help fa-circle-question ·
+     nav (links to other pages) keeps its own icon ·
+     employee list: emp-basic … emp-document (see the colours below). */
+.ui-act-create { --act: #2563eb; }
+.ui-act-edit { --act: #d97706; }
+.ui-act-view { --act: #0891b2; }
+.ui-act-delete { --act: #dc2626; }
+.ui-act-print { --act: #4b5563; }
+.ui-act-approve { --act: #16a34a; }
+.ui-act-reject { --act: #be185d; }
+.ui-act-link { --act: #4f46e5; }
+.ui-act-notify { --act: #ea580c; }
+.ui-act-cancel { --act: #78716c; }
+.ui-act-dispatch { --act: #9333ea; }
+.ui-act-save { --act: #0f766e; }
+.ui-act-restore { --act: #65a30d; }
+.ui-act-filter { --act: #0369a1; }
+.ui-act-reset { --act: #a16207; }
+.ui-act-back { --act: #334155; }
+.ui-act-excel { --act: #047857; }
+.ui-act-lock { --act: #1f2937; }
+.ui-act-unlock { --act: #57534e; }
+.ui-act-receive { --act: #0d9488; }
+.ui-act-import { --act: #7c2d12; }
+.ui-act-download { --act: #0e7490; }
+.ui-act-copy { --act: #6366f1; }
+.ui-act-mail { --act: #b45309; }
+.ui-act-assign { --act: #7e22ce; }
+.ui-act-auto { --act: #a21caf; }
+.ui-act-revise { --act: #4338ca; }
+.ui-act-merge { --act: #155e75; }
+.ui-act-start { --act: #4d7c0f; }
+.ui-act-move-up, .ui-act-move-down { --act: #64748b; }
+.ui-act-report { --act: #0284c7; }
+.ui-act-line-input { --act: #1e40af; }
+.ui-act-hourly-output { --act: #b91c1c; }
+.ui-act-password { --act: #92400e; }
+.ui-act-apply { --act: #3730a3; }
+.ui-act-help { --act: #5b21b6; }
+.ui-act-nav { --act: #475569; }      /* links to other pages: one colour, each keeps its own icon */
+.ui-act-emp-basic { --act: #0ea5e9; }
+.ui-act-emp-salary { --act: #059669; }
+.ui-act-emp-address { --act: #e11d48; }
+.ui-act-emp-nominee { --act: #7c3aed; }
+.ui-act-emp-age { --act: #ca8a04; }
+.ui-act-emp-separation { --act: #9f1239; }
+.ui-act-emp-settlement { --act: #1d4ed8; }
+.ui-act-emp-increment { --act: #15803d; }
+.ui-act-emp-earning { --act: #c026d3; }
+.ui-act-emp-leave { --act: #c2410c; }
+.ui-act-emp-document { --act: #854d0e; }
+.ui-act {
+    gap: 5px;
+    background-color: color-mix(in srgb, var(--act, var(--ui-primary)) 12%, #fff) !important;
+    border: 1px solid color-mix(in srgb, var(--act, var(--ui-primary)) 28%, #fff) !important;
+    color: var(--act, var(--ui-primary)) !important;
+    box-shadow: none !important;
+}
+.ui-act:hover, .ui-act:focus {
+    background-color: var(--act, var(--ui-primary)) !important;
+    border-color: var(--act, var(--ui-primary)) !important;
+    color: #fff !important;
+}
+.ui-act i { color: inherit !important; }
 
 /* Bootstrap 5 close button used by a few modals (Bootstrap 4 has only .close). */
 .btn-close { width: 24px; height: 24px; border: 0; background: transparent; opacity: .6; position: relative; padding: 0; }

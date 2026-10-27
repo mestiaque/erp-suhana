@@ -117,7 +117,7 @@
             <div class="card mb-30">
                 <div class="card-header d-flex justify-content-between align-items-center">
                      <h3>{{$user->name}} - Profile View</h3>
-                     <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}"  class="btn-custom yellow btn-icon" title="Edit"><i class="bx bx-edit"></i></a>
+                     <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}"  class="btn-custom ui-act ui-act-edit" title="Edit"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
                 </div>
                 <div class="card-body">
 

@@ -146,8 +146,8 @@
                 </div>
                 <div class="form-group col-md-2">
                     <div class="history-actions">
-                        <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
-                        <a href="{{route('admin.approvals.index')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
+                        <button type="submit" class="btn btn-sm ui-act ui-act-filter" title="Filter"><i class="fa-solid fa-filter"></i> Filter</button>
+                        <a href="{{route('admin.approvals.index')}}" class="btn btn-sm ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                     </div>
                 </div>
             </div>
@@ -197,19 +197,19 @@
                             </td>
                             <td>
                                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                                    <a href="{{$approval->url}}" class="btn btn-sm btn-secondary btn-icon" title="Open Page"><i class="bx bx-link-external"></i></a>
+                                    <a href="{{$approval->url}}" class="btn btn-sm btn-icon ui-act ui-act-link" title="Open Page"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                                     <x-approval-remind :approval="$approval" />
 
                                     @if($approval->isPending())
                                     @can('approvals.approve')
                                     <form method="post" action="{{route('admin.approvals.approve', $approval->id)}}" onsubmit="return confirm('Approve this request?');">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-success btn-icon" title="Approve"><i class="bx bx-check"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-icon ui-act ui-act-approve" title="Approve"><i class="fa-solid fa-check"></i></button>
                                     </form>
                                     @endcan
 
                                     @can('approvals.reject')
-                                    <button type="button" class="btn btn-sm btn-danger btn-icon" title="Reject" data-toggle="modal" data-target="#rejectModal{{$approval->id}}"><i class="bx bx-x"></i></button>
+                                    <button type="button" class="btn btn-sm btn-icon ui-act ui-act-reject" title="Reject" data-toggle="modal" data-target="#rejectModal{{$approval->id}}"><i class="fa-solid fa-xmark"></i></button>
 
                                     <div class="modal fade" id="rejectModal{{$approval->id}}" tabindex="-1">
                                         <div class="modal-dialog">
@@ -225,8 +225,8 @@
                                                         <textarea name="remarks" class="form-control" rows="3" required></textarea>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-danger">Reject</button>
+                                                        <button type="button" class="btn btn-icon ui-act ui-act-cancel" data-dismiss="modal" title="Cancel"><i class="fa-solid fa-ban"></i></button>
+                                                        <button type="submit" class="btn btn-icon ui-act ui-act-reject" title="Reject"><i class="fa-solid fa-xmark"></i></button>
                                                     </div>
                                                 </form>
                                             </div>

@@ -16,7 +16,7 @@
         <h3 class="mb-0">Admin List</h3>
         <div>
             @can('admin.add')
-            <a href="javascript:void(0)" class="btn btn-primary btn-sm btn-icon" data-toggle="modal" data-target="#AddUser" title="Add User"><i class="fa-solid fa-plus"></i></a>
+            <a href="javascript:void(0)" class="btn btn-sm ui-act ui-act-create" data-toggle="modal" data-target="#AddUser" title="Add User"><i class="fa-solid fa-plus"></i> Add User</a>
             @endcan
         </div>
     </div>
@@ -38,8 +38,8 @@
                 <input type="text" name="search" value="{{request()->search?:''}}" placeholder="Name, Email, Phone, Employee ID" class="form-control form-control-sm">
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Filter"><i class="fa-solid fa-filter"></i></button>
-                <a href="{{route('admin.usersAdmin')}}" class="btn btn-light btn-sm btn-icon" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
+                <button type="submit" class="btn btn-sm ui-act ui-act-filter" title="Filter"><i class="fa-solid fa-filter"></i> Filter</button>
+                <a href="{{route('admin.usersAdmin')}}" class="btn btn-sm ui-act ui-act-reset" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
             </div>
         </form>
 
@@ -58,7 +58,7 @@
                         <option value="5">Delete</option>
                         @endcan
                     </select>
-                    <button class="btn btn-sm btn-primary rounded-0" onclick="return confirm('Confirm action?')">Go</button> --}}
+                    <button class="btn btn-sm rounded-0 ui-act ui-act-apply" onclick="return confirm('Confirm action?')" title="Go"><i class="fa-solid fa-check-double"></i> Go</button> --}}
                 </div>
                 @else <div></div>
                 @endif
@@ -144,15 +144,11 @@
                                 {{-- @if($user?->permission?->id == 999 && auth()->user()?->permission?->id == 999) --}}
                                 <div class="btn-group">
                                     @can('admin.edit')
-                                    <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom success mr-1" title="Edit">
-                                        <i class="bx bx-edit"></i>
-                                    </a>
+                                    <a href="{{route('admin.usersAdminAction',['edit',$user->id])}}" class="btn-custom ui-act ui-act-edit" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
                                     @endcan
                                     @if($user->id != Auth::id())
                                     @can('admin.delete')
-                                    <a href="{{route('admin.usersAdminAction',['delete',$user->id])}}" onclick="return confirm('Delete this user?')" class="btn-custom danger" title="Delete">
-                                        <i class="bx bx-trash"></i>
-                                    </a>
+                                    <a href="{{route('admin.usersAdminAction',['delete',$user->id])}}" onclick="return confirm('Delete this user?')" class="btn-custom ui-act ui-act-delete" title="Delete"><i class="fa-solid fa-trash"></i></a>
                                     @endcan
                                     {{-- @endif --}}
                                 </div>
@@ -202,8 +198,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary"><i class="bx bx-plus"></i> Add User</button>
+                    <button type="button" class="btn ui-act ui-act-cancel" data-dismiss="modal" title="Close"><i class="fa-solid fa-ban"></i> Close</button>
+                    <button type="submit" class="btn ui-act ui-act-save" title="Add User"><i class="fa-solid fa-floppy-disk"></i> Add User</button>
                 </div>
             </form>
         </div>

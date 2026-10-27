@@ -45,10 +45,8 @@
                             <div class="col-md-5 mb-1">
                                 <div class="input-group">
                                     <input type="text" name="search" value="{{request()->search?:''}}" placeholder="User Name, Email, Mobile" class="form-control {{$errors->has('search')?'error':''}}" />
-                                    <button type="submit" class="btn btn-success btn-sm rounded-0 mr-1 btn-icon" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
-                                    <a href="{{route('admin.usersAdmin', ['view' => 'deleted'])}}" class="btn-custom yellow" style="height: auto;">
-                                        <i class="bx bx-rotate-left"></i>
-                                    </a>
+                                    <button type="submit" class="btn btn-sm rounded-0 ui-act ui-act-filter" title="Search"><i class="fa-solid fa-filter"></i> Search</button>
+                                    <a href="{{route('admin.usersAdmin', ['view' => 'deleted'])}}" class="btn-custom ui-act ui-act-reset" style="height: auto;" title="Reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                                 </div>
                             </div>
                         </div>
@@ -110,12 +108,8 @@
                                 {{$user->deletedBy?->name }}</td>
                             <td style="padding: 8px 5px; text-align: center;">
                                 @if(can('admin.delete'))
-                                    <a href="{{ route('admin.usersAdminAction', ['restore', $user->id]) }}" class="btn-custom success" onclick="return confirm('Are you sure you want to restore this user?')">
-                                        <i class="bx bx-reset"></i>
-                                    </a>
-                                    <a href="{{ route('admin.usersAdminAction', ['force-delete', $user->id]) }}" class="btn-custom danger" onclick="return confirm('Are you sure you want to permanently delete this user?')">
-                                        <i class="bx bx-trash"></i>
-                                    </a>
+                                    <a href="{{ route('admin.usersAdminAction', ['restore', $user->id]) }}" class="btn-custom ui-act ui-act-restore" onclick="return confirm('Are you sure you want to restore this user?')" title="Restore"><i class="fa-solid fa-trash-arrow-up"></i></a>
+                                    <a href="{{ route('admin.usersAdminAction', ['force-delete', $user->id]) }}" class="btn-custom ui-act ui-act-delete" onclick="return confirm('Are you sure you want to permanently delete this user?')" title="Delete"><i class="fa-solid fa-trash"></i></a>
                                 @else -- @endif
                             </td>
                         </tr>

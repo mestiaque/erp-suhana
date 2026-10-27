@@ -85,7 +85,7 @@
                 </div>
                 @endforeach
 
-                <button type="submit" class="btn-custom primary" style="position: fixed; z-index: 1; right: 1rem; bottom: 1rem;">Save changes</button>
+                <button type="submit" class="btn-custom ui-act ui-act-save" style="position: fixed; z-index: 1; right: 1rem; bottom: 1rem;" title="Save changes"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
             </form>
         </div>
     </div>
