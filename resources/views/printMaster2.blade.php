@@ -153,7 +153,7 @@
 
     <div class="container">
         @yield('contents')
-        @unless($hideGeneratedNote ?? false)
+        @unless(($hideGeneratedNote ?? false) || request('sign_note') === '0')
             <div class="generated-note">This is a system generated report, no signature required.</div>
         @endunless
     </div>

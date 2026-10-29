@@ -375,6 +375,7 @@
       </script>
 
       @include('admin.partials.toasts')
+      @include('admin.layouts.sign-note-toggle')
       @stack('js')
       {{-- @include('components.loader') --}}
    </body>
