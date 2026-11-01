@@ -32,8 +32,17 @@ class MailNotificationSetting extends Model
      */
     public static function recipientEmailOverride(string $actionKey): ?array
     {
-        $ids = static::where('action_key', $actionKey)->value('recipient_user_ids');
-        $ids = $ids ? json_decode($ids, true) : null;
+        // Read through the model so the 'array' cast applies; newer Laravel versions also cast
+        // Builder::value(), older ones return the raw JSON - so accept either shape.
+        $ids = static::where('action_key', $actionKey)->first()?->recipient_user_ids;
+        while (is_string($ids)) {
+            $decoded = json_decode($ids, true);
+            if ($decoded === null || $decoded === $ids) {
+                break;
+            }
+            $ids = $decoded;
+        }
+        $ids = is_array($ids) ? array_values(array_filter(array_map('intval', $ids))) : null;
 
         if (empty($ids)) {
             return null;
