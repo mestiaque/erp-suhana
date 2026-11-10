@@ -304,6 +304,7 @@ td > form { display: inline-block; margin: 0; }
 .ui-act-emp-address { --act: #e11d48; }
 .ui-act-emp-nominee { --act: #7c3aed; }
 .ui-act-emp-age { --act: #ca8a04; }
+.ui-act-emp-lefty { --act: #b45309; }
 .ui-act-emp-separation { --act: #9f1239; }
 .ui-act-emp-settlement { --act: #1d4ed8; }
 .ui-act-emp-increment { --act: #15803d; }
